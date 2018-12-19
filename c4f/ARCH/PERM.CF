@@ -1,0 +1,22 @@
+: PERM CR CSTR 20 UMIN 
+LOCALS/   
+  0 VALUE `LEN   
+  20 BARY `ARP  
+  : `>ARP 0 `ARP ;
+  : `PRINT [ `LEN TAB? ] `>ARP `LEN TYPE ; 
+  : `SWAP { S D } `ARP PUSH `ARP DUP PUSH
+    C@ { S@ } J  C@ { D@ } POP C! { S! } POP  C! { D! } ;
+/LOCALS  
+  DUP TO `LEN `>ARP MOVM `LEN  ,< 
+{ N } FUNCTION `PERMUTE \ LOCALS/ /LOCALS
+  N 0;  
+  AT N DEC  
+  N `PRINT ?; 
+	N `PERMUTE  
+  N TIMES;  
+    J N `SWAP  N `PERMUTE  J N `SWAP  
+RETURN ;
+
+/S
+
+"PERO" PERM

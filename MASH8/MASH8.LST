@@ -1,0 +1,1177 @@
+Turbo Assembler	 Version 3.2	    12/11/18 14:19:28	    Page 1
+MASH8.asm
+
+
+
+      1				     ;C:\Documents and Settings\Gergana\Desktop\CrystalForth\TEMPFO\mash8.asm
+      2				     ; -----------------------------------------------
+      3				     ; _DUP  \	STACK
+      4				     ; _J     \
+      5				     ; _PUSH  /
+      6				     ; _POP  /
+      7				     ;
+      8				     ; _@R+  \	TRANSFER
+      9				     ; _!R+   \
+     10				     ; _RX    /	     RA	XA
+     11				     ; _TX   /	     RT	XCHG
+     12				     ;
+     13				     ; _EXIT \	CONTROL
+     14				     ; _JUMP  \
+     15				     ; _NEXT  /
+     16				     ; _IF   /
+     17				     ;
+     18				     ; _+*   \	MATH AND LOGIC
+     19				     ; _+2/   \
+     20				     ; _-/    /
+     21				     ; _NAND /
+     22				     ;
+     23
+     24				     locals  @@
+     25
+     26	      =	dword ptr			  pd  equ dword	ptr
+     27	      =	word  ptr			  pw  equ word	ptr
+     28	      =	byte  ptr			  pb  equ byte	ptr
+     29
+     30	      =-0002		     TO_ =   -2
+     31	      =-0004		     AT_ =   -4
+     32	      =0002		     VL_ =    2
+     33	      =0000		     qqq_= 0
+     34
+     35				     JMP_    MACRO LBL
+     36					     jmp   SHORT LBL
+     37					 ENDM
+     38
+     39				     SKIPA_   MACRO
+     40					     DB	   03DH
+     41					 ENDM
+     42
+     43				     SKIPB_   MACRO
+     44					     DB	   03CH
+     45					 ENDM
+     46
+     47				     SKIPR_   MACRO reg
+     48					     mov   reg,0
+     49					     org   $-2
+     50					 ENDM
+     51
+     52				     X_	 MACRO
+     53					     xchg  Rsp,DSP
+     54				       ENDM
+     55
+     56				     TOD_    MACRO  REG
+     57					     PUSH  REG
+Turbo Assembler	 Version 3.2	    12/11/18 14:19:28	    Page 2
+MASH8.asm
+
+
+
+     58					 ENDM
+     59
+     60				     DTO_    MACRO  REG
+     61					     POP   REG
+     62					 ENDM
+     63
+     64				     TWICE_    macro
+     65					     DW	     $+2
+     66					 endm
+     67
+     68				     RDEC_    macro
+     69					     DW	     @_NEXT_
+     70					     TWICE_
+     71					 endm
+     72
+     73				     ;@I2P   macro
+     74				     ;	     MOV WR,[I]
+     75				     ;	     I2P
+     76				     ;	     TEST    AL,1
+     77				     ;	  endm
+     78
+     79				     DROP_    macro
+     80				       XCHG  T,W
+     81					     DTO_    T
+     82				       endm
+     83
+     84				     DUPW_    macro
+     85					     TOD_    T
+     86				       XCHG  T,W
+     87				       endm
+     88
+     89				     CLR_   macro     REG
+     90					     XOR   REG,REG
+     91				       endm
+     92
+     93				     ?ZERO_   MACRO   REG
+     94					     OR	     REG,REG
+     95					     ENDM
+     96
+     97				     RTO_     MACRO   REG
+     98					     X_
+     99					     POP     REG
+    100					     X_
+    101					 ENDM
+    102
+    103				     TOR_     MACRO   REG
+    104					     X_
+    105					     PUSH    REG
+    106					     X_
+    107				       ENDM
+    108
+    109				     LDWP_ MACRO
+    110					     LODSW
+    111				       ENDM
+    112
+    113				     STWP_ MACRO
+    114					     STOSW
+Turbo Assembler	 Version 3.2	    12/11/18 14:19:28	    Page 3
+MASH8.asm
+
+
+
+    115				       ENDM
+    116
+    117				     ALIGN_  MACRO  FLAG
+    118					     IF	($-START+FLAG) AND 1
+    119					 NOP
+    120				     qqq_ = qqq_+1
+    121					     ENDIF
+    122					     ENDM
+    123
+    124				     N_	     MACRO LBL
+    125				     LBL:
+    126					 ENDM
+    127
+    128				     L_	     MACRO LBL
+    129					     ALIGN_  0
+    130				     LBL:
+    131				     ENDM
+    132
+    133				     P_	 MACRO LBL
+    134					     ALIGN_  0
+    135					     NOP
+    136				     LBL:
+    137					     org   $-1
+    138				       ENDM
+    139
+    140				     @nam    macro   msg
+    141					     local   endstr
+    142					     db	     endstr-$-1
+    143					     db	     msg
+    144				     endstr  label   byte
+    145					     endm
+    146
+    147				     @ln     macro   token
+    148				     ppppp = $
+    149					     @nam  token
+    150					     dw	   qqqqq
+    151				     qqqqq = ppppp
+    152					     endm
+    153
+    154				     XT_     macro   LBL,ADR
+    155				       L_    LBL
+    156				       DW    ADR
+    157				       ENDM
+    158
+    159				     VAR_    macro   LBL,DAT
+    160				       XT_   LBL,@_VAR
+    161				       DW    DAT
+    162				       ENDM
+    163
+    164				     const_  macro   lbl,dat
+    165				       XT_   LBL,@_CONS@
+    166				       DW    DAT
+    167				       endm
+    168
+    169				     DEFER_  macro   lbl,dat
+    170				       XT_   LBL,@_JUMP
+    171				       DW    DAT
+Turbo Assembler	 Version 3.2	    12/11/18 14:19:28	    Page 4
+MASH8.asm
+
+
+
+    172				       endm
+    173
+    174				     value_  macro   lbl,dat
+    175					     ALIGN_  0
+    176				       DW    @_SETVA
+    177				       const_	 LBL,dat
+    178				       endm
+    179
+    180				     vector_ macro   lbl,dat
+    181					     ALIGN_  0
+    182				       DW    @_SETVA
+    183				       DEFER_	 LBL,DAT
+    184				       endm
+    185
+    186				     point_  macro   lbl1,LBL2,dat
+    187					     L_	 LBL1
+    188				       DW  @_POP
+    189				       vector_ LBL2,dat
+    190				       endm
+    191
+    192				     QUAN_   MACRO   LBL,DAT
+    193					     ALIGN_  0
+    194				       DW    VAR3@
+    195				       vector_	  lbl,DAT
+    196				       ENDM
+    197
+    198				     entry_  macro ADR,DAT,nam
+    199				       DW    ADR,DAT
+    200				       @nam  nam
+    201				       endm
+    202
+    203
+    204
+    205
+    206
+    207
+    208				     ; REGISTERS     for interpretter
+    209	      =SI		       I       = SI  ; INSTUCTION POINTER
+    210	      =BP		       RSP = BP	     ; RETURN	     STACK POINTER
+    211	      =SP		       DSP = SP	     ; DATA STACK POINTER
+    212	      =DI			     RT	 = DI	     ; RETURN	     STACK TOP REGISTER
+    213
+    214	      =CX		       T   = CX	 ; DATA	STACK TOP REGISTER
+    215	      =CL		       TL  = CL
+    216	      =CH		       TH  = CH
+    217	      =AX		       W   = AX	 ; WORK	REGISTER
+    218	      =AL		       WL    = AL
+    219	      =AH		       WH    = AH
+    220	      =BX		       AR  = BX	 ; ADDRESS & ARITHMETHIC REGISTER
+    221
+    222					     ; AX CX DX	BX SCRATCH
+    223					     ; KEEP I DSP RSP RT
+    224
+    225	      =DI		       NACC  =	     DI
+    226	      =BP			     NBASE   =	     BP
+    227
+    228	0000			     MyCseg  segment para  use16
+Turbo Assembler	 Version 3.2	    12/11/18 14:19:28	    Page 5
+MASH8.asm
+
+
+
+    229
+    230					 assume	cs:  MyCseg,  ds: MyCseg, ss: MyCseg, es: MyCseg
+    231
+    232					 org 100h
+    233
+    234	      =-0100			     @TBUF   = -256	  ;  256
+    235	      =-0200			     @TIB    = @TBUF  *	     2	  ;  256 ;   512 B FSTACK
+    236	      =-0400			     @R_TOP  = @TIB   *	     2	  ; 1024 B RSTACK
+    237	      =-0800			     @S_TOP  = @R_TOP *	     2	  ; 2048 B DSTACK
+    238	      =-1000			     @VOCTOP = @S_TOP *	     2	  ; 4096 B = 4 BUFFERS * 1024 B
+    239
+    240	0100				 Start	 Label byte
+    241	0100			     @_@START:
+    242	0100  BB 1000			     mov     bX,1000h	       ; only 64k allocate
+    243	0103  B4 4A			     mov     ah,4ah
+    244	0105  CD 21			     int     21h
+    245				      P_     @_ABORT
+1   246					     ALIGN_  0
+2   247					     IF	($-START+0) AND	1
+2   248	0107  90			 NOP
+2   249	      =0001		     qqq_ = qqq_+1
+2   250					     ENDIF
+1   251	0108  90			     NOP
+1   252	0109			     @_ABORT:
+1   253					     org   $-1
+    254	0108  FC			     CLD
+    255	0109  BC F800			     MOV     DSP,@S_TOP
+    256	010C  BD FC00			     MOV     RSP,@R_TOP
+    257	010F  E8 00DA			     CALL    _EXECU
+    258	0112			     @_@INITA:	     ; INIT TIB	CSTR
+    259	0112  0000		       DW    0
+    260
+    261				     ;--------------- RETURN STACK --------------------
+    262
+    263				      P_ @_POP	       ; POP
+1   264					     ALIGN_  0
+2   265					     IF	($-START+0) AND	1
+2   266					 NOP
+2   267				     qqq_ = qqq_+1
+2   268					     ENDIF
+1   269	0114  90			     NOP
+1   270	0115			     @_POP:
+1   271					     org   $-1
+    272				       TOD_  T
+1   273	0114  51			     PUSH  T
+    274	0115  8B CF		       MOV   T,RT
+    275				       JMP_  @RDROP
+1   276	0117  EB 4F			     jmp   SHORT @RDROP
+    277
+    278				      P_ @_IOZ
+1   279					     ALIGN_  0
+2   280					     IF	($-START+0) AND	1
+2   281	0119  90			 NOP
+2   282	      =0002		     qqq_ = qqq_+1
+2   283					     ENDIF
+1   284	011A  90			     NOP
+1   285	011B			     @_IOZ:
+Turbo Assembler	 Version 3.2	    12/11/18 14:19:28	    Page 6
+MASH8.asm
+
+
+
+1   286					     org   $-1
+    287				       TOD_  T
+1   288	011A  51			     PUSH  T
+    289				      P_ @_IO1
+1   290					     ALIGN_  0
+2   291					     IF	($-START+0) AND	1
+2   292	011B  90			 NOP
+2   293	      =0003		     qqq_ = qqq_+1
+2   294					     ENDIF
+1   295	011C  90			     NOP
+1   296	011D			     @_IO1:
+1   297					     org   $-1
+    298				       TOD_  T
+1   299	011C  51			     PUSH  T
+    300				      P_ @_IO2
+1   301					     ALIGN_  0
+2   302					     IF	($-START+0) AND	1
+2   303	011D  90			 NOP
+2   304	      =0004		     qqq_ = qqq_+1
+2   305					     ENDIF
+1   306	011E  90			     NOP
+1   307	011F			     @_IO2:
+1   308					     org   $-1
+    309				       TOD_  T
+1   310	011E  51			     PUSH  T
+    311				      P_ @_IO3
+1   312					     ALIGN_  0
+2   313					     IF	($-START+0) AND	1
+2   314	011F  90			 NOP
+2   315	      =0005		     qqq_ = qqq_+1
+2   316					     ENDIF
+1   317	0120  90			     NOP
+1   318	0121			     @_IO3:
+1   319					     org   $-1
+    320				       TOD_  T
+1   321	0120  51			     PUSH  T
+    322				      P_ @_IO4
+1   323					     ALIGN_  0
+2   324					     IF	($-START+0) AND	1
+2   325	0121  90			 NOP
+2   326	      =0006		     qqq_ = qqq_+1
+2   327					     ENDIF
+1   328	0122  90			     NOP
+1   329	0123			     @_IO4:
+1   330					     org   $-1
+    331				       X_
+1   332	0122  87 EC			     xchg  Rsp,DSP
+    333	0124  53 57		       PUSH  AR	RT
+    334				       X_
+1   335	0126  87 EC			     xchg  Rsp,DSP
+    336	0128  91		       XCHG  AX,T
+    337	0129  5F 59 5A		       POP   DI	CX DX
+    338	012C  56		       PUSH  SI
+    339	012D  8B DF		       MOV   BX,DI
+    340	012F  8B F2		       MOV   SI,DX
+    341	0131  C3		       RET
+    342
+Turbo Assembler	 Version 3.2	    12/11/18 14:19:28	    Page 7
+MASH8.asm
+
+
+
+    343				     ; Return input character and true,
+    344				     ; or a false if no	input.
+    345
+    346				      L_ @_?CRX	     ; (  -- c T | F )
+1   347					     ALIGN_  0
+2   348					     IF	($-START+0) AND	1
+2   349					 NOP
+2   350				     qqq_ = qqq_+1
+2   351					     ENDIF
+1   352	0132			     @_?CRX:
+    353	0132  011Br		       DW @_IOZ
+    354	0134  BA FFFF		       MOV   DX,0FFFFH ; input command & setup for TRUE	flag
+    355	0137  B4 06		       MOV   AH,6    ; MS - DOS	Direct Console I/O
+    356	0139  CD 21		       INT   021H    ;
+    357	013B  74 0F		       JZ    QRX3    ; ?key ready
+    358	013D  0A C0		       OR    AL,AL   ; AL=0 if extended	char
+    359	013F  75 03		       JNZ   QRX1    ; ?extended character code
+    360	0141  CD 21		       INT   021H    ;
+    361	0143  F9		       STC
+    362	0144			     QRX1:
+    363	0144  B4 00		       MOV   AH,0
+    364	0146  73 02		       JNC   QRX2
+    365	0148  86 E0		       XCHG  AH,AL   ; extended	code in	msb
+    366	014A			     QRX2:
+    367	014A  50		       PUSH  AX	     ; save character
+    368				       SKIPB_
+1   369	014B  3C			     DB	   03CH
+    370	014C			     QRX3:
+    371	014C  4A		       DEC   DX
+    372	014D  52		       PUSH  DX	     ; flag
+    373				       JMP_  @_@IORET
+1   374	014E  EB 0D			     jmp   SHORT @_@IORET
+    375
+    376				      L_ @_CTX	    ; (	c -- ) \ Send character	c to output device.
+1   377					     ALIGN_  0
+2   378					     IF	($-START+0) AND	1
+2   379					 NOP
+2   380				     qqq_ = qqq_+1
+2   381					     ENDIF
+1   382	0150			     @_CTX:
+    383	0150  011Dr		       DW  @_IO1     ; char in DL
+    384	0152  80 FA FF		       CMP   DL,0FFH ; 0FFH is interpreted as input
+    385	0155  75 02		       JNZ   @TX1    ; do NOT allow input
+    386	0157  B2 20		       MOV   DL,32   ; change to blank
+    387	0159			     @TX1:
+    388	0159  B4 06		       MOV   AH,6    ; MS - DOS	Direct Console I/O
+    389	015B  CD 21		       INT   021H    ; display character
+    390
+    391	015D			     @_@IORET:
+    392				       X_
+1   393	015D  87 EC			     xchg  Rsp,DSP
+    394	015F  5F 5B		       POP   RT	AR
+    395				       X_
+1   396	0161  87 EC			     xchg  Rsp,DSP
+    397
+    398				      P_ @_DROPX
+1   399					     ALIGN_  0
+Turbo Assembler	 Version 3.2	    12/11/18 14:19:28	    Page 8
+MASH8.asm
+
+
+
+2   400					     IF	($-START+0) AND	1
+2   401	0163  90			 NOP
+2   402	      =0007		     qqq_ = qqq_+1
+2   403					     ENDIF
+1   404	0164  90			     NOP
+1   405	0165			     @_DROPX:
+1   406					     org   $-1
+    407	0164			     @DROPX:
+    408				       DTO_  T
+1   409	0164  59			     POP   T
+    410
+    411				      P_ @_RET		 ; RET
+1   412					     ALIGN_  0
+2   413					     IF	($-START+0) AND	1
+2   414	0165  90			 NOP
+2   415	      =0008		     qqq_ = qqq_+1
+2   416					     ENDIF
+1   417	0166  90			     NOP
+1   418	0167			     @_RET:
+1   419					     org   $-1
+    420	0166  8B F7		       MOV   I,RT
+    421
+    422				      P_ @_RDROP	 ; RDROP
+1   423					     ALIGN_  0
+2   424					     IF	($-START+0) AND	1
+2   425					 NOP
+2   426				     qqq_ = qqq_+1
+2   427					     ENDIF
+1   428	0168  90			     NOP
+1   429	0169			     @_RDROP:
+1   430					     org   $-1
+    431	0168			     @RDROP:
+    432				       RTO_  RT
+1   433					     X_
+2   434	0168  87 EC			     xchg  Rsp,DSP
+1   435	016A  5F			     POP     RT
+1   436					     X_
+2   437	016B  87 EC			     xchg  Rsp,DSP
+    438	016D			     @MAI0:
+    439	016D  E9 0086		       JMP   _MAIN
+    440
+    441				      P_ @__DROP
+1   442					     ALIGN_  0
+2   443					     IF	($-START+0) AND	1
+2   444					 NOP
+2   445				     qqq_ = qqq_+1
+2   446					     ENDIF
+1   447	0170  90			     NOP
+1   448	0171			     @__DROP:
+1   449					     org   $-1
+    450				       DTO_  T
+1   451	0170  59			     POP   T
+    452				       SKIPA_
+1   453	0171  3D			     DB	   03DH
+    454
+    455				      P_ @_0?X		 ; RDROP
+1   456					     ALIGN_  0
+Turbo Assembler	 Version 3.2	    12/11/18 14:19:28	    Page 9
+MASH8.asm
+
+
+
+2   457					     IF	($-START+0) AND	1
+2   458					 NOP
+2   459				     qqq_ = qqq_+1
+2   460					     ENDIF
+1   461	0172  90			     NOP
+1   462	0173			     @_0?X:
+1   463					     org   $-1
+    464	0172  E3 F0		       JCXZ  @DROPX
+    465				       JMP_  @MAI0
+1   466	0174  EB F7			     jmp   SHORT @MAI0
+    467
+    468				     ; --------------------  CONTROL  -------------------
+    469
+    470				      P_ @_MIF		   ; (-IF
+1   471					     ALIGN_  0
+2   472					     IF	($-START+0) AND	1
+2   473					 NOP
+2   474				     qqq_ = qqq_+1
+2   475					     ENDIF
+1   476	0176  90			     NOP
+1   477	0177			     @_MIF:
+1   478					     org   $-1
+    479	0176  41		       INC   T
+    480				       SKIPA_
+1   481	0177  3D			     DB	   03DH
+    482
+    483				      P_ @_NEXT		   ; (NEXT
+1   484					     ALIGN_  0
+2   485					     IF	($-START+0) AND	1
+2   486					 NOP
+2   487				     qqq_ = qqq_+1
+2   488					     ENDIF
+1   489	0178  90			     NOP
+1   490	0179			     @_NEXT:
+1   491					     org   $-1
+    492	0178  4F		       DEC   RT
+    493	0179  B0 00		       MOV   AL,0
+    494				       ORG   $-1
+    495
+    496				      P_     @_1MIF				       ; (IF-
+1   497					     ALIGN_  0
+2   498					     IF	($-START+0) AND	1
+2   499					 NOP
+2   500				     qqq_ = qqq_+1
+2   501					     ENDIF
+1   502	017A  90			     NOP
+1   503	017B			     @_1MIF:
+1   504					     org   $-1
+    505	017A  49		       DEC   T
+    506	017B  78 0F		       JS      _SKIP
+    507
+    508				      P_     @_JUMP				 ; (JUMP
+1   509					     ALIGN_  0
+2   510					     IF	($-START+0) AND	1
+2   511	017D  90			 NOP
+2   512	      =0009		     qqq_ = qqq_+1
+2   513					     ENDIF
+Turbo Assembler	 Version 3.2	    12/11/18 14:19:28	    Page 10
+MASH8.asm
+
+
+
+1   514	017E  90			     NOP
+1   515	017F			     @_JUMP:
+1   516					     org   $-1
+    517	017E			     _JMP:
+    518	017E  8B 34		       MOV   I,[I]
+    519				       JMP_  _MAIN
+1   520	0180  EB 74			     jmp   SHORT _MAIN
+    521
+    522				      P_ @_?SKIP	   ; (?SKIP
+1   523					     ALIGN_  0
+2   524					     IF	($-START+0) AND	1
+2   525					 NOP
+2   526				     qqq_ = qqq_+1
+2   527					     ENDIF
+1   528	0182  90			     NOP
+1   529	0183			     @_?SKIP:
+1   530					     org   $-1
+    531	0182  E3 04		       JCXZ  @IFM1?
+    532				       JMP_  _MAIN
+1   533	0184  EB 70			     jmp   SHORT _MAIN
+    534
+    535				      P_     @_IF				 ; (IF
+1   536					     ALIGN_  0
+2   537					     IF	($-START+0) AND	1
+2   538					 NOP
+2   539				     qqq_ = qqq_+1
+2   540					     ENDIF
+1   541	0186  90			     NOP
+1   542	0187			     @_IF:
+1   543					     org   $-1
+    544	0186  41		       INC   T
+    545
+    546				      P_ @_IFM1		   ; (IFM1
+1   547					     ALIGN_  0
+2   548					     IF	($-START+0) AND	1
+2   549	0187  90			 NOP
+2   550	      =000A		     qqq_ = qqq_+1
+2   551					     ENDIF
+1   552	0188  90			     NOP
+1   553	0189			     @_IFM1:
+1   554					     org   $-1
+    555	0188			     @IFM1?:
+    556	0188  49		       DEC   T
+    557				       DTO_  T
+1   558	0189  59			     POP   T
+    559	018A  74 F2		       JZ  _JMP
+    560				      P_ @_SKIP		   ; (SKIP
+1   561					     ALIGN_  0
+2   562					     IF	($-START+0) AND	1
+2   563					 NOP
+2   564				     qqq_ = qqq_+1
+2   565					     ENDIF
+1   566	018C  90			     NOP
+1   567	018D			     @_SKIP:
+1   568					     org   $-1
+    569	018C			     _SKIP:
+    570	018C  46			     INC	     I
+Turbo Assembler	 Version 3.2	    12/11/18 14:19:28	    Page 11
+MASH8.asm
+
+
+
+    571	018D  46			     INC	     I
+    572				       JMP_  _MAIN
+1   573	018E  EB 66			     jmp   SHORT _MAIN
+    574
+    575				     ; -------------------- MATH -------------------
+    576
+    577				      P_     @_PLAVG				     ; +2/
+1   578					     ALIGN_  0
+2   579					     IF	($-START+0) AND	1
+2   580					 NOP
+2   581				     qqq_ = qqq_+1
+2   582					     ENDIF
+1   583	0190  90			     NOP
+1   584	0191			     @_PLAVG:
+1   585					     org   $-1
+    586				       DTO_  W
+1   587	0190  58			     POP   W
+    588	0191  03 C8			     ADD   T,W
+    589	0193  8B C1			     MOV   W,T
+    590	0195  D1 D9			     RCR   T,1
+    591					     TOD_    W
+1   592	0197  50			     PUSH  W
+    593				       JMP_  _MAIN
+1   594	0198  EB 5C			     jmp   SHORT _MAIN
+    595
+    596				      P_     @_PMUL				     ; +*
+1   597					     ALIGN_  0
+2   598					     IF	($-START+0) AND	1
+2   599					 NOP
+2   600				     qqq_ = qqq_+1
+2   601					     ENDIF
+1   602	019A  90			     NOP
+1   603	019B			     @_PMUL:
+1   604					     org   $-1
+    605				       DTO_  W
+1   606	019A  58			     POP   W
+    607	019B  A8 01			     TEST  WL,1
+    608	019D  74 02			     JZ	   @D2DIV
+    609	019F  03 CB			     ADD   T,AR
+    610	01A1			     @D2DIV:
+    611	01A1  D1 D8			     RCR   W,1
+    612	01A3  D1 D9			     RCR   T,1
+    613					     TOD_    W
+1   614	01A5  50			     PUSH  W
+    615				       JMP_  _MAIN
+1   616	01A6  EB 4E			     jmp   SHORT _MAIN
+    617
+    618				      P_     @_SDIV				     ; -/
+1   619					     ALIGN_  0
+2   620					     IF	($-START+0) AND	1
+2   621					 NOP
+2   622				     qqq_ = qqq_+1
+2   623					     ENDIF
+1   624	01A8  90			     NOP
+1   625	01A9			     @_SDIV:
+1   626					     org   $-1
+    627				       DTO_  W
+Turbo Assembler	 Version 3.2	    12/11/18 14:19:28	    Page 12
+MASH8.asm
+
+
+
+1   628	01A8  58			     POP   W
+    629	01A9  D1 E0			     SHL   W,1
+    630	01AB  D1 D1			     RCL   T,1
+    631	01AD  3B C3			     CMP   W,AR
+    632	01AF  72 03			     JB	       NO_DIV
+    633	01B1  2B CB			     SUB   T,AR
+    634	01B3  40			     INC   W
+    635	01B4			     NO_DIV:
+    636					     TOD_    W
+1   637	01B4  50			     PUSH  W
+    638				       JMP_  _MAIN
+1   639	01B5  EB 3F			     jmp   SHORT _MAIN
+    640
+    641				     ; -------------------------  LOGIC	 --------------------
+    642
+    643				      P_     @_NAND				     ; NAND
+1   644					     ALIGN_  0
+2   645					     IF	($-START+0) AND	1
+2   646	01B7  90			 NOP
+2   647	      =000B		     qqq_ = qqq_+1
+2   648					     ENDIF
+1   649	01B8  90			     NOP
+1   650	01B9			     @_NAND:
+1   651					     org   $-1
+    652				       DTO_  W
+1   653	01B8  58			     POP   W
+    654	01B9  23 C8		       AND   T,W
+    655				      P_ @_NOT		 ; NOT
+1   656					     ALIGN_  0
+2   657					     IF	($-START+0) AND	1
+2   658	01BB  90			 NOP
+2   659	      =000C		     qqq_ = qqq_+1
+2   660					     ENDIF
+1   661	01BC  90			     NOP
+1   662	01BD			     @_NOT:
+1   663					     org   $-1
+    664	01BC  41		       INC     T
+    665				      P_ @_NEG		 ; NEG
+1   666					     ALIGN_  0
+2   667					     IF	($-START+0) AND	1
+2   668	01BD  90			 NOP
+2   669	      =000D		     qqq_ = qqq_+1
+2   670					     ENDIF
+1   671	01BE  90			     NOP
+1   672	01BF			     @_NEG:
+1   673					     org   $-1
+    674	01BE  F7 D9		       NEG     T
+    675				       JMP_  _MAIN
+1   676	01C0  EB 34			     jmp   SHORT _MAIN
+    677
+    678				      P_     @_XOR				     ; XOR
+1   679					     ALIGN_  0
+2   680					     IF	($-START+0) AND	1
+2   681					 NOP
+2   682				     qqq_ = qqq_+1
+2   683					     ENDIF
+1   684	01C2  90			     NOP
+Turbo Assembler	 Version 3.2	    12/11/18 14:19:28	    Page 13
+MASH8.asm
+
+
+
+1   685	01C3			     @_XOR:
+1   686					     org   $-1
+    687				       DTO_  W
+1   688	01C2  58			     POP   W
+    689	01C3  33 C8		       XOR   T,W
+    690				       JMP_  _MAIN
+1   691	01C5  EB 2F			     jmp   SHORT _MAIN
+    692
+    693				      P_ @_ULESS	 ; U<
+1   694					     ALIGN_  0
+2   695					     IF	($-START+0) AND	1
+2   696	01C7  90			 NOP
+2   697	      =000E		     qqq_ = qqq_+1
+2   698					     ENDIF
+1   699	01C8  90			     NOP
+1   700	01C9			     @_ULESS:
+1   701					     org   $-1
+    702				       DTO_  W
+1   703	01C8  58			     POP   W
+    704	01C9  2B C1		       SUB   W,T
+    705				       JMP_  @FLAG
+1   706	01CB  EB 04			     jmp   SHORT @FLAG
+    707
+    708				      P_ @_ZEQ		 ; 0=
+1   709					     ALIGN_  0
+2   710					     IF	($-START+0) AND	1
+2   711	01CD  90			 NOP
+2   712	      =000F		     qqq_ = qqq_+1
+2   713					     ENDIF
+1   714	01CE  90			     NOP
+1   715	01CF			     @_ZEQ:
+1   716					     org   $-1
+    717	01CE  83 E9 01		       SUB   T,1
+    718	01D1			     @FLAG:
+    719	01D1  1B C9		       SBB   T,T
+    720				       JMP_  _MAIN
+1   721	01D3  EB 21			     jmp   SHORT _MAIN
+    722
+    723				     ; ---- MAIN LOOP  & STACK	----------------
+    724
+    725				      P_ @_DUP		 ; DUP
+1   726					     ALIGN_  0
+2   727					     IF	($-START+0) AND	1
+2   728	01D5  90			 NOP
+2   729	      =0010		     qqq_ = qqq_+1
+2   730					     ENDIF
+1   731	01D6  90			     NOP
+1   732	01D7			     @_DUP:
+1   733					     org   $-1
+    734				       TOD_  T
+1   735	01D6  51			     PUSH  T
+    736				       JMP_  _MAIN
+1   737	01D7  EB 1D			     jmp   SHORT _MAIN
+    738
+    739				      P_ @_XA		 ; XA
+1   740					     ALIGN_  0
+2   741					     IF	($-START+0) AND	1
+Turbo Assembler	 Version 3.2	    12/11/18 14:19:28	    Page 14
+MASH8.asm
+
+
+
+2   742	01D9  90			 NOP
+2   743	      =0011		     qqq_ = qqq_+1
+2   744					     ENDIF
+1   745	01DA  90			     NOP
+1   746	01DB			     @_XA:
+1   747					     org   $-1
+    748	01DA  87 FB		       XCHG  RT,AR
+    749				       JMP_  _MAIN
+1   750	01DC  EB 18			     jmp   SHORT _MAIN
+    751
+    752				      P_ @_XI		 ; EX
+1   753					     ALIGN_  0
+2   754					     IF	($-START+0) AND	1
+2   755					 NOP
+2   756				     qqq_ = qqq_+1
+2   757					     ENDIF
+1   758	01DE  90			     NOP
+1   759	01DF			     @_XI:
+1   760					     org   $-1
+    761	01DE  87 FE		       XCHG  RT,I
+    762				       JMP_  _MAIN
+1   763	01E0  EB 14			     jmp   SHORT _MAIN
+    764
+    765				      P_     @_XT				 ; XCHG
+1   766					     ALIGN_  0
+2   767					     IF	($-START+0) AND	1
+2   768					 NOP
+2   769				     qqq_ = qqq_+1
+2   770					     ENDIF
+1   771	01E2  90			     NOP
+1   772	01E3			     @_XT:
+1   773					     org   $-1
+    774	01E2  87 CF		       XCHG  T,RT
+    775				       JMP_  _MAIN
+1   776	01E4  EB 10			     jmp   SHORT _MAIN
+    777
+    778				      P_ @_FOR		 ; (FOR
+1   779					     ALIGN_  0
+2   780					     IF	($-START+0) AND	1
+2   781					 NOP
+2   782				     qqq_ = qqq_+1
+2   783					     ENDIF
+1   784	01E6  90			     NOP
+1   785	01E7			     @_FOR:
+1   786					     org   $-1
+    787	01E6  8B 34		       MOV   I,[I]
+    788
+    789				      P_ @_PUSH					     ; PUSH
+1   790					     ALIGN_  0
+2   791					     IF	($-START+0) AND	1
+2   792					 NOP
+2   793				     qqq_ = qqq_+1
+2   794					     ENDIF
+1   795	01E8  90			     NOP
+1   796	01E9			     @_PUSH:
+1   797					     org   $-1
+    798				       DROP_
+Turbo Assembler	 Version 3.2	    12/11/18 14:19:28	    Page 15
+MASH8.asm
+
+
+
+1   799	01E8  91		       XCHG  T,W
+1   800					     DTO_    T
+2   801	01E9  59			     POP   T
+    802				       JMP_  _RPUSH
+1   803	01EA  EB 04			     jmp   SHORT _RPUSH
+    804
+    805	01EC			     _EXECU:
+    806				       DTO_  I
+1   807	01EC  5E			     POP   I
+    808				       JMP_  _MAIN
+1   809	01ED  EB 07			     jmp   SHORT _MAIN
+    810
+    811	01EF			     _NEST:
+    812	01EF  96		       XCHG  I,W
+    813	01F0			     _RPUSH:
+    814	01F0  97		       XCHG  RT,W
+    815				       TOR_  W
+1   816					     X_
+2   817	01F1  87 EC			     xchg  Rsp,DSP
+1   818	01F3  50			     PUSH    W
+1   819					     X_
+2   820	01F4  87 EC			     xchg  Rsp,DSP
+    821	01F6			     _MAIN:					 ; (NOP
+    822					     LDWP_
+1   823	01F6  AD			     LODSW
+    824	01F7  A8 01		       TEST  WL,1
+    825	01F9  74 F4		       JE      _NEST
+    826	01FB  48		       DEC   W
+    827	01FC  FF E0		       JMP	     W
+    828
+    829				     ;-----------------------  TRANSFER	----------------
+    830
+    831				      P_     @_J			       ; J
+1   832					     ALIGN_  0
+2   833					     IF	($-START+0) AND	1
+2   834					 NOP
+2   835				     qqq_ = qqq_+1
+2   836					     ENDIF
+1   837	01FE  90			     NOP
+1   838	01FF			     @_J:
+1   839					     org   $-1
+    840				       TOD_  T
+1   841	01FE  51			     PUSH  T
+    842	01FF  8B 4E 00		       MOV   T,[RSP]
+    843				       JMP_  _MAIN
+1   844	0202  EB F2			     jmp   SHORT _MAIN
+    845
+    846				      P_     @_RLDP			       ; @R+
+1   847					     ALIGN_  0
+2   848					     IF	($-START+0) AND	1
+2   849					 NOP
+2   850				     qqq_ = qqq_+1
+2   851					     ENDIF
+1   852	0204  90			     NOP
+1   853	0205			     @_RLDP:
+1   854					     org   $-1
+    855				       TOD_  T
+Turbo Assembler	 Version 3.2	    12/11/18 14:19:28	    Page 16
+MASH8.asm
+
+
+
+1   856	0204  51			     PUSH  T
+    857	0205  8B 0D		       MOV   T,[RT]
+    858	0207			     @RT2P:
+    859	0207  47		       INC   RT
+    860	0208			     @RT1P:
+    861	0208  47		       INC   RT
+    862				       JMP_  _MAIN
+1   863	0209  EB EB			     jmp   SHORT _MAIN
+    864
+    865				      P_     @_RSTP			       ; !R+
+1   866					     ALIGN_  0
+2   867					     IF	($-START+0) AND	1
+2   868	020B  90			 NOP
+2   869	      =0012		     qqq_ = qqq_+1
+2   870					     ENDIF
+1   871	020C  90			     NOP
+1   872	020D			     @_RSTP:
+1   873					     org   $-1
+    874				       DROP_
+1   875	020C  91		       XCHG  T,W
+1   876					     DTO_    T
+2   877	020D  59			     POP   T
+    878	020E  89 05		       MOV   [RT],W
+    879				       JMP_  @RT2P
+1   880	0210  EB F5			     jmp   SHORT @RT2P
+    881
+    882				      P_ @_RSTBP	 ; C!R+
+1   883					     ALIGN_  0
+2   884					     IF	($-START+0) AND	1
+2   885					 NOP
+2   886				     qqq_ = qqq_+1
+2   887					     ENDIF
+1   888	0212  90			     NOP
+1   889	0213			     @_RSTBP:
+1   890					     org   $-1
+    891				       DROP_
+1   892	0212  91		       XCHG  T,W
+1   893					     DTO_    T
+2   894	0213  59			     POP   T
+    895	0214  88 05		       MOV   [RT],WL
+    896				       JMP_  @RT1P
+1   897	0216  EB F0			     jmp   SHORT @RT1P
+    898
+    899				     ;-----------------------------------------------
+    900
+    901	0218			     freemem:
+    902				     ;	DW ENDMEM-FREEMEM-2
+    903				      ;	entry_	@_ENTRY,0,'=:'
+    904				       ;DB 0
+    905	0218			     EndMem:
+    906
+    907				     ; --------------  END  ---------------
+    908
+    909				      L_     @_END__
+1   910					     ALIGN_  0
+2   911					     IF	($-START+0) AND	1
+2   912					 NOP
+Turbo Assembler	 Version 3.2	    12/11/18 14:19:28	    Page 17
+MASH8.asm
+
+
+
+2   913				     qqq_ = qqq_+1
+2   914					     ENDIF
+1   915	0218			     @_END__:
+    916
+    917	0218				 MyCseg	 ends
+    918					 end  Start
+Turbo Assembler	 Version 3.2	    12/11/18 14:19:28	    Page 18
+Symbol Table
+
+
+
+
+Symbol Name		Type   Value			   Cref	(defined at #)
+
+??DATE			Text   "12/11/18"
+??FILENAME		Text   "MASH8	"
+??TIME			Text   "14:19:28"
+??VERSION		Number 0314
+@CPU			Text   0101H
+@CURSEG			Text   MYCSEG			   #228
+@D2DIV			Near   MYCSEG:01A1		   608	#610
+@DROPX			Near   MYCSEG:0164		   #407	 464
+@FILENAME		Text   MASH8
+@FLAG			Near   MYCSEG:01D1		   706	#718
+@IFM1?			Near   MYCSEG:0188		   531	#555
+@MAI0			Near   MYCSEG:016D		   #438	 466
+@RDROP			Near   MYCSEG:0168		   276	#431
+@RT1P			Near   MYCSEG:0208		   #860	 897
+@RT2P			Near   MYCSEG:0207		   #858	 880
+@R_TOP			Number -0400			   #236	 237  256
+@S_TOP			Number -0800			   #237	 238  255
+@TBUF			Number -0100			   #234	 235
+@TIB			Number -0200			   #235	 236
+@TX1			Near   MYCSEG:0159		   385	#387
+@VOCTOP			Number -1000			   #238
+@WORDSIZE		Text   2			   #228
+@_0?X			Near   MYCSEG:0173		   #462
+@_1MIF			Near   MYCSEG:017B		   #503
+@_?CRX			Near   MYCSEG:0132		   #352
+@_?SKIP			Near   MYCSEG:0183		   #529
+@_@INITA		Near   MYCSEG:0112		   #258
+@_@IORET		Near   MYCSEG:015D		   374	#391
+@_@START		Near   MYCSEG:0100		   #241
+@_ABORT			Near   MYCSEG:0109		   #252
+@_CTX			Near   MYCSEG:0150		   #382
+@_DROPX			Near   MYCSEG:0165		   #405
+@_DUP			Near   MYCSEG:01D7		   #732
+@_END__			Near   MYCSEG:0218		   #915
+@_FOR			Near   MYCSEG:01E7		   #785
+@_IF			Near   MYCSEG:0187		   #542
+@_IFM1			Near   MYCSEG:0189		   #553
+@_IO1			Near   MYCSEG:011D		   #296	 383
+@_IO2			Near   MYCSEG:011F		   #307
+@_IO3			Near   MYCSEG:0121		   #318
+@_IO4			Near   MYCSEG:0123		   #329
+@_IOZ			Near   MYCSEG:011B		   #285	 353
+@_J			Near   MYCSEG:01FF		   #838
+@_JUMP			Near   MYCSEG:017F		   #515
+@_MIF			Near   MYCSEG:0177		   #477
+@_NAND			Near   MYCSEG:01B9		   #650
+@_NEG			Near   MYCSEG:01BF		   #672
+@_NEXT			Near   MYCSEG:0179		   #490
+@_NOT			Near   MYCSEG:01BD		   #662
+@_PLAVG			Near   MYCSEG:0191		   #584
+@_PMUL			Near   MYCSEG:019B		   #603
+@_POP			Near   MYCSEG:0115		   #270
+@_PUSH			Near   MYCSEG:01E9		   #796
+@_RDROP			Near   MYCSEG:0169		   #429
+Turbo Assembler	 Version 3.2	    12/11/18 14:19:28	    Page 19
+Symbol Table
+
+
+
+@_RET			Near   MYCSEG:0167		   #418
+@_RLDP			Near   MYCSEG:0205		   #853
+@_RSTBP			Near   MYCSEG:0213		   #889
+@_RSTP			Near   MYCSEG:020D		   #872
+@_SDIV			Near   MYCSEG:01A9		   #625
+@_SKIP			Near   MYCSEG:018D		   #567
+@_ULESS			Near   MYCSEG:01C9		   #700
+@_XA			Near   MYCSEG:01DB		   #746
+@_XI			Near   MYCSEG:01DF		   #759
+@_XOR			Near   MYCSEG:01C3		   #685
+@_XT			Near   MYCSEG:01E3		   #772
+@_ZEQ			Near   MYCSEG:01CF		   #715
+@__DROP			Near   MYCSEG:0171		   #448
+AR			Number BX			   #220	 333  394  609	631  633  748
+AT_			Number -0004			   #31
+DSP			Number SP			   #211	 255  332  335	393  396  434  437  817	 820
+ENDMEM			Near   MYCSEG:0218		   #905
+FREEMEM			Near   MYCSEG:0218		   #901
+I			Number SI			   #209	 420  518  518	570  571  761  787  787	 807  812
+NACC			Number DI			   #225
+NBASE			Number BP			   #226
+NO_DIV			Near   MYCSEG:01B4		   632	#635
+PB			Text   byte  ptr		   #28
+PD			Text   dword ptr		   #26
+PW			Text   word  ptr		   #27
+QQQ_			Number 0012			   #33	249  #249  282	#282  293  #293	 304  #304  315	 #315  326  #326  +
+							   402	#402  415  #415	 512  #512  550	 #550  647  #647  659  #659  669  +
+							   #669	 697  #697  712	 #712  729  #729  743  #743  869  #869
+QRX1			Near   MYCSEG:0144		   359	#362
+QRX2			Near   MYCSEG:014A		   364	#366
+QRX3			Near   MYCSEG:014C		   357	#370
+RSP			Number BP			   #210	 256  332  335	393  396  434  437  817	 820  842
+RT			Number DI			   #212	 274  333  394	420  435  492  748  761	 774  814  857	859  861  +
+							   878	895
+START			Byte   MYCSEG:0100		   #240	 247  265  280	291  302  313  324  348	 378  400  413	424  443  +
+							   457	472  485  498  510  524	 537  548  562	579  598  620  645  657	  +
+							   667	680  695  710  727  741	 754  767  780	791  833  848  867  884	  +
+							   911	918
+T			Number CX			   #214	 273  274  288	299  310  321  336  409	 451  479  505	544  556  +
+							   558	588  589  590  609  612	 630  633  654	664  674  689  704  717	  +
+							   719	719  735  774  799  801	 841  842  856	857  875  877  892  894
+TH			Number CH			   #216
+TL			Number CL			   #215
+TO_			Number -0002			   #30
+VL_			Number 0002			   #32
+W			Number AX			   #217	 587  588  589	592  606  611  614  628	 629  631  634	637  653  +
+							   654	688  689  703  704  799	 812  814  818	826  827  875  878  892
+WH			Number AH			   #219
+WL			Number AL			   #218	 607  824  895
+_EXECU			Near   MYCSEG:01EC		   257	#805
+_JMP			Near   MYCSEG:017E		   #517	 559
+_MAIN			Near   MYCSEG:01F6		   439	520  533  573  594  616	 639  676  691	721  737  750  763  776	  +
+							   809	#821  844  863
+_NEST			Near   MYCSEG:01EF		   #811	 825
+_RPUSH			Near   MYCSEG:01F0		   803	#813
+_SKIP			Near   MYCSEG:018C		   506	#569
+Turbo Assembler	 Version 3.2	    12/11/18 14:19:28	    Page 20
+Symbol Table
+
+
+
+
+Macro Name						   Cref	(defined at #)
+
+?ZERO_							   #93
+@LN							   #147
+@NAM							   #140
+ALIGN_							   #117	 246  264  279	290  301  312  323  347	 377  399  412	423  442  +
+							   456	471  484  497  509  523	 536  547  561	578  597  619  644  656	  +
+							   666	679  694  709  726  740	 753  766  779	790  832  847  866  883	  +
+							   910
+CLR_							   #89
+CONST_							   #164
+DEFER_							   #169
+DROP_							   #79	798  874  891
+DTO_							   #60	408  450  557  586  605	 627  652  687	702  800  806  876  893
+DUPW_							   #84
+ENTRY_							   #198
+JMP_							   #35	275  373  465  519  532	 572  593  615	638  675  690  705  720	  +
+							   736	749  762  775  802  808	 843  862  879	896
+LDWP_							   #109	 822
+L_							   #128	 346  376  909
+N_							   #124
+POINT_							   #186
+P_							   #133	 245  263  278	289  300  311  322  398	 411  422  441	455  470  +
+							   483	496  508  522  535  546	 560  577  596	618  643  655  665  678	  +
+							   693	708  725  739  752  765	 778  789  831	846  865  882
+QUAN_							   #192
+RDEC_							   #68
+RTO_							   #97	432
+SKIPA_							   #39	452  480
+SKIPB_							   #43	368
+SKIPR_							   #47
+STWP_							   #113
+TOD_							   #56	272  287  298  309  320	 591  613  636	734  840  855
+TOR_							   #103	 815
+TWICE_							   #64
+VALUE_							   #174
+VAR_							   #159
+VECTOR_							   #180
+XT_							   #154
+X_							   #52	331  334  392  395  433	 436  816  819
+
+Groups & Segments	Bit Size Align	Combine	Class	   Cref	(defined at #)
+
+MYCSEG			16  0218 Para	none		   #228	 230  230  230	230
+

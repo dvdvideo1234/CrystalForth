@@ -1,0 +1,8 @@
+
+ Start  Stop   Length Name               Class
+
+ 00000H 0034FH 00350H MYCSEG             
+
+Program entry point at 0000:0100
+Warning: no stack
+

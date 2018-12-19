@@ -1,0 +1,34 @@
+./ARCHIVE/MASH8/MASH8.###:	DW @_DXEP_,@_MKSTR,@_LIT__,'`',@_ASTBP,@_RET__
+./ARCHIVE/MASH8/MASH8.###:    DW @_DXEP_,@_STAR_,@_DUP__,@_ASTBP
+./ARCHIVE/MASH8/MASH8.###:    DW @_PREMV,@_IF___,@CMOVE,@_PUSH_,@_CSTR_,@_ASTBP,@_POP__
+./ARCHIVE/MASH8/MASH8.005: P_ @_ASTBP
+./ARCHIVE/MASH8/MASH8.005:	DW @_DXEP_,@_MKSTR,@_LIT__,'`',@_ASTBP,@_RET__
+./ARCHIVE/MASH8/MASH8.005:    DW @_DXEP_,@_STAR_,@_DUP__,@_ASTBP,@_JUMP_,@_AMOVE
+./ARCHIVE/MASH8/MASH8.005:    DW @_PREMV,@_IF___,@CMOVE,@_PUSH_,@_COUNT,@_ASTBP,@_POP__
+./ARCHIVE/MASH8/MASH8.006: P_ @_ASTBP
+./ARCHIVE/MASH8/MASH8.006:	DW @_DXEP_,@_MKSTR,@_LIT__,'`',@_ASTBP,@_RET__
+./ARCHIVE/MASH8/MASH8.006:    DW @_DXEP_,@_STAR_,@_DUP__,@_ASTBP
+./ARCHIVE/MASH8/MASH8.006:    DW @_PREMV,@_IF___,@CMOVE,@_PUSH_,@_CSTR_,@_ASTBP,@_POP__
+./ARCHIVE/MASH8/MASH8.007: P_ @_ASTBP
+./ARCHIVE/MASH8/MASH8.007:	DW @_DXEP_,@_MKSTR,@_LIT__,'`',@_ASTBP,@_RET__
+./ARCHIVE/MASH8/MASH8.007:    DW @_DXEP_,@_STAR_,@_DUP__,@_ASTBP
+./ARCHIVE/MASH8/MASH8.007:    DW @_PREMV,@_IF___,@CMOVE,@_PUSH_,@_CSTR_,@_ASTBP,@_POP__
+./ARCHIVE/MASH8/MASH8.008:	DW @_DXEP_,@_MKSTR,@_LIT__,'`',@_ASTBP,@_RET__
+./ARCHIVE/MASH8/MASH8.008:    DW @_DXEP_,@_STAR_,@_DUP__,@_ASTBP
+./ARCHIVE/MASH8/MASH8.008:    DW @_PREMV,@_IF___,@CMOVE,@_PUSH_,@_CSTR_,@_ASTBP,@_POP__
+./err:**Error** MASH8.asm(784) Undefined symbol: @_ASTBP
+./err:**Error** MASH8.asm(870) Undefined symbol: @_ASTBP
+./err:**Error** MASH8.asm(872) Undefined symbol: @_ASTBP
+./GRE.BAT:grep -i -H -R "@_ASTBP" . >gre.txt
+./mash8.asm:	DW @_DXEP,@_MKSTR,@_LIT,'`',@_ASTBP,@_RET 
+./mash8.asm:    DW @_DXEP,@_STAR,@_DUP,@_ASTBP
+./mash8.asm:    DW @_PREMV,@_IF,@CMOVE,@_PUSH,@_CSTR,@_ASTBP,@_POP 
+./MASH8.LST:   1681	03DC  03BEr 04AAr 046Er	  +	     DW	@_DXEP,@_MKSTR,@_LIT,'`',@_ASTBP,@_RET
+./MASH8.LST:**Error** MASH8.asm(784) Undefined symbol: @_ASTBP
+./MASH8.LST:   1961	04AA  03BEr 04FCr 01C3r	  +	 DW @_DXEP,@_STAR,@_DUP,@_ASTBP
+./MASH8.LST:**Error** MASH8.asm(870) Undefined symbol: @_ASTBP
+./MASH8.LST:   1970	04B2  030Er 0181r 04C0r	  +	 DW @_PREMV,@_IF,@CMOVE,@_PUSH,@_CSTR,@_ASTBP,@_POP
+./MASH8.LST:**Error** MASH8.asm(872) Undefined symbol: @_ASTBP
+./MASH8.LST:**Error** MASH8.asm(784) Undefined symbol: @_ASTBP
+./MASH8.LST:**Error** MASH8.asm(870) Undefined symbol: @_ASTBP
+./MASH8.LST:**Error** MASH8.asm(872) Undefined symbol: @_ASTBP

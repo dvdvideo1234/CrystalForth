@@ -1,0 +1,7 @@
+EXI?T HLD     0 VALUE HLD
+
+: ;HLD HLD EX TO HLD ; : BASE! 2 UMAX TO BASE ;
+: <# 0 : <#? 0 TO HLD 0; NEG EX sgn : HOLD ;HLD C!- ;
+: 1# BASE U/MOD SWAP ALPHA HOLD ; : ?#> HLD DUP NEG ;
+: `N# XEP DUP 0< <#? : S# 1# DROP; #?; RECURSE ;
+: .R lf : .RB BASE! `N# HLD + SPACES : #> ?#> TYPE ;

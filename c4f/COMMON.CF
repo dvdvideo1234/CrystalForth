@@ -1,0 +1,84 @@
+: TAB? 
+  78 CNTC - U< 
+  CR ?; 
+  2 SPACES 
+;
+
+: >. 
+  TOKEN? ID. 
+;
+
+-64 CONST >EACH
+
+0 VALUE `OLDT
+
+: NUL:
+  BL
+: NUBL:
+	"=:_`" SEVAL  
+;  
+  
+: /LOCALS 
+  NUL: TO CSTK> >, THEN` 
+;
+
+: /S          \ END OF STREEM
+  BL TO EOS
+;
+
+: DICTMARK
+  T TO `OLDT 
+;
+
+: RETURN` 
+  `OLDT TO T 
+; 
+
+: LOCALS/` 
+  AHEAD` ,<` CSTK> 
+; 
+
+: TAB? 
+  78 CNTC - U< 
+  CR ?; 
+  2 SPACES 
+;
+
+: TRICE 
+  PUSH J XCHG 
+: IXEC  
+  J 
+: EXECUTE  
+  PUSH 
+; 
+
+: IN. 
+  J
+: N. 
+  SPC; 6 .R 
+;
+
+: 3DUP. 
+  DUP B.S 
+: 3DUP 
+  TRICE 
+: PICK 
+  PUSH OVER XCHG POP 
+;
+
+: OK/FAIL> PUSH ' >NF< ID. EXECUTE DUP N. IN.  POP
+: ASERT 
+  - 
+  IF 
+    ."FAL_" 
+  ;THEN 
+    ."OK__" 
+;
+
+: 8*
+    2*
+: 4* 
+    2* 2* 
+;
+
+: PDUMP PARSTK  . RECURSE ;

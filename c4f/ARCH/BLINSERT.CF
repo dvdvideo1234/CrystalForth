@@ -1,0 +1,8 @@
+{ >A >L A L { INSERTING A L WITH BLANK -- >A` >L` } }
+FUNCTION BLINSERT 
+LOCALS/   
+  : INS DUP AT >L +! >A (MPUSH TO >A ;
+/LOCALS   
+  "_" CSTR INS A L INS   >A >L 
+RETURN ;
+

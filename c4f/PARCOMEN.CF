@@ -1,0 +1,138 @@
+{ DEFINITIONS }
+
+{ BODY }
+
+: `{ 
+
+LOCALS/
+
+  DICTMARK
+  
+  -1 QUAN {LVL
+  
+  0 VALUE `(LOCATE
+  
+  : `{?NAMES ,<  
+  @' ?:STR , 
+  4 WARY `NAMES
+  
+  : `{NAMES 
+    "//"    "{"     "\"     "}" 
+    BEGIN
+      [ 4 -1 `NAMES ! ] 4 
+      TIMES; 
+        2- J `NAMES ! 
+  ; ,<
+  `{NAMES   <CSTK TO H    \ INITIALIZE  `NAMES
+  
+  ' \ =: `\ 
+  
+  : `} 
+    {LVL  
+    AT {LVL DEC 
+    0<>;  
+    `(LOCATE AT LOCATE 
+    
+  : `// 
+    FOUND 
+    0>=;  
+    H @ TO FOUND 
+  ; 
+  
+  : `REM/ 
+    {LVL 
+    0<>;
+    
+  : {REM/} 
+    H OFF 
+    -1 TO FOUND  
+    TO LOCATE TO `(LOCATE 
+    PAD OFF 
+  ;
+  
+  : `PAD+ 
+    TBUF 
+    [ 
+      {LVL 0= 
+      DROP ?; 
+      
+    : PAD+" 
+      H INC DROP; PAD 
+      XEP;
+      CSTR J STR + (MOVM BL SWAP C!+ (;S! 
+    ] 
+    POP 1 
+  ;
+  
+/LOCALS
+  AT {LVL INC 
+  `REM/ 
+  LOC! 
+  `{?NAMES ?DUP `PAD+ ?; 
+  1- 
+  [ 
+    @ 1 
+  ] 
+  ,< 
+  0 WARY `{NAMES: 
+  >, 
+  `} `\ `{ `// 
+RETURN ,<
+
+' `{ =: {
+'  { =: {`
+
+: REMARR} 
+  NIP; 
+  
+: PARCOMEN 
+  PAD STR H @ 
+  XEP; 
+    DUP J OR 0;
+    2DUP + 1- C@ BL - !"NO_COMMENT" 
+;
+
+: SHOW} 
+  PARCOMEN CR . CR TYPE 
+;
+
+: EVAL} 
+  PARCOMEN DROP EVAL 
+; 
+
+/S
+
+
+{ \ DFGHDFGH
+: \ DFGHDFGHDFGH
+A \ SDFGHDFGHDFGHDFG
+2 { SDFGHSDFGHDFG { SDFGSDFGSDF } }
+3 \ SDFGDFGHFD
++ { FDGHDFGHDFG
+}
+.
+;
+FORGET 
+A
+} SHOW} EVAL}
+
+1 2 3
+: PARAMS}. CR CR;
+  REMARR}
+  DROP; 
+  TIMES;
+    DUP J N`THP DUP 3 + TAB? J . SPC; []; TYPE 
+;
+
+{
+: PARAMS}. CR CR;
+  REMARR}
+  DROP; 
+  TIMES;
+    DUP J N`THP DUP 3 + TAB? J . SPC; []; TYPE 
+;
+} PARAMS}.
+. . . CR
+FORGET PARAMS}.
+
+

@@ -1,0 +1,96 @@
+: FOREACH 
+  >EACH >" PARCOMEN  ,< 
+  
+{ SADR SLEN CNT // STEP OFST DEST } 
+
+FUNCTION `FOREACH 
+LOCALS/ 
+
+  : BAD? 
+    !"PARAMS?" 
+  ; 
+  
+  : XLAT[I] J NOT BL + ,<
+  BL BARY XLAT
+  
+  : MACROPARAMS? 0 XLAT BL ERASE
+    >EACH CSTR 
+    .TIMES; 
+      CSTR DUP BL U< 
+      DROP ?;  
+      XLAT INC 
+  ;
+  
+  : HAS_PARAMS? 
+    0 XLAT C@ BAD?  \ ^@ MOT ALOWED
+    BL FOR          \ FORWARD 
+      XLAT[I] C@ 
+      IF
+        AT STEP INC
+        STEP XLAT[I] C!
+      THEN  
+    NEXT DROP
+    STEP 0<>;
+      1 TO STEP 
+      "_^A" >EACH "+! DROP 
+  ; 
+    
+  : PREPARE 
+    [ 
+      SADR STEP DUP AT SLEN +! NPAR TO SADR 
+    ] 
+    OFST  TO DEST >EACH CSTR 
+    .TIMES; 
+      CSTR DUP BL U< 
+      IF 
+        XLAT C@  \ XLAT OPERATION
+        1- PUSH  SADR POP N`THP 
+        .TIMES; CSTR 
+      THEN 
+          DEST C!+ TO DEST 
+  ; 
+  
+  { : PARDUMP CR 
+    SADR N. ."SADR_" 
+    SLEN N. ."SLEN_"
+    CNT  N. ."CNT__"
+    STEP N. ."STEP_"
+    OFST N. ."OFST_"
+    DEST N. ."DEST_"
+    TBUF BL DUMP CR
+  ; }
+  
+/LOCALS 
+  CNT 0; MACROPARAMS?
+  SADR SLEN + TO OFST \ PARDUMP
+  SADR CNT NPAR OFST - BAD? HAS_PARAMS? \ PARDUMP
+  CNT STEP (/MD !"ODDLIST" 0 TO SLEN 	TIMES; 
+    PREPARE OFST DEST OVER- EVAL 
+RETURN 
+;
+
+/S
+
+\ { + - U* U/ 2* 2/ UMOD NEG GAGA } "CR_>." FOREACH
+
+: ** DUP U* ; : 2^ 1 SWAP TIMES; 2* ;
+CR { ASDF ASFD AFDS AFSD } ">." FOREACH 
+{ %1111 $20 '~ 3#200 7#100 99 ^A 'A } \ SHOW}
+CR ">NUM_^A_." FOREACH .
+
+{ %1111 $20 '~ 3#200 7#100 99 ^A 'A } \ SHOW}
+CR ">NUM_^A_NEG_." FOREACH 
+CR { %1111 $20 '~ 3#200 7#100 99 ^A 'A } SHOW}
+CR ">NUM_^A_**_." FOREACH 
+
+\ { + - U* U/ 2* 2/ UMOD NEG } SHOW}
+\ CR  "'_^A_'$_EMIT_H._>._=:_>._^A" FOREACH
+\ CR { + - U* U/ 2* 2/ UMOD NEG } SHOW}
+\ CR  ">._^A_>._=:_>._^B" FOREACH
+{ 1 A 2 B 3 C 4 D 5 E 6 F } SHOW}
+CR  ">._^A_>._^B_SPACE" FOREACH 
+\ ">NUM_^A_CONST_^B1" FOREACH 
+
+CR { 1 . 2 3 + } ">._??^A!!" FOREACH
+CR 
+

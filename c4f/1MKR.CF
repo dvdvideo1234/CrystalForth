@@ -1,0 +1,28 @@
+
+{ MAKERS }
+
+: `MKR 0 =, , 
+  EX 
+: ,' 
+  ' , 
+;   
+
+: `W, STR , 
+;
+: 3MKR `MKR , , 
+  DOES>  `W,    
+: `W: `W, 
+: `(: 
+  =H `W, @EXECUTE 
+; 
+
+: 2MKR 
+  `MKR , 
+  DOES> `W: 
+;     
+
+: 1MKR 
+  `MKR 
+  DOES> `(: 
+;
+

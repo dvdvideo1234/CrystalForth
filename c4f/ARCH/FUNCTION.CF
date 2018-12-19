@@ -1,0 +1,75 @@
+
+: FUNCTION 
+  PARCOMEN DUP FOUND - 
+
+LOCALS/
+
+  DICTMARK
+  
+  ' PARSTK  4 + CONST PARPTR^ 
+    
+  : @PAR 
+    @ PARPTR^ @ + 
+  ;   
+  
+  NUL:
+  
+  0#> @PAR @ 
+  ;  
+  
+  1#> @PAR ! 
+  ;  
+  
+  2#> @PAR 
+  ; 
+  
+  3MKR PQUAN ,
+  
+\  FOUND TO `V3   COUNT  TO `V2    LEN TO `V1    LIST TO `V0 
+  2 0 8 FAMILY PQUAN  PLIST PLEN PCOUNT LFOUND V4 V5 V6 V7 
+  
+  : ZEROS 
+    TIMES; 
+      0 TO PARSTK 
+  ;
+  
+  : FILLPAR 
+    TIMES; 
+      TO PARSTK 
+  ; 
+  
+  : SETPAR 
+    C@R+  C@R+ P>BYT XCHG PUSH ZEROS FILLPAR   
+    EX
+    POP PARPTR^ +! 
+  ;  
+  
+  NUL:
+     
+/LOCALS \ PLIST PLEN PCOUNT LFOUND
+  SETPAR ,< 4 C, 0 C, >, 
+  [ NUL: (LIT SETPAR , PCOUNT LFOUND - C, LFOUND C, >, ]
+  bs PCOUNT U< !"TOO_MANY_PARS" =H DICTMARK PCOUNT TIMES; 
+    J 8* (LIT PLIST + PLIST J N`THP \ CREATE PARAMETTER
+    "=:_" CSTR SBUF S! +S! 
+: STREVAL    
+    STR EVAL \ CREATION
+RETURN ;    
+
+/S
+
+CR ."SIGNA" CR
+
+: SIGNA SPC; [ : `SEMIT DUP EMIT ] XEP; ,<
+{ A B C D E F G H } FUNCTION `ASIGN
+    CR
+    A `SEMIT B `SEMIT C `SEMIT D `SEMIT
+    E `SEMIT F `SEMIT G `SEMIT H `SEMIT 
+RETURN ;
+
+{ CR 'S 'I 'G 'N 'A 'T 'U 'R 'E SIGNA 
+    CR SIGNA  WITH EMIT 9 TIMES
+} EVAL}
+CR
+
+FORGET SIGNA

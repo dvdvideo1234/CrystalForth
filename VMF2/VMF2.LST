@@ -1,0 +1,989 @@
+Turbo Assembler	 Version 3.2	    12/11/18 17:20:52	    Page 1
+VMF2.asm
+
+
+
+      1				     ; AX IS DATA STACK	REGISTER  AND ALTERNATIVE STACK	REGISTER
+      2				     ; SP IS STACK REGISTER  AND ALTERNATIVE DATA STACK	REGISTER
+      3				     ; BX IS INSTRUCTION POINTER
+      4				     ; DX IS DATA TOP REGISTER
+      5				     ; BP IS LOCAL STACK FRAME REGISTER
+      6
+      7				     locals  @@
+      8	      =	dword ptr	     pd	 equ dword ptr
+      9	      =	word  ptr	     pw	 equ word  ptr
+     10	      =	byte  ptr	     pb	 equ byte  ptr
+     11
+     12				     XSKIPCX MACRO
+     13					     DB	0B9H
+     14					   ENDM
+     15
+     16				     XSKIPCL MACRO
+     17					     DB	0B1H
+     18					   ENDM
+     19
+     20				     XSKIPDI MACRO
+     21					     DB	0BFH
+     22					   ENDM
+     23
+     24				     XC	   MACRO
+     25					     XCHG  AX,CX
+     26					   ENDM
+     27
+     28				     X	   MACRO
+     29					     XCHG  AX,SP
+     30					   ENDM
+     31
+     32				     XDUP  MACRO
+     33					     X
+     34					     PUSH  DX
+     35					     X
+     36					   ENDM
+     37
+     38				     XDROP MACRO
+     39					     X
+     40					     POP DX
+     41					     X
+     42					   ENDM
+     43
+     44				     SJMP  MACRO  ADDRS
+     45					     jmp  SHORT	ADDRS
+     46					   ENDM
+     47
+     48				     next  MACRO
+     49					     jmp  _NOP
+     50					   ENDM
+     51
+     52				     num   MACRO n
+     53					     dw	n + n +	80h
+     54					   ENDM
+     55
+     56				     WPUSH MACRO
+     57					    SJMP XCX_PUSH
+Turbo Assembler	 Version 3.2	    12/11/18 17:20:52	    Page 2
+VMF2.asm
+
+
+
+     58					   ENDM
+     59
+     60				     XNEXT MACRO
+     61					    SJMP X_XNEXT
+     62					   ENDM
+     63
+     64				     ;-----------------
+     65
+     66
+     67	      =0100		     FNPAGE= 256
+     68	      =0000		     qqqqq = 0
+     69	      =0000		     ppppp = qqqqq
+     70
+     71				     dstr2   macro   msg,flg
+     72				       local endstr
+     73				       db    endstr-$-1+flg
+     74				       db    msg
+     75				     endstr  label   byte
+     76				       endm
+     77
+     78				     dstr    macro   msg
+     79					  dstr2	msg,0
+     80					     endm
+     81
+     82				     nf	     macro   token
+     83				     ppppp = $
+     84				       dstr2 token,0
+     85				       dw    qqqqq
+     86				     qqqqq = ppppp
+     87				       endm
+     88
+     89				     nfi     macro   token
+     90				     ppppp = $
+     91				       dstr2 token,080h
+     92				       dw    qqqqq
+     93				     qqqqq = ppppp
+     94				       endm
+     95
+     96
+     97	0000			     MyCseg  segment para  use16
+     98					     assume cs:	MyCseg,	 ds: MyCseg, ss: MyCseg
+     99
+    100					     ORG 100H
+    101
+    102	0100			     T	     Label byte
+    103
+    104	      =0000		     T_NOP   =	  ($-T)/2
+    105	0100  02F7r			     DW	  _NOP
+    106	      =0001		     T_EX    =	  ($-T)/2
+    107	0102  03B1r			     DW	  _EX
+    108	      =0002		     T_XCHG  =	  ($-T)/2
+    109	0104  020Er			     DW	  _XCHG
+    110	      =0003		     T_CALL  =	  ($-T)/2
+    111	0106  03BDr			     DW	  _CALL
+    112	      =0004		     T_JUMP  =	  ($-T)/2
+    113	0108  030Ar			     DW	  _JUMP
+    114	      =0005		     T_SCALL =	  ($-T)/2
+Turbo Assembler	 Version 3.2	    12/11/18 17:20:52	    Page 3
+VMF2.asm
+
+
+
+    115	010A  037Dr			     DW	  _SCALL
+    116	      =0006		     T_SJUMP =	  ($-T)/2
+    117	010C  0388r			     DW	  @SJUMP
+    118	      =0007		     T_EXIT  =	  ($-T)/2
+    119	010E  0316r			     DW	  _EXIT
+    120
+    121	      =0008		     T_LOCOUT=	  ($-T)/2
+    122	0110  030Er			     DW	  _LOCOUT
+    123	      =0009		     T_LGN   =	  ($-T)/2
+    124	0112  0222r			     DW	  _LGN
+    125	      =000A		     T_LSN   =	  ($-T)/2
+    126	0114  0228r			     DW	  _LSN
+    127	      =000B		     T_LIN   =	  ($-T)/2
+    128	0116  0231r			     DW	  _LIN
+    129	      =000C		     T_LDN   =	  ($-T)/2
+    130	0118  0237r			     DW	  _LDN
+    131	      =000D		     T_LAN   =	  ($-T)/2
+    132	011A  021Cr			     DW	  _LAN
+    133	      =000E		     T_LADDN =	  ($-T)/2
+    134	011C  0215r			     DW	  _LADDN
+    135	      =000F		     T_LOCIN =	  ($-T)/2
+    136	011E  0253r			     DW	  _LOCIN
+    137
+    138	      =0010		     T_LIT   =	  ($-T)/2
+    139	0120  0244r			     DW	  _LIT
+    140	      =0011		     T_DLIT  =	  ($-T)/2
+    141	0122  03BDr			     DW	  _DLIT
+    142	      =0012		     T_HLIT  =	  ($-T)/2
+    143	0124  032Br			     DW	  _HLIT
+    144	      =0013		     T_LITBM =	  ($-T)/2
+    145	0126  0331r			     DW	  _LITBM
+    146	      =0014		     T_LITB  =	  ($-T)/2
+    147	0128  0334r			     DW	  _LITB
+    148	      =0015		     T_LITB1 =	  ($-T)/2
+    149	012A  03BDr			     DW	  _LITB1
+    150	      =0016		     T_LITB2 =	  ($-T)/2
+    151	012C  03BDr			     DW	  _LITB2
+    152	      =0017		     T_LITB3 =	  ($-T)/2
+    153	012E  03BDr			     DW	  _LITB3
+    154
+    155	      =0018		     T_PUSH  =	  ($-T)/2
+    156	0130  035Br			     DW	  _PUSH
+    157	      =0019		     T_POP   =	  ($-T)/2
+    158	0132  033Br			     DW	  _POP
+    159	      =001A		     T_DUP   =	  ($-T)/2
+    160	0134  02E7r			     DW	  _DUP
+    161	      =001B		     T_DROP  =	  ($-T)/2
+    162	0136  035Cr			     DW	  _DROP
+    163	      =001C		     T_JAT   =	  ($-T)/2
+    164	0138  031Dr			     DW	  _JAT
+    165	      =001D		     T_RAT   =	  ($-T)/2
+    166	013A  0322r			     DW	  _RAT
+    167	      =001E		     T_OVER  =	  ($-T)/2
+    168	013C  03BDr			     DW	  _OVER
+    169	      =001F		     T_SWAP  =	  ($-T)/2
+    170	013E  03BDr			     DW	  _SWAP
+    171
+Turbo Assembler	 Version 3.2	    12/11/18 17:20:52	    Page 4
+VMF2.asm
+
+
+
+    172	      =0020		     T_CONT  =	  ($-T)/2
+    173	0140  03ABr			     DW	  _CONT
+    174	      =0021		     T_TIMES =	  ($-T)/2
+    175	0142  03A5r			     DW	  _TIMES
+    176	      =0022		     T_RETF  =	  ($-T)/2
+    177	0144  023Dr			     DW	  _RETF
+    178	      =0023		     T_FROMF =	  ($-T)/2
+    179	0146  0242r			     DW	  _FROMF
+    180	      =0024		     T_IFM   =	  ($-T)/2
+    181	0148  036Br			     DW	  _IFM
+    182	      =0025		     T_IFND  =	  ($-T)/2
+    183	014A  0371r			     DW	  _IFND
+    184	      =0026		     T_NEXT  =	  ($-T)/2
+    185	014C  0383r			     DW	  _NEXT
+    186	      =0027		     T_FOR   =	  ($-T)/2
+    187	014E  0360r			     DW	  _FOR
+    188
+    189	      =0028		     T_NOT   =	  ($-T)/2
+    190	0150  02C7r			     DW	  _NOT
+    191	      =0029		     T_XOR   =	  ($-T)/2
+    192	0152  02E1r			     DW	  _XOR
+    193	      =002A		     T_AND   =	  ($-T)/2
+    194	0154  02D5r			     DW	  _AND
+    195	      =002B		     T_PL2_DIV =    ($-T)/2
+    196	0156  03BDr			     DW	  _PL2_DIV
+    197	      =002C		     T_PLUS  =	  ($-T)/2
+    198	0158  03BDr			     DW	  _PLUS
+    199	      =002D		     T_MINUS =	  ($-T)/2
+    200	015A  03BDr			     DW	  _MINUS
+    201	      =002E		     T_UMUL  =	  ($-T)/2
+    202	015C  02B3r			     DW	  _UMUL
+    203	      =002F		     T_UMSLSM =	   ($-T)/2
+    204	015E  02A4r			     DW	  _UMSLSM
+    205
+    206	      =0030		     T_GETA   =	   ($-T)/2
+    207	0160  0319r			     DW	   _GETA
+    208	      =0031		     T_SETA   =	   ($-T)/2
+    209	0162  0348r			     DW	   _SETA
+    210	      =0032		     T_AT     =	   ($-T)/2
+    211	0164  03BDr			     DW	   _AT
+    212	      =0033		     T_ATP    =	   ($-T)/2
+    213	0166  033Er			     DW	   _ATP
+    214	      =0034		     T_TO     =	   ($-T)/2
+    215	0168  0351r			     DW	   _TO
+    216	      =0035		     T_TOP    =	   ($-T)/2
+    217	016A  0355r			     DW	   _TOP
+    218	      =0036		     T_CATP   =	   ($-T)/2
+    219	016C  03BDr			     DW	   _CATP
+    220	      =0037		     T_CTOP   =	   ($-T)/2
+    221	016E  034Cr			     DW	   _CTOP
+    222
+    223	      =0038		     T_ULESS? =	   ($-T)/2
+    224	0170  0398r			     DW	   _ULESS?
+    225	      =0039		     T_ZLESS? =	   ($-T)/2
+    226	0172  039Fr			     DW	   _ZLESS?
+    227	      =003A		     T_ZERO?  =	   ($-T)/2
+    228	0174  0393r			     DW	   _ZERO?
+Turbo Assembler	 Version 3.2	    12/11/18 17:20:52	    Page 5
+VMF2.asm
+
+
+
+    229	      =003B		     T_PLUS1  =	   ($-T)/2
+    230	0176  02C3r			     DW	   _PLUS1
+    231	      =003C		     T_PLUS2  =	   ($-T)/2
+    232	0178  02C2r			     DW	   _PLUS2
+    233	      =003D		     T_GETV2  =	   ($-T)/2
+    234	017A  0279r			     DW	   _GETV2
+    235	      =003E		     T_SETV1  =	   ($-T)/2
+    236	017C  03B7r			     DW	   _SETV1
+    237	      =003F		     T_VAR    =	   ($-T)/2
+    238	017E  029Fr			     DW	   XVAR
+    239
+    240	0180  0000 0000	0200r	  +	     DW	  0,0,_RETURN,_COUNT, 0,0,0,0
+    241	      0209r 0000 0000 0000+
+    242	      0000
+    243	0190  0000 0000	0000 0000 +	     DW	  0,0,0,0,	 0,0,0,0
+    244	      0000 0000	0000 0000
+    245	01A0  0000 0000	0000 0000 +	     DW	  0,0,0,0,	 0,0,0,0
+    246	      0000 0000	0000 0000
+    247	01B0  0000 0000	0000 0000 +	     DW	  0,0,0,0,	 0,0,0,0
+    248	      0000 0000	0000 0000
+    249	01C0  0000 0000	0000 0000 +	     DW	  0,0,0,0,	 0,0,0,0
+    250	      0000 0000	0000 0000
+    251	01D0  0000 0000	0000 0000 +	     DW	  0,0,0,0,	 0,0,0,0
+    252	      0000 0000	0000 0000
+    253	01E0  0000 0000	0000 0000 +	     DW	  0,0,0,0,	 0,0,0,0
+    254	      0000 0000	0000 0000
+    255	01F0  0000 0000	0000 0000 +	     DW	  0,0,0,0,	 0,0,0,0
+    256	      0000 0000	0000 0000
+    257
+    258	0200  08 07		     _RETURN DB	  T_LOCOUT,T_EXIT
+    259	0202  31 36 07		     _CFETCH DB	  T_SETA,T_CATP,T_EXIT
+    260	0205  31 36 30 07	     _CFETCHP  DB T_SETA,T_CATP,T_GETA,T_EXIT
+    261	0209  31 36 30 1F 07	     _COUNT  DB	  T_SETA,T_CATP,T_GETA,T_SWAP,T_EXIT
+    262
+    263	020E  59		     _XCHG:  POP   CX
+    264	020F  52			     PUSH  DX
+    265	0210  8B D1			     MOV   DX,CX
+    266					     NEXT
+1   267	0212  E9 00E2			     jmp  _NOP
+    268	0215  E8 006B		     _LADDN: CALL  LCLS
+    269	0218  01 13			     ADD   [BP+DI],DX
+    270					     SJMP  _XDROP
+1   271	021A  EB 11			     jmp  SHORT	_XDROP
+    272	021C  E8 0061		     _LAN:   CALL  LCLS_DP
+    273	021F  8D 13			     LEA   DX,[BP+DI]
+    274	0221  C3			     RET
+    275	0222  E8 005B		     _LGN:   CALL  LCLS_DP
+    276	0225  8B 13			     MOV   DX,[BP+DI]
+    277	0227  C3			     RET
+    278	0228  E8 0058		     _LSN:   CALL  LCLS
+    279	022B  89 13			     MOV   [BP+DI],DX
+    280	022D			     _XDROP: XDROP
+1   281					     X
+2   282	022D  94			     XCHG  AX,SP
+1   283	022E  5A			     POP DX
+1   284					     X
+2   285	022F  94			     XCHG  AX,SP
+Turbo Assembler	 Version 3.2	    12/11/18 17:20:52	    Page 6
+VMF2.asm
+
+
+
+    286	0230  C3			     RET
+    287	0231  E8 004F		     _LIN:   CALL  LCLS
+    288	0234  FF 03			     INC   PW [BP+DI]
+    289	0236  C3			     RET
+    290	0237  E8 0049		     _LDN:   CALL  LCLS
+    291	023A  FF 0B			     DEC   PW [BP+DI]
+    292	023C  C3			     RET
+    293	023D  8B CB		     _RETF:  MOV   CX,BX
+    294	023F  5B			     POP   BX
+    295	0240  FF E1			     JMP   CX
+    296
+    297	0242  FF E3		     _FROMF: JMP  BX	     ; 31
+    298
+    299	0244  E8 0045		     _LIT:   CALL  LCLS_
+    300	0247			     XLIT:   XDUP
+1   301					     X
+2   302	0247  94			     XCHG  AX,SP
+1   303	0248  52			     PUSH  DX
+1   304					     X
+2   305	0249  94			     XCHG  AX,SP
+    306	024A  8B 17			     MOV  DX,[BX]
+    307	024C  43			     INC  BX
+    308	024D  43			     INC  BX
+    309	024E  C3			     RET
+    310	024F  53		     _FUNC:  PUSH BX
+    311	0250  8D 5D 02			     LEA  BX,[DI+2]
+    312	0253  E8 FFF1		     _LOCIN: CALL XLIT	     ; PARAMETTERS
+    313	0256  33 C9			     XOR  CX,CX
+    314	0258  55			     PUSH BP	     ; & TEMPORARY
+    315	0259  8B EC			     MOV  BP,SP	     ; LOCAL
+    316	025B  86 CE			     XCHG CL,DH	     ; VARIABLES
+    317	025D  33 FF			     XOR  DI,DI
+    318	025F  2B F9			     SUB  DI,CX
+    319	0261  74 0C			     JE	  @@2
+    320	0263  03 FF			     ADD  DI,DI
+    321	0265  8D 3B			     LEA  DI,[DI+BP]
+    322	0267  8B E7			     MOV  SP,DI
+    323	0269  56			     PUSH SI
+    324	026A  96			     XCHG AX,SI
+    325	026B  F3> A5			     REP  MOVSW
+    326	026D  96			     XCHG AX,SI
+    327	026E  5E			     POP  SI
+    328	026F  87 CA		     @@2:    XCHG CX,DX
+    329	0271  E3 03			     JCXZ @@9
+    330	0273  52		     @@3:    PUSH DX
+    331	0274  E2 FD			     LOOP @@3
+    332	0276  E9 00E3		     @@9:    JMP  _DROP
+    333
+    334	0279  AF		     _GETV2: SCASW
+    335	027A  AF			     SCASW
+    336	027B  8B 4D 02		     _GETV:  MOV   CX,[DI+2]  ;	CONSTANTS
+    337					     WPUSH
+1   338					    SJMP XCX_PUSH
+2   339	027E  EB 72			     jmp  SHORT	XCX_PUSH
+    340
+    341	0280			     LCLS_DP:XDUP
+1   342					     X
+Turbo Assembler	 Version 3.2	    12/11/18 17:20:52	    Page 7
+VMF2.asm
+
+
+
+2   343	0280  94			     XCHG  AX,SP
+1   344	0281  52			     PUSH  DX
+1   345					     X
+2   346	0282  94			     XCHG  AX,SP
+    347	0283  8B 3F		     LCLS:   MOV  DI,[BX]
+    348	0285  81 CF FF00		     OR	  DI,-256
+    349	0289  D1 E7			     SHL  DI,1
+    350	028B  43			     INC  BX
+    351	028C  59		     LCLS_:  POP  CX
+    352	028D  FF D1			     CALL CX
+    353					     SJMP _NOP
+1   354	028F  EB 66			     jmp  SHORT	_NOP
+    355	0291			     PRE_DR: X
+1   356	0291  94			     XCHG  AX,SP
+    357	0292  5F			     POP  DI
+    358					     X
+1   359	0293  94			     XCHG  AX,SP
+    360	0294  EB F6			     JMP  LCLS_
+    361
+    362	0296  AF			     SCASW
+    363	0297  AF			     SCASW
+    364	0298  59		     XDOES:  POP   CX	      ;	(DOES
+    365	0299  53			     PUSH  BX
+    366	029A  8B D9			     MOV   BX,CX
+    367	029C  C9			     DB	   0C9H
+    368	029D  AF			     SCASW
+    369	029E  AF			     SCASW
+    370	029F  8D 4D 02		     XVAR:   LEA   CX,[DI+2]  ;	VARIABLES
+    371					     WPUSH
+1   372					    SJMP XCX_PUSH
+2   373	02A2  EB 4E			     jmp  SHORT	XCX_PUSH
+    374
+    375	02A4			     _UMSLSM:X		     ; UM/MOD
+1   376	02A4  94			     XCHG  AX,SP
+    377	02A5  5F			     POP  DI
+    378	02A6  87 D7			     XCHG DX,DI
+    379	02A8  59			     POP  CX
+    380					     XC
+1   381	02A9  91			     XCHG  AX,CX
+    382	02AA  3B D7			     CMP  DX,DI
+    383	02AC  73 02			     JNB  @@1
+    384	02AE  F7 F7			     DIV  DI
+    385	02B0  92		     @@1:    XCHG DX,AX
+    386					     SJMP X_PNEXT
+1   387	02B1  EB 05			     jmp  SHORT	X_PNEXT
+    388	02B3			     _UMUL:  X		     ; UM*
+1   389	02B3  94			     XCHG  AX,SP
+    390	02B4  59			     POP  CX
+    391					     XC
+1   392	02B5  91			     XCHG  AX,CX
+    393	02B6  F7 E2			     MUL  DX
+    394	02B8  50		     X_PNEXT:PUSH AX
+    395	02B9			     X_CNEXT:XC
+1   396	02B9  91			     XCHG  AX,CX
+    397					     SJMP  X_XNEXT
+1   398	02BA  EB 3A			     jmp  SHORT	X_XNEXT
+    399
+Turbo Assembler	 Version 3.2	    12/11/18 17:20:52	    Page 8
+VMF2.asm
+
+
+
+    400	02BC  D1 E2		     xqary:  shl  Dx,1
+    401	02BE  D1 E2		     XWARY:  shl  DX,1
+    402	02C0  03 D7		     XBARY:  ADD  DX,DI
+    403
+    404	02C2  42		     _PLUS2: INC  DX	     ; 2+
+    405	02C3  42		     _PLUS1: INC  DX	     ; 1+    ; SJMP _NOP
+    406					     SJMP _NOP
+1   407	02C4  EB 31			     jmp  SHORT	_NOP
+    408
+    409	02C6  4A		     _NEG:   DEC  DX
+    410	02C7  F7 D2		     _NOT:   NOT  DX
+    411					     SJMP _NOP
+1   412	02C9  EB 2C			     jmp  SHORT	_NOP
+    413
+    414	02CB			     _PL2_DV:X
+1   415	02CB  94			     XCHG  AX,SP
+    416	02CC  59			     POP  CX
+    417	02CD  03 D1			     ADD  DX,CX
+    418	02CF  52			     PUSH DX
+    419					     X
+1   420	02D0  94			     XCHG  AX,SP
+    421	02D1  D1 DA			     RCR  DX,1
+    422					     SJMP _NOP
+1   423	02D3  EB 22			     jmp  SHORT	_NOP
+    424
+    425	02D5			     _AND:   X	   ; AND
+1   426	02D5  94			     XCHG  AX,SP
+    427	02D6  5F			     POP   DI
+    428	02D7  23 D7			     AND  DX,DI
+    429					     SJMP X_XNEXT
+1   430	02D9  EB 1B			     jmp  SHORT	X_XNEXT
+    431
+    432	02DB			     _OR:    X	   ; OR
+1   433	02DB  94			     XCHG  AX,SP
+    434	02DC  5F			     POP   DI
+    435	02DD  0B D7			     OR	  DX,DI
+    436					     SJMP X_XNEXT
+1   437	02DF  EB 15			     jmp  SHORT	X_XNEXT
+    438
+    439	02E1			     _XOR:   X	   ; XOR
+1   440	02E1  94			     XCHG  AX,SP
+    441	02E2  5F			     POP   DI
+    442	02E3  33 D7			     XOR  DX,DI
+    443					     SJMP X_XNEXT
+1   444	02E5  EB 0F			     jmp  SHORT	X_XNEXT
+    445
+    446	02E7			     _DUP:   X
+1   447	02E7  94			     XCHG  AX,SP
+    448	02E8  52			     PUSH DX
+    449					     SJMP X_XNEXT
+1   450	02E9  EB 0B			     jmp  SHORT	X_XNEXT
+    451
+    452	02EB  5F		     _CATRP: POP  DI
+    453	02EC  8A 0D			     MOV  CL,[DI]
+    454	02EE  47			     INC  DI
+    455	02EF  57			     PUSH DI
+    456
+Turbo Assembler	 Version 3.2	    12/11/18 17:20:52	    Page 9
+VMF2.asm
+
+
+
+    457	02F0  32 ED		     XCL_PUS:XOR  CH,CH
+    458
+    459	02F2			     XCX_PUSH:	X
+1   460	02F2  94			     XCHG  AX,SP
+    461	02F3  52		     XD_PUSH:PUSH DX
+    462
+    463	02F4  8B D1		     XD_MOVE:MOV  DX,CX
+    464
+    465	02F6			     X_XNEXT:X
+1   466	02F6  94			     XCHG  AX,SP
+    467
+    468	02F7  8B 0F		     _NOP:   MOV  CX,[BX]    ; NOP
+    469	02F9  43			     INC  BX
+    470	02FA  D0 E1		     X_next2:SHL  CL,1
+    471	02FC  72 06			     JC	  X_DO_TOK
+    472	02FE  B5 01			     MOV  CH,FNPAGE/256
+    473	0300  8B F9		     X_EXI:  MOV  DI,CX
+    474	0302  FF 25			     jmp  pw [di]
+    475
+    476	0304			     X_DO_TOK:
+    477					     ;MOV  CH,[BX]
+    478	0304  43			     INC  BX
+    479	0305  53			     PUSH BX
+    480	0306  8B D9			     MOV  BX,CX
+    481	0308  EB ED			     JMP  _NOP
+    482
+    483	030A  8B 1F		     _JUMP:  MOV  BX,[BX]    ; (JUMP
+    484					     NEXT
+1   485	030C  EB E9			     jmp  _NOP
+    486
+    487	030E			     BOOT_REGS:
+    488
+    489	030E  8B E5		     _LOCOUT:MOV  SP,BP	     ; /LOC
+    490	0310  5D			     POP  BP
+    491					     SJMP _NOP
+1   492	0311  EB E4			     jmp  SHORT	_NOP
+    493
+    494	0313			     _dropex:xdrop
+1   495					     X
+2   496	0313  94			     XCHG  AX,SP
+1   497	0314  5A			     POP DX
+1   498					     X
+2   499	0315  94			     XCHG  AX,SP
+    500	0316  5B		     _EXIT:  POP  BX	     ; EXIT
+    501					     SJMP _NOP
+1   502	0317  EB DE			     jmp  SHORT	_NOP
+    503
+    504	0319  8B CE		     _GETA:  MOV  CX,SI	     ; A@
+    505					     WPUSH
+1   506					    SJMP XCX_PUSH
+2   507	031B  EB D5			     jmp  SHORT	XCX_PUSH
+    508
+    509	031D  5F		     _JAT:   POP  DI	     ; J
+    510	031E  59			     POP  CX
+    511	031F  51			     PUSH CX
+    512	0320  57			     PUSH DI
+    513					     XSKIPDI
+Turbo Assembler	 Version 3.2	    12/11/18 17:20:52	    Page 10
+VMF2.asm
+
+
+
+1   514	0321  BF			     DB	0BFH
+    515
+    516	0322  59		     _RAT:   POP  CX	     ; R@
+    517	0323  51			     PUSH CX
+    518					     WPUSH
+1   519					    SJMP XCX_PUSH
+2   520	0324  EB CC			     jmp  SHORT	XCX_PUSH
+    521
+    522	0326  92		     _B2W:   XCHG AX,DX
+    523	0327  98			     CBW
+    524	0328  92			     XCHG AX,DX
+    525					     NEXT
+1   526	0329  EB CC			     jmp  _NOP
+    527
+    528	032B  B1 00		     _HLIT:  MOV  CL,0
+    529	032D  8A 2F			     MOV  CH,[BX]
+    530					     SJMP LTBZ
+1   531	032F  EB 07			     jmp  SHORT	LTBZ
+    532
+    533	0331  B5 FF		     _LITBM: MOV  CH,-1	     ; NBLIT
+    534					     XSKIPDI
+1   535	0333  BF			     DB	0BFH
+    536
+    537	0334  B5 00		     _LITB:  MOV  CH,0
+    538	0336  8A 0F			     MOV  CL,[BX]    ; BLIT
+    539	0338  43		     LTBZ:   INC  BX
+    540					     WPUSH
+1   541					    SJMP XCX_PUSH
+2   542	0339  EB B7			     jmp  SHORT	XCX_PUSH
+    543
+    544	033B  59		     _POP:   POP  CX	     ; POP
+    545					     WPUSH
+1   546					    SJMP XCX_PUSH
+2   547	033C  EB B4			     jmp  SHORT	XCX_PUSH
+    548
+    549	033E  8B FA		     _ATP:   MOV  DI,DX	     ;	@+
+    550					     X
+1   551	0340  94			     XCHG  AX,SP
+    552	0341  FF 35			     PUSH PW [DI]
+    553					     X
+1   554	0343  94			     XCHG  AX,SP
+    555	0344  42			     INC  DX
+    556	0345  42			     INC  DX
+    557					     NEXT
+1   558	0346  EB AF			     jmp  _NOP
+    559	0348  8B F2		     _SETA:  MOV   SI,DX      ;	A!
+    560					     SJMP   _DROP
+1   561	034A  EB 10			     jmp  SHORT	_DROP
+    562	034C  88 14		     _CTOP:  MOV   [SI],DL    ;	C!A+
+    563	034E  46			     INC   SI
+    564					     SJMP   _DROP
+1   565	034F  EB 0B			     jmp  SHORT	_DROP
+    566	0351  89 14		     _TO:    MOV   [SI],DX    ;	 !A
+    567					     SJMP   _DROP
+1   568	0353  EB 07			     jmp  SHORT	_DROP
+    569	0355  89 14		     _TOP:   MOV   [SI],DX    ;	!A+
+    570	0357  46			     INC   SI
+Turbo Assembler	 Version 3.2	    12/11/18 17:20:52	    Page 11
+VMF2.asm
+
+
+
+    571	0358  46			     INC   SI
+    572					     SJMP   _DROP
+1   573	0359  EB 01			     jmp  SHORT	_DROP
+    574	035B  52		     _PUSH:  PUSH  DX	      ;	PUSH
+    575	035C			     _DROP:  X		     ; DROP
+1   576	035C  94			     XCHG  AX,SP
+    577	035D  5A			     POP   DX
+    578					     XNEXT
+1   579					    SJMP X_XNEXT
+2   580	035E  EB 96			     jmp  SHORT	X_XNEXT
+    581	0360  8B CA		     _FOR:   MOV   CX,DX
+    582					     XDROP
+1   583					     X
+2   584	0362  94			     XCHG  AX,SP
+1   585	0363  5A			     POP DX
+1   586					     X
+2   587	0364  94			     XCHG  AX,SP
+    588	0365  49			     DEC   CX
+    589	0366  7C 20			     JL	   @SJUMP
+    590	0368  51			     PUSH  CX
+    591					     SJMP  @SKIP
+1   592	0369  EB 24			     jmp  SHORT	@SKIP
+    593	036B  0B D2		     _IFM:   OR	   DX,DX      ;	(-IF
+    594	036D  7D 20			     JNL   @SKIP
+    595					     SJMP  @SJUMP
+1   596	036F  EB 17			     jmp  SHORT	@SJUMP
+    597	0371  0B D2		     _IFND:  OR	   DX,DX      ;	(#IF NON DROP
+    598	0373  74 13			     JZ	   @SJUMP
+    599					     SJMP  @SKIP
+1   600	0375  EB 18			     jmp  SHORT	@SKIP
+    601	0377  33 C9		     _SKIPB: XOR   CX,CX     ; (SKIPB
+    602	0379  8A 0F			     MOV   CL,[BX]
+    603					     SJMP  WSKIP
+1   604	037B  EB 10			     jmp  SHORT	WSKIP
+    605	037D  8D 4F 01		     _SCALL: LEA   CX,[BX+1]
+    606	0380  51			     PUSH  CX
+    607					     SJMP  @SJUMP
+1   608	0381  EB 05			     jmp  SHORT	@SJUMP
+    609	0383  59		     _next:  POP   CX	     ; (NEXT
+    610	0384  E3 09			     JCXZ  @SKIP
+    611	0386  49			     DEC   CX
+    612	0387  51			     PUSH  CX
+    613	0388  8A 0F		     @SJUMP: MOV   CL,[BX]   ; (SJUMP
+    614					     XC
+1   615	038A  91			     XCHG  AX,CX
+    616	038B  98			     CBW
+    617					     XC
+1   618	038C  91			     XCHG  AX,CX
+    619	038D  03 D9		     WSKIP:  ADD   BX,CX
+    620	038F  43		     @SKIP:  INC   BX
+    621	0390			     @_1:    NEXT
+1   622	0390  E9 FF64			     jmp  _NOP
+    623
+    624	0393  83 EA 01		     _ZERO?: SUB   DX,1	      ;	0=
+    625					     SJMP _CARRY
+1   626	0396  EB 09			     jmp  SHORT	_CARRY
+    627	0398			     _ULESS?:X		     ; U<
+Turbo Assembler	 Version 3.2	    12/11/18 17:20:52	    Page 12
+VMF2.asm
+
+
+
+1   628	0398  94			     XCHG  AX,SP
+    629	0399  59			     POP   CX
+    630	039A  51			     PUSH  CX
+    631					     X
+1   632	039B  94			     XCHG  AX,SP
+    633	039C  2B CA			     SUB   CX,DX
+    634					     XSKIPDI
+1   635	039E  BF			     DB	0BFH
+    636	039F  D1 E2		     _ZLESS?:SHL   DX,1	      ;	0<
+    637	03A1  1B D2		     _CARRY: SBB   DX,DX
+    638					     SJMP  @_1
+1   639	03A3  EB EB			     jmp  SHORT	@_1
+    640
+    641	03A5  4A		     _TIMES: DEC   DX
+    642	03A6  7D 03			     JNL   _CONT
+    643	03A8  5B			     POP   BX
+    644	03A9  EB B1			     JMP   _DROP
+    645
+    646	03AB  8D 4F FF		     _CONT:  LEA   CX,[BX-1]
+    647	03AE  51			     PUSH  CX
+    648					     SJMP  @_1
+1   649	03AF  EB DF			     jmp  SHORT	@_1
+    650
+    651	03B1			     X4TH:
+    652	03B1  59		     _EX:    POP   CX	      ;	(EX
+    653	03B2  53		     XCALL:  PUSH  BX
+    654	03B3  8B D9		     XGOTO:  MOV   BX,CX
+    655					     SJMP  @_1
+1   656	03B5  EB D9			     jmp  SHORT	@_1
+    657
+    658	03B7  AF		     _SETV1: SCASW
+    659	03B8  89 55 02		     _SETV:  MOV   [DI+2],DX	; SETTERS
+    660	03BB  EB 9F			     JMP   _DROP
+    661
+    662	03BD			     _DLIT:
+    663	03BD			     _LITB1:
+    664	03BD			     _LITB2:
+    665	03BD			     _LITB3:
+    666	03BD			     _OVER:
+    667	03BD			     _SWAP:
+    668	03BD			     _PL2_DIV:
+    669	03BD			     _PLUS:
+    670	03BD			     _MINUS:
+    671	03BD			     _AT:
+    672	03BD			     _CATP:
+    673	03BD			     _CALL:
+    674
+    675	03BD			     INIT_REGS:
+    676	      =MYCSEG:03BD	     DtoP=$
+    677	      =0000		     lastw = ppppp
+    678
+    679
+    680				     ;	     db	  tbp	   ;brkpt
+    681	03BD			     MyCseg  ends
+    682					     end  T
+Turbo Assembler	 Version 3.2	    12/11/18 17:20:52	    Page 13
+Symbol Table
+
+
+
+
+Symbol Name		Type   Value			   Cref	(defined at #)
+
+??DATE			Text   "12/11/18"
+??FILENAME		Text   "VMF2	"
+??TIME			Text   "17:20:52"
+??VERSION		Number 0314
+@@1			Near   MYCSEG:02B0		   383	#385
+@@2			Near   MYCSEG:026F		   319	#328
+@@3			Near   MYCSEG:0273		   #330	 331
+@@9			Near   MYCSEG:0276		   329	#332
+@CPU			Text   0101H
+@CURSEG			Text   MYCSEG			   #97
+@FILENAME		Text   VMF2
+@SJUMP			Near   MYCSEG:0388		   117	589  596  598  608  #613
+@SKIP			Near   MYCSEG:038F		   592	594  600  610  #620
+@WORDSIZE		Text   2			   #97
+@_1			Near   MYCSEG:0390		   #621	 639  649  656
+BOOT_REGS		Near   MYCSEG:030E		   #487
+DTOP			Number MYCSEG:03BD		   #676
+FNPAGE			Number 0100			   #67	472
+INIT_REGS		Near   MYCSEG:03BD		   #675
+LASTW			Number 0000			   #677
+LCLS			Near   MYCSEG:0283		   268	278  287  290  #347
+LCLS_			Near   MYCSEG:028C		   299	#351  360
+LCLS_DP			Near   MYCSEG:0280		   272	275  #341
+LTBZ			Near   MYCSEG:0338		   531	#539
+PB			Text   byte  ptr		   #10
+PD			Text   dword ptr		   #8
+PPPPP			Number 0000			   #69	677
+PRE_DR			Near   MYCSEG:0291		   #355
+PW			Text   word  ptr		   #9  288  291	 474  552
+QQQQQ			Number 0000			   #68	69
+T			Byte   MYCSEG:0100		   #102	 104  106  108	110  112  114  116  118	 121  123  125	127  129  +
+							   131	133  135  138  140  142	 144  146  148	150  152  155  157  159	  +
+							   161	163  165  167  169  172	 174  176  178	180  182  184  186  189	  +
+							   191	193  195  197  199  201	 203  206  208	210  212  214  216  218	  +
+							   220	223  225  227  229  231	 233  235  237	682
+T_AND			Number 002A			   #193
+T_AT			Number 0032			   #210
+T_ATP			Number 0033			   #212
+T_CALL			Number 0003			   #110
+T_CATP			Number 0036			   #218	 259  260  261
+T_CONT			Number 0020			   #172
+T_CTOP			Number 0037			   #220
+T_DLIT			Number 0011			   #140
+T_DROP			Number 001B			   #161
+T_DUP			Number 001A			   #159
+T_EX			Number 0001			   #106
+T_EXIT			Number 0007			   #118	 258  259  260	261
+T_FOR			Number 0027			   #186
+T_FROMF			Number 0023			   #178
+T_GETA			Number 0030			   #206	 260  261
+T_GETV2			Number 003D			   #233
+T_HLIT			Number 0012			   #142
+T_IFM			Number 0024			   #180
+T_IFND			Number 0025			   #182
+Turbo Assembler	 Version 3.2	    12/11/18 17:20:52	    Page 14
+Symbol Table
+
+
+
+T_JAT			Number 001C			   #163
+T_JUMP			Number 0004			   #112
+T_LADDN			Number 000E			   #133
+T_LAN			Number 000D			   #131
+T_LDN			Number 000C			   #129
+T_LGN			Number 0009			   #123
+T_LIN			Number 000B			   #127
+T_LIT			Number 0010			   #138
+T_LITB			Number 0014			   #146
+T_LITB1			Number 0015			   #148
+T_LITB2			Number 0016			   #150
+T_LITB3			Number 0017			   #152
+T_LITBM			Number 0013			   #144
+T_LOCIN			Number 000F			   #135
+T_LOCOUT		Number 0008			   #121	 258
+T_LSN			Number 000A			   #125
+T_MINUS			Number 002D			   #199
+T_NEXT			Number 0026			   #184
+T_NOP			Number 0000			   #104
+T_NOT			Number 0028			   #189
+T_OVER			Number 001E			   #167
+T_PL2_DIV		Number 002B			   #195
+T_PLUS			Number 002C			   #197
+T_PLUS1			Number 003B			   #229
+T_PLUS2			Number 003C			   #231
+T_POP			Number 0019			   #157
+T_PUSH			Number 0018			   #155
+T_RAT			Number 001D			   #165
+T_RETF			Number 0022			   #176
+T_SCALL			Number 0005			   #114
+T_SETA			Number 0031			   #208	 259  260  261
+T_SETV1			Number 003E			   #235
+T_SJUMP			Number 0006			   #116
+T_SWAP			Number 001F			   #169	 261
+T_TIMES			Number 0021			   #174
+T_TO			Number 0034			   #214
+T_TOP			Number 0035			   #216
+T_ULESS?		Number 0038			   #223
+T_UMSLSM		Number 002F			   #203
+T_UMUL			Number 002E			   #201
+T_VAR			Number 003F			   #237
+T_XCHG			Number 0002			   #108
+T_XOR			Number 0029			   #191
+T_ZERO?			Number 003A			   #227
+T_ZLESS?		Number 0039			   #225
+WSKIP			Near   MYCSEG:038D		   604	#619
+X4TH			Near   MYCSEG:03B1		   #651
+XBARY			Near   MYCSEG:02C0		   #402
+XCALL			Near   MYCSEG:03B2		   #653
+XCL_PUS			Near   MYCSEG:02F0		   #457
+XCX_PUSH		Near   MYCSEG:02F2		   339	373  #459  507	520  542  547
+XDOES			Near   MYCSEG:0298		   #364
+XD_MOVE			Near   MYCSEG:02F4		   #463
+XD_PUSH			Near   MYCSEG:02F3		   #461
+XGOTO			Near   MYCSEG:03B3		   #654
+XLIT			Near   MYCSEG:0247		   #300	 312
+XQARY			Near   MYCSEG:02BC		   #400
+Turbo Assembler	 Version 3.2	    12/11/18 17:20:52	    Page 15
+Symbol Table
+
+
+
+XVAR			Near   MYCSEG:029F		   238	#370
+XWARY			Near   MYCSEG:02BE		   #401
+X_CNEXT			Near   MYCSEG:02B9		   #395
+X_DO_TOK		Near   MYCSEG:0304		   471	#476
+X_EXI			Near   MYCSEG:0300		   #473
+X_NEXT2			Near   MYCSEG:02FA		   #470
+X_PNEXT			Near   MYCSEG:02B8		   387	#394
+X_XNEXT			Near   MYCSEG:02F6		   398	430  437  444  450  #465  580
+_AND			Near   MYCSEG:02D5		   194	#425
+_AT			Near   MYCSEG:03BD		   211	#671
+_ATP			Near   MYCSEG:033E		   213	#549
+_B2W			Near   MYCSEG:0326		   #522
+_CALL			Near   MYCSEG:03BD		   111	#673
+_CARRY			Near   MYCSEG:03A1		   626	#637
+_CATP			Near   MYCSEG:03BD		   219	#672
+_CATRP			Near   MYCSEG:02EB		   #452
+_CFETCH			Byte   MYCSEG:0202		   #259
+_CFETCHP		Byte   MYCSEG:0205		   #260
+_CONT			Near   MYCSEG:03AB		   173	642  #646
+_COUNT			Byte   MYCSEG:0209		   240	#261
+_CTOP			Near   MYCSEG:034C		   221	#562
+_DLIT			Near   MYCSEG:03BD		   141	#662
+_DROP			Near   MYCSEG:035C		   162	332  561  565  568  573	 #575  644  660
+_DROPEX			Near   MYCSEG:0313		   #494
+_DUP			Near   MYCSEG:02E7		   160	#446
+_EX			Near   MYCSEG:03B1		   107	#652
+_EXIT			Near   MYCSEG:0316		   119	#500
+_FOR			Near   MYCSEG:0360		   187	#581
+_FROMF			Near   MYCSEG:0242		   179	#297
+_FUNC			Near   MYCSEG:024F		   #310
+_GETA			Near   MYCSEG:0319		   207	#504
+_GETV			Near   MYCSEG:027B		   #336
+_GETV2			Near   MYCSEG:0279		   234	#334
+_HLIT			Near   MYCSEG:032B		   143	#528
+_IFM			Near   MYCSEG:036B		   181	#593
+_IFND			Near   MYCSEG:0371		   183	#597
+_JAT			Near   MYCSEG:031D		   164	#509
+_JUMP			Near   MYCSEG:030A		   113	#483
+_LADDN			Near   MYCSEG:0215		   134	#268
+_LAN			Near   MYCSEG:021C		   132	#272
+_LDN			Near   MYCSEG:0237		   130	#290
+_LGN			Near   MYCSEG:0222		   124	#275
+_LIN			Near   MYCSEG:0231		   128	#287
+_LIT			Near   MYCSEG:0244		   139	#299
+_LITB			Near   MYCSEG:0334		   147	#537
+_LITB1			Near   MYCSEG:03BD		   149	#663
+_LITB2			Near   MYCSEG:03BD		   151	#664
+_LITB3			Near   MYCSEG:03BD		   153	#665
+_LITBM			Near   MYCSEG:0331		   145	#533
+_LOCIN			Near   MYCSEG:0253		   136	#312
+_LOCOUT			Near   MYCSEG:030E		   122	#489
+_LSN			Near   MYCSEG:0228		   126	#278
+_MINUS			Near   MYCSEG:03BD		   200	#670
+_NEG			Near   MYCSEG:02C6		   #409
+_NEXT			Near   MYCSEG:0383		   185	#609
+_NOP			Near   MYCSEG:02F7		   105	267  354  407  412  423	 #468  481  485	 492  502  526	558  622
+_NOT			Near   MYCSEG:02C7		   190	#410
+Turbo Assembler	 Version 3.2	    12/11/18 17:20:52	    Page 16
+Symbol Table
+
+
+
+_OR			Near   MYCSEG:02DB		   #432
+_OVER			Near   MYCSEG:03BD		   168	#666
+_PL2_DIV		Near   MYCSEG:03BD		   196	#668
+_PL2_DV			Near   MYCSEG:02CB		   #414
+_PLUS			Near   MYCSEG:03BD		   198	#669
+_PLUS1			Near   MYCSEG:02C3		   230	#405
+_PLUS2			Near   MYCSEG:02C2		   232	#404
+_POP			Near   MYCSEG:033B		   158	#544
+_PUSH			Near   MYCSEG:035B		   156	#574
+_RAT			Near   MYCSEG:0322		   166	#516
+_RETF			Near   MYCSEG:023D		   177	#293
+_RETURN			Byte   MYCSEG:0200		   240	#258
+_SCALL			Near   MYCSEG:037D		   115	#605
+_SETA			Near   MYCSEG:0348		   209	#559
+_SETV			Near   MYCSEG:03B8		   #659
+_SETV1			Near   MYCSEG:03B7		   236	#658
+_SKIPB			Near   MYCSEG:0377		   #601
+_SWAP			Near   MYCSEG:03BD		   170	#667
+_TIMES			Near   MYCSEG:03A5		   175	#641
+_TO			Near   MYCSEG:0351		   215	#566
+_TOP			Near   MYCSEG:0355		   217	#569
+_ULESS?			Near   MYCSEG:0398		   224	#627
+_UMSLSM			Near   MYCSEG:02A4		   204	#375
+_UMUL			Near   MYCSEG:02B3		   202	#388
+_XCHG			Near   MYCSEG:020E		   109	#263
+_XDROP			Near   MYCSEG:022D		   271	#280
+_XOR			Near   MYCSEG:02E1		   192	#439
+_ZERO?			Near   MYCSEG:0393		   228	#624
+_ZLESS?			Near   MYCSEG:039F		   226	#636
+
+Macro Name						   Cref	(defined at #)
+
+DSTR							   #78
+DSTR2							   #71
+NEXT							   #48	266  484  525  557  621
+NF							   #82
+NFI							   #89
+NUM							   #52
+SJMP							   #44	270  338  353  372  386	 397  406  411	422  429  436  443  449	  +
+							   491	501  506  519  530  541	 546  560  564	567  572  579  591  595	  +
+							   599	603  607  625  638  648	 655
+WPUSH							   #56	337  371  505  518  540	 545
+X							   #28	281  284  301  304  342	 345  355  358	375  388  414  419  425	  +
+							   432	439  446  459  465  495	 498  550  553	575  583  586  627  631
+XC							   #24	380  391  395  614  617
+XDROP							   #38	280  494  582
+XDUP							   #32	300  341
+XNEXT							   #60	578
+XSKIPCL							   #16
+XSKIPCX							   #12
+XSKIPDI							   #20	513  534  634
+
+Groups & Segments	Bit Size Align	Combine	Class	   Cref	(defined at #)
+
+MYCSEG			16  03BD Para	none		   #97	98  98	98
+

@@ -1,0 +1,828 @@
+locals  @@
+
+pd  equ dword ptr
+pw  equ word  ptr
+pb  equ byte  ptr
+
+TO_    =  2
+AT_    =  4
+VAL_   =  6
+
+JMPS    MACRO LBL
+          jmp  SHORT LBL
+        ENDM
+
+SKIPW   MACRO
+        DB    0BFH
+        ENDM
+
+SKIPA   MACRO
+        DB    03DH
+        ENDM
+
+SKIPB   MACRO
+        DB    03CH
+        ENDM
+
+X       MACRO
+  xchg sp,AX
+        ENDM
+
+TPUSH   MACRO REG
+        X
+        PUSH  REG
+        X
+        ENDM
+
+TPOP    MACRO REG
+        X
+        POP   REG
+        X
+        ENDM
+
+qqqqq = 0
+ppppp = qqqqq
+
+@nam    macro   msg
+  local endstr
+  db    endstr-$-1
+  db    msg
+endstr  label   byte
+        endm
+
+@ln     macro   token
+ppppp = $
+  @nam  token
+  dw    qqqqq
+qqqqq = ppppp
+        endm
+
+@ALIGN  MACRO  FLAG
+        IF ($-START+FLAG) AND 1
+        NOP
+        ENDIF
+        ENDM
+
+;        _ALIGN 0
+;HLBL    =      ($-START+100H) SHR 1
+@XALIGN MACRO  HLBL
+HLBL    =      $
+        ENDM
+
+;LBL     =      (($-START+100H) SHR 1)+08000H
+@colGO  macro  lbl
+        @XALIGN LBL
+        DW  @XNEST,@LBL
+        endm
+
+@col    macro  lbl
+        @XALIGN LBL
+        DW  @NEST
+        endm
+
+@LBL    macro  lbl
+        @XALIGN LBL
+        DW  @LBL
+        endm
+
+@VAR    macro   LBL,DAT
+        @XALIGN LBL
+        DW      @VAR,DAT
+        ENDM
+
+@XT     macro   LBL,ADR
+        @XALIGN LBL
+        DW      ADR
+        ENDM
+
+@value  macro   lbl,dat
+        @XALIGN LBL
+        DW     @_cons2,@SETVAR,dat
+        endm
+
+@DEFERO macro   lbl,dat
+        @XALIGN LBL
+        DW     @_deferO,dat
+        endm
+
+@DEFER  macro   lbl,dat
+        @XALIGN LBL
+        DW     @_defer,dat
+        endm
+
+@vector macro   lbl,dat
+        @XALIGN LBL
+        DW     @_defer2,@SETVAR,dat
+        endm
+
+@point  macro   lbl,dat
+        @XALIGN LBL
+        DW     @_point,@_setpnt,dat
+        endm
+
+@QUAN   MACRO   LBL,DAT
+        @XALIGN lbl
+        DW     @_CONS3,@SETVAR2,@VAR,dat
+        ENDM
+
+@VOC    MACRO   LBL,DAT
+        @XALIGN lbl
+        DW     @SET_VOC,@SRCH_VOC,dat
+        ENDM
+
+@const  macro   lbl,dat
+        @XALIGN LBL
+        DW    @_cons,DAT
+        endm
+
+@MCONS  macro   lbl,dat
+        @XALIGN LBL
+        DW    DOConst-1
+        DW    _DOES5
+        DW    DAT
+        endm
+
+@entry  macro ADR,DAT,nam
+        DW    ADR,DAT
+        @nam  nam
+        endm
+
+
+; REGISTERS
+; SI INSTRUCTION POINTER
+; SP RETURN STACK POINTER
+; AX DATA STACK POINTER
+; CX DATA STACK TOP REGISTER
+; DI WORK REGISTER
+; DX ADRESS REGISTER  ?
+; DX BX BP   - NOT USED
+;
+; MINIMAL SET INTERPRETTER COMMANDS
+; METHOD       COMMANDS  (DOES (VAR (CONST (CONST2 (DEFER (DEFER2
+;                        (SETVAR (SETVAR2 (CONST3 (SETPOINT (POINT
+;                        (BARY (WARY (RW_BLK
+; CONTROL      COMMANDS  (IF (JUMP (CALL (NEXT (FOR (NEST (EXEC (PERF
+;                        (GOTO (RETURN (EX (XNEST (IFZ (IFM
+; RETURN STACK COMMANDS  POP PUSH RDROP I J
+; DATA STACK   COMMANDS  DUP DROP XCHG
+; MATH         COMMANDS  +2/ LIT  ABS NEG NOT _ 1- 2- 1+ 2+
+; LOGICAL      COMMANDS  XOR AND
+; DATA TRANSF  COMMANDS  @R+ !R+ C!R+
+; IO           COMMANDS  (IO
+
+MyCseg  segment para  use16
+
+        assume cs: MyCseg,  ds: MyCseg, ss: MyCseg, es: MyCseg
+
+        org 100h
+
+@TBUF   = -256          ; 256
+@TIB    = @TBUF * 2     ; 256
+@R_TOP  = @TIB * 2      ; 512  RSTACK
+@S_TOP  = @R_TOP * 2    ; 1024 DSTACK
+@VOCTOP = @S_TOP * 2    ; 2048 = 4 BUFFERS * 512
+
+Start   Label byte
+        JMPS SELF0
+
+  @CONST  _TBL,80H
+  @CONST  _TIB,-512
+  @CONST  _TBUF,-256
+  @CONST  _0,0
+  @CONST  _BL,32
+
+  @VALUE  _HERE,FREEMEM
+  @VALUE  _ETIB,0
+  @VALUE  _LTIB,0
+  @VALUE  _DICT,@VOCTOP
+  @VALUE  _CURR,VAL_+_DFND
+  @POINT  _FIND,0
+_SETPNT = TO_+_FIND
+
+_OPERATION DW @WARY
+        DW _COMP_NUM,_COMMA,_NUMBER,_EXEC
+
+  @XT     _CNTC,0
+
+  @VOC    _DFND,@VOCTOP+ENDMEM-FREEMEM
+  @VOC    _MFND,0
+
+  @DEFERO _EMIT,_@EMIT
+  @DEFER  _SOURCE,_ETIB
+  @DEFER  _OK,0
+  @DEFER  _ACCEPT,_ACC
+  @DEFER  _ERROR,0
+
+  @POINT  _INIT,_@_INI
+_REINI  = TO_+_INIT
+
+SELF0:
+  mov   bx,1000h     ; only 64k allocate
+  mov   ah,4ah
+  int   21h
+@ABORT:
+  MOV   SP,@R_TOP
+  MOV   AX,@S_TOP
+  CALL  @_RETUR
+  DW    _INIT,_INIT,_TBL,_COUNT
+_MAINLP DW @_EVAL,_TIB,_TBL,_ACCEPT,_OK,_JUMP,_MAINLP
+
+;------------------------------------
+
+  @COL @_EVAL
+        DW _DUP,TO_+_LTIB,@_ADD,TO_+_ETIB
+@EVAL   DW _TOKEN,_ZEX,_TBUF,_FIND
+        DW _OPERATION,_PERFORM,_JUMP,@EVAL
+
+_commaer:
+  call _does
+@commaer:
+  dw _strp,_comma,_perfORM,_exit
+
+@MAKER:
+  call _does
+  dw _HERE,_ENTRY,_JUMP,@commaER
+
+_COLON  DW @MAKER,@NEST,_RPAR          ; :
+
+_SEMICO DW _commaer,@_RETUR,_LPAR      ; ;
+
+_clit   dw _commaer,_lit,_comma        ; #,
+
+  @COL _NUMBER
+        DW _COUNT,_NUM,_SKIP
+
+  @COL _??
+        DW _ABORT?
+  @NAM  " ?"
+        DW _EXIT
+
+  @COL _COMP_NUM
+        DW _NUMBER,_cLIT,_COMMA,_EXIT
+
+  @XT  _num,@PARAMZ      ;= (>#       ; (NUM
+  push  ax
+  MOV   AX,10  ; base := 10
+  CALL  @@NUM
+  pop   AX
+  X
+  PUSH  BX
+  PUSH  CX
+  X
+  RET
+
+@@NUM:
+  CALL  @@numini
+  CALL  @@SGN
+@@NUMZ:
+  CALL  @@N1
+  JMPS  @@NUMZ
+
+@@n1:
+  cmp   al,'$'     ; BASE := 16
+  JNE   @@N2
+  MOV   al,16
+  jmp   SHORT @@setbas
+
+@@N2:   cmp  al,'#'     ; BASE := CX
+  JNE   @@N3
+  mov   al,Bl
+@@numini:
+  Xor   Bx,Bx      ; ACCUMULATOR
+@@setbas:
+  mov   DI,ax
+@@END?:
+  JCXZ  @@ERNUM
+@@GETC:
+  deC   CX
+  LODSB
+  RET
+
+@@N3:
+  cmp   al,'9'+1
+  jc    @@ton2
+  AND   AL,0DFH
+  cmp   al,'A'      ; no case sensivity
+  jc    @@ERNUM
+  sub   al,7
+@@ton2:
+  sub   al,'0'
+  cmp   ax,DI
+  jnc   @@ERNUM
+  xchg  ax,Bx
+  mul   DI
+  xchg  ax,Bx
+  add   Bx,ax
+  JCXZ  @@EXNUM
+  JMP   @@GETC
+@@ERNUM:
+  INC   CX
+@@EXNUM:
+  pop   dx    ; rdrop
+@@noEXn:
+  RET
+
+@@SGN:
+  CMP   AL,'-'     ; SGN
+  JNE   @@N1
+  POP   dX
+  CALL  @@END?
+  CALL  dX
+  NEG   bX
+  RET
+
+@RLD:
+  TPUSH CX
+  POP   CX
+@ld@:
+  PUSH  DI
+  MOV   DI,CX
+;@LD@@:
+  MOV   CX,[DI]
+  RET
+
+@FOR:
+  NOT   CX
+@PUSH:
+  PUSH  CX
+@DROP:
+  PUSH  DI
+_DRET:
+  MOV   DI,CX
+  TPOP  CX
+  OR    DI,DI
+  RET
+
+  @XT  _ZEQ,@CALL
+@ZEQ:
+  SUB   CX,1
+  SBB   CX,CX
+  RET
+
+  @XT  _DUP,@DUP
+  ret
+
+  @XT  _J,@_IJ         ; J
+        DW 2
+
+_@EMIT: DW @2IO,200h ; dos function number EMIT
+  INT   21H
+  XCHG  SI,AX
+  RET
+
+  @COL _TOKEN
+        DW _BL,_SKIP
+  @COL _PARSE
+        DW _SOURCE,_LTIB,_PARS,TO_+_LTIB,_TBUF,_MAKESTR,@_A,_EXIT
+
+;  CHAR etib ltib  /  START LEN >IN
+;  SI   BX   Cx
+  @XT  _PARS,@PARAM           ;= (PARS
+  MOV   DI,BX
+  SUB   DI,CX
+  XCHG  AX,SI
+
+  CMP   AL,' '
+  JNE   @@SKIPX
+  JCXZ  @@SKIPX
+  REPE  SCASB
+  JE    @@SKIPX
+  DEC   DI
+  INC   CX
+@@SKIPX:
+  MOV   DX,DI   ;  START OF THE SOURCE
+  JCXZ  @@WEX
+
+  REPNE SCASB
+  JNE   @@WEX
+  DEC   DI
+
+@@WEX:
+  XCHG  AX,DI   ; END OF THE SOURCE
+  SUB   AX,DX
+  XCHG  AX,SI
+  X
+  PUSH  DX      ; START OF THE SOURCE
+  JMPS  @FND?2
+; PUSH  SI      ; LENGTH OF THE SOURCE
+; PUSH  CX      ; REST LEN OF BUF
+; X
+; RET
+
+  @XT  _FND,@PARAMZ     ; (FIND
+NEXTfnd:
+  MOV   CX,[BX]
+  Jcxz  @FND?
+  MOV   BX,CX
+  LEA   dI,[BX+5]
+  mov   cl,[di]
+  XOR   ch,ch
+  INC   CX
+  PUSH  SI
+  repe  cmpsb
+  POP   SI
+  jNZ   NEXTfnd
+  mov   SI,[BX+2]
+  inc   cx        ; fnd_ok
+@FND?:
+  x
+@FND?2:
+  PUSH  SI
+  PUSH  CX
+  X
+  RET
+
+; DATA STACK   COMMANDS  DUP DROP
+
+@_IJ:
+  MOV   DI,[DI]
+  ADD   DI,SP
+  SKIPA
+
+@_CONS3:
+  SCASW
+@_CONS2:
+  SCASW
+@_CONS:
+  MOV   DI,[DI]
+_VAR:
+  TPUSH CX
+@ADR:
+  MOV   CX,DI
+  JMP   _MAIN
+
+_strp   dw @ld@
+  scasw
+  skipa
+_SWAP   DW @DROP       ; SWAP
+@swap:
+  XCHG  CX,DI
+  JMPS  _VAR
+
+@POP:
+  POP   DI
+  JMPS  _VAR
+
+_LDP    DW @ld@        ; @+
+_VAR2:
+  SCASW
+  JMPS  _VAR
+
+_STM    DW @DROP
+  DEC   DI
+  MOV   [DI],CH
+  SKIPA
+
+_STMB   DW @DROP
+  DEC   DI
+  MOV   [DI],CL
+  JMPS  @ADR
+
+_STP    DW @DROP
+  MOV   [DI],CX
+@ADRP:
+  SCASW
+  JMPS  @ADR
+
+; RETURN STACK COMMANDS  POP PUSH XCHG
+_COUNT  DW @ld@
+  MOV   CH,0
+  INC   DI
+  XCHG  CX,DI
+  JMPS  _VAR
+
+_@_STR  DW @RLD
+  XOR   CH,CH
+  INC   CX
+  ADD   CX,DI
+  SKIPB
+
+@XCHG:
+  POP   DI
+  XCHG  CX,DI
+@PUSH@:
+  push  di
+  JMPS  @1
+
+_LIT    DW @RLD
+  SCASW
+  JMPS  @PUSH@
+
+_PUSH   DW @PUSH
+  JMPS  @1
+
+@2IO:    ; DX/CX/BX AX
+  X
+  PUSH  CX
+  PUSH  CX
+  X
+@_IO:
+  PUSH  SI
+  PUSH  BX
+  MOV   BX,CX
+  MOV   SI,[DI] ; TO BE  AX
+  SCASW
+  X
+  POP   CX
+  POP   DX
+  X
+  XCHG  SI,AX
+  jmps  @doer
+
+@PARAMZ:       ; UNIVERSAL ENTRY
+  x
+  push  cx
+  x
+@PARAM:        ; UNIVERSAL ENTRY
+  PUSH  SI
+  PUSH  BX
+  x
+  pop   bx
+  pop   si
+  x
+@doer:
+  CALL  DI
+@ret_self:
+  CLD
+  POP   BX
+@RET_DR:
+  POP   SI
+_DROP:
+  TPOP  CX
+  JMPS  _MAIN
+
+@ABS:
+  OR    CX,CX
+  JNS   @1
+@NEG:
+  DEC   CX
+@NOT:
+  NOT   CX
+@1:
+  JMPS _MAIN
+
+@2M:
+  DEC   CX
+  DEC   CX
+  SKIPA
+@2P:
+  INC   CX
+  INC   CX
+  JMPS _MAIN
+_2P     DW @2P
+
+_ST     DW @DROP
+  SKIPB
+
+@SETVAR2:
+  SCASW
+@SETVAR:
+  MOV   [DI],CX
+  JMPS  _DROP
+
+@DUP:
+  TPUSH CX
+@CALL:
+  CALL  DI
+  JMPS  _MAIN
+
+_FOR    DW @FOR
+  JS    @SKIP
+  MOV   SI,[SI]
+
+@RDROP:
+  POP   DI
+  JMPS  _MAIN
+
+_IF     DW @DROP
+  JE    @JUMP
+
+@SKIP:
+  CMPSW
+  JMPS  _MAIN
+
+@NEXT:    ; (NEXT
+  POP   DI
+  INC   DI
+  JE    @SKIP
+  PUSH  DI
+
+@JUMP:    ; (JUMP
+  MOV   SI,[SI]
+  JMPS  _MAIN
+
+@_POINT:
+  MOV   DI,[DI+2]
+  JMPS  @NEST
+
+@_SETPNT:
+  MOV   [DI],SI
+  JMPS  @_RETUR
+
+; MAIN  LOOP
+_does4:
+  SCASW
+_does3:
+  SCASW
+_does2:
+  SCASW
+_does:
+  TPUSH CX
+  MOV   CX,DI
+@EX:
+  POP   DI
+@NEST:
+  PUSH  SI
+@LBL@:
+  PUSH  DI
+@_RETUR: ; (;
+  POP   SI
+_MAIN:
+  MOV   DI,[SI]
+  CMPSW
+  JMP   [DI-2]
+
+_ZEX    DW @DROP
+  JE    @_RETUR
+  JMP   _MAIN
+
+@CALL@:   ; (CALL
+  XCHG  DI,AX
+  LODSW
+  XCHG  DI,AX
+  JMPS  @NEST
+
+; CONTROL      COMMANDS
+@NEST3:
+  SCASW
+@NEST2:
+  SCASW
+  JMPS  @NEST
+
+_EXECUTE DW @DROP
+  JMPS  @NEST
+
+_LDB    DW @ld@        ; C@
+  MOV   CH,0
+  SKIPA
+_LD     DW @ld@        ; @
+  JMPS  _MAIN
+
+@_DEFERO:
+  INC   PW [_CNTC]
+  SKIPA
+@_DEFER3:
+  SCASW
+@_DEFER2:
+  SCASW
+@_DEFER:
+  MOV   DI,[DI]
+@EXEC:
+  OR    DI,DI
+  JZ    _MAIN
+  SCASW
+  JMP   [DI-2]
+
+_EXEC   DW @DROP
+  jmps  @EXEC
+
+_PERFORM   DW @DROP
+  jmps  @_DEFER
+
+; LOGICAL      COMMANDS  XOR AND
+_SUB    DW @DROP
+  SUB   CX,DI
+  JMPS  _MAIN
+
+@WARY:
+  SHL   CX,1
+@BARY:
+  SKIPA
+@_ADD    DW @DROP
+  ADD   CX,DI
+  JMPS  _MAIN
+
+  @XT  _NEXT,@NEXT
+  @XT  _RDROP,@RDROP
+  @XT  _JUMP,@JUMP
+  @XT  _EXIT,@_RETUR
+  @XT  _SKIP,@SKIP
+  @XT  _ABORT,@ABORT
+
+  @COL _LOOPS
+        DW _FOR,@@LPS
+@@LPS0  DW _J,_EXECUTE,_NEXT,@@LPS0
+@@LPS   DW _RDROP,_EXIT
+
+  @COL _ENTRY
+        DW _CURR,_LD,_SWAP,_0,_TOKEN?
+        DW _DICT,_STRPUSH,@_A,_STMB,_STM
+        DW _STM,_DUP,TO_+_DICT,_CURR,_ST,_EXIT
+
+  @COL _TYPES
+        DW _LOOPS,_COUNT,_EMIT,_EXIT
+
+  @COL    _TDOT
+        DW _COUNT,_TYPES
+@ABORTX DW @_DROP_,_EXIT
+
+
+  @XT  @_DROP_,@DROP
+
+  @COL    _TOKEN?
+        DW _TOKEN,_ZEQ,_??,_TBUF,_EXIT
+
+_ACCZ   DW @2IO,0A00H
+  MOV   PW [BX],120
+  INT   21H
+  INC   BX
+  XCHG  SI,AX
+  TPUSH BX
+  RET
+
+  @COL _ACC
+  DW @_DROP_,_ACCZ,_COUNT,_EXIT
+
+  @COL _COMMA
+        DW _HERE,_STP,TO_+_HERE,_EXIT
+
+  @COL _ABORT?
+        DW _@_STR,_SWAP,_IF,@ABORTX,_ERROR,_ABORT
+
+@SET_VOC:
+  CALL  _does2
+  DW    TO_+_CURR,_EXIT
+
+@SRCH_VOC:
+  CALL  _does
+  DW    _FND,_EXIT
+
+  @col _LPAR
+        DW _SETPNT
+@LPAR   DW TO_+_DFND
+@EXEC2P DW _2P,_EXIT            ; EXECUTE
+
+  @col _RPAR
+        DW _SETPNT,TO_+_MFND,_DUP,_ZEQ,_IF,@EXEC2P
+        DW @_DROP_,TO_+_DFND,_EXIT  ; COMPILE
+
+  @XT  _CMOVEU,@PARAM
+  ADD   BX,CX
+  JMPS  @MPUSH
+
+  @XT  _STRPUSH,@PARAMZ       ; S!-
+  mov   cl,[Si]
+  XOR   ch,ch
+  INC   CX
+  SKIPA
+
+  @XT  _MPUSH,@PARAM
+  XCHG  CX,BX
+@MPUSH:
+  MOV   DI,bX   ; TOP OF DICTIONARY
+  ADD   SI,CX   ; AFTER NAME ADDRESS
+  STD           ; BACKWARDS
+  CMPSB         ; PREPARE FOR DIRECTION
+  REP   MOVSB   ; NAME  MOVE
+  LEA   DX,[DI+1]
+  RET
+
+  @XT  _MAKESTR,@PARAM        ; S!
+  XCHG  BX,CX
+  MOV   DX,CX
+  MOV   [BX],CL
+  INC   BX
+  SKIPA
+
+  @XT  _CMOVE,@PARAM          ; CMOVE
+  MOV   DI,bX
+  REP   MOVSB   ; NAME  MOVE
+  RET
+
+_AEX    DW @CALL               ; A@!
+  SKIPA
+@_A      DW @DUP                ; A@
+  XCHG  CX,DX
+  RET
+
+_@_INI:
+    DW  _HERE,_STRP,_DICT,_MPUSH,@_A,TO_+_DICT
+    DW  _REINI
+    DW  _LPAR,_0,TO_+_LTIB,_EXIT
+
+;-----------------------------------------------
+
+freemem:
+  DW ENDMEM-FREEMEM-2
+  @ENTRY  _ENTRY,0,'=:'
+  DB 0
+EndMem:
+
+
+lastw = ppppp
+
+MyCseg  ends
+        end  Start
+
+;____________________________________________
+

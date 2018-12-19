@@ -1,0 +1,772 @@
+locals  @@
+
+pd  equ dword ptr
+pw  equ word  ptr
+pb  equ byte  ptr
+
+TO_     =  -2
+AT_     =  -4
+VL_     =  2
+
+JMPS_    MACRO LBL
+          jmp  SHORT LBL
+        ENDM
+
+SKIPA_   MACRO
+        DB    03DH
+        ENDM
+
+SKIPC_   MACRO
+        DB    03CH
+        ENDM
+
+SKIPB_   MACRO reg
+        mov   reg,0
+        org   $-1
+        ENDM
+
+SKIPW_   MACRO reg
+        mov   reg,0
+        org   $-2
+        ENDM
+
+CLr_   MACRO reg
+  XOR   reg,REG
+  ENDM
+
+TWICE_  MACRO
+  DW    $+2
+  ENDM
+  
+X_       MACRO
+  xchg Rsp,DSP
+        ENDM
+
+TO_R_    MACRO  REG
+  PUSH   REG
+        ENDM
+
+R_TO_    MACRO  REG
+  POP    REG
+        ENDM
+
+TO_D_    MACRO  REG
+  X_
+  PUSH   REG
+  X_
+        ENDM
+
+D_TO_    MACRO  REG
+  X_
+  POP    REG
+  X_
+        ENDM
+
+w2_      macro
+  scasw
+        endm
+
+cf_to_   macro  reg
+  sbb   reg,reg
+        endm
+
+rchg_    macro   reg
+  xchg  ax,reg
+        endm
+
+DUP2_    MACRO   R1,R2
+  X_
+  PUSH  R1
+  PUSH  R2
+  X_
+        ENDM
+
+DROP2_   MACRO   R1,R2
+  X_
+  POP   R1
+  POP   R2
+  X_
+        ENDM
+
+qqqqq = 0
+ppppp = qqqqq
+
+nam_    macro   msg
+  local endstr
+  db    endstr-$-1
+  db    msg
+endstr  label   byte
+        endm
+
+ln_     macro   token
+ppppp = $
+  nam_  token
+  dw    qqqqq
+qqqqq = ppppp
+        endm
+
+ALIGN_  MACRO  FLAG
+  IF ($-START+FLAG) AND 1
+  NOP
+  ENDIF
+  ENDM
+
+P_ MACRO LBL
+  ALIGN_ 0
+  NOP
+LBL:
+  ORG $-1
+  ENDM
+        
+L_  MACRO LBL
+  ALIGN_ 0
+LBL:  
+  ENDM
+
+ACALL_  MACRO LBL
+  MOV   W,OFFSET LBL
+  PUSH  W
+  ENDM
+
+entry_  macro nam,ADR
+  DW    ADR,0
+  nam_  nam
+  endm
+
+; REGISTER  ASIGNMENTS for interpretter
+;-------------------------------------------
+ip  = si    ; INSTRUCTION POINTER
+dsp = ax    ; DATA STACK POINTER
+rsp = sp    ; RETURN STACK POINTER
+RA	= DI		; RETURN ( ADDRESS ) STACK TOP register
+
+NXT = DX    ; DATA STACK NEXT REGISTER
+top = cx    ; DATA STACK TOP REGISTER
+topL= cL    ; DATA STACK TOP REGISTER LOW
+topH= cH    ; DATA STACK TOP REGISTER HI
+NEXT  = bP    ; RETURN  register ( $NEXT ADDRESS )
+W   = BX    ; WORK  register
+WL  = BL    ; WORK  register LOW
+WH  = BH    ; WORK  register HI
+
+;
+; MINIMAL SET INTERPRETTER COMMANDS
+;--------------------------------------------
+; CONTROL      COMMANDS  (IF (JUMP (RETURN (IF-
+; RETURN STACK COMMANDS  POP PUSH 
+; DATA STACK   COMMANDS  DUP J
+; DATA TRANSF  COMMANDS  @R+ !R+ XCHG XR
+; MATH         COMMANDS  +2/ +* -/ NAND
+; IO           COMMANDS  (IO
+
+MyCseg  segment para  use16
+
+        assume cs: MyCseg,  ds: MyCseg, ss: MyCseg, es: MyCseg
+
+        org 100h
+
+@TBUF  = -256      	  ; -256    TBUF = 256   
+@TIB   = @TBUF * 2    ; -512    TIB  = 256  + 
+@RTOP  = @TIB         ; -512  RSTACK = 768  +
+@STOP  = @TBUF+@TIB*2 ; -1280 DSTACK = 768  += TOTAL = 2048
+@VOCTOP= @TIB * 12    ; -6144 = 4 BUFFERS * 1024 + TOTAL
+
+Start   Label byte
+_START:
+  mov   bx,1000h     ; only 64k allocate
+  mov   ah,4ah
+  int   21h
+  JMP   @ABORT
+
+ ALIGN_ 0
+ 
+_vERROR DW  _JUMP,_NOP
+_vNUM   DW  _JUMP,_NOP
+_vBLOCK DW  _JUMP,_NOP
+_vOK    DW  _JUMP,_OK
+
+;_AST   DW _SET
+;_ALD   DW _CON
+AR     DW 0
+
+   DW _SET
+_MSG   DW _CON,0
+
+_CNTC  DW _VAR,0
+  
+_DZ3    DW _RSKIP
+_DZ2    DW _RSKIP
+_DOEZ   DW _POP,_XCHG,_RET
+
+_VAR3   DW _RSKIP
+_VAR2   DW _RSKIP
+_VAR    DW _POP,_RET
+
+_XDROP  DW  _EX
+_DROP   DW  _DROPX
+_CSTR   DW  _PUSH,_RLDBP,_XCHG,_POP,_RET
+
+_DDTIME DW  _XDROP
+_DTIMES DW  _XDROP
+_TIMES  DW  _PUSH,_XCHG
+_TIMESX DW  _FOR,@TIMESX
+@TIMES  DW  _J,_EXECUTE
+@TIMESX DW  _NEXT,@TIMES
+_2EXIT  DW  _RDROP,_RDROPX
+
+_STYPE  DW  _XSTR,_CTYPE,_RET
+_SLIT   DW  _XSTR,_RET
+_?ABORT DW  _XSTR,TO_+_MSG,_IF,_NOP,_vERROR,_ABORT
+  
+_IDTYPE DW  _SPCX  
+_CTYPE  DW  _CSTR
+_TYPE   DW  _XDROP
+_TYPES  DW  _TIMESX,_CSTR,_JUMP,_EMIT
+
+_LD:				; @
+  DW	_PUSH
+_CON:
+  DW	_RLDP,_RDROPX
+_SET:
+  DW	_RSKIP,_RSTP
+_EXIT:  
+  DW  _RDROPX
+  
+_AX:    
+  DW	_CON
+@AX DW 0
+_BX:    
+  DW	_CON
+@BX DW 0
+_CX:    
+  DW	_CON
+@CX DW 0
+_DX:    
+  DW	_CON
+@DX DW 0
+_FL:    
+  DW	_CON
+@FL DW 0
+
+_LIT:
+  DW	_RLDP,_RET
+_@EXEC:
+  DW  _LD
+_EXECUTE:
+  DW  _PUSH
+_NOP:  
+  DW  _RET
+_XEP:
+  DW  _XCHG,_EXECUTE,_POP,_RET
+_XDZERO:
+  DW  _XEP  
+_DZERO:
+  TWICE_
+_ZERO:
+  DW	_CON, 0  
+  
+  
+; IO           COMMANDS  (IO  vvvvvvvvvv
+;---------------------------------------------
+
+_CEMIT:
+    DW  _RSKIP
+_OEMIT:    
+    DW  _RLDP,_EMIT,_RDROPX
+_EMITP:    
+    DW  _RLDP,_EMIT,_RET
+  
+  DW _SET,_CON
+_EMIT:
+  DW	_BEMIT,_CNTC,_INC,_RET
+  
+  DW _SET,_CON
+_KEY:
+  DW	_DUP,_RET
+  
+_DEMIT:
+  DW	_DOS1,200H
+  
+_DOS1 DW _DOEZ,_LD,_XDZERO
+L_ _DOSZ
+  DW    _IO
+  CALL	_INIREG
+  INT   21H
+  RET
+  
+L_ _VIDZ
+  DW    _IO
+  CALL	_INIREG
+  INT	  10H  
+  RET  
+  
+L_ _KBDZ
+  DW    _IO
+  CALL	_INIREG
+  INT	  16H  
+  RET  
+  
+P_ _BEMIT          			; @_BEMIT
+  PUSH  DSP
+  XCHG  AX,TOP
+  MOV		AH,0EH
+	INT 	10H
+  POP   DSP
+	JMP   @DROP
+
+_INIREG:
+  POP	IP
+  X_
+  POP	DI BX CX DX
+  X_
+  RCHG_	DI
+  PUSH  DI DS ES
+  CALL	IP
+  POP	  ES DS DI
+  RCHG_	DI
+  PUSHF
+  POP	  @FL
+  MOV	  @DX,DX
+  MOV	  @CX,CX
+  MOV	  @BX,BX
+  MOV	  @AX,DI
+  RET
+ 
+P_ _IO
+  DUP2_   NXT TOP
+  PUSH    RA 
+  CALL    IP
+  DROP2_  TOP NXT
+  CLD
+  POP     RA 
+
+P_ _RET				; (RET
+@RET:
+  MOV	    IP,RA
+
+P_ _RDROP  
+@RDROP:
+  POP	  NEXT
+@RDROP1:
+  POP	  RA
+  JMP	  NEXT
+   
+P_ _POP				  ; POP
+  CALL  @DUP
+  MOV	TOP,RA
+  JMPS_ @RDROP
+  
+P_ _DROPX				; DROP;
+  CALL  @DROP
+  JMPS_ @RET
+    
+P_ _RDROPX			; RDROP;
+  POP	  NEXT
+  POP	  IP
+  JMPS_ @RDROP1
+    
+P_ _FOR
+  MOV   IP,[IP]
+  
+P_ _PUSH
+  POP   NEXT
+  PUSH  RA
+  PUSH  NEXT
+  MOV	  RA,TOP
+  JMP   @DROP
+  
+; IO           COMMANDS  (IO  ^^^^^^^
+
+; CONTROL      COMMANDS  (IF (JUMP (RETURN (IF-
+
+
+P_ _SKIPDR	 			; ?.SKIP
+  JCXZ  @SKIPDR
+  RET
+@SKIPDR:
+  DEC   TOP
+P_ _IF	 			    ; (IF
+  ACALL_  @DROP
+  
+P_ _IFZ	 			    ; (IF#
+  JCXZ    @JUMP
+  
+P_ _SKIP  
+@SKIP:
+  LEA   ip,[IP+2]
+  RET
+
+P_ _MIF           ; (-IF
+  INC   TOP
+  SKIPW_  W
+  
+P_ _NEXT
+  DEC   RA
+  SKIPB_  WL
+  
+P_ _IFM    			  ; (IF-
+  DEC   TOP
+@IFM:  
+  JS    @SKIP
+
+P_ _JUMP    			; (JUMP
+@JUMP:
+  MOV   IP,[IP]
+  RET
+
+P_ _EX
+  XCHG	IP,RA
+  RET  
+
+P_ _XSTR
+  CALL  @RLDBP
+  ADD   TOP,RA
+  CALL  @ALIGN
+  DEC   RA
+
+P_ _XCHG				; XCHG
+  XCHG	TOP,RA
+  RET  
+  
+P_ _XA				; XA
+  XCHG	AR,RA
+  RET  
+
+; MAIN  LOOP
+;--------------------------------------
+
+@NEST:				; (NEST
+  PUSH	RA
+  MOV	  RA,IP
+  MOV	  IP,W
+  
+P_ _NOP_P
+@MAIN:
+  XCHG  w,DSP   ; AX = DSP
+  LODSW
+  TEST	AL,1
+  XCHG  w,DSP
+  jE	  @nest
+  DEC	  W
+  CALL  W
+  JMP   @MAIN
+
+@RETURN:  
+  POP	IP
+  JMP   @MAIN
+  
+; DATA TRANSFER  COMMANDS  @R+ !R+ XCHG XA
+;---------------------------------------------
+
+P_ _INC				  ; INC
+  MOV   W,TOP
+  INC   PW [W]
+  JMPS_ @DROP
+  
+P_ _DEC				  ; DEC	
+  MOV   W,TOP
+  DEC   PW [W]
+  JMPS_ @DROP
+  
+P_ _RLDBP				; @R+
+@RLDBP:
+  CALL  @DUP
+  MOV   TOPL,[RA]
+  INC   RA
+
+P_ _W_B
+  CLR_  TOPH
+  RET
+  
+P_ _RLDP				; @R+
+  CALL  @DUP
+  MOV   TOP,[RA]
+  
+P_ _RSKIP       ; R2+
+  LEA	  RA,[RA+2]
+  RET
+    
+P_ _RSTBP				; C!R+
+  MOV   [RA],TOPL
+  INC   RA
+  JMPS_ @DROP
+  
+P_ _RSTP				; !R+
+  MOV   [RA],TOP
+  LEA	  RA,[RA+2]
+  
+;  STACK COMMANDS   PUSH DUP
+;------------------------------------
+
+P_ _DROP_P  
+@DROP:
+  MOV	  TOP,NXT
+  
+P_ _NIP  
+@NIP:  
+  D_TO_  NXT
+  RET
+
+P_ _OVER
+  TO_D_ NXT
+  
+P_ _SWAP
+  XCHG	TOP,NXT
+  RET
+  
+P_ _TUCK
+  TO_D_ TOP
+  RET
+  
+P_ _DUP
+@DUP:
+  TO_D_ NXT
+  MOV	  NXT,TOP
+  RET
+  
+;  STACK   COMMANDS   J POP
+P_ _J
+  CALL  @DUP
+  POP   NEXT
+  POP   TOP
+  PUSH  TOP
+  JMP   NEXT
+  
+; MATH         COMMANDS  +2/ +* -/ NAND
+;----------------------------------------
+
+P_ _ALIGN
+@ALIGN:
+  TEST  TOPL,1
+  JNZ   @1P
+  RET
+
+P_ _4P
+  INC   TOP
+  INC   TOP
+P_ _2P
+  INC   TOP
+P_ _1P
+@1P:
+  INC   TOP
+  RET
+  
+P_ _2M
+  DEC   TOP
+P_ _1M
+  DEC   TOP
+  RET
+  
+P_ _MDIV
+  SHL	  NXT,1
+  RCL   TOP,1
+  CMP   TOP,AR
+  JB	  @MDIV
+  SUB   TOP,AR
+  INC	  NXT
+@MDIV: 
+  RET 
+   
+P_ _PLAVG
+  ADD   NXT,TOP
+  MOV	TOP,NXT
+  
+P_ _DIV2
+  RCR   TOP,1
+  RET
+   
+P_ _PMUL
+  TEST	NXT,1
+  JE    @LDIV2
+  ADD   TOP, AR
+  
+P_ _LDIV2
+@LDIV2:
+  RCR   TOP,1
+  RCR   NXT,1
+  RET
+   
+P_ _XOR
+  XOR   TOP,NXT
+  JMPS_ @NIP
+  
+P_ _NAND
+  AND     TOP,NXT
+  ACALL_  @NIP
+  
+P_ _NOT
+  INC   TOP
+  
+P_ _NEG
+  NEG	TOP
+  RET
+   
+L_ _MEMCMP							; MEM-,
+    DW      _IO
+    X_  
+		POP		  CX
+		POP  	  DI
+		POP     SI
+    JCXZ    @CMP
+		REP 	  CMPSB
+		JE		  @CMP
+		DEC		  SI
+		LODSB 
+		SUB     AL,[DI-1]
+		CBW   
+    XCHG    AX,CX
+@CMP: 
+    PUSH    CX
+    X_
+		RET
+
+ L_ _PARS
+    DW      _IO
+    X_
+		POP		  CX
+		POP  	  DI
+		POP     SI
+    XCHG    SI,AX
+    JCXZ 	  @@SKIPX
+    SUB  	  DI,CX	   
+    CMP  	  AL,' '
+    JNE  	  @@SKIPX
+    REPE 	  SCASB
+    JE   	  @@SKIPX
+    DEC  	  DI
+    INC  	  CX
+@@SKIPX:
+    MOV     AX,DI       ;  START OF THE SOURCE
+    PUSH    DI
+    JCXZ  	@@WEX
+    REPNE 	SCASB
+    JNE   	@@WEX
+    DEC   	DI
+@@WEX:                ; END OF THE SOURCE  IN DI
+    SUB     DI,AX       ; LENGTH OF THE WORD
+    XCHG    SI,AX
+@RETVAL:    
+    PUSH    DI          ; LENGTH OF THE WORD
+    JMPS_   @CMP      ; IN CX REMAINS LENGTH OF THE BUFFER
+	
+; -----------------------
+; searching
+; -----------------------
+  
+ L_ _FND
+  DW  _IO
+    X_
+		POP  	  DI
+		POP		  SI
+    CLR_    CX 
+@FND?: 
+    ADD     DI,CX
+    LEA 	  DI,[DI+4]
+    mov 	  cl,byte[Di]
+    jcxz	  @DCX ;not_fnd
+    inc 	  cx
+    PUSH    SI
+    repe	  cmpsb
+    POP     SI
+    jNZ 	  @FND?
+    MOV		  CL,2
+    ADD		  [DI+2],CX
+    MOV     SI,DI
+@DCX:
+    MOV     DI,SI
+    JMPS_   @RETVAL
+
+ L_ _MPUSH ; TOP OF DICTIONARY   IN DI
+    DW      _IO
+    X_
+		POP  	  DI
+		POP		  CX
+    STC
+    JMPS_   @MAKESTR
+
+ L_ _MAKESTR         ; (S!
+  DW _IO
+    X_
+		POP  	  DI
+		POP		  CX
+    MOV     CH,0
+    ADD     DI,CX
+    INC     DI          ; SPACE FOR LENGTH
+    MOV     PB [DI],'`' ; IMMEDIATE SIGN
+    ;CLC
+@MAKESTR:  
+		POP     SI
+    MOV     DX,CX       ; SAVE LENGTH
+    PUSHF               ; SAVE CF & DF
+    ADD     SI,CX       ; AFTER NAME ADDRESS
+    STD                 ; BACKWARDS
+    CMPSB               ; PREPARE FOR DIRECTION
+    REP     MOVSB       ; NAME (MEMORY) MOVE
+    POPF
+    MOV     [DI],DL     ; LENGTH OF THE STRING
+    ADC     di,CX       ; ADD CARRY TO DI
+    PUSH    DI          ; ADDRESS TO RETURN
+    X_
+    RET
+
+P_ _ABORT
+@ABORT:
+  MOV   RSP,@RTOP
+  MOV   DSP,@STOP
+  ALIGN_ 1
+  CALL  @RETURN
+
+; HI LEVEL  START
+;------------------------------------
+
+  DW  _LIT,20,_SPACES
+  DW  _CR
+  DW  _OK
+  
+_BYE:  
+  DW	1
+  
+  
+_MINUS:
+  DW  _NEG
+_PLUS:
+  DW  _PLAVG,_DROPX
+  
+_OK:
+    DW  _STYPE
+    DB  3," OK"
+    
+_CR:
+      DW  _STYPE
+      DB  2,13,10,0
+      
+  DW  _CNTC
+_OFF    DW  _ZERO
+_SWAPST:
+        DW  _SWAP
+_ST:				; !
+        DW	_PUSH
+_STV:
+        DW	_RSTP,_RDROPX
+    
+
+_SPCX   DW  _EX,_SKIP
+_SPACES DW  _TIMESX
+_SPACE  DW  _CEMIT
+_BL     DW  _CON,32
+
+  
+_END:
+
+lastw = ppppp
+
+MyCseg  ends
+        end  Start
+
+
+;_XSTR:
+;  DW  _J,_POP,_POP,_CSTR,_PLUS,_ALIGN,_PUSH,_PUSH,_RET
+  
+   DW _SET
+_BASE  DW _CON,10
+

@@ -1,0 +1,802 @@
+;C:\Documents and Settings\Gergana\Desktop\CrystalForth\TEMPFO\mash8.asm
+; -----------------------------------------------
+; _DUP	\  STACK
+; _J	 \
+; _PUSH	 /
+; _POP	/
+; 
+; _@R+	\  TRANSFER
+; _!R+	 \
+; _RX	 /	RA XA
+; _TX	/	RT XCHG
+; 
+; _EXIT	\  CONTROL
+; _JUMP	 \
+; _NEXT	 /
+; _IF	/
+; 
+; _+*	\  MATH AND LOGIC 
+; _+2/	 \
+; _-/	 /
+; _NAND	/
+; 
+
+locals  @@
+
+	     pd	 equ dword ptr
+	     pw	 equ word  ptr
+	     pb	 equ byte  ptr
+
+TO_ =	-2
+AT_ =	-4
+VL_ =	 2
+qqq_= 0
+
+JMP_    MACRO LBL
+	jmp   SHORT LBL
+    ENDM
+
+SKIPA_   MACRO
+	DB    03DH
+    ENDM
+
+SKIPN_   MACRO
+	DB    03CH
+    ENDM
+
+SKIPr_   MACRO reg
+	mov   reg,0
+	org   $-2
+    ENDM
+
+X_  MACRO
+	xchg  Rsp,DSP
+  ENDM
+
+TOD_    MACRO  REG
+	PUSH  REG
+    ENDM
+
+DTO_    MACRO  REG
+	POP   REG
+    ENDM
+
+TWICE_    macro
+	DW	$+2
+    endm
+
+RDEC_    macro
+	DW	@_NEXT_
+	TWICE_
+    endm
+
+;@I2P   macro
+;	MOV WR,[I]
+;	I2P
+;	TEST	AL,1
+;    endm
+
+;DROP_    macro
+;	DTO_	T
+;    endm
+
+;DUP_    macro
+;	TOD_	T
+;    endm
+
+CLR_   macro     REG
+	XOR   REG,REG
+    endm
+
+?ZERO_   MACRO   REG
+	OR	REG,REG
+	ENDM
+
+RTO_     MACRO   REG
+	X_
+	POP	REG
+	X_
+    ENDM
+
+TOR_     MACRO   REG
+	X_
+	PUSH	REG
+	X_
+    ENDM
+
+LDP_ MACRO  
+	LODSW
+  ENDM
+
+STP_ MACRO   
+	STOSW
+  ENDM
+
+ALGN_  MACRO  FLAG
+    IF	($-START+FLAG) AND 1
+    NOP
+qqq_ = qqq_+1    
+    ENDIF
+    ENDM
+
+N_	MACRO LBL	
+LBL:
+    ENDM
+
+L_	MACRO LBL
+	ALGN_  0
+LBL:
+ENDM
+
+P_  MACRO LBL
+	ALGN_  0
+	NOP
+LBL:
+	org   $-1
+  ENDM
+
+@nam    macro   msg
+	local	endstr
+	db   	endstr-$-1
+	db   	msg
+endstr	label   byte
+	endm
+
+@ln     macro   token
+ppppp = $
+	@nam  token
+	dw    qqqqq
+qqqqq = ppppp
+	endm
+
+ALIGN_  MACRO  FLAG
+	IF ($-START+FLAG) AND 1
+	NOP
+	ENDIF
+	ENDM
+
+XT_     macro   LBL,ADR
+  L_    LBL
+  DW    ADR
+  ENDM
+
+VAR_    macro   LBL,DAT
+  XT_   LBL,VAR@
+  DW    DAT
+  ENDM
+
+const_  macro   lbl,dat
+  XT_   LBL,@_CONS@
+  DW    DAT
+  endm
+
+DEFER_  macro   lbl,dat
+  XT_   LBL,@_JUMP_
+  DW    DAT
+  endm
+
+value_  macro   lbl,dat
+	ALGN_  0
+  DW    @_SETVA
+  const_    LBL,dat
+  endm
+
+vector_ macro   lbl,dat
+	ALGN_  0
+  DW    @_SETVA
+  DEFER_    LBL,DAT
+  endm
+
+point_  macro   lbl1,LBL2,dat
+	L_  LBL1
+  DW  @_POP__
+  vector_ LBL2,dat
+  endm
+
+QUAN_   MACRO   LBL,DAT
+	ALGN_  0
+  DW    VAR3@
+  vector_    lbl,DAT
+  ENDM
+
+entry_  macro ADR,DAT,nam
+  DW    ADR,DAT
+  @nam  nam
+  endm
+
+        
+        
+        
+        
+        
+; REGISTERS     for interpretter
+  I	  = SI	; INSTUCTION POINTER
+  RSP = BP	; RETURN	STACK POINTER
+  DSP = SP	; DATA STACK POINTER
+  WL	= AL
+  WH	= AH
+  WR	= AX  	; WORK REGISTER
+	AR	= DI	; ADDRESS REGISTER
+	TR	= DX	; TEMP REGISTER
+  SR  = BX  ; SELF REGISTER
+	
+	; AX DX CX DI SCRATCH
+	; KEEP I DSP SR RDP
+
+  NACC 	=	DI
+	NBASE	=	BP
+
+MyCseg  segment para  use16
+
+    assume cs:	MyCseg,	 ds: MyCseg, ss: MyCseg, es: MyCseg
+
+    org 100h
+
+	@TBUF   = -256	     ;	256
+	@TIB    = @TBUF  *	2    ;	256 ;	512 B FSTACK
+	@R_TOP  = @TIB   *	2    ; 1024 B RSTACK
+	@S_TOP  = @R_TOP *	2    ; 2048 B DSTACK
+	@VOCTOP = @S_TOP *	2    ; 4096 B =	4 BUFFERS * 1024 B
+
+    Start   Label byte
+@_START:
+	mov     bX,1000h	  ; only 64k allocate
+	mov     ah,4ah
+	int     21h
+ P_	@_ABORT
+	CLD
+	MOV     DSP,@S_TOP
+	MOV     RSP,@R_TOP
+	CALL    _EXECU
+@_INITA:	; INIT TIB CSTR
+    DW    0
+	
+; -----------------------
+; searching
+; -----------------------
+
+ P_ @_DROPX
+  DTO_  WR
+  JMP_ 	_RET
+
+ P_ @_RSKIP
+  ADD   PW [RSP],2
+  JMP_  _RET2
+  
+ P_ @_FIND_
+  TOR_  I     ; SI
+  DTO_  SI
+  DTO_  DI
+	XOR		CX,CX
+FND:    	
+  MOV   AX,SI
+  LEA 	SI,[SI+4]
+  mov 	cl,byte[si]
+  jcxz	_DCX ;not_fnd
+  inc 	cx
+  PUSH  DI
+  repe	cmpsb
+  POP   DI
+  jNZ 	findN
+  add 	si,cx
+  JMP_  FND
+findN:  	
+  XCHG  AX,SI
+	MOV		CL,2
+	ADD		[SI+2],CX
+  XCHG  AX,DI
+_DCX:	
+	PUSH	DI CX
+
+; ---------------------------------------  CONTROL
+	
+ P_	@_RET__				    ; (RET
+_RET:
+  RTO_  I
+_RET2:
+  JMP_ 	_MAIN
+	
+ P_	@_NEXT_					  ; (NEXT
+  DEC   PW [RSP]
+  JS	  _SKIP
+
+ P_	@_JUMP_				    ; (JUMP
+_JMP:
+  MOV   I,[I]
+  JMP_	_MAIN
+	
+ P_	@_IF___				    ; (IF
+  DTO_  CX
+  JCXZ  _JMP
+ P_ @_SKIP_           ; (SKIP
+_SKIP:
+	LEA		I,[I+2]
+  JMP_	_MAIN
+	
+; -------------------- MATH AND LOGIC ------------------- 
+
+ P_	@_PLAVG					; +2/
+  DTO_  WR
+  DTO_  TR
+	ADD   TR,WR
+	MOV   WR,TR
+	RCR   WR,1
+  JMP_	NO_DIV
+
+ P_	@_PMUL_					; +*
+  DTO_  WR
+  DTO_  TR
+	TEST  TR,1
+	JZ    _D2DIV
+	ADD   WR,AR
+_D2DIV:				     
+	RCR   WR,1
+	RCR   TR,1
+  JMP_	NO_DIV
+
+ P_	@_SDIV_					; -/
+  DTO_  WR
+  DTO_  TR
+	SHL   TR,1
+	RCL   WR,1
+	CMP   WR,AR
+	JB	  NO_DIV
+	SUB   WR,AR
+	INC   TR
+NO_DIV:
+	TOD_	TR 
+	TOD_	WR
+  JMP_	_MAIN
+	
+; ---------------------------------------  TRANSFER
+
+ P_	@_XCHG_				  ; XCHG
+  DTO_  WR
+  XCHG  WR,[RSP]
+	TOD_	WR
+  JMP_	_MAIN
+	
+ P_	@_RSTP_				  ; !R+
+  DTO_  WR      
+  XCHG  DI,[RSP]
+  STP_           
+ P_	@_XA___			    ; XA
+  XCHG  DI,[RSP]
+  JMP_	_MAIN 
+  
+ P_	@_RLDP_				  ; @R+
+  XCHG  SI,[RSP]
+  LDP_           
+  TOD_  WR      
+ P_ @_EX___     
+  XCHG  SI,[RSP]
+  JMP_	_MAIN   
+	              
+ P_ @_POP__          ; POP
+  TOD_  [RSP]
+ P_ @_RDROP          ; RDROP
+  INC   RSP
+  INC   RSP
+  JMP_	_MAIN
+  
+ P_ @_PUSH_					; PUSH
+  DTO_	WR
+  JMP_	_RPUSH
+  
+; ---- MAIN LOOP  & STACK  ----------------
+
+ P_ @_EXECU  ;TE
+_EXECU: 
+  DTO_	WR
+_NEST:
+  XCHG	I,WR
+_RPUSH:
+  TOR_  WR
+_MAIN:					; ( NOP
+	LDP_	
+  TEST  WL,1
+  JE	  _NEST
+  DEC   WR
+  JMP		WR   
+	
+ P_ @_LIT__ 
+  LDP_
+  TOD_  WR
+  JMP_	_MAIN  
+	
+ P_	@_J____			     	; J
+  TOD_  [RSP+2]
+  JMP_	_MAIN
+
+ P_ @_@EXEC         
+	DTO_	AR
+  MOV   WR,[AR]
+  JMP_	_NEST
+
+ P_	@_DEC__	        ; DEC
+  DTO_  AR
+	DEC		PW [AR]
+  JMP_	_MAIN
+	
+ P_	@_INC__	        ; INC
+  DTO_  AR
+	INC		PW [AR]
+  JMP_	_MAIN
+	
+;----------------  PARSE   -----------------
+
+;  CHAR etib ltib   /  START LEN >IN  / >IN 				           
+;  DX   CX   BX    		dX    AX  Cx
+
+ P_ @_PARS_
+	POP		CX DI AX	
+	SUB  	DI,CX	   
+	CMP  	AL,' '
+	JNE  	@@SKIPX
+	JCXZ 	@@SKIPX
+	REPE 	SCASB
+	JE   	@@SKIPX
+	DEC  	DI
+	INC  	CX
+@@SKIPX:
+	push  	di      ;  START OF THE SOURCE
+	push  	di      ;  START OF THE SOURCE
+	JCXZ  	@@WEX
+	REPNE 	SCASB
+	JNE   	@@WEX
+	DEC   	DI
+@@WEX:          ; END OF THE SOURCE  IN DI
+	POP		DX 	; DX START OF THE WORD
+	SUB   DI,DX   ; LENGTH OF THE WORD
+_RETVAL:  
+	PUSH	DI 
+_RETLEN:  
+  PUSH  CX	; CX REMAIN LENGTH OF THE BUFFER
+	JMP		_MAIN
+	
+; -------------------------  STRING --------------------	
+
+ P_ @_DUP__
+  DTO_  CX
+  TOD_  CX
+  JMP_  _RETLEN
+	
+ P_	@_NAND_					; NAND
+  DTO_  CX
+  DTO_  TR
+  AND   CX,TR
+_NOT:  
+	NOT   CX
+  JMP_	_RETLEN
+
+ P_	@_NOT__					; NOT
+  DTO_  CX
+  JMP_  _NOT
+ 
+ P_	@_NEG__					; NEG
+  DTO_  CX
+  DEC   CX
+  JMP_  _NOT
+ 
+;----------------   NUMBERS	 ---------------------
+
+ P_ @_ATOI_
+	;DW @_IO___
+	POP		CX AX
+	PUSH	SI BX BP 
+	CALL	@@ATOI
+	XCHG  AX,nacc
+	POP		BP BX SI
+	JMP_	_RETVAL
+
+@@SGN:	
+	CMP   	AL,'-'     ; SGN
+	JNE   	@@N16
+	JCXZ  	@@ERNUM
+	POP   	dX
+	CALL  	dX         ; return to caller
+	NEG   	nacc
+@@EXNUM2:
+	RET
+
+@@ATOI:
+	MOV   	AL,10   	; BASE 10 INITIALLY
+	CALL  	@@numini
+	deC   	CX
+	LODSB	
+	CALL  	@@SGN
+@@GETC:	
+	JCXZ  	@@EXNUM2
+	deC   	CX
+	LODSB	
+	CALL  	@@N16
+	JMP_  	@@GETC
+
+@@NB:
+	SHR		BX,1
+	MOV		AL,NEWBASE[BX]
+	JMP_	@@SETBAS
+@@DIEZ:	
+	XCHG  	nacc,AX
+@@numini:	
+	Xor   	nacc,nacc       ; ZEROING ACCUMULATOR
+@@setbas:	
+	DEC   	AX
+	DEC   	AX
+	xor   	ah,ah
+	mov   	nbase,ax
+	INC   	nbase
+	INC   	nbase
+	JCXZ  	@@ERNUM
+	RET
+@@ERNUM:	
+	DEC		CX
+	SKIPN_
+@@ERNUM0:	
+	;DEC		SI
+	INC   	CX
+@@EXNUM:	
+	pop   	dx    ; rdrop
+	RET
+		
+@@N16:	
+	MOV		BX,6
+@@SCANB1:	
+	DEC		BX
+	JS		@@SCANB2	
+	CMP		AL,OPTAB[BX]
+	JNE		@@SCANB1	
+@@SCANB2:	
+	JNE   	@@N5
+	JCXZ  	@@ERNUM
+	SHL		BX,1
+	JMP		COMOPT[BX]
+		
+@@KOLI:	
+	deC   	CX
+	LODSB	
+	AND	  	AL,31
+	JMP_  	@@ACCUM
+	
+@@N5:	
+	cmp   	al,'9'+1
+	jc    	@@ton2
+	cmp   	al,'A'      ; no case sensivity
+	jc    	@@ERNUM0
+	sub   	al,7
+@@ton2:	
+	sub   	al,'0'
+	cmp   	ax,nbase
+	jnc   	@@ERNUM0
+	SKIPA_
+@@KAVI:	
+	deC   	CX
+	LODSB
+@@ACCUM:	
+	Xchg  	nacc,AX
+	mul   	nbase
+	Xchg  	nacc,AX
+	add   	nacc,ax
+	RET	
+	
+COMOPT  DW @@NB,@@NB,@@NB,@@KOLI,@@KAVI,@@DIEZ
+OPTAB   DB "$&%'^#"
+NEWBASE DB 16,8,2 
+
+;======================================================
+
+  L_ @_ALIGN
+    DW @_DUP__,@_ODD__
+ L_ @_PLUS_
+  DW @_PLAVG,@_DROPX
+ 
+ L_ @_XTIMS
+        DW @_PUSH_,@_JUMP_,@@LPS
+@@LPS0  DW @_J____,@_EXECU
+@@LPS   DW @_NEXT_,@@LPS0
+ L_ @_2EXIT
+	DW @_RDROP
+ L_ @_EXIT_
+	DW @_RDROP
+ L_ @_NOP__	
+	DW @_RET__
+	
+ L_ @_XDROP	
+	DW @_EX___
+ L_ @_DROP_ 
+	DW @_DROPX
+
+ L_ @_CONS@
+  DW @_RLDP_,@_RDROP,@_RET__
+  
+  CONST_  @_TBL__,80H
+  CONST_  @_TIB__,-512
+  CONST_  @_TBUF_,-256
+  CONST_  @_BL___,32
+  CONST_  @_1____,1
+  CONST_  @_M1___,-1
+  L_ @_ZEQ__
+    DW @_IF___,@_M1___
+  CONST_  @_0____,0
+  L_ @_ODD__
+    DW @_1____,@_AND__,@_RET__
+         
+ L_ @_DOES_
+  DW @_POP__,@_XCHG_,@_RET__
+
+; L_ @_POINT
+;  DW @_RLDP_,@_XCHG_,@_DROPX
+         
+ L_ @_SETVA
+  DW @_RSKIP,@_RSTP_,@_RDROP,@_RET__
+  
+  VALUE_  @_HERE_,FREEMEM
+  VALUE_  @_ETIB_,0
+  VALUE_  @_LTIB_,0
+  VALUE_  @_DICT_,@VOCTOP
+  VALUE_  @_CNTC_,0
+
+  DEFER_  @_OK___,@_nop__
+  DEFER_  @_AXEPT,@_nop__ ;_ACC
+  DEFER_  @_NUM__,@_nop__
+  DEFER_  @_ERROR,@_drop_; _IDTYP
+         
+  POINT_  @_REINI,@_INITV,@_@_INI
+  POINT_  @_SETPT,@_DOIT?,0
+
+ L_ @_MAKER
+  dw @_HNTRY
+ L_ @_comar
+  DW @_RLDP_,@_RDROP,@_JUMP_,@_comma
+
+ L_ @_XDICT
+	DW @_DICT_,@_EX___,TO_+@_DICT_,@_RET__
+	
+ L_ @_XHERE
+	DW @_HERE_,@_EX___,TO_+@_HERE_,@_RET__
+	
+ L_ @_EVAL_
+	DW @_NOP__ 
+ L_ @_@EVAL   
+	DW @_TOKEN,@_DLDB_,@_IF___,@_DROP_,@_DOIT?,@_JUMP_,@_@EVAL
+	
+ L_ @_SEMIC 
+	DW @_comar,@_RET__  		; (;,
+
+ L_ @_clit_   
+	dw @_comar,@_lit__       ; (LIT,
+
+ L_ @_NUMBR
+	DW @_COUNT,@_NUM__,@_NZ??_,@_RET__
+	
+ L_ @_XZ??_
+	DW @_EX___
+ L_ @_Z??__
+	DW @_ZEQ__
+ L_ @_NZ??_
+	DW	@_ABRT?
+	@NAM  " ?"
+	DW	@_RET__
+
+ L_ @_DXEP_
+	DW @_DUP__
+ L_ @_XEP__
+	DW @_XCHG_,@_EXECU,@_POP__,@_RET__
+	
+ L_ @_TOKN?
+	DW @_TOKEN,@_XZ??_
+ L_ @_DLDB_				; DUP C@
+	DW @_DUP__
+ L_ @_LDB__
+  DW @_COUNT
+ L_ @_NIP__
+  DW @_PUSH_,@_DROP_,@_POP__,@_RET__
+  
+ L_ @_TOKEN
+	DW @_BL___
+ L_ @_WORD_
+	DW @_PARSE,@_TBUF_
+ L_ @_TOSTR	
+	DW @_DXEP_,@_MKSTR,@_LIT__,'`'
+ L_ @_SWPST
+	DW @_SWAP_,@_ST___,@_RET__
+ L_ @_PARSE
+	DW @_NOP__,@_ETIB_,@_LTIB_,@_PARS_,TO_+@_LTIB_,@_RET__
+
+ L_ @_HDICT
+    DW  @_HERE_,@_STR__
+ L_ @_TODIC
+	DW @_XDICT,@_MPUSH,@_RET__
+
+ L_ @_@_INI
+    DW  @_HDICT,@_REINI,@_EVAL_,@_REINI
+    DW  @_LPAR_,@_0____,TO_+@_LTIB_,@_RET__
+
+ L_ @_ABRT?
+	DW @_@STR_,@_SWAP_,@_IF___,@_DROP_,@_ERROR,@_ABORT
+
+ L_ @_COLON  
+	DW @_ALIGN,@_RPAR_          ; :
+ L_ @_HNTRY
+	DW @_HERE_
+ L_ @_ENTRY
+	DW @_0SWAP,@_TOKN?
+	DW @_XDICT,@_STRPU,@_STM__
+ L_ @_STM__
+  DW @_LIT__,-2,@_DXEP_
+ L_ @_ST___ 
+  DW @_PUSH_,@_RSTP_,@_RDROP,@_RET__
+
+ L_ @_SEMI_
+	DW @_SEMIC
+ L_ @_LPAR_				; INTERPRETTER
+	DW @_SETPT,@_?FIND,@_IF___,@_NUMBR,@_@EXEC,@_RET__
+
+ L_ @_RPAR_		; COMPILER
+	DW @_SETPT,@_?FNDC,@_DEC__,@_IF___,@RPAR2,@_@EXEC,@_RET__
+@RPAR2 DW @_?FIND,@_IF___,@@COMP_NUM,@_JUMP_,@_comar
+@@COMP_NUM:
+	DW @_NUMBR
+ L_ @_CMLIT	
+	DW @_cLIT_
+ L_ @_COMMA
+	DW @_XHERE
+ L_ @_STP__
+  DW @_PUSH_,@_RSTP_,@_POP__,@_RET__
+	
+ L_ @_TICK_ ;_LOCATE  '
+	DW @_XZ??_,@_TOKN?,@_JUMP_,@_?FIND
+	
+ L_ @_?FNDC
+	DW @_DXEP_,@_J____,@_INC__
+ L_ @_?FIND	
+	DW @_DICT_,@_FIND_,@_RET__
+
+ L_ @_0SWAP
+  DW @_0____
+ L_ @_SWAP_
+  DW @_PUSH_,@_XCHG_,@_POP__,@_RET__
+  
+ L_ @_STR__
+  DW @_PUSH_,@_RLDP_,@_XCHG_,@_POP__,@_RET__
+
+ L_ @_COUNT
+  DW @_PUSH_,@_RLDP_
+  RDEC_
+  DW @_XCHG_,@_POP__
+ L_ @_W_TOB 
+  DW @_LIT__,255
+ L_ @_AND__
+  DW @_NAND_,@_NOT__,@_RET__
+  
+ L_ @_1P___
+  DW @_NOT__,@_NEG__,@_RET__
+  
+ L_ @_1M___
+  DW @_NEG__,@_NOT__,@_RET__
+  
+ L_ @_I____
+  DW @_J____,@_RET__
+  
+ L_ @_MKSTR
+ L_ @_MPUSH
+ L_ @_@STR_
+ L_ @_STRPU
+  DW @_RET__
+  
+  
+;-----------------------------------------------
+
+freemem:
+  DW ENDMEM-FREEMEM-2
+  entry_  @_ENTRY,0,'=:'
+  DB 0
+EndMem:
+
+; --------------  END  ---------------
+
+ L_	@_END__
+
+    MyCseg  ends
+    end  Start
+

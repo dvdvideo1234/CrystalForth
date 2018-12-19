@@ -1,0 +1,6 @@
+$017E =: _JMP
+$018C =: _SKIP
+$01EC =: _EXECU
+$01EF =: _NEST
+$01F0 =: _RPUSH
+$01F6 =: _MAIN

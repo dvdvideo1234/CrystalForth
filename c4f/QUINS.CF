@@ -1,0 +1,27 @@
+: QUINS CR 0 ,< 
+{ X // IDX } FUNCTION QUIN  
+LOCALS/  
+    \ 8 CONST Q8  
+    4 CONST Q8  
+    Q8 BARY ROW  
+    Q8 BARY FROW  
+ Q8 2* BARY DIAG\ 
+ Q8 2* BARY DIAG/ 
+  : ADD_QUIN IDX 1+ X ROW C! ; 
+  0#> PUSH IDX FROW 
+      IXEC X IDX + DIAG\
+      IXEC Q8 IDX - X + DIAG/ ;  
+  N: TEST >, C@ OR ; 
+  N: SET >, 1 CSWAP! ; 
+  =, RESET >, 0 CSWAP! ;
+/LOCALS  
+  X Q8 - IF 
+    Q8 TIMES; 
+    J TO IDX  0 TEST 0<>;  
+    ADD_QUIN SET X 1+ QUIN RESET ;
+  THEN 
+  [ Q8 TAB? ] 0 Q8 1- RNG>; 
+    ROW C@ ALPHA EMIT   
+RETURN ;
+
+\ QUINS

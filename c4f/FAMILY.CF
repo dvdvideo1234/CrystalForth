@@ -1,0 +1,33 @@
+
+{ DOERS }
+: `WITH 
+  POP ' ,<  
+0 VECTOR `DO   
+
+: WITHZ 
+  `WITH 0 `DO 
+;
+
+: WITH' 
+  `WITH ' `DO 
+;            
+
+: WITH# 
+  `WITH >NUM `DO 
+;
+
+: WITH  
+  `WITH `DO 
+;              
+
+: WITH+ 
+  `WITH DUP `DO OVER+ 
+;
+
+: FAMILY 
+  WITH+ SWAP ..TIMES 
+;    
+
+: FAMILY# 
+  WITH# SWAP ..TIMES 
+;
