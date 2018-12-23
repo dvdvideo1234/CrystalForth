@@ -1,0 +1,107 @@
+Minimal bootstrap
+From http://groups.google.com/group/comp.lang.forth/browse_thread/thread/287c36f0f2995d49/10872cb68edcb526?#10872cb68edcb526
+
+---
+ FORTH Primitives Comparison (use a fixed width font)
+---
+3     primitives - Frank Sargent's "3 Instruction Forth"
+9     primitives - Mark Hayes theoretical minimal Forth bootstrap
+9,11  primitives - Mikael Patel's Minimal Forth Machine (9 minimum, 11 full)
+13    primitives - theoretical minimum for a complete FORTH (Brad Rodriguez)
+16,29 primitives - C. Moore's word set for the F21 CPU (16 minimum, 29 full)
+20    primitives - Philip Koopman's "dynamic instruction frequencies"
+23    primitives - Mark Hayes MRForth
+25    primitives - C. Moore's instruction set for MuP21 CPU
+36    primitives - Dr. C.H. Ting's eForth, a highly portable forth
+46    primitives - GNU's GFORTH for 8086
+58-255 functions - FORTH-83 Standard (255 defined, 132 required, 58 nucleus)
+60-63 primitives - considered the essence of FORTH by C. Moore (unknown)
+72    primitives - Brad Rodriguez's 6809 CamelForth
+74-236 functions - FORTH-79 Standard (236 defined, 147 required, 74 nucleus)
+94-229 functions - fig-FORTH Std. (229 defined, 117 required, 94 level zero)
+133-?  functions - ANS-FORTH Standard (? defined, 133 required, 133 core)
+200    functions - FORTH 1970, the original Forth by C. Moore
+240    functions - MVP-FORTH (FORTH-79)
+~1000  functions - F83 FORTH
+~2500  functions - F-PC FORTH
+
+FIXME   27 ?     - C. Moore's MachineForth
+
+For comparison:
+---
+8       commands - BrainFuck (small,Turing complete language)
+8     primitives - Stutter LISP
+8     primitives - LISP generic
+11     functions - OS functions Ritchie & Thompson PDP-7 and/or PDP-11 Unix
+14    primitives - LISP McCarthy based
+18     functions - OS functions required by P.J. Plauger's Standard C
+Library
+19     functions - OS functions required by Redhat's newlib C library
+28       opcodes - LLVA - Low Level Virtual instruction set Architecture
+51-56  functions - CP/M 1.3 (36-41 BDOS, 15 BIOS)
+56     functions - CP/M 2.2 (39 BDOS, 17 BIOS)
+40      syscalls - Linux v0.01 (67 total, 13 unused, 14 minimal, 40
+complete)
+71       opcodes - LLVM - Low Level Virtual Machine instructions
+92+    functions - MP/M 2.1 (92 BDOS, ? BIOS)
+102    functions - CP/M 3.0 (69 BDOS, 33 BIOS)
+~120   functions - OpenWATCOM v1.3, calls - DOS, BIOS, DPMI for PM DOS apps.
+150     syscalls - GNU HURD kernel
+170    functions - DJGPP v2.03, calls - DOS, BIOS, DPMI for PM DOS apps.
+206    bytecodes - Java Virtual Machine bytecodes
+290     syscalls - Linux Kernel 2.6.17 (POSIX.1)
+
+eForth primitives (9 optional)
+----
+doLIT doLIST BYE EXECUTE EXIT next ?branch branch ! @ C! C@ RP@ RP! R> R@ >R
+SP@ SP! DROP DUP SWAP  OVER 0< AND OR XOR UM+ TX!
+?RX !IO $CODE $COLON $USER D$ $NEXT COLD IO?
+
+9 MRForth bootstrap theoretical
+----
+@ ! + AND XOR (URSHIFT) (LITERAL) (ABORT) EXECUTE
+
+9 Minimal Forth (3 optional)
+----
+>r r> 1+ 0= nand @ dup! execute exit
+
+drop dup swap
+
+23 MRForth primitives
+----
+C@ C! @ ! DROP DUP SWAP OVER $>$R R$>$ + AND OR XOR (URSHIFT) 0$<$ 0=
+(LITERAL) EXIT (ABORT) (EMIT) (KEY)
+
+20 Koopman high execution, Dynamic Freq.
+----
+CALL EXIT EXECUTE VARIABLE USER LIT CONSTANT 0BRANCH BRANCH I @ C@ R> >R
+SWAP DUP ROT + = AND
+
+46 Gforth
+----
+:DOCOL :DOCON :DODEFER :DOVAR :DODOES ;S BYE EXECUTE BRANCH ?BRANCH LIT @ !
+C@ C! SP@ SP! R> R@ >R RP@ RP! + - OR XOR AND 2/ (EMIT) EMIT? (KEY) (KEY?)
+DUP 2DUP DROP 2DROP SWAP OVER ROT -ROT UM* UM/MOD LSHIFT RSHIFT 0= =
+
+36 eForth
+-------
+BYE ?RX TX! !IO doLIT doLIST EXIT EXECUTE next ?branch branch ! @ C! C@ RP@
+RP! R> R@ >R SP@ SP! DROP DUP SWAP OVER 0< AND OR XOR UM+ $NEXT D$ $USER
+$COLON $CODE
+
+BrainFuck
+-------
+
+> < + - . , [ ]
+
+Stutter LISP
+----
+car cdr cons if set equal lambda quote
+
+generic LISP
+----
+atom car cdr cond cons eq lambda quote
+
+LISP, McCarthy based
+----
+and atom car cdr cond cons eq eval lambda nil quote or set t

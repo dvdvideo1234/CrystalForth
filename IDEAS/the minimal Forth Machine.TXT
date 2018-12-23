@@ -1,0 +1,291 @@
+Hi, Forth Lovers, how about a distributed problem solving session?
+The quest is to find `the minimal Forth Machine'. What is the minimal set
+of operations such a machine must implement?
+
+I have started to attach this problem. My first group of operations to
+study is the arithmetric operations, thus the sub-problem is; What is
+the minimal set of operation to realize + - * /mod mod /?
+
+Sofar I need:
+   not xor 
+   0> 0< 0= 
+   1+ 1- 
+   dup swap rot drop 
+   >r r> 
+   if else then
+   tail-recurse ( compiles a branch to the beginning of the definition)
+
+This list can be minimized further by defining control structure, 
+stack, logical, and memory operations.
+
+The goal is to design this minimal machine and the definitions need
+so that any teacher out there can take a net-list description of the
+machine and a memory specification (in for instance EDIF) and hand it
+over to students in a computer architecture/digital design classes.
+
+"Forth for the Masses" -- Mikael Patel
+
+----8<----8<----8<----8<----8<----8<----8<----8<----8<----8<----
+
+( Arithmetric operations with a small set of primitives, Mikael Patel, 1989)
+
+( Requires: not xor 0> 0< 0= 1+ 1- dup swap rot drop >r r> if else then)
+( Implements: 0 1 negate abs + - * /mod / mod)
+
+0 constant 0                                ( A bit crazy but...)
+1 constant 1                                ( ...you an't seen nothing yet)
+
+: negate ( x -- y)
+  not 1+ ;                                ( Invert and increment)
+
+: abs ( x -- y)
+  dup 0< if negate then ;                ( Absolute value)
+
+: + ( x y -- z)
+  dup 0=                                ( Check if there is still more to do)
+  if drop                                ( Return result)
+  else
+    dup 0>                                ( Check direction)
+    if 1- swap 1+ swap                        ( Decrement and increment)
+    else
+      1+ swap 1- swap                        ( Increment and decrement)
+    then
+    tail-recurse                        ( And go again)
+  then ;
+
+: - ( x y -- z)
+  negate + ;                                ( Negate and add)
+
+: (*) ( a x y -- z)
+  dup 0>                                ( Check if there is still more to do)
+  if 1-                                        ( Decrement counter)
+    swap rot over + swap rot                ( Add to result and put back in order )
+    tail-recurse                        ( And go again)
+  else
+    drop drop                                ( Drop temporary parameters)
+  then ;
+
+: sign ( x y -- s)
+  0> swap 0> xor ;                        ( Return sign of arithmetric operation)
+
+: * ( x y -- z)
+  dup 0=                                ( Check for zero)
+  if swap drop                                ( Drop parameter and return zero)
+  else
+    over over sign >r                        ( Save the sign of the result)
+    0 rot abs rot abs (*)                ( Do it the hard way)
+    r> if negate then                        ( Check if negative then negate)
+  then ;
+
+: (/mod) ( q r y -- r q)
+  swap over - dup 0< not                ( Generate next reminder and check)
+  if swap                                ( Put reminer back into place)
+    rot 1+ rot rot                        ( Increment quotient)
+    tail-recurse                        ( And go again)
+  else
+    + swap                                ( Restore and return result)
+  then ;
+
+: /mod ( x y -- r q)
+  dup 0=                                ( Check if divide by zero)
+  if drop drop 0 0                        ( Return zero)
+  else
+    over >r                                ( Save sign of divident)
+    over over sign >r                        ( Save sign of result)
+    0 rot abs rot abs (/mod)                ( Setup initial quotient)
+    r> if negate then                        ( Check sign of quotient)
+    r> if swap negate swap then                ( Check sign of reminder)
+ then ;
+
+: / ( x y -- q)
+  /mod swap drop ;                        ( Do it and drop reminder)
+
+: mod ( x y -- r)
+  /mod drop ;                                ( Do it and drop quotient)
+
+ 
+
+
+PAul STevens -- MACC 	
+
+11.08.89
+Превод на съобщението на български  
+
+In article <13...@massormetrix.ida.liu.se>, mi...@massormetrix.ida.liu.se (Mikael Patel) writes...
+>Hi, Forth Lovers, how about a distributed problem solving session?
+> 
+>The quest is to find `the minimal Forth Machine'. What is the minimal set
+>of operations such a machine must implement? 
+> 
+>I have started to attach this problem. My first group of operations to
+>study is the arithmetric operations, thus the sub-problem is; What is
+>the minimal set of operation to realize + - * /mod mod /?
+> 
+>Sofar I need:
+>   not xor 
+>   0> 0< 0= 
+>   1+ 1- 
+>   dup swap rot drop 
+>   >r r> 
+>   if else then
+>   tail-recurse ( compiles a branch to the beginning of the definition)
+> 
+I don't think you really want a minimal machine.  I bet it would
+amount to no more than 4 words, including IF and THEN.  One of the
+words might be -!, which subtracts a memory location from the
+top of the stack and puts the result both on the top of the stack
+and back in the memory location.
+       -!    ( 16b addr .. 16b-(addr))     (addr) = 16b-(addr)
+Let's try one:
+        variable JUNKA   ( scratch area for several words )
+        variable JUNKB   ( scratch area )
+        : DROP    ( 16b  ..  )
+            JUNKA -!   JUNKA -!       ( clear junka and stack entry )
+            JUNKB JUNKA -!            ( junka and tos both = address of junkb )
+            -! JUNKB -!               ( clear tos and junkb )
+            JUNKA -!                  ( junka=-junkb )
+            JUNKB -! JUNKB -!         ( clear junkb and tos )
+            JUNKA -! -! ;             ( subtract 0 from second entry on stack)
+                                      ( leaves it unchanged and drops entry )
+Could get inefficient!
+
+For example, you certainly don't need ROT in your example:
+
+                    : ROT >R SWAP R> SWAP ;
+
+In the limit you wind up with something about as efficient as a Turing
+machine.  But very complete.
+
+ 
+
+
+Stephen D Hawley 	
+
+11.08.89
+Превод на съобщението на български  
+
+In article <22...@dogie.macc.wisc.edu> ste...@vms.macc.wisc.edu (PAul STevens -- MACC) writes:
+>In article <13...@massormetrix.ida.liu.se>, mi...@massormetrix.ida.liu.se (Mikael Patel) writes...
+>In the limit you wind up with something about as efficient as a Turing
+>machine.  But very complete.
+I think perhaps you missed the point.  The original article mentioned that
+this would be for student use to implement.  Efficiency is not really the
+question, but educational value.
+
+For example, I took an architecture class 2 semesters ago that covered the
+advantages of RISC machines as part of the curriculum.  We were presented
+the a machine called the Machester Mark I (which was a real machine --the
+prof. gave us a program that simulated it).  It had the following instruction
+set:
+                BRA addr        -branch unconditional to addr
+                BRL disp        -branch uncond with disp as a displacement
+                LNG addr        -load the negation of the contents of addr
+                STA addr        -store into addr
+                SUB addr        -subtract the contents of addr
+                SKN                -if negative, skip next instruction
+                HLT                -halt
+
+7 instructions.  That's all.  The prof had a contest to write the most
+compact factorial.  Mine came in 3rd (3 bytes longer than the winner).
+I also wrote an optimizing assembler for the machine.
+Below is my entry, for your amusement and perusal.
+
+This coming semester, I will be implementing a compiler for a FORTH-like
+language.  Unlike most FORTH's, it will be suited to an environment which
+doesn't take kindly to you poking around at the address space, FORGET
+will not be so unforgiving (ie, only the function you want to forget will
+go away, not everything defined afterwards), and much more planned.
+
+Why?  Purely for educational reasons.
+
+Oh dear.  I seem to have gone off the deep end here.
+
+* factorial program for the MM I
+* Steve Hawley
+* has to be assembled at location 1!!
+* uses the fact that the data for "zero" is really just a branch to 1
+* manchasm -a 1 ... ...
+fact    lng n
+        skn
+        hlt
+        sta 501
+        lng zero
+        sta 500
+        bra ment
+mult    lng 500
+        sub r
+        sta 500
+        lng 500
+        sta 500
+        lng 501
+        sta 501
+ment    lng 501
+        sub one
+        sta 501
+        skn
+        bra mult
+        lng 500
+        sta r
+        lng r
+        sta r
+        lng n
+        sta n
+        lng n
+        sub one
+        sta n
+* data section.  dat is a pseudo op
+zero    dat 0 * this is actually a branch to location 1!!
+one     dat 1
+n       dat 4
+r       dat 1
+
+Steve Hawley
+s...@flash.bellcore.com
+"Up is where you hang your hat."
+        --Jim Blandy, computer scientist
+
+ 
+
+
+Lassila Timo-Pekka 	
+
+16.08.89
+Превод на съобщението на български  
+
+In article <13...@massormetrix.ida.liu.se> mi...@massormetrix.ida.liu.se (Mikael Patel) writes:
+
+> ( Arithmetric operations with a small set of primitives, Mikael Patel, 1989)
+> ( Requires: not xor 0> 0< 0= 1+ 1- dup swap rot drop >r r> if else then)
+                      ^^          ^^          ^^^
+
+> ( Implements: 0 1 negate abs + - * /mod / mod)
+How about ...
+
+: >0 dup <0
+  if drop 0
+  else =0
+    if 0
+    else 1
+    then
+  then ;
+
+: 1- not 1+ not ;
+
+: rot >r swap r> swap ;
+
+
+> : (*) ( a x y -- z)
+>   dup 0>                                ( Check if there is still more to do)
+>   if 1-                                        ( Decrement counter)
+>     swap rot over + swap rot                ( Add to result and put back in order )
+               ^^^^
+And you forgot this.
+
+: over >r dup r> swap ;
+
+
+--
+Timo-Pekka Lassila            # Tampere University of Technology 
+                              #     /Signal Processing Laboratory
+t...@tut.fi                     # PO Box 527, SF-33101 Tampere, Finland
+mcvax!tut!tp                  #

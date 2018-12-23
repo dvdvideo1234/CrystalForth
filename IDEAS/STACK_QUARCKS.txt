@@ -1,0 +1,309 @@
+https://www.reddit.com/r/Forth/comments/599lb4/symbols_for_stack_operators/
+
+Symbols for Stack Operators
+I was looking at various Unicode symbols today[1], and noticing that there are symbols for Arithmetic, Calculus, Logic, Set Theory, even Music. Stack manipulation seems pretty fundamental to me. I wonder why standard symbols have never been put forth for them?
+Of course, what are the fundamental stack operations?
+A paper called Stack Quarks by Rob Chapman[2] gives one way to look at it, though it is very hardware oriented. He gives six elemental operations which can be combined to make the operations we use in Forth. For example, a DROP is DIP NIP, and DUP is a NUP DRIP. But I don't see how he accounts for, say, swapping the NOS and the top of the remaining stack (the third item).
+In any case, the operations from a coder's perspective are probably the more pertinent operations for a symbolic notation, the fundamental operations seem to me to be:
+drop
+dup
+swap
+push (>r)
+pull (r>)
+With these five I think all others are possible. Do you agree?
+And if we were to assign a standard set of operator symbols to the fundamental stack manipulators, what do you think they should be?
+[1] https://en.wikibooks.org/wiki/Unicode/List_of_useful_symbols [2] http://clubweb.interbaun.com/~rc/Timbre/ContentPages/Timbre/SQP/StackQuarksPaper.html
+19 Comments
+Share
+
+Save
+81% Upvoted
+This thread is archived
+New comments cannot be posted and votes cannot be cast
+SORT BY
+Best
+
+
+level 1
+[deleted]
+7 points
+·
+2 years ago
+I find "push" and "pull" more sensible than ">R" and "R>", but then I've never liked all these squiggly symbols in languages.
+Share
+Report
+Save
+
+
+level 1
+sotolf2
+3 points
+·
+2 years ago
+At least they should be something easy to type on a standard keyboard, or else they won't be used.
+Share
+Report
+Save
+
+
+level 2
+transfire
+2 points
+·
+2 years ago
+That doesn't need to be a limitation in this case, just as most math notations can't be written with a standard keyboard either. The notation would be useful for papers, rather than actual coding.
+At least at first. Eventually I think it will get easier to type some alternate characters on keyboards. The mechanical keyboard community is ahead of times in this regard using layers. It just needs one of the big companies (Apple, Google, etc) to push it as a standard. But then the question becomes what layers will be standard. If there are no standard stack operators by then, they are sure not to be included.
+Share
+Report
+Save
+
+
+level 3
+sotolf2
+3 points
+·
+2 years ago
+Layers are standard on European keyboards, so you can write stuff like <v> with just AltGr z u i for example.
+Share
+Report
+Save
+
+
+level 1
+phalp
+2 points
+·
+2 years ago
+I was thinking that if we're willing to do something a bit less like standard mathematical notation, string diagrams like these would be perfect for a stack language. dup would be the splitting of a string, swap would be two strings crossing, drop would be a string terminating. push and pull are actually a bit different from the others since in Forth they refer to an entirely different stack, so their diagrammatic appearance would be different depending on whether you want to show this stack or not. You'd need to know stack effects for each word though.
+Share
+Report
+Save
+
+
+level 2
+transfire
+2 points
+·
+2 years ago
+The swap symbol makes a lot of sense, and dup too. I think drop would be a bit harder -- what does a "terminating string" look like exactly?
+Share
+Report
+Save
+
+
+level 3
+phalp
+2 points
+·
+2 years ago
+Basically the string just ends. You can put a little circle on the end or something to make it look different from a string which just hasn't been connected yet.
+Share
+Report
+Save
+
+
+level 2
+pointfree
+1 point
+·
+2 years ago
+One could type characters not on an typical keyboard by typing more than one letter and only outputting that single special character when the required combination of letters has been pressed.
+( enter minus to make a line segment) --
+( upon entering > convert --> to an arrow character) >
+( to delete the arrow character press backspace or delete only once)
+Does anyone know of unicode characters that could do the string diagrams? The string diagram thing is very similar to the approach I've been taking with gelForth's forth to hardware compiler. When compiling to hardware the Forth code can be thought of as running in parallel.
+https://www.reddit.com/r/Forth/comments/587dfh/high_stack_finegrain_concurrency/d8ybgi0/
+a b + dup c / swap d * *
+can be rewritten as ((a + b) / c) * ((a + b) * d)
++ associates with two parameters so that's two parallel segments (a, b) in ladder logic, string diagrams, and gelForth. Stack effects are cumulative, so only the stack effects of the primitives need to be explicitly defined.
+http://sub.allaboutcircuits.com/images/04014.png
+In-series gates are words that depend on the stack effects of a previous word like one gate feeding into another.
+Although, in gelForth, swap is a word that does its only work at compile/synth-time. It just changes where the two subsequent branches of logic are compiled/synthesized to, in other words what prior branches they are associated with.
+PSoC 5LP routing works by short circuiting so that works with the same Boolean logic as synthesizing to PLD's using your same Forth words, although, allot will be happen to be allotting space on the routing fabric, not on a PLD in that case. allot may have logic spill over into other PLD's when the previous ones are full. By the way, there's no conditionals in allot it's all just math formulas.
+Apologies for the digression.
+Share
+Report
+Save
+
+
+level 3
+phalp
+2 points
+·
+2 years ago
+·
+edited 2 years ago
+I don't see mapping 1-to-1 to Unicode characters as being the best way to do string diagrams. Part of the idea of the diagram is that although it's got exactly the structure of any other Forth code, there's some visual flexibility in the layout, and the vertical dimension maps to stack depth. You can render it down to characters but you could just as well produce a graphical version from the same code.
+a-+-T------*--
+b-- L-?---*-
+    c-- d--
+Condensed version:
+a+T---*--
+b-L?-*-
+  c-d-
+Share
+Report
+Save
+
+
+level 4
+transfire
+2 points
+·
+2 years ago
+Could you explain this more. I don't quite understand the diagrams.
+Share
+Report
+Save
+
+
+level 5
+phalp
+2 points
+·
+2 years ago
+First of all, make sure the diagrams are showing up in a fixed-width font and that the line-drawing characters are coming out right. Otherwise they're nonsense. Second, it may help to know that the code being diagrammed is a b + dup c / swap d * *.
+Ok, so here's another version of the diagram. All three are identical up to horizontal spacing. I increased the spacing on this one to hopefully make it easier to read.
+a---+--T----------------*--
+  b--  L----?--------*---
+         c---     d---
+The symbols a, b, +, c, d, and * are the same as in the Forth code. ? is simply division (I used this symbol because my first diagram versions used / to represent part of a wire). There are two further symbols:
+  --T--     -----
+    L--     -----
+    dup      swap
+My concept is that each operator takes a number of items from the stack, represented by strings going into its left side, and leaves a number of items on the stack, represented by strings coming out its right side. Since dup takes one items and leaves two, it has one string coming in on the left, and two going out on the right. Since swap takes two and leaves two, it has two strings on each side. The math operators all take two and leave one. I used the vertical double line in an attempt to show that the operator is two "lines" high. So if I had an operator that took 3 stack items and left 2, it would appear like one of the following:
+--?--       --T--
+--+--       --?--
+---         ---
+(It's not important which one. That's just an aesthetic choice. I did some sketches on paper, and IMO the easiest-to-read design is to simply circle the operators and gently bend the strings to meet them.)
+Ok, symbols having been explained, notice that in my wide-spaced diagram in this post, all the symbols are horizontally in the same order as in the standard Forth code. That's the starting point. In fact, if I take out the lines you can see that, ignoring vertical position, it's exactly the Forth code.
+a   + dup     swap      *  
+  b         ?        *   
+         c        d   
+But paying attention to vertical position again, the vertical positions are indicating stack depth relative to the start of this code. a is on the first line, meaning we've pushed one item onto the stack. b is on the second, meaning the stack depth is now two. + is back on the first line, meaning that there is now only one item on the stack again, and so on. Now I'll paste in the version with strings again:
+a---+--T----------------*--
+  b--  L----?--------*---
+         c---     d---
+The strings simply connect each word to the one which consumes the stack items it leaves. This isn't a free-form connection of nodes, like you see in Pure Data for example. It's simply a way of depicting a stack language, which the computer mechanically derives from the stack effects of the words (we assume stack effects are known).
+Now that we know which word follows which, horizontal spacing isn't quite so important. Sometimes in a piece of Forth code one word will precede another, but the latter won't actually depend on the output of the former. a and b are like that in this code. So we can optionally adjust the spacing to neaten up the diagram like so:
+a--+--T------------*--
+b---  L--?------*---
+      c---   d---
+I wondered how compact it could go, so I tightened up the spacing to the maximum. I personally like to be able to fit a lot of code on-screen so I wanted to see how much screen space you'd lose this way as compared to standard Forth formatting. As a matter of fact, both this formatting and the standard formatting have an area of 24.
+a+T---*-
+b-L?-*-
+  c-d-
+Share
+Report
+Save
+
+
+level 6
+transfire
+1 point
+·
+2 years ago
+That's super cool.
+Share
+Report
+Save
+
+
+level 1
+9xlba3
+2 points
+·
+2 years ago
+In between following this discussion, I asked myself whether and in which context stack manipulating words are necessary. I came to the observation that there are required because such words combine two functional aspects of the language:
+The need to access underlying stack elements
+Stack balancing.
+The necessary of the last aspect is principal avoidable with the rule, that underlying stack elements are discarded except the topmost ones which where pushed by the executed word This lead to the situation where the stack does not need to be explicitly balanced.
+Then with regard to aspect one, only one stack manipulation word is necessary, PICK.
+This word should of course be implemented as primitive and can be recognized though an easy accessible symbol: ^ (strg+shift+U)
+Share
+Report
+Save
+
+
+level 2
+transfire
+1 point
+·
+2 years ago
+Ah, a Belt Machine. Interesting.
+However without DROP, I imagine it must get pretty hard to track where previous parameters are on the stack so one can PICK them.
+Share
+Report
+Save
+
+
+level 3
+9xlba3
+1 point
+·
+2 years ago
+No, the Belt model is based on back indexing of the first and second operation parameter whereas in my proposal only the first parameter is indexed and the second one as well as destination location is always the top-of-stack position. It resembles an accumulator-stack model (more like the IA32 FPU stack is addressed).
+Share
+Report
+Save
+
+
+level 4
+transfire
+1 point
+·
+2 years ago
+I see. I was really just referring to the idea of the stack items "falling off" the back of the stack -- no drop. It's like a belt machine.
+Still, isn't there some difficulty in figuring out the subsequent picks if nothing is ever dropped? Maybe it is not so bad. I need to come up with a good example and try it out.
+Share
+Report
+Save
+
+
+level 5
+9xlba3
+2 points
+·
+2 years ago
+·
+edited 2 years ago
+As Forth allows concatenate programming, it is possible to transform code sequences into sequences of word definitions which consume either zero up to 3 parameters, These are:
+Nullary ( - )
+Unary ( ...-n )
+Binary ( ...-n1,n2 )
+Ternary ( ...-n1,n2-n3 )
+words.
+The transformation can naturally be done at edit (alias parsing) time and is trivial implementable. As the number of remaining stack items is not important as long as stack growing is limited to a fixed depth, I think the easiest approach is simply restricting the number of return parameters to three.
+Share
+Report
+Save
+
+
+level 1
+[deleted]
+1 point
+·
+2 years ago
+·
+edited 2 years ago
+I made something of sorts one time. But remembering the APL/J/K debacle, i went with ASCII.
+https://groups.google.com/forum/#!topic/comp.lang.forth/BSiqhUolPC4
+Share
+Report
+Save
+
+
+level 2
+transfire
+2 points
+·
+2 years ago
+So your is:
+,   drop
+"   dup
+~   swap
+^   over
+>   @
+<   !
+
+I've thought about those too, but I think it would be best to have something more recognizable -- these are so common in other uses, like natural language writing.

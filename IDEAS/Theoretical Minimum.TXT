@@ -1,0 +1,34 @@
+The Theoretical Minimum: a very short review
+I plowed through Susskind and Hrabovsky's The Theoretical Minimum: What You Need to Know to Start Doing Physics over the last month.
+
+Here's the publisher's blurb:
+
+The Theoretical Minimum is a book for anyone who has ever regretted not taking physics in college—or who simply wants to know how to think like a physicist. In this unconventional introduction, physicist Leonard Susskind and hacker-scientist George Hrabovsky offer a first course in physics and associated math for the ardent amateur. Unlike most popular physics books—which give readers a taste of what physicists know but shy away from equations or math—Susskind and Hrabovsky actually teach the skills you need to do physics, beginning with classical mechanics, yourself. Based on Susskind’s enormously popular Stanford University-based (and YouTube-featured) continuing-education course, the authors cover the minimum—the theoretical minimum of the title—that readers need to master to study more advanced topics.
+An alternative to the conventional go-to-college method, The Theoretical Minimum provides a tool kit for amateur scientists to learn physics at their own pace.
+
+The publisher's description is accurate, and the book delivers on the promise. It is well-written, clear, beautifully typeset, and covers the topics it sets out to cover.
+
+The problem with this book, I think, is similar to that faced by the MOOC techniques (Udacity, etc.): it is simply very hard for students, even extremely motivated students, to master this material by reading a book. To really learn to do physics, you need to:
+
+Hear it explained, in a variety of ways, from a variety of perspectives
+Ask questions; stop and get a tough point explained in a different manner when the first explanation didn't click
+Discuss the topics with other students
+Attempt homework problems on your own; have them graded; return to the questions you got wrong, attempt them again, and continue until you can produce the solution yourself.
+See examples of how to apply these techniques to a variety of problems
+And so forth.
+Perhaps a reasonable approach would be to combine a text such as The Theoretical Minimum with Professor Susskind's video lectures, then blend in something like Professor Michael Scatz's Physics I class on Coursera, and also add in a more in-depth textbook for additional substance.
+
+But time is short; I enjoyed reading Susskind and Hrabovsky, and I'm now moving on to whatever piques my interest next.
+
+Posted by Bryan Pendleton at 10:00 AM 
+2 comments:
+
+
+George HrabovskyJanuary 3, 2014 at 3:37 AM
+I learned physics by reading The Feynman Lectures on Physics on my own and discussed it with no one. I asked questions and then went out and found the answers. I worked with professors at the University of Wisconsin at Madison, who seemed quite willing to talk to me when I was 14. I wished that I had had this book back then. That was why I wrote the book, to put something like this out there. But I have been teaching people how to do physics since 1980. Your point are not valid for a short book, like this one—there was no space for tons of examples. That was the reason for the problems we added to the book.
+
+Reply
+Replies
+
+Bryan PendletonJanuary 3, 2014 at 9:58 AM
+Thanks for the reply! I'm no longer sure what my point was (it was 9 months ago that I read and enjoyed your book), but if I had one, it was merely that it seemed the publisher (but not you) was overstating the case by claiming this was "An alternative to the conventional go-to-college method". Like you, I wish that I had had this book back then, and I'm pleased that you've made it available for students of the future!

@@ -1,0 +1,373 @@
+Minimal FORTH compiler and tutorial
+Rich Jones writes: I wanted to understand how FORTH is implemented, so I implemented it and wrote a step-by-step tutorial on what every bit does.
+
+The tutorial is inside a (literate) code file you can download and run.
+
+I've been told recently by people I trust that it is about time I learned Forth. This may be just what I was waiting for...
+
+By Ehud Lamm at 2007-09-13 20:48 | General | other blogs | 124808 reads
+Comment viewing options
+    Save settings
+Select your preferred way to display the comments and click "Save settings" to activate your changes.
+Factor
+Factor seems like it has the good parts of Forth with the good parts of Joy. While not as "canonical" as Forth, it looks like it may be a good place to start.
+By Derek Elkins at Thu, 2007-09-13 20:55 | login or register to post comments
+What's interesting specifically about Forth...
+...is the low level machinery required to get it to work - or the lack of it. That's what makes a well documented minimal Forth like this quite interesting. Writing a Forth from the ground up is a fascinating experience. After just a few lines of assembler you're defining Forth words and writing hybrid Forth/Assembler. I know of no other practical language that can be bootstrapped so quickly.
+By sigfpe at Thu, 2007-09-13 21:39 | login or register to post comments
+You don't want that to be all...
+If that were the only thing interesting about Forth, then it wouldn't be worth anyone's time. I don't care about being able to quickly bootstrap a language I don't want to use.
+Also, my impression is that none of the concatenative languages are far behind Forth in that regard.
+By Derek Elkins at Thu, 2007-09-13 22:19 | login or register to post comments
+Nowadays there are a few concatenative languages...
+I don't care about being able to quickly bootstrap a language I don't want to use.
+I don't think Forth would be a good language choice for you :-)
+By sigfpe at Thu, 2007-09-13 22:47 | login or register to post comments
+What's REALLY interesting about Forth
+Rich Jones remarks that, like Lisp is the ultimate high-level language, Forth is the ultimate low-level language. He's partially right, because what is *really* interesting about Forth is its "low floor, high ceiling" approach to abstraction levels. On one hand, Forth has pointers, manual memory control and a stack-centered parameter mechanism, all of which are hallmarks of low-level languages -- they require the programmer to think in terms that have nothing to do with the problem domain (unless the problem domain is, say, operating systems development). But on the other hand, the combination of implicit calling and implicit parameter passing with the very easy definition of new words allows a Forth programmer to scale the level of abstraction up. The result is a language which, despite its otherwise low-level nature, is used in largely the same manner as Lisp: Forth programs are made up of hierarchies of specialized little languages.
+Forth is not my favourite language, mostly because I'm no fan of manual memory management. I'd also prefer a more functional touch; a language like Joy gets closer to what I'd want in a stack language. Forth is interesting and unique, though, and the literature on it can be very thought-provoking for those of us who, like me, aren't used to thinking in a compositional/concatenative/stack-based style.
+By Simon Kongshoj at Fri, 2007-09-14 08:06 | login or register to post comments
+compactness of representation
+Basing this purely on hearsay, I'm told another interesting aspect of Forth is its apparent sweet spot between code size and runtime efficiency. (Space consumption is very important in an age where processor speed dwarfs memory access speed--or worse, network access speed.)
+For example, I remember Marc Feeley telling me several years ago that in his experience implementing Scheme on tiny devices, byte code was a great code representation, because it tended to be more compact to store than compiled assembly; the runtime cost of byte-code interpretation was offset by the savings (both in space and time) over larger compiled binaries.
+Similarly, I've heard great success stories (that I probably don't have the right to talk about publicly in any detail) in amazingly compact code size by re-implementing systems in Forth.
+By Dave Herman at Thu, 2007-09-13 23:04 | login or register to post comments
+compactness, NEXT, INLINE
+I was wondering about this.
+Basically this FORTH uses the classical indirect threaded code model, so when calling a series of assembler primitives, each primitive is essentially "joined" by the NEXT macro. The NEXT macro is 3 bytes of x86 code and consists of two memory reads and a jump. I haven't measured anything, but I should think that compares favourably to the usual CALL/RET sequence. (More discussion and a link to a page of actual benchmarks)
+For FORTH words calling other FORTH words we have to go through DOCOL and EXIT which involves more overhead (in particular, pushing and popping the return stack). So one thought I had would be to implement an INLINE compiler directive which would INLINE the next word (but it would only work with FORTH words, although that is easy to check). Using the examples from the tutorial:
+: QUADRUPLE INLINE DOUBLE INLINE DOUBLE ;
+would directly expand into a definition equivalent to:
+: QUADRUPLE DUP + DUP + ;
+That gets rid of the DOCOL/EXIT overhead for each inlined word.
+Note that I haven't tried to implement INLINE so perhaps there are other problems that I haven't foreseen. INLINE certainly wouldn't work for recursive words, but FORTH is very low-level like this and it assumes smart programmers.
+Rich.
+By Richard W.M. Jones at Thu, 2007-09-13 23:32 | login or register to post comments
+One optimization you can
+One optimization you can make in the colon compiler is to check that the called word has a "small enough," linear implementation. For example, if there are no control flow words in the invoked word (straight-ahead execution) and its length falls below a certain level, then just go ahead and inline it anyway.
+If the compiler is aware of the CPU architecture it's compiling for, it can even do "performance inferencing" -- with straight-ahead code, you can infer how long a piece of code will take, provided you know the latencies of the subordinate words used. This can allow the compiler to make a more intelligent decision on when to or not to inline.
+By sfalvo at Fri, 2007-09-14 18:31 | login or register to post comments
+Exercises
+Thanks, it's a good idea.
+I'm thinking in terms of assembling (pun intended) a set of exercises around this. The ones I've thought of so far:
+Implement INLINE
+Implement automatic inlining (as in the comment above).
+Implement SEE.
+Make ' (TICK) work in immediate mode.
+Make the control structures like IF work in immediate mode.
+Add strings as primitives to the language. Most of the groundwork for this is done already.
+Add TRY .. WITH (exceptions). Fairly simple I think - the RAISE word just needs to unwind the return stack.
+Add dynamic memory management. Start with a primitive for accessing Linux system calls, and then build something on top of this using mmap or sbrk to allocate space, either for ad-hoc allocations (as in C's malloc) or just for extending the space for user-defined words.
+Garbage collection (hey, why not?).
+Implement CREATE DOES> and reimplement : and ; in terms of CREATE.
+and then lots of tidying up such as implementing the rest of
+ANS FORTH, like a proper '.' (dot), VARIABLE, ALLOT, ...
+By Richard W.M. Jones at Fri, 2007-09-14 19:02 | login or register to post comments
+Garbage Collection
+There is a Garbage Collection package available here for Forth. I used it in a project a few years back and it worked quite well
+By doublec at Sat, 2007-09-15 03:54 | login or register to post comments
+Speaking of Forth
+Not sure if it helps, but Ian Osgood has been doing a Forth translation for SICP chapter #1. Personally, I've never been able to figure out how to go from basic forth stuff into higher levels of abstraction.
+By Chris Rathman at Thu, 2007-09-13 22:03 | login or register to post comments
+First, write in a
+First, write in a predominantly horizontal style. If you write your code vertically, as one would do with Lisp or C, you tend to write unmaintainable trash, from which Forth gets its "write-only" reputation from.
+Knowing that you'll write horizontally, just as English sentences are written, try to remember that you're defining words with :. Like a dictionary, you want your definitions to be kept as short as possible. Try to use no more than two lines of code for each definition.
+Then, knowing that each definition is to be kept short, you start to realize, you really wish that you had pre-defined Forth words for various concepts so that you can fit everything into a line. This should be an "aha!" moment for you, because it is this nugget of wisdom that gives rise to evolving DSLs in Forth.
+For example, let's say that you wanted to open a dialog box with some warning text, and OK and a CANCEL button. It would be really neat if you could do something like this:
+: makeDialogBox 
+    defineDialogAs anIcon theAdmonition nextRow
+    S" OK" ['] do-it makeButton S" Cancel" ['] abort-it makeDefaultButton construct ;
+Words like defineDialogAs, anIcon, etc. are all perfectly valid Forth words, even if they aren't yet defined. (Obviously, you'll eventually have to define them.) Because the Forth environment evaluates strictly from left to right (unless altered by a custom-defined control-flow primitive), you'll tend to make use of bracketing words. In the above example, defineDialogAs is used to "start" the definition of a dialog box widget, while the word construct is used to terminate it. Hence, an empty dialog box could be defined with : makeEmptyDialog defineDialogAs construct ;.
+To re-use an earlier example in these comments, it's relatively trivial to write something like:
+: double   dup + ;
+: quadruple  double double ;
+But, sometimes, it's nice if you didn't have to do this. So, using the power of wishful thinking, we might want to write:
+: quadruple   twice: dup + ;
+The key word here is in twice:. How do we implement it? Knowing that most Forth systems expose the return (aka partial continuation) stack to you, it's relatively easy:
+: call   >r ;
+: twice:   r> dup call call ;
+Now, you can use twice: whereever you want. I leave it as an exercise to the reader how to generalize this to take arbitrary parameters. :)
+Another good metric is that if your word needs to process more than the three top-most items on the stack, you will benefit strongly by refactoring the word. This is why it is very rare to find Forth words that consume more than three cells on the data stack at a time.
+Perfect Forth code uses single words to express single concepts. It is entirely possible to write Forth software so that instead of defineDialogAs, you'd write something like define dialog as. There is a point of diminishing returns, however. I personally advocate using well-named words (either camelCaps or dashed-words-like-lisp) for public words, and single word names for internal words.
+Note that Forth also lets you redefine words too, allowing for contextually-sensitive definitions. One use of these is to address the issue of Forth's modularity. Some say that Forth lacks modularity since it lacks encapsulation. However, being able to redefine words goes a long way towards making Forth more modular, on par at least with the likes of Pascal, if not better. For example:
+: foo   ... doSomethingHere ... ;   ( Yes, ... is a valid Forth word. :)
+: publicFunctionNumber1   ... foo ... ;
+
+( in another module, loaded in a galaxy far, far away... )
+
+: foo   ... doSomethingELSEHere ... ;
+: publicProcedure   ... foo ... ;
+This is perfectly valid code, and is always guaranteed to work. And, yet, after the second definition of foo, there is no way to get at the original, at least without peeking directly in code space and effectively reverse-engineering the code. But, you can do just that with languages like C too, so it's not really a relevant issue.
+So, if you have a bunch of functions that you want to hide, you could overtly do this:
+: foo -1 abort" attempt to invoke protected word." ;
+: bar -1 abort" attempt to invoke protected word." ;
+But this gets tedious. So, we now realize a new language feature we'd like, so let's make it:
+\ Works on GForth at least.  May work on others.
+\ Your Forth may not define "parse-word"; it's a proposed word
+\ for the ANSI Forth 200x effort.  If your system doesn't have it,
+\ it is safe to define it like so:
+\
+\ : parse-word   32 word count ;
+
+create expression   100 chars allot
+variable offset
+
+: reset       0 offset ! ;
+: compose     expression offset @ + swap dup >r move r> offset +! ;
+: hideWord    reset S" : " compose compose S"  abortOnHiddenWord ;" compose
+              expression offset @ evaluate ;
+: hide        parse-word hideWord ;
+
+: abortOnHiddenWord   -1 abort" attempt to invoke protected word." ;
+
+hide expression
+hide offset
+hide reset
+hide compose
+Now, attempting to execute any of the "private" words will result in a
+sensible run-time error.
+I know this post is a bit schizophrenic, but it's awfully hard to wrap up years of Forth coding experience into a single blog comment. I hope that this has been of some help. :)
+By sfalvo at Fri, 2007-09-14 18:19 | login or register to post comments
+Modern FORTH
+Some folks see an article like this and come away with the notion that one *must* implement FORTH this way. Modern FORTH implementations like those from MPE and Marcel Hendrix use sophisticated code generation techniques and have performance comparable to C compilers. Anton Ertl and others have done significant research in efficient compilation of FORTH and related languages.
+I became interested in FORTH many years ago for many of the same reasons as the author of the article, and I have a great appreciation of the ability to bootstrap a FORTH environment in a small amount of code completely comprehensible by a single person. However, I highly recommend learning to write FORTH programs before you write your own FORTH. LtU readers already have an appreciation for domain specific languages. FORTH's language extensibility encourages you to write programs and solve programming problems by creating a DSL for the task at hand. You will quickly come to appreciate the language if you approach with that in mind.
+By Trey Boudreau at Thu, 2007-09-13 23:26 | login or register to post comments
+False impressions
+I respectfully disagree with your comment that you should learn the language before learning how to implement the minimal FORTH, and the reason is that I don't think it is possible to learn the language before you understand how it is implemented.
+Almost any non-trivial FORTH program is going to use words like 'IMMEDIATE', 'ALLOT' and perhaps even 'CREATE'. It was the meaning of these words which I was struggling with which is what caused me to write this tutorial. Now I do understand what they do.
+I think also implicit in your comment is the worry that FORTH is never going to be popular / recognised as long as there are lots of tutorials about how to write FORTH from scratch, instead of emphasizing how wonderful modern FORTH compilers are. I think you're absolutely right. Given the poor quality of most programmers, 99% of people who read tutorials like this will give up as soon as they see it's written in assembler and/or requires them to engage their brain. Luckily it's exactly those 99% that you probably don't want to be recruiting for your FORTH project.
+Rich.
+By Richard W.M. Jones at Fri, 2007-09-14 11:33 | login or register to post comments
+Not so false impressions?
+I would second (and expand on) Trey's comment. Implementing a Forth system will not make you a better Forth programmer. Sure, it will teach you something about a way in which an implementation could work, but that's not the same thing as being able to use the language effectively. Worse; there are of course different ways to implement the language, and writing your own implementation before you know the language can cause you to see limitations which are merely artifacts of your particular implementation.
+I have to admit to being a Forth implentation junkie myself; I've written at least 8 or 10 toy Forths in several different languages. And while it has been interesting and fun, I found a couple of years ago that I wasn't actually very good at writing decent Forth code, and that the few people I knew who had concentrated on actually using the language were better at it than I was.
+So...that's my experience on the subject. YMMV, and all that.
+By Joshua Grams at Fri, 2007-09-14 20:15 | login or register to post comments
+First of all I'd like to
+First of all I'd like to thank you for a most interesting article. I understand exactly what you mean by saying:
+>>Almost any non-trivial FORTH program is going to use words like 'IMMEDIATE', 'ALLOT' and perhaps even 'CREATE'. It was the meaning of these words which I was struggling with which is what caused me to write this tutorial. Now I do understand what they do.
+However, I must disagree with the following:
+>>I don't think it is possible to learn the language before you understand how it is implemented.
+Lot's and lots of modern developers in high level languages have very basic ideas about how these langauges are implemented, which doesn't prevent these developers from being quite efficient. Think of any Rapid Development language, ex. Micrasoft Visual Basic. The internals of VB has changed several time, P-Code first, then moving away from P-Code from version 5, and the move to comletely new runtime (.net) in version 7. These changes are more or less transparent for a vb developer, in a sense that they souldn't really be aware of the low level details of them.
+By Andrew Savinykh at Fri, 2007-09-28 05:45 | login or register to post comments
+I think the comment was
+I think the comment was about FORTH ("the language") rather than languages in general ("a language").
+By Philippa Cowderoy at Fri, 2007-09-28 14:32 | login or register to post comments
+My mistake then.
+My mistake then.
+By Andrew Savinykh at Sun, 2007-09-30 20:18 | login or register to post comments
+forth in education
+I wish there was a common secondary education curriculum that involved, basically, the students re-implementing most of the commonly used software stacks. Start with assembly, go to forth, bootstrap everything.....
+Most graduating classes would do a bad job. Components would flop along the way and they'd have to accept some previous generation's better versino. Most end results would be lame. Maybe every decade or so, some graduating class would clean house.
+In the meanwhile, working programmers would understand what they're doign a lot better.
+-t
+By Thomas Lord at Fri, 2007-09-14 03:12 | login or register to post comments
+end-to-end, bottom-up
+I've always had mixed feelings about the "we have to teach them C!" arguments, and maybe you've hit on why: on the one hand, I have many issues with C itself, and I don't buy (all) the arguments about content-over-process; but on the other I think end-to-end thinking is important in CS. For example, when you're designing or debugging you have to get your head out of the abstraction box and think globally. Understanding the many general layers of software abstraction that have been invented in the last century is important.
+So maybe it's not so much teaching C as teaching closer to the hardware abstraction that's important. I like your idea of providing scaffoldings for each layer so that students aren't dead in the water when one layer fails. It also would give students a boost in debugging (try replacing one layer at a time [linear] or half of the layers at a time [binary] with the teacher's version to see where the problem is going wrong).
+This also makes me think of how compilers are traditionally taught: lexing -> parsing -> type checking -> intermediate language -> register allocation -> codegen. I've known some teachers to have success in going the other way around: start at the back end and move your way forward. This avoids giving the students the impression that software engineering involves building a product, waterfall-style, that you hope will actually do something at the very, *very* end -- and in my experience, most courses don't even get there by the end of the semester.
+By Dave Herman at Fri, 2007-09-14 12:21 | login or register to post comments
+end-to-end, top-down?
+It's funny you mention this. I agree with you on end-to-end thinking but it seems to me that most CS programs start at the top (for various definitions of top; Scheme, Python, Java) and work their way down. I have to say that seems to me like the right default. You start with concepts (maybe even some practicality) and move your way towards dealing with the machine details of the implementation as well as the idea. SICP certainly does this and, of course, there's not a program in the world that starts with assembler and moves up (at least, not that I know of). This makes me wonder what arguments might be raised in favor of such a program though and what it and the students it produces would look like.
+By redline6561 at Wed, 2008-04-02 13:18 | login or register to post comments
+Not just academia
+Every passing day I bang my head against code that is too much code and not enough expression. Given the gratuitous growth of computing power, I think I'm all about doing it the most obvious and simple way (e.g. just do everything via tuple spaces) and then throw hardware at the problem when it (predictably) ends up having lame performance. :-) Well, OK, even just not using Java would probably be a real step forward, but why stop at that? :-)
+By raould at Thu, 2008-04-03 23:13 | login or register to post comments
+I don't know
+I'm mostly just thinking out loud. I'm a big proponent of teaching programming and reasoning skills and high-level languages are absolutely vital for that; first-year students can't possibly see the forest for the trees when they're lost in a maze of complex technological detail. So this is clearly an argument against the bottom-up approach.
+On the other hand, when you start up too high in the stratosphere, students have no motivation for the grandiose abstractions you give them. That's one reason (beyond the dogma) I find the OO approach so inappropriate for beginners: beyond just taking the teacher's word for it, how on earth does a first-year student have enough perspective to decide what message-passing and inheritance have to do with anything?
+At any rate, I come from an HtDP culture, which teaches basic principles without inundating students with either low-level detail or high-level principles beyond their maturity level.
+This Forth stuff just has me musing about alternative approaches, that's all. Maybe the "what comes first?" question is over-valued anyway; the first semester isn't the only one. Personally I would've had a blast with an OS or compiler or languages or architecture course based on Forth, but I can imagine it might've been more appropriate after my first year.
+By Dave Herman at Mon, 2008-04-07 03:28 | login or register to post comments
+What comes first?
+What comes first probably is over-valued but it's difficult to say by how much. In the interest of precision, I'd argue that the difference between SICP, HTDP, Concrete Abstractions and even something like How To Think Like A Computer Scientist using Python are minimal and that the real importance is to avoid starting them with large, manifestly-typed languages (i.e. Java, C++). Whether you start with a minimal language like Scheme, Python, or Forth I think the essential thing is context. There is a rich history for computer science that informs the present practice and that is what seems to be lost by most texts. The delicate balance between theoretical knowledge which comes from the field's history often as a response to practical needs and actual relevant approachable instruction is what makes writing a good Computer Science text so difficult.
+By redline6561 at Thu, 2008-04-10 03:02 | login or register to post comments
+Forth for kids
+I see Forth on bare metal as a toy for kids aged 8-14 or so, just as my generation had BASIC on C=64/AppleII and assembler on Amiga/Atari/PC.
+By Luke Gorrie at Thu, 2008-04-10 12:02 | login or register to post comments
+I suspect this has been done before
+I suspect this has been done before. For example, here's a less well-documented minimal one I wrote 15 years ago:
+http://www.ioccc.org/1992/buzzard.2.c
+http://www.ioccc.org/1992/buzzard.2.design
+Because the extremely minimal bootstrapping system does not support comments in the bootstrapped source code, the bootstrapping source file is not fully commented, so the latter link is a link to a separate document with additional commentary, rather than the actual boostrap source file.
+By Sean Barrett at Fri, 2007-09-14 12:32 | login or register to post comments
+Buzzard
+Yes, in fact I used parts of your design (see my comments near the top of the file, and also search for "buzzard" in the file).
+Thanks!
+Rich.
+By Richard W.M. Jones at Fri, 2007-09-14 13:05 | login or register to post comments
+Ah! Ok, my fault for not
+Ah! Ok, my fault for not looking closely, thanks.
+By Sean Barrett at Fri, 2007-09-14 14:46 | login or register to post comments
+no, not at all
+My main reason for being interested in FORTH and wanting to learn about it are your IOCCC entry and a strange thing called ARTIC FORTH which I used on the ZX81.
+So thank you indeed.
+Rich.
+By Richard W.M. Jones at Fri, 2007-09-14 19:09 | login or register to post comments
+FreeForth
+FreeForth is another good one for learning implementation. It includes some very subtle tricks to keep the code terse and fast, at the cost of abandoning standards. (Most obviously: you have to close even interpreted command lines with a semicolon.)
+By Julian Morrison at Fri, 2007-09-14 14:21 | login or register to post comments
+I don't buy it.
+FreeForth looked interesting because it claimed to be a self-hosting, incremental, native i386 compiler. That is, it was interesting, until I discovered that it is profoundly broken, failing even the simplest of smoke tests. My very first attempt at writing a subroutine (GCD) eventually uncovered at least three, and possibly more (!) bugs.
+[Edit: for readability I moved the output up so that it's on the same line as it's expression]
+lpsmith@nimrod:~/languages/forth/ff $  ./ff
+Loading'ff.ff: help normal .now {{{ +longconds f. hid'm
+FreeForth 0.8 <http://christophe.lavarenne.free.fr/ff>  Try: help
+ 0; : show IF ."T" ELSE ."F" THEN ;
+ 0; 0 0=  show ;                    \ T 
+ 1; 1 0=  show ;                    \ T 
+ 2; 0 0=  IF ."T" ELSE ."F" THEN ;  \ F
+ 3; 1 0=  IF ."T" ELSE ."F" THEN ;  \ F
+ 4; 0 0 = show ;                    \ F 
+ 6; 1 0 = show ;                    \ T 
+ 8; 0 1 = show ;                    \ T
+10; 1 0 = show ;                    \ F
+12; 0 0 = IF ."T" ELSE ."F" THEN ;  \ T
+14; 1 0 = IF ."T" ELSE ."F" THEN ;  \ F
+16; 0 1 = IF ."T" ELSE ."F" THEN ;  \ F
+18; 1 1 = IF ."T" ELSE ."F" THEN ;  \ T
+
+20; : display IF 42 . ELSE 63 . THEN ;
+20; 0 0 = display ;                \ 63
+22; 0 0 = IF 42 ELSE 63 THEN . ;   \ 42
+24; 0 0 = IF 42 . ELSE 63 . THEN ; 
+42 Segmentation fault (core dumped)
+
+lpsmith@nimrod:~/languages/forth/ff $  ./ff
+Loading'ff.ff: help normal .now {{{ +longconds f. hid'm
+FreeForth 0.8 <http://christophe.lavarenne.free.fr/ff>  Try: help
+ 0; : display IF 42 . ELSE 63 . THEN ;
+ 0; 0 0= IF 42 . ELSE 63 . THEN ;      \ 63
+ 1; 0 0= display ;
+42 42 42 42 42 42 42 42 42 42 42 42 42 42 42 42 42 42 42 42 ... ^C
+
+lpsmith@nimrod:~/languages/forth/ff $  cd ..
+lpsmith@nimrod:~/languages/forth $  rm -rf ff
+It's obvious that this implementation hasn't been used for anything other than the (admittedly cute!) Towers of Hanoi animation that is included. Moreover, you can't run many standard Forth programs on FreeForth, and furthermore, a few of ways that FreeForth diverges from standards are very misguided. The combined result is positively underwhelming.
+None of the author's claims are believable. How can you possibly implement a self-hosting incremental compiler if you don't have propositional logic working, missing the ability to reliably jump to the correct destination, and lacking an assembler? And how can you know that it is fast, if the only working, interesting example is not computationally demanding?
+By Leon P Smith at Fri, 2008-04-11 08:44 | login or register to post comments
+How about reading the documentation?
+You shouldn't make such claims before reading the documentation. FreeForth indeed is different from other implementations, especially in the area of flow control, but it is definitely not "profoundly broken". How about reading what help IF and help conditionals have to say? The only thing your code demonstrates is the fact that you expected conditionals in FreeForth to work like in most other Forths and didn't bother dig deeper. Look:
+
+0; 0 0- drop IF ."T" ELSE ."F" THEN ;
+F 0; 1 0- drop IF ."T" ELSE ."F" THEN ;
+T 0; 0 0 = 2drop IF ."T" ELSE ."F" THEN ;
+T 0; 0 1 = 2drop IF ."T" ELSE ."F" THEN ;
+F 0; : show 0- drop IF ."T" ELSE ."F" THEN ;
+0; 0 0- drop BOOL show ;
+F 0; 1 0- drop BOOL show ;
+T 0; 0 0 = 2drop BOOL show ;
+T 0; 0 1 = 2drop BOOL show ;
+F 0;
+About your other claims, well, from the point of language design and implementation FreeForth is one of the most interesting minimalistic constructs available for our dissection. You are at a loss for dismissing it like that. Besides, being different or even weird was always an integral part of what Forth is all about.
+By Nike at Thu, 2008-04-24 10:21 | login or register to post comments
+Sorry about my tone, but I stand by the content.
+I apologize for the harsh tone of my original post. However, I stand by my assessment. I read the documentation, and I used the help command extensively. I spent probably two or three hours trying to figure out what I was doing wrong, only to conclude I was doing nothing wrong, once I started checking that basic things work, something I normally take for granted.
+I don't care if the comparison operators don't drop their arguments: that's a legit design decision, although sticking with standards means you can test your implementation against others, which is a big win for quality control.
+However, if you call this lack of referential transparency a "feature" and not a "bug", then you've proved my "profoundly misguided" point for me. Moreover, comparison operators really should push their results onto the stack, conceptually even if not in reality. A real compiler can optimize away these stack operations pretty easily.
+Moreover, I doubt this really is a feature, given the core dump and the mysterious infinite loop. There is something seriously wrong with words in FreeForth.
+I've played with Jones Forth a bit. It's very minimal, and the first thing I suggest doing is adding a stack underflow check. However, it works, it's instructive, and it is quite worthy of LtU. FreeForth is none of these.
+By Leon P Smith at Mon, 2008-07-14 23:16 | login or register to post comments
+Lisp the ultimate high-level language?
+This is great, and I thank Rich Jones for doing it, but I have to respectfully disagree with the statement that Lisp is the ultimate high-level language. I like Lisp and Scheme (and Forth, for that matter), but (for instance) Haskell's type system is light-years ahead of anything in Lisp, which really doesn't have a type system. I'm not claiming that Haskell is the ultimate anything, but I find the statement about Lisp to be unfounded.
+I think all language hackers should implement their own Forth just to learn how it's done. When I did it I found it to be a very illuminating experience.
+By Michael Vanier at Sat, 2007-09-15 10:17 | login or register to post comments
+Of types and abstraction levels
+While I also think that stating that Lisp is the ultimate high-level language is probably getting one's mouth too full (although I suspect Rich is well aware of this, and is making a point about his subjective preferences rather than stating an objective fact of computer science), the presence of a static type system does not necessarily imply that a language has a higher level of abstraction than a dynamically typed language.
+For instance, C, Fortran and Pascal have static type systems, Lisp, Smalltalk and Prolog don't. The converse also can't be used to infer anything useful about abstraction levels; Most BASICs and assemblers don't have static types, Haskell, ML and Eiffel do.
+By Simon Kongshoj at Sat, 2007-09-15 14:55 | login or register to post comments
+Lisp is not the ultimate DSL.
+Michael Vanier writes "but (for instance) Haskell's type system is light-years ahead of anything in Lisp, which really doesn't have a type system"
+I think "horses for courses" on this.
+(I also think "doesn't really have a type system" is unreasonably inflammatory. A lot of design went into the CL type system, and the type system does a fairly good job of letting the programmer express useful and arbitrarily complicated abstractions without worrying about causing undefined behavior at runtime; it also helps make efficiently-compiled CL code reasonably common compared to efficiently-compiled code in most dynamically typed languages. The CL type system is not as nice as those Sufficiently Smart Static Type Systems which let you do everything you might reasonably want to do and also catch all problems at compile time, of course. Still, CL type system is useful, and it is nontrivial, and it exists. For "doesn't really have a type system" consider K&R C, e.g., to see that CL's type system is providing rather more expressivity and guarantees. And even for K&R C I think it would be silly to say "doesn't really have a type system:" K&R C's type system expresses and guarantees a lot of useful things which can't be expressed in assembly language in any natural way.)
+When a static/compiletime type checking system can understand what you're trying to do, it can be really wonderful, and type inference makes it more wonderful still. And I know that modern static type systems can understand lots of things. E.g., I am only half-literate in SML, but even so I benefited enormously from having all those precise static types floating around in the code in Umut Acar's Ph. D. thesis. I mostly use CL, and I like it, but I'd need to be amazingly bigoted not to have appreciated how CL's type system doesn't give me much help in following distinctions like 'b Modref.t * ('b -> 'a -> unit) -> ('a -> unit) vs. 'a modref -> ('a -> unit) -> unit at compile time. (CL's type system lets me run the code and get a runtime type error instead of undefined behavior, which is useful --- compare K&R C, again --- but still not as nice.)
+On the other hand, when a static type system can't be made to understand what the code is trying to do, its attempts to provide guarantees can be a significant source of friction. E.g., as best as I can judge from my half-literacy in SML, Turbak and Wells are rather more than half-literate in SML and Haskell; but still, in their _Cycle Therapy_ paper, they were reduced to effectively faking up dynamic typing. In CL, it seems reasonably straightforward to get the existing dynamic type system to work with ideas like theirs, intimately enough to be able to do things like identifying the "vertex" concept with "object", the "label of vertex" concept with "CLOS class of object," and thereby getting to use CL's built-in support for things like polymorphism with inheritance. I'm even less literate in OCaml than in SML, but given the difficulties in expressing cycle therapeutic ideas in SML and Haskell, I'd be somewhat surprised if it were straightforward to do a trick like that in OCaml; if I'm correct about that, I nominate it as a nontrivial example of whizzy static typing being not so nice when it is not quite whizzy enough.
+Static typing lets the compiler handle guarantees about your code, which can make it qualitatively easier to reason about your code. Provable guarantees as aids to reasoning can be extremely valuable, of course: see garbage collection, structured programming, compilers smart enough to compile subroutine calls and recursion, and so forth, such guarantees can be an enormous win. But in my experience when static type systems are not quite smart enough to keep up with what the code is doing, static typing starts to feel like garbage collection by reference counting, early versions of structured programming with poor support for nonlocal exit, subroutine calls without recursion or without tail call elimination, and so forth. Granted that "ultimate high-level language" is a very unclear concept. Still I think it's reasonable to disagree with (what seems to be) "statically typed languages are higher level because make it easier to prove things about the set of problems which can be expressed as concisely and idiomatically in them as in dynamically typed languages" as long as my programming seems to take me outside that set of problems.
+I would actually be more receptive to the argument that any given FooLang isn't the ultimate high level language because of differences which cut the opposite way. E.g., continuations, which aren't present in CL (though they are in Scheme, of course). Like languages with dynamic types, languages with continuations express more problems idiomatically and concisely, at the price of being trickier to reason about and more difficult to compile efficiently. By and large I think that "express more problems idiomatically" takes precedence over "easier to reason about" for the purposes of defining "ultimate high level language." If you want to have "easy to reason about" take precedence over "expresses more problems," are you sure you're not talking about the "ultimate DSL" instead?:-)
+By William Harold Newman at Sat, 2007-09-15 17:42 | login or register to post comments
+Liskell
+If you just chuck some parentheses at a random language, it can be Lispy enough for a lot of people. I like the design of Liskell, which is essentially Haskell with enough Lispy syntax that it feels like a Lisp. For example:
+(define (distance3D (Point3D x y z))
+  (sqrt (+ (^ x 2)
+           (+ (^ y 2) (^ z 2)))))
+This uses Haskell-style data constructors and pattern matching, and it's strongly typed. It also feels like Lisp -- the syntax is pleasant and defmacro works as you'd expect -- as far as I'm concerned, it is a Lisp with weird semantics.
+Perhaps Lisp is the ultimate high-level language because nobody is very clear on where the boundaries of Lisp end.
+By Peter Scott at Wed, 2007-09-26 06:14 | login or register to post comments
+This is awesome.
+I read the entire thing in one sitting - it was captivating. :-) Very impressive work! I don't have the same thorough background that most on LtU have so I found this very valuable. Thanks!
+By BigZaphod at Sat, 2007-09-22 00:36 | login or register to post comments
+Yes, this is totally awesome.
+Yes, this is totally awesome.
+By Luke Gorrie at Tue, 2008-04-01 12:21 | login or register to post comments
+Forth and Lisp (1.5)/Scheme
+In a sense, I think of Forth and Lisp(1.5) or Scheme as duals of each other. Forth is of course the ultimate postfix language and Lisp/Scheme is the ultimate prefix language. And of course there is the "happy marriage" of the two in the HP-28/48/49 Reverse Polish Lisp (RPL) language, which IMHO is better than either of them in a number of ways.
+I really think you need to implement a Forth to understand it, and I think the same can be said for Scheme. By the way, I don't really like "Forth-like" languages, such as "Joy." Forth is very much a down-to-earth real-world language, and to wrap it in theory, computer science, formal semantics, etc., destroys its beauty in the same way that taking those things *away* from Scheme destroys *its* beauty.
+I remember when I first discovered Forth. By that time I knew FORTRAN well, dozens of assembly languages, and Lisp 1.5. When you first encounter Forth, you say, "this is bizarre ... it's crazy ... it's stupid ... how can this ... oh my God! It's brilliant!" At that point you have become a Forth addict. :)
+By znmeb at Sat, 2007-09-22 06:12 | login or register to post comments
+Suprised by Joy
+Well, to be fair, Joy wasn't intended to be Forthlike; the author (Manfred von Thun) didn't know about Forth when he designed Joy. Joy was intended to explore a purely theoretical area, and it just happened that Forth (and Postscript, and RPL) were already sitting right there.
+By wtanksleyjr at Fri, 2007-09-28 20:00 | login or register to post comments
+An other reason why Forth is interesting
+As the author, I learned the original threaded interpreter Forth by making one myself when I was undergrad. That time we did it on a DEC 20. It had few interesting features, one of them was that the registers were part of the address space. In our implementation we utilized this to store the next implementation in the registers which made it very fast.
+To me the fasination has died somewhat, but the idea that one is able to control the code generation of your libraries is an important lesson. And that such implemention details can be packaged nicely away.
+By Kasper Osterbye at Sat, 2007-09-22 10:49 | login or register to post comments
+Another Forth-ish / Joy-ish language - "Cat"
+Another language somewhat similar to Forth (but imo easier to learn) is Cat.
+A quote from the site - "A stack based functional programming language (imagine Forth meets Scheme)." It also has type-checking as well (somewhat similar to Haskell). The Cat source code is in the public domain. Well worth a look.
+I've often thought that Rebol has a bit of a Forth feel to it as well, but it has gone way beyond Forth with its large range of data-types and so on.
+As an aside - a really neat aspect (imo) of the various Forth implementations is that quite a number of them are public-domain. My guess as to the reason for this is that Forth has been around for a long time (I think it even pre-dates the FSF). Given that, if you wanted to share code in those days, it was pretty much the case that you made it public-domain. No GPL in those days.
+By obsidian at Wed, 2007-09-26 08:33 | login or register to post comments
+Cat
+Cat has been discussed a number of times before on LtU. Indeed, Christopher Diggins, the creator of Cat, is a regular LtU contributor (as cdiggins). You can find links to a number of previous LtU discussions on Cat here.
+By Allan McInnes at Wed, 2007-09-26 15:14 | login or register to post comments
+Ported to PowerPC on Mac OS X
+I've made a more-or-less straight translation of the i386 code to PPC on Mac OS X, for those interested:
+http://www.lshift.net/blog/2007/10/04/jonesforth-ported-to-powerpc-and-mac-os-x
+By tonyg at Thu, 2007-10-04 00:28 | login or register to post comments
+Building jonesforth
+I tried to build jonesforth on my Fedora Core 4 machine using GCC 4.0.2. I got an error: /usr/bin/ld: unrecognized option '--build-id=none'
+So of course I checked the ld help for build-id and it wasn't listed. I tried building without the build-id option and got an error-free build, but when I ran 'cat jonesforth.f - | ./jonesforth', it just sat there.
+Are there more recent build instructions somewhere?
+By Daryl Lee at Sun, 2007-11-11 23:31 | login or register to post comments
+Building jonesforth
+There seems to be an issue with older versions
+of AS(1) that do not compile the kernel properly.
+The .set directive fails to update the link
+appropriately in defword/defcode compiled words,
+so FIND goes into an infinite loop.
+Upgrading to binutils 2.18 fixed the issue for me
+on Linux, and on my Mac OS X (Intel) port I simply
+used m4 for this task.
+By sebell at Fri, 2008-02-29 15:01 | login or register to post comments
+Building Jonesforth
+I got it to build under Ubuntu Linux with:
+gcc -m32 -nostdlib -static -o jonesforth jonesforth.S
+cat jonesforth.f - | ./jonesforth
+It seems to work OK.
+Leon
+By Leon Heller at Mon, 2007-12-10 16:57 | login or register to post comments
+a quick xref
+Joshua I. Grams discusses implementation details of JonesForth over at Luke Gorrie's blog.
+By el-vadimo at Sun, 2008-04-13 00:52 | login or register to post comments
+ROT reversed?
+Am I crazy, or is ROT/-ROT swapped compared to the standard (as in Starting Forth)?
+By kotlinski at Thu, 2009-01-15 10:38 | login or register to post comments
+No
+No you're not crazy. I did get them backwards.
+By Richard W.M. Jones at Fri, 2009-08-14 15:02 | login or register to post comments
+Embedded Forth
+I've returned, after nearly two years away. My interest focuses on building an embedded Forth, and the real starting point is understand the guts, and jonesforth does that very nicely (Thanks!). But I want two things: 1. The ability to launch without reading a file. 2. ANS Forth compliance.
+I've solved the first one, by moving jonesforth.f into jonesforth.S as comments, converting the bare code into .ascii lines, and arranging for _KEY to start by reading this text. I've also fixed up ROT/-ROT (see kotlinski's question), and made TRUE and all the logical tests return -1, per the ANS documentation. My question is, is anyone interested in the results? I am at what I consider a takeoff point where I will begin serious hacking (case-insensitive dictionary searching and CREATE/DOES> are high on my list) so if anyone wants a single-file implementation of a very slightly modified jonesforth, now is the time to let me know.
+By Daryl Lee at Thu, 2009-07-23 16:00 | login or register to post comments
+ANS-compliant Jonesforth
+I've already modified Jonesforth (v45) to be ANS-compliant at the CORE level (including CREATE...DOES>). My version fully passes the Hayes CORE tests, the COREPLUS tests and those CORE EXT tests that are relevant (i.e. for words that are implemented).
+Unfortunately the assembler section of my adapted Jonesforth has been converted to Intel syntax, so it's not a trivial exercise to 'back annotate' the changes into the Gas-syntax version.
+You can download my modified Jonesforth from here:
+http://www.rtr.myzen.co.uk/bb4wforth.zip
+The executable only runs under Windows, but the modified assembler source (less the original comments) can be found in forth.bas and the modified Forth section in bb4wforth.f.
+By Richard Russell at Thu, 2009-10-08 22:17 | login or register to post comments
+Ported to Macintel (Mac OS X i386)
+I've ported jonesforth to Macintel - Mac OS X on i386.
+Instructions to use are available here [http://github.com/ruda/jonesforth-macintel]
+Note: the project has been imported from my original page at ruda.googlecode.com/ in 2009.
+By ruda at Tue, 2009-11-03 02:39 | login or register to post comments
