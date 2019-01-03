@@ -173,17 +173,17 @@ _START:
   POP   NP
   MOV   RSP,@R_TOP-2
   MOV   DSP,@S_TOP-2
-  CALL  @RET
+  CALL  @RETA
   
 _@INIT  DW 0
 ;AR      DW 0
 
 ;vvvvvv--------------   IO  ---------------
 
- P_ _IODD,@IODD              ; ( IO
+ P_ _IODD,@IODD          ; ( IO
   DUP_    T
   
- P_ _IOD,@IOD              ; ( IO
+ P_ _IOD,@IOD            ; ( IO
   DUP_    T
   
  P_ _IO,@IO              ; ( IO
@@ -226,7 +226,7 @@ _@INIT  DW 0
         JS      @SKIP
         
  P_ _JUMP,@JUMP             ; ( (JUMP
-        @IP_    IP
+        MOV     IP,[IP]
         N_
         
  P_ _?SKIP,@?SKIP
@@ -275,6 +275,7 @@ _@INIT  DW 0
  P_ _BE,@BE
         MOV     AH,0EH
         INT     10H
+ P_ _DROP,@DROP
         JMPS_   @DROP1
       
  P_ _RSTM,@RSTM         ; ( !R-
@@ -335,10 +336,11 @@ _@INIT  DW 0
  P_ _ALIGN,@ALIGN
         DEC     T
         OR      TL,1
-        
- P_ _1P,@1P        
+@_1P:        
         INC     T
         N_
+ P_ _1P,@1P  
+        JMPS_   @_1P
         
  P_ _PLAVG,@PLAVG        ; ( +2/
         ADD     T,[DSP]
@@ -347,6 +349,9 @@ _@INIT  DW 0
  P_ _2DIV,@2DIV          ; ( 2/
         RCR     T,1
         N_
+ P_ _MSB1,@MSB1
+        STC
+        JMPS_   @2DIV
         
  P_ _SDIV,@SDIV          ; ( -/
         SHL     PW [DSP],1
@@ -412,8 +417,8 @@ _@INIT  DW 0
 
  L_ _CTX,@CTX      ; ( c -- ) \ Send character c to output device.
   DW  _IO      ; char in DL
+  CMP   AL,0FFH ; 0FFH is interpreted as input
   XCHG  AX,DX
-  CMP   DL,0FFH ; 0FFH is interpreted as input
   JNZ   @TX1    ; do NOT allow input
   MOV   DL,32   ; change to blank
 @TX1:
@@ -424,14 +429,14 @@ _@INIT  DW 0
  L_ _?CRX,@?CRX      ; (  -- c T | F )  
   DW _IODD
   MOV   DX,0FFFFH ; input command & setup for TRUE flag
-  MOV   [DSP],DX  
   CALL  @TX1      ; MS - DOS Direct Console I/O
   JNZ   QRX0    ; ?key ready
-  DEC   DX      
+  INC   DX      
   DROP_
   MOV   [DSP],DX
   RET
 QRX0:  
+  MOV   [DSP],DX  
   OR    AL,AL   ; AL=0 if extended char
   JNZ   QRX1    ; ?extended character code
   INT   021H    ;
@@ -442,6 +447,7 @@ QRX1:
   XCHG  AH,AL   ; extended code in msb
 QRX2:
   MOV   [DSP+2],AX
+QRX3:
   RET
     
 _END:

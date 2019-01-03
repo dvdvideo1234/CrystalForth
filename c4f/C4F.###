@@ -191,7 +191,8 @@ _@INIT  DW 0
   MOV     DI,[DSP]
   MOV     CX,[DSP+2]
   MOV     DX,[DSP+4]
-  CALL    IP
+  XCHG    DI,IP
+  CALL    DI
   POP     AR NP 
   
 ;^^^^^^--------------   IO  ---------------
