@@ -1,0 +1,336 @@
+$100 ORG!                 
+
+\ =" ARCHIVE\NF12\" AUTO!
+
+INCLUDE NF12.CF
+INCLUDE NF12.C1    
+           
+\ =" ARCHIVE\NF12\"  AUTO!  
+
+\ FHDFGHDFGHFDG          
+
+241 =: --END--
+
+
+THIDE _START              
+\ THIDE _NOP                  
+THIDE _ENDMEM                 
+ 
+1 =: BYE
+
+
+\ APT- _START   =: START   
+APT- _ABORT   =: ABORT   
+APT- _MAIN    =: @MAIN    
+APT- _MINUS   =: -   
+APT- _PLUS    =: +    
+APT- _DROP1   =: DROP;   
+APT- _SEMIGO  =: (GO;  
+APT- _EXECUT  =: EXECUTE  
+APT- _NOPX    =: NOP;    
+APT- _SET2    =: (SET2    
+APT- _ST      =: !      
+APT- _SET     =: SET     
+APT- _LIT     =: (LIT     
+APT- _LD      =: @      
+APT- _CON     =: (CON     
+APT- _EXIT    =: EXIT    
+APT- _STR     =: STR     
+APT- _CSTR    =: CSTR    
+APT- _?C@     =: ?C@     
+APT- _C@      =: C@      
+APT- _0       =: 0       
+APT- _BL      =: BL      
+APT- _TBL     =: TBL     
+APT- _TBUF    =: TBUF    
+APT- _SBUF    =: SBUF    
+APT- _TIB     =: TIB     
+APT- _VNUMC   =: vNUMC   
+APT- _VRDLN   =: vREADLN   
+APT- _VRDOT   =: vRDOT   
+APT- _VOK     =: vOK     
+APT- _VTARG   =: vTARG     
+APT- _REINI   =: REINI   
+APT- _INIT    =: @INIT    
+APT- _LTIBX   =: LTIBX   
+APT- _LTIB    =: LTIB    
+APT- _ETIB    =: ETIB    
+APT- _HX      =: H;      
+APT- _H       =: H       
+APT- _TX      =: T;      
+APT- _T       =: T       
+APT- _@COMM   =: @,   
+APT- __@COM   =: (@,   
+APT- _COMMA   =: ,   
+APT- _STP     =: !+     
+APT- _XCOMMA  =: ;,  
+APT- _COMLIT  =: (LIT,  
+APT- _SEMSEM  =: TARG;;  
+APT- _ABDOT   =: ABDOT   
+APT- _DORDOT  =: ERR.  
+APT- _XN??    =: ;N??    
+APT- _N??     =: N??     
+APT- _??      =: ??      
+APT- _BK      =: (BK      
+APT- _OSTR    =: (?S   
+APT- _IO      =: (IO      
+APT- _?SKIP   =: ?SKIP   
+APT- _IF      =: (IF      
+APT- _SKIPDR  =: .SKIP  
+APT- _SKIP    =: SKIP    
+APT- _IFM     =: (IF-     
+APT- _NEXTP   =: (NEXT+   
+APT- _NEXT    =: (NEXT    
+APT- _MIF     =: (-IF     
+APT- _NFOR    =: (FOR+    
+APT- _FOR     =: (FOR     
+APT- _JUMP    =: (DEF    
+APT- _BE      =: (BE      
+APT- _RSTM    =: !R-   
+APT- _RST     =: !R    
+APT- _RLDM    =: RLDM    
+APT- _RLD     =: RLD     
+APT- _RLDP    =: @R+    
+APT- _RSTBP   =: RSTBP   
+APT- _RSTP    =: RSTP    
+APT- _RLDBP   =: RLDBP   
+APT- _XR      =: XR      
+APT- _XA      =: XA      
+APT- _1PX     =: 1+;      
+APT- _RDRPX   =: RDROP;   
+APT- _RET     =: (;     
+APT- _EX      =: EX      
+APT- _NIP     =: NIP     
+APT- _DROP    =: DROP    
+APT- _DROPX   =: DROPX   
+APT- _PUSH    =: PUSH    
+APT- _J       =: J       
+APT- _DUP     =: DUP     
+APT- _STKP    =: STKP    
+APT- _OVER    =: OVER    
+APT- _POP     =: POP     
+APT- _POPX    =: POP;    
+APT- _RDROP   =: RDROP   
+APT- _SWAP    =: SWAP    
+APT- _XOR     =: XOR     
+APT- _MDIV    =: -/    
+APT- _P2DIV   =: +2/   
+APT- _2DIV    =: 2/    
+APT- _PMUL    =: +*    
+APT- _D2DIV   =: D2/   
+APT- _NAND    =: NAND    
+APT- _NEG     =: NEG     
+APT- _ZEQ     =: 0=     
+APT- _NOT     =: NOT     
+APT- _TOKEN?  =: TOKEN?  
+APT- _TOKEN   =: TOKEN   
+APT- _WORD    =: WORD    
+APT- _PARSE   =: PARSE   
+APT- _PARS    =: PARS    
+APT- _CFNDTAR =: CFNDT
+APT- _CFIND   =: CFND   
+APT- _TICK    =: '   
+APT- _FINDT   =: FIND    
+APT- _FIND    =: FND    
+APT- _TONUMC  =: ">NUMC  
+APT- _TONUM   =: ">NUM   
+APT- _ATOI    =: ATOI    
+APT- _HDICT   =: H>DICT   
+APT- _TODICT  =: >DICT  
+APT- _MPUSH   =: MPUSH   
+APT- _XTBUF   =: ;S>TBUF"!   
+APT- _TOTBUF  =: S>TBUF"!  
+APT- _MKSTR   =: S>"!   
+\ APT- _ENDMEM  =: ENDMEM  
+
+\ APT- _ABORT =: RESTART        
+\ \ APT- _INIT  =: @INIT        
+\ APT- _BK    =: (BK            
+\ APT- _IO    =: (IO            
+\ APT- _RET   =: (;             
+\ APT- _BE    =: (BE            
+\ APT- _?SKIP =: ?SKIP          
+\ APT- _IF    =: (IF            
+\ APT- _SKIPDR =: SKIPFT        
+\ APT- _SKIP  =: SKIP           
+\ APT- _IFM   =: (IF-           
+\ APT- _MIF   =: (-IF           
+\ APT- _NEXT  =: (NEXT          
+\ APT- _NEXTP =: (NEXTP       
+\ APT- _JUMP  =: (DEF           
+\ APT- _OSTR  =: (?S            
+\ APT- _RSTM  =: !R-            
+\ APT- _RST   =: !R             
+\ APT- _RLDM  =: @R-            
+\ APT- _RLD   =: @R             
+\ APT- _RLDP  =: @R+            
+\ APT- _RSTBP =: C!R+           
+\ APT- _RSTP  =: !R+            
+\ APT- _RLDBP =: C@R+           
+\ APT- _XCHG  =: XR             
+\ APT- _XA    =: XA             
+\ APT- _EX    =: EX             
+\ APT- _NIP   =: NIP            
+\ APT- _DROP  =: DROP           
+\ APT- _RDRPX =: RDROP;           
+\ APT- _DROPX =: DROPX           
+\ APT- _NFOR  =: (NFOR          
+\ APT- _FOR   =: (FOR           
+\ APT- _PUSH  =: PUSH           
+\ APT- _J     =: J              
+\ APT- _DUP   =: DUP            
+\ APT- _STKP  =: SP@            
+\ APT- _OVER  =: OVER           
+\ APT- _POP   =: POP            
+\ APT- _POPX  =: POP;            
+\ APT- _RDROP =: RDROP          
+\ APT- _SWAP  =: SWAP           
+\ APT- _XOR   =: XOR            
+\ APT- _MDIV  =: -/             
+\ APT- _P2DIV =: +2/            
+\ APT- _2DIV  =: 2/             
+\ APT- _PMUL  =: +*             
+\ APT- _D2DIV =: D2/            
+\ APT- _NAND  =: NAND           
+\ APT- _NEG   =: NEG            
+\ APT- _ZEQ   =: 0=             
+\ APT- _NOT   =: NOT            
+\ APT- _PARS  =: (PARS          
+\ APT- _CFIND =: (CFND
+\ APT- _FIND  =: (FND
+\ APT- _ATOI  =: (NUM
+\ APT- _MPUSH =: MPUSH
+\ APT- _MKSTR =: S>"!
+
+' (DEF =: (JUMP 
+
+\ : - NEG         : + +2/         : DROP;  DROPX ; UNW
+\ : (GO; @R+      : EXECUTE PUSH  : NOP; ;
+\ : (SET2 @R+ DROP !R RDROP; ; UNW
+\ : ! PUSH        : (SET !R RDROP; ; UNW
+\ : (LIT @R+ ;
+\ : @ PUSH        : (CON @R       : EXIT RDROP; ; UNW
+\ 
+\ : STR PUSH @R+ XR POP; ; UNW 
+\ : CSTR PUSH C@R+ XR POP; ; UNW 
+\ : CSTR- (1-
+\ : ?C@ DUP : C@ PUSH C@R+ RDROP; ; UNW 
+
+
+\ \ VARIABLES
+\ 
+\ 0 CONST 0     \ >,
+\ $20 CONST BL
+\ $80 CONST TBL
+\ $FF00 CONST TBUF
+\ 
+\ 0 DEFER vNUMC
+\ 0 DEFER vREADLN
+\ 0 DEFER vERR.
+\ 0 DEFER vOK
+\ 0 DEFER vTARG
+\ 
+\ 0 VALUE; LTIB
+\ 18 4 - 1K     U*  VAL' LTIB  T!
+\ $100 18 1K U* + VALUE ETIB
+\ 
+\ 0 VALUE; H
+\ $E800 VALUE; T
+\ 
+\ : H>DICT H STR  : >DICT T; MPUSH ;
+\     
+\ : @, PUSH   : (@, @R+ RDROP : ,  H; : !+ PUSH !R+ POP; ; UNW  
+\ : ;, EX , ;
+\ : (LIT, (@, (LIT ,<
+\ : TARG;; (@, ;;
+\ : ((A" (?S SWAP DROP; ?; 
+\ : ERR. vERR. RESTART ;  UNW
+\ 
+\ : ">NUMC ;,  (LIT, :;
+\ : ">NUM CSTR (NUM   : ?? !"?" ;;  
+\ : ;#?? EX   : #?? 0=  ?? ;
+\ 
+\ : TOKEN?  ;#??
+\ : TOKEN BL  ?C@ :;
+\ : WORD [ TBUF S>"! ]
+\ : PARSE NOP; ETIB LTIB; (PARS ;
+\   
+\ : REINI POP (SET2
+\ : @INIT  (JUMP ;;
+\ 
+
+
+\ MEMORY
+
+0 VALUE; CNTC
+\ :VALUE KEY ;
+:VALUE EMIT  CNTC; 
+: 1+ 1+; ; UNW
+
+: SETPNT POP (SET2
+: FINDEX  (JUMP ;;
+
+: EVAL NOP;
+: @EVAL TOKEN DROP; ?; FINDEX RECURSE ;
+
+\ : `HISTART    @INIT  
+\ : _MAIN EVAL vOK vREADLN RECURSE ;
+
+: (& @R+ RDROP  : AND NAND : NOT; NOT ;
+: ODD (& ,< 1 , 
+: FIXER! !R ;
+: TIMES| (FOR CALL BEGIN J EXECUTE 
+   THEN (NEXT RELEASE< RDROP; ; UNW
+
+\ -------------------------------------
+\ COMPILING
+\ -------------------------------------
+  
+
+: TARG:` : =H H    : =: 0 TOKEN?
+: (=:     ?C@ 1+ T; MPUSH TWICE : !- PUSH !R- POP; ; UNW
+    
+  
+\ HI LEVEL  START
+\ ------------------------------------
+
+\ COMPILER
+: TARG: NOP; =H      : TARG>, SETPNT   
+  CFNDT IF @ DUP ODD EXECUTE ?; , ;THEN
+  vTARG FND vNUMC ?;  @, ;
+
+\  INTERPRETTER 
+: `INI H STR >DICT @EVAL TBL CSTR REINI vREADLN SKIP
+: TARG;  TARG;;   : TARG,< SETPNT
+: `INTER FIND IF @ FIXER! NOP; ;THEN ,< 
+' ">NUM DEFER vNUM
+  
+\ FIXES
+  
+\ META ">NUM    vNUM 
+\ META ">NUMC  vNUMC 
+\ META DROP;   vERR. 
+\ META NOP;      vOK 
+\ META T       vTARG 
+META `INI    @INIT 
+META `INTER FINDEX 
+\ ' `HISTART ' _INIT T!
+HERE VAL' H T!
+\ ' (BK ' KEY  T!
+\ ' (BE ' EMIT T!
+
+12 , ' =: , 0 , "=:" 
+-1 ALLOT \ HERE T>R 16 - 16 DUMP
+0 , 0 , 0 C,  
+16 ALLOT       
+
+CR ."H._" VAL' H T@ H.
+CR HERE H.
+CR 1K $100 + HERE - .
+
+TSAVE PIF.COM 
+
+_FREEMEM:
+
+
+
