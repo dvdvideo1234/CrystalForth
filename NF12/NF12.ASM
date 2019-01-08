@@ -82,6 +82,10 @@ CLR     macro   reg
   XOR   reg,reg
 endm
 
+TWICE_  MACRO
+  DW $+2
+ENDM
+
 ALIGN_  MACRO
   IF ($-START) AND 1
   NOP
@@ -165,7 +169,7 @@ _PLUS   DW _P2DIV
 _DROP1  DW _DROPX ; UNW
 
 ; : (GO; @R+      : EXECUTE PUSH  : NOP; ;
-_SEMIGO DW _RLDP
+_SEMIGO DW _RLDP,_XR
 _EXECUT DW _PUSH  
 _NOPX   DW _RET
 
@@ -188,7 +192,7 @@ _EXIT   DW _RDRPX ; UNW
 _STR    DW _PUSH,_RLDP,_XR,_POPX 
 
 ; : CSTR PUSH C@R+ XR POP; ; UNW 
-_CSTR   DW _PUSH,_RLDP,_XR,_POPX 
+_CSTR   DW _PUSH,_RLDBP,_XR,_POPX 
 
 ; : ?C@ DUP : C@ PUSH C@R+ RDROP; ; UNW 
 _?C@    DW _DUP 
@@ -250,9 +254,6 @@ _XCOMMA DW _EX,_JUMP,_COMMA
 ; : (LIT, (@, (LIT ,<
 _COMLIT DW __@COM,_LIT 
 
-; : TARG;; (@, ;;
-_SEMSEM DW __@COM,_RET 
-
 ; : ((A" (?S SWAP DROP; ?; 
 _ABDOT  DW _OSTR,_SWAP,_IF,_DROP1
 
@@ -268,6 +269,10 @@ _??       DW _ABDOT
           
           
 ; IO COMMANDS vvvvvvvvvv  ---------------------------
+
+P_  _BRK
+  INT   3
+  JMP   @MAIN
 
 L_ _BK
   DW _DUP,_IO
@@ -559,7 +564,8 @@ L_ _TOKEN?
   DW _XN??
         ; : TOKEN BL  ?C@ :;
 _TOKEN:
-  DW _BL,_SEMIGO,_?C@ 
+  DW _BL
+  DW _SEMIGO,_?C@
         ; : WORD [ TBUF S>"! ] _XTBUF
 _WORD:
   DW _XTBUF
@@ -599,6 +605,7 @@ _PARSE:
  L_ _CFNDTAR
   DW  _vTARG
  L_ _CFIND
+  ;DW _BRK
   DW  _IO      
   INC     PB [BX]
   CALL    @FIND  
@@ -610,12 +617,13 @@ L_ _TICK
 L_ _FINDT
   DW _T
 L_ _FIND
+  DW _BRK
   DW  _IO
 @FIND:  
   CLR     CX 
-  XCHG    TOP,DI
 @FND?:  
-  ADD     DI,CX
+  ADD     AX,CX
+  MOV     DI,AX
   LEA 	  DI,[DI+4]
   mov 	  cl,PB [Di]
   jcxz	  @DCX ;not_fnd
@@ -624,6 +632,7 @@ L_ _FIND
   MOV     SI,BX
   repe	  cmpsb
   POP     SI
+  XCHG    AX,DI
   jNZ 	  @FND?
 	MOV		  CL,2
 	ADD		  [DI+2],CX
@@ -635,10 +644,13 @@ L_ _FIND
 ;----------------   NUMBERS	 ---------------------
 
 ; : ">NUMC ;,  (LIT, :;
-  ALIGN_
-_TONUMC   DW _XCOMMA,_SEMIGO,_COMLIT 
+ 
+L_ _TONUMC   
+  DW _XCOMMA,_SEMIGO,_COMLIT 
+  
 ; : ">NUM CSTR (NUM   : ?? !"?" ;;  
-_TONUM    DW _CSTR,_SEMIGO,_??   
+L_ _TONUM    
+  DW _CSTR,_SEMIGO,_??   
 
 L_ _ATOI
   DW  _IO
@@ -775,9 +787,12 @@ OPTAB   DB "$&%'^#"
   
 ; : H>DICT H STR  : >DICT T; MPUSH ;
 ;     
-_HDICT    DW _H,_STR  
-_TODICT   DW _TX ;, MPUSH ;
- L_ _MPUSH ; TOP OF DICTIONARY   IN DI
+L_ _HDICT    
+  DW _H,_STR  
+L_ _TODICT   
+  DW _TX 
+  
+L_ _MPUSH ; TOP OF DICTIONARY   IN DI
   DW _IO
 	POPR_   DI
 	POPR_	  CX

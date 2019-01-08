@@ -50,12 +50,13 @@ APT- _COMMA   =: ,
 APT- _STP     =: !+     
 APT- _XCOMMA  =: ;,  
 APT- _COMLIT  =: (LIT,  
-APT- _SEMSEM  =: TARG;;  
+\ APT- _SEMSEM  =: TARG;;  
 APT- _ABDOT   =: (!"   
 APT- _DORDOT  =: ERR.  
 APT- _XN??    =: ;N??    
 APT- _N??     =: N??     
-APT- _??      =: ??      
+APT- _??      =: ?? 
+APT- _BRK     =: _BRK      
 APT- _BK      =: (BK      
 APT- _OSTR    =: (?S   
 APT- _IO      =: (IO      
@@ -133,15 +134,15 @@ APT- _MKSTR   =: S>"!
       \ LAST WORDS 
 
 0 VALUE; CNTC
-0 :VALUE KEY ;
+\ 0 :VALUE KEY ;
 0 :VALUE EMIT  CNTC; 
 : 1+ 1+; ; UNW
 
-: STATE! POP (SET2
+: STATE! POP _BRK (SET2
 : FINDEX  (JUMP ;;
 
 : EVAL NOP;
-: `@EVAL TOKEN DROP; ?; FINDEX RECURSE ;
+: `@EVAL TOKEN  DROP; ?; FINDEX RECURSE ;
 
 : (& @R+ RDROP  : AND NAND : NOT; NOT ;
 : ODD (& ,< 1 , 
@@ -163,11 +164,11 @@ VAL' ODD =: BYE
 
       \   INTERPRETTER 
       
-: `INI H STR >DICT `@EVAL TBL CSTR REINI vREADLN SKIP
-: TARG;  TARG;;   : TARG,< STATE!
-: `INTER FIND IF @ FIXER! NOP; ;THEN ,< 
+: `INI H STR >DICT `@EVAL TBL CSTR REINI vREADLN 
+: TARG,< STATE! : `INTER FIND IF @ FIXER! NOP; ;THEN ,< 
 ' ">NUM DEFER vNUM
-  
+: TARG;  TARG,<  : TARG;; (@, ;;
+ 
       \   FIXES
   
 \ META ">NUM    vNUM 
@@ -180,13 +181,13 @@ META `INTER FINDEX
 \ ' `HISTART ' _INIT T!
 HERE    VAL' H T!
 ' EVAL ' @MAIN T!
-' (BK   ' KEY  T!
+\ ' (BK   ' KEY  T!
 ' (BE   ' EMIT T!
 
 12 , ' =: , 0 , "=:" 
 -1 ALLOT \ HERE T>R 16 - 16 DUMP
 0 , 0 , 0 C,  
-8 ALLOT       
+6 ALLOT       
 
 CR ."H._" VAL' H T@ H.
 CR HERE H.
