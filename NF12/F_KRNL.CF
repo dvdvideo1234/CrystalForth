@@ -13,7 +13,12 @@ APT- _DROP1   =: DROP;
 APT- _SEMIGO  =: (GO;  
 APT- _EXECUT  =: EXECUTE  
 APT- _NOPX    =: NOP;    
+APT- _DZ0     =: (D#0
 APT- _SET2    =: (SET2    
+APT- _MARKF   =: MARK>
+APT- _ZCOMMA  =: Z,
+APT- _RELSB   =: RELS>      
+APT- _SWPST   =: SWAP!      
 APT- _ST      =: !      
 APT- _SET     =: (SET     
 APT- _LIT     =: (LIT     
@@ -48,15 +53,15 @@ APT- _@COMM   =: @,
 APT- __@COM   =: (@,   
 APT- _COMMA   =: ,   
 APT- _STP     =: !+     
-APT- _XCOMMA  =: ;,  
+APT- _XLIT    =: ;LIT,  
 APT- _COMLIT  =: (LIT,  
-\ APT- _SEMSEM  =: TARG;;  
-APT- _ABDOT   =: (!"   
+APT- _ABDOT   =: ((A"   
 APT- _DORDOT  =: ERR.  
 APT- _XN??    =: ;N??    
 APT- _N??     =: N??     
 APT- _??      =: ?? 
 APT- _BRK     =: _BRK      
+APT- _TOBYTE  =: W>B     
 APT- _BK      =: (BK      
 APT- _OSTR    =: (?S   
 APT- _IO      =: (IO      
@@ -133,16 +138,18 @@ APT- _MKSTR   =: S>"!
 
       \ LAST WORDS 
 
-0 VALUE; CNTC
-\ 0 :VALUE KEY ;
-0 :VALUE EMIT  CNTC; 
-: 1+ 1+; ; UNW
-
-: STATE! POP _BRK (SET2
+\ INCLUDE EXT.CF      
+  
+: STATE! POP (SET2
 : FINDEX  (JUMP ;;
 
 : EVAL NOP;
-: `@EVAL TOKEN  DROP; ?; FINDEX RECURSE ;
+: @EVAL \ _BRK 
+  TOKEN \ _BRK 
+  DROP; ?; FINDEX 
+\ SP@ STKP? ! H HEREP? ! T DICTP? !
+RECURSE ;
+' EVAL ' @MAIN T!
 
 : (& @R+ RDROP  : AND NAND : NOT; NOT ;
 : ODD (& ,< 1 , 
@@ -150,11 +157,9 @@ APT- _MKSTR   =: S>"!
 VAL' ODD =: BYE
 
 : FIXER! !R ;
-: TIMES| (FOR CALL BEGIN J EXECUTE 
-   THEN (NEXT RELEASE< RDROP; ; UNW
 
 : TARG:` : =H H    : =: 0 TOKEN?
-: (=:     ?C@ 1+ T; MPUSH TWICE : !- PUSH !R- POP; ; UNW
+: (=:     ?C@ 1 + T; MPUSH TWICE : !- PUSH !R- POP; ; UNW
       
       \   COMPILER
       
@@ -164,38 +169,50 @@ VAL' ODD =: BYE
 
       \   INTERPRETTER 
       
-: `INI H STR >DICT `@EVAL TBL CSTR REINI vREADLN 
-: TARG,< STATE! : `INTER FIND IF @ FIXER! NOP; ;THEN ,< 
+: `INI H STR >DICT @EVAL TBL CSTR REINI vREADLN 
+: TARG,< STATE! : `INTER FIND \ _BRK 
+  IF @ FIXER! NOP; \ _BRK 
+  ;THEN ,< 
 ' ">NUM DEFER vNUM
 : TARG;  TARG,<  : TARG;; (@, ;;
  
       \   FIXES
-  
-\ META ">NUM    vNUM 
-\ META ">NUMC  vNUMC 
-\ META DROP;   vERR. 
-\ META NOP;      vOK 
-\ META T       vTARG 
+      
+APT2 TARG:`   :`  
+APT2 TARG;;   ;;` 
+APT2 TARG;    ;`  
+APT- TARG:   =: :    
+APT- TARG>,  =: >, 
+APT2 TARG,<   ,<` 
+ 
 META `INI    @INIT 
 META `INTER FINDEX 
-\ ' `HISTART ' _INIT T!
 HERE    VAL' H T!
-' EVAL ' @MAIN T!
-\ ' (BK   ' KEY  T!
-' (BE   ' EMIT T!
 
-12 , ' =: , 0 , "=:" 
--1 ALLOT \ HERE T>R 16 - 16 DUMP
-0 , 0 , 0 C,  
-6 ALLOT       
+      \   WORD THE ONE
+12 , ' =: , 0 , "=:" -1 ALLOT \ HERE T>R 16 - 16 DUMP
+THIDE =:  0 , 0 , 0 C,  
 
-CR ."H._" VAL' H T@ H.
-CR HERE H.
-CR 1K $100 + HERE - .
+      \ ALIGNING TO 1K
+      
+\ 10 ALLOT       
 
+      \ STATISTICS
+      
+CR ."_BODY_LENGTH_" VAL' H T@ $100 - . CR
+CR ."_CODE_LENGTH_" HERE $100 - . CR
+CR 1K $100 + HERE - ."BYTES_TO_ADD__" . CR
+
+      \ SAVE RESULT
+      
 TSAVE PIF.COM 
 
-_FREEMEM:
 
+      \ PREPARE NEW WORDS TO BE ASSIGNED 
+      
+USING PIF.COM
+\ NAMES
+RNAMES
+USING PB5.COM
 
-
+_END_OF_COMPILATION_

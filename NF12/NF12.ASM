@@ -140,13 +140,13 @@ MyCseg  segment para  use16
 
         org 100h
 
-STKSZ   = 512
+STKSZ   = 512+128
 @R_TOP  = -64            
 @S_TOP  = @R_TOP-STKSZ   
 @TIB    = @S_TOP-STKSZ-256-@R_TOP   
-@TBUF   = @TIB-256         
-@SBUF   = @TBUF-256         
-@VOCTOP = @SBUF-256
+@SBUF   = @TIB-256         
+@TBUF   = @SBUF-256         
+@VOCTOP = @TBUF-16
 
 Start  Label byte   
 L_ _START
@@ -154,53 +154,44 @@ L_ _START
   mov   bx,1000h        ; only 64k allocate
   int   21h
 P_ _ABORT
-  CLD
   MOV   RSP,@R_TOP
   MOV   DSP,@S_TOP
+  CALL  @RET
   CALL  @RETURN
   
   DW _INIT    ; : `HISTART @INIT  
 ;_MAIN   DW EVAL vOK vREADLN RECURSE ;
 _MAIN   DW 0,_vOK,_vRDLN,_JUMP,_MAIN
 
-; : - NEG         : + +2/         : DROP;  DROPX ; UNW
-_MINUS  DW _NEG
-_PLUS   DW _P2DIV
-_DROP1  DW _DROPX ; UNW
-
-; : (GO; @R+      : EXECUTE PUSH  : NOP; ;
-_SEMIGO DW _RLDP,_XR
-_EXECUT DW _PUSH  
-_NOPX   DW _RET
-
-; : (SET2 @R+ DROP !R RDROP; ; UNW
-_SET2   DW _RLDP,_DROP,_RSTP,_RDRPX ; UNW
-
-; : ! PUSH        : (SET !R RDROP; ; UNW
-_ST     DW _PUSH
-_SET    DW _RST,_RDRPX ; UNW
-
-; : (LIT @R+ ;
-_LIT    DW _RLDP,_RET 
-
-; : @ PUSH        : (CON @R       : EXIT RDROP; ; UNW
-_LD     DW _PUSH        
-_CON    DW _RLD       
-_EXIT   DW _RDRPX ; UNW
-; 
-; : STR PUSH @R+ XR POP; ; UNW 
-_STR    DW _PUSH,_RLDP,_XR,_POPX 
-
-; : CSTR PUSH C@R+ XR POP; ; UNW 
-_CSTR   DW _PUSH,_RLDBP,_XR,_POPX 
-
-; : ?C@ DUP : C@ PUSH C@R+ RDROP; ; UNW 
-_?C@    DW _DUP 
-_C@     DW _PUSH,_RLDBP,_RDRPX
-
-
 ; VARIABLES
 ;
+; 0 VALUE; H
+_HX     DW _H,_EX,_SET2
+_H      DW _CON,_EndMem
+
+; $E800 VALUE; T
+        DW _SET2
+_TX     DW _T,_EX,_SET2
+_T      DW _CON,@VOCTOP
+ 
+; 0 VALUE; LTIB
+; 18 4 - 1K     U*  VAL' LTIB  T!
+_LTIBX  DW _LTIB,_EX,_SET2
+_LTIB   DW _CON,(18-5)*1024
+
+; $100 18 1K U* + VALUE ETIB
+        DW _SET2
+_ETIB   DW _CON,18*1024+100H
+ 
+_vNUMC  DW _JUMP,_TONUMC ; 0 DEFER 
+_vRDLN  DW _JUMP,0 ; 0 DEFER 
+_vRDOT  DW _JUMP,_DROP1  ; 0 DEFER _ERR
+_vOK    DW _JUMP,_NOPX   ; 0 DEFER 
+_vTARG  DW _JUMP,_T       ; 0 DEFER 
+ 
+_REINI  DW _POP,_SET2
+_INIT   DW _JUMP,_RET
+
 ; 0 CONST 0     \ >,
 _0      DW _CON,0
    
@@ -215,47 +206,63 @@ _TBUF   DW _CON,@TBUF
 _SBUF   DW _CON,@SBUF   
 _TIB    DW _CON,@TIB   
  
-_vNUMC   DW _JUMP,_TONUMC ; 0 DEFER 
-_vRDLN   DW _JUMP,0 ; 0 DEFER 
-_vRDOT   DW _JUMP,_DROP1  ; 0 DEFER _ERR
-_vOK     DW _JUMP,_NOPX   ; 0 DEFER 
-_vTARG   DW _JUMP,_T       ; 0 DEFER 
- 
-_REINI    DW _POP,_SET2
-_INIT     DW _JUMP,_RET
+; : - NEG         : + +2/         : DROP;  DROPX ; UNW
+_MINUS  DW _NEG
+_PLUS   DW _P2DIV
+_DROP1  DW _DROPX ; UNW
 
-; 0 VALUE; LTIB
-; 18 4 - 1K     U*  VAL' LTIB  T!
-_LTIBX  DW _LTIB,_EX,_SET2
-_LTIB   DW _CON,(18-4)*1024
+; : (GO; @R+      : EXECUTE PUSH  : NOP; ;
+_SEMIGO DW _RLDP,_XR
+_EXECUT DW _PUSH  
+_NOPX   DW _RET
 
-; $100 18 1K U* + VALUE ETIB
-        DW _SET2
-_ETIB   DW _CON,18*1024+100H
- 
-; 0 VALUE; H
-_HX     DW _H,_EX,_SET2
-_H      DW _CON,_EndMem
+_DZ0    DW _POP,_XR,_RET
+; : (SET2 @R+ DROP !R RDROP; ; UNW
+_SET2   DW _RLDP,_DROP,_RSTP,_RDRPX ; UNW
 
-; $E800 VALUE; T
-        DW _SET2
-_TX     DW _T,_EX,_SET2
-_T      DW _CON,@VOCTOP
- 
+_MARKF  DW  _H
+_ZCOMMA DW  __@COM,0
+_RELSB  DW  _H
+_SWPST  DW  _SWAP
+; : ! PUSH        : (SET !R RDROP; ; UNW
+_ST     DW _PUSH
+_SET    DW _RSTP,_RDRPX ; UNW
+
+; : (LIT @R+ ;
+_LIT    DW _RLDP,_RET 
+
+; : @ PUSH        : (CON @R       : EXIT RDROP; ; UNW
+_LD     DW _PUSH        
+_CON    DW _RLDP       
+_EXIT   DW _RDRPX ; UNW
+; 
+; : STR PUSH @R+ XR POP; ; UNW 
+_STR    DW _PUSH,_RLDP,_XR,_POPX 
+
+; : CSTR PUSH C@R+ XR POP; ; UNW 
+_CSTR   DW _PUSH,_RLDBP,_XR,_POPX 
+
+; : ?C@ DUP : C@ PUSH C@R+ RDROP; ; UNW 
+_?C@    DW _DUP 
+_C@     DW _PUSH,_RLDBP,_RDRPX
+
+
 ; : @, PUSH   : (@, @R+ RDROP : ,  H; : !+ PUSH !R+ POP; ; UNW  
-_@COMM  DW _PUSH   
-__@COM  DW _RLDP,_RDROP 
+__@COM  DW _DZ0 
+_@COMM  DW _LD  
 _COMMA  DW _HX 
 _STP    DW _PUSH,_RSTP,_POPX
 
 ; : ;, EX , ;
-_XCOMMA DW _EX,_JUMP,_COMMA 
-
+;_XCOMMA DW _EX,_JUMP,_COMMA 
+_XLIT   DW _EX,_SEMIGO,_COMMA
 ; : (LIT, (@, (LIT ,<
 _COMLIT DW __@COM,_LIT 
 
 ; : ((A" (?S SWAP DROP; ?; 
-_ABDOT  DW _OSTR,_SWAP,_IF,_DROP1
+_ABDOT  DW _OSTR,_SWAP
+        ; DW _BRK
+        DW _IF,_DROP1
 
 ; : ERR. vERR. RESTART ;  UNW
 _DORDOT DW _vRDOT,_ABORT 
@@ -274,15 +281,19 @@ P_  _BRK
   INT   3
   JMP   @MAIN
 
+L_ _TOBYTE
+  DW _IO
+  JMPS  @W_TO_B
+  
 L_ _BK
   DW _DUP,_IO
   CLR   AX
   INT   16H
   ZERO?_ TOPL
-  JE  @@1
-@W_B:  
+  JE  @RET
+@W_TO_B:  
   CLR   TOPH
-@@1: RET
+@RET: RET
 
 P_ _OSTR          ; (?S
   R_TO 	W			    ; TAKE TOP OF THE RETURN STACK
@@ -572,6 +583,7 @@ _WORD:
         ; : PARSE NOP; ETIB LTIB; (PARS ;
 _PARSE:
   DW _NOPX,_ETIB,_LTIBX
+  ;,_BRK
   
  L_ _PARS
   DW  _IO
@@ -617,7 +629,7 @@ L_ _TICK
 L_ _FINDT
   DW _T
 L_ _FIND
-  DW _BRK
+  ;DW _BRK
   DW  _IO
 @FIND:  
   CLR     CX 
@@ -643,14 +655,28 @@ L_ _FIND
 
 ;----------------   NUMBERS	 ---------------------
 
+@CSCANB:
+  POP     DI
+  PUSH    CX
+  MOV     CL,[DI]
+  MOV     CH,0
+  ADD     DI,CX
+  STD
+  REPNE   SCASB
+  CLD
+  MOV     DI,CX
+  POP     CX
+  RET
+  
 ; : ">NUMC ;,  (LIT, :;
  
 L_ _TONUMC   
-  DW _XCOMMA,_SEMIGO,_COMLIT 
+  DW _XLIT; _XCOMMA,_SEMIGO,_COMLIT 
   
 ; : ">NUM CSTR (NUM   : ?? !"?" ;;  
 L_ _TONUM    
-  DW _CSTR,_SEMIGO,_??   
+  DW _CSTR,_SEMIGO,_??
+  ;DW _BRK
 
 L_ _ATOI
   DW  _IO
@@ -662,14 +688,14 @@ L_ _ATOI
 @@TMP   = SI
 @@OPADR = DX  ; OPTION ADDRESS
   
-  XCHG    TOP,DI
+  XCHG    TOP,@@IND
   PUSH    DSP
   LEA     @@ADR,[@@ADR+@@IND]
   NOT     @@IND
 	CALL	  @@ATOI
   POP     DSP
-  MOV     NXT,CX
-  XCHG    TOP,DI
+  MOV     NXT,@@ACC
+  XCHG    TOP,@@IND
 	RET
 
 @@ATOI:
@@ -683,16 +709,19 @@ L_ _ATOI
   JNZ     @@GETC
   RET
 
-COMOPT  DW @@B16,@@B8,@@B2,@@KOLI,@@ACCUM,@@DIEZ
-OPTAB   DB "$&%'^#"
+COMOPT  DW @@KOLI,@@TICK,@@DIEZ,@@setbasE,@@setbasE,@@setbasE
+@@OPTAB:
+        CALL @CSCANB
+OPTAB   DB 6,"^'#"
+OPBASE  DB "$&%",16,8,2
 
 @@SGN:
-  INC     @@IND
+  INC     @@IND                 ; ZERO LEN
 	JZ     	@@ERNUM
-  CMP     pb [@@ADR+@@IND],'-'     ; SGN
-  jne     @@EXNUM2
-  INC     @@IND
-	JZ     	@@ERNUM
+  CMP     pb [@@ADR+@@IND],'-'  ; SGN?
+  jne     @@EXSGN
+  INC     @@IND                 ; SKIP '-'
+	JZ     	@@ERNUM               ; LAST CHAR ?
 	POP   	@@OPADR
 	CALL  	@@OPADR         ; return to caller
 @@DNEG:  
@@ -701,9 +730,9 @@ OPTAB   DB "$&%'^#"
 ;	not   	AR
 ;@@DINC:  
 ;	inc   	@@acc
-;  jne     @@EXNUM2
+;  jne     @@EXSGN
 ;	inc   	AR
-@@EXNUM2: 
+@@EXSGN: 
   RET
 
 @@DIEZ:	
@@ -712,19 +741,6 @@ OPTAB   DB "$&%'^#"
 @@numini:	
 	CLR   	@@acc      ; ZEROING ACCUMULATOR
   ;CLR     AR        ; HI PART ACCUMULATOR
-  JMPS    @@setbasE
-  
-@@B2:
-	MOV		  AL,2        ; BIN
-  SKIPA
-  
-@@B8:
-	MOV		  AL,8        ; OCT
-  SKIPA
-  
-@@B16:              ; HEX
-	MOV		  AL,16
-  
 @@setbasE:	
 	DEC   	AX
 	DEC   	AX
@@ -736,23 +752,17 @@ OPTAB   DB "$&%'^#"
   CALL    @@STATE
   
 @@N16:	
-  PUSH    @@base
-	MOV		  @@TMP,6-1
-@@SCANB1:	
-	CMP		  AL,OPTAB[@@TMP]
-	JE		  @@SCANB2	
-	DEC		  @@TMP
-	JNS		  @@SCANB1	
-@@SCANB2:	
-	SHL		  @@TMP,1
-	MOV		  @@OPADR,COMOPT[@@TMP]
-  POP     @@base
-  
-  JS      @@N5
+  PUSH    DI
+  CALL    @@OPTAB
+  JNE     @@N5	
+  MOV     AL,[DI+OPBASE]
+  SHL     DI,1
+	MOV		  @@OPADR,COMOPT[DI]
+  POP     DI
   INC     @@IND
 	JZ      @@ERNUM
   DEC     @@IND
-  RET
+  JMP     @@OPADR
   
 @@ERNUM:	
 	DEC   	@@IND
@@ -761,6 +771,7 @@ OPTAB   DB "$&%'^#"
 	RET
   
 @@N5:	
+  POP     DI 
 	cmp   	al,'9'+1
 	jc    	@@ton2
 	cmp   	al,'A'      ; no case sensivity
@@ -781,7 +792,11 @@ OPTAB   DB "$&%'^#"
   ;ADC     AR,DX
 	JMPS    @@NORMAL?
   
+@@TICK:  
+  CALL    @@STATE
+	JMPS  	@@ACCUM
 @@KOLI:	
+  CALL    @@STATE
 	AND	  	AL,31
 	JMPS  	@@ACCUM
   
@@ -793,6 +808,7 @@ L_ _TODICT
   DW _TX 
   
 L_ _MPUSH ; TOP OF DICTIONARY   IN DI
+  ;DW _BRK
   DW _IO
 	POPR_   DI
 	POPR_	  CX
@@ -807,6 +823,7 @@ _TOTBUF:
   DW      _TBUF
   
  L_ _MKSTR         ; S>"!
+  ;DW _BRK
   DW _IO
 	POPR_   DI
 	POPR_	  CX
