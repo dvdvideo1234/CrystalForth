@@ -158,10 +158,10 @@ L_ _START
 P_ _ABORT
   MOV   RSP,@R_TOP
   MOV   DSP,@S_TOP
-  CALL  @RET
+  CALL  @RET            ; HOLE FOR STOPPING DEBUGGER 
   CALL  @RETURN
   
-_@INIT  DW 0  ; : `HISTART @INIT  
+_@INIT  DW 0  ; STARTUP ADDRESS  
 
 ; VARIABLES
 ;
@@ -169,7 +169,7 @@ _@INIT  DW 0  ; : `HISTART @INIT
 _HX     DW _H,_EX,_SET2
 _H      DW _CON,_EndMem
 
-; $E800 VALUE; T
+; $F800 VALUE; T
         DW _SET2
 _TX     DW _T,_EX,_SET2
 _T      DW _CON,@VOCTOP
@@ -276,9 +276,9 @@ P_  _BRK
   INT   3
   JMP   @MAIN
 
-L_ _TOBYTE
-  DW _IO
-  JMPS  @W_TO_B
+;L_ _TOBYTE
+;  DW _IO
+;  JMPS  @W_TO_B
   
 L_ _BK
   DW _DUP,_IO
@@ -300,10 +300,11 @@ P_ _OSTR          ; (?S
   AND   DRL,0FEH
   XCHG  DR,W
   JMPS  @DUPW ; 
+
     
 P_ _IO  				  ; IF INPUT PARAMS = OUTPUT PARAMS 
   ;PUSH  DX  ; PRESERVE REGISTERS
-  MOV   W,IP
+  XCHG  W,IP
   MOV   BX,[DSP]
   MOV   CX,[DSP+2]
   MOV   DX,[DSP+4]
@@ -520,11 +521,11 @@ P_ _XOR				  ; XOR - LOGICAL PRIMITIVE
   XOR     NXT,TOP	  ; XOR TO SECOND DATA ELEMENT - NEXT
   JMPS    @DROP
   
-P_ _MINUS
-  NEG   TOP
-P_ _PLUS
-  ADD   NXT,TOP	  
-  JMPS    @DROP
+; P_ _MINUS
+;   NEG   TOP
+; P_ _PLUS
+;   ADD   NXT,TOP	  
+;   JMPS    @DROP
  
 P_ _MDIV				  ; -/ DIVIDE PRIMITIVE
   SHL	  NXT,1     ; SHIFT LEFT NEXT TO CARRY

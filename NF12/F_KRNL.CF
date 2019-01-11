@@ -23,8 +23,6 @@ APT- _LTIBX   =: LTIBX
 APT- _LTIB    =: LTIB    
 APT- _ETIB    =: ETIB  
 APT- _MSG     =: MESSAGE    
-APT- _MINUS   =: -   
-APT- _PLUS    =: +    
 APT- _SEMIGO  =: (GO;  
 APT- _EXECUT  =: EXECUTE  
 APT- _NOPX    =: NOP;    
@@ -50,7 +48,7 @@ APT- _XN??    =: ;N??
 APT- _N??     =: N??     
 APT- _??      =: ?? 
 APT- _BRK     =: _BRK      
-APT- _TOBYTE  =: W>B     
+\ APT- _TOBYTE  =: W>B     
 APT- _BK      =: (BK      
 APT- _OSTR    =: (?S   
 APT- _IO      =: (IO      
@@ -104,6 +102,7 @@ APT- _ZEQ     =: 0=
 APT- _NOT     =: NOT     
 APT- _ULESS   =: U<
 APT- _ODD     =: ODD
+APT- _0LESS   =: 0<
 APT- _TOKEN?  =: TOKEN?  
 APT- _TOKEN   =: TOKEN   
 APT- _WORD    =: WORD    
@@ -126,8 +125,19 @@ APT- _MKSTR   =: S>"!
 
 ' (DEF =: (JUMP 
 
+=! STATE?
+
+0 VALUE; CNTC
+:VALUE EMIT CNTC;    
+: 1+ 1+; ; UNW
+' (BE   ' EMIT T!
+
+: -  NEG 
+: +  +2/
 : DROP;  DROPX ; UNW
  
+INCLUDE EXT.CF      
+  
 : STATE! POP (SET2
 : FINDEX  (JUMP ;;
 
@@ -139,10 +149,10 @@ APT- _MKSTR   =: S>"!
 
 1 =: BYE
 
- INCLUDE EXT.CF      
-  
 : TARG:` : =H H    : =: 0 : =F TOKEN?
-: (=:     ?C@ 1 + T; MPUSH TWICE : !- PUSH !R- POP; ; UNW
+  DUP ID.
+  12 STATE?
+: (=:     ?C@ 1+ T; MPUSH TWICE : !- PUSH !R- POP; ; UNW
       
       \   COMPILER
       
@@ -154,11 +164,11 @@ APT- _MKSTR   =: S>"!
       
 : TARG,< STATE! 
 : `INTER FIND 
-  1 `STATE! _BRK 
+  \ 1 STATE?
   IF @ CALL SKIP THEN (SET : `LASTWORD NOP; 
-  2 `STATE! _BRK
-  ;THEN 
-  3 `STATE! _BRK
+  \ 2 STATE?
+  ;; THEN 
+  \ 3 STATE?
   ,< 
 ' ">NUM DEFER vNUM
 : TARG;  TARG,<  : TARG;; (@, ;;
@@ -167,33 +177,31 @@ APT- _MKSTR   =: S>"!
 
 : EVAL NOP;
 : @EVAL 
-  4 `STATE! _BRK 
+  \ 4 STATE? 
   TOKEN 
-  5 `STATE! _BRK 
-  DROP; ?; FINDEX 
-  6 `STATE! _BRK
-  SP@ `STKP? !                \ DATA STACK POINTER
-  H `HEREP? !                 \ HEAP POINTER
-  T `DICTP? !                 \ DICTIONARY POINTER
-  (LIT `LASTWORD @ `LASTW? !  \ LAST EXECUTED WORD
+  \ 5 STATE? 
+  OVER ID.
+  10 STATE?  
+  DROP; ?; 
+  FINDEX 
+  \ 6 STATE?
 RECURSE ;
 
-: READLN TIB TBL 
-: vACCEPT NOP; ;
+: READLN NOP; ; \ TIB TBL 
 
 : `INI H>DICT 
-  7 `STATE! _BRK
+  \ 7 STATE?
     CALL 
   AHEAD CSWAP> 
     THEN 
-  8 `STATE! _BRK
+  \ 8 STATE?
     REINI 
     MESSAGE vERR           
 : QUIT TARG,< 
 : `QUIT READLN
 : `MAIN 
   THEN 
-  9 `STATE! _BRK
+  \ 9 STATE?
   EVAL vOK  `QUIT ;
         
         

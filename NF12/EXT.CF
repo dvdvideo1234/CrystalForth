@@ -1,12 +1,11 @@
-0 VALUE; CNTC
+=! `LASTWORD
+
 :VALUE KEY  ;
 ' (BK   ' KEY  T!
-:VALUE EMIT CNTC;    : 1+ 1+; ; UNW
-' (BE   ' EMIT T!
 
 : TIMES| (FOR CALL BEGIN J EXECUTE 
    THEN (NEXT RELEASE< RDROP; ; UNW
-: ;DROP EX DROP; ; UNW   
+: ;DROP EX DROP; ;   
 : ;SPC EX 
 : SPACE BL EMIT ;
 : ID. ;SPC
@@ -27,8 +26,18 @@ VAL' TBUF T@
 \ 2- DUP CONST STKP
 DROP
 
-: `STATE! `STATE? ! ;
+: ??ID ID. (BK DROP ;
 
+
+: STATE?
+ `STATE? ! 
+  SP@ `STKP? !                \ DATA STACK POINTER
+  H `HEREP? !                 \ HEAP POINTER
+  T `DICTP? !                 \ DICTIONARY POINTER
+  (LIT `LASTWORD @ `LASTW? !  \ LAST EXECUTED WORD
+  _BRK
+;  
+  
 \ ----------------
 \ _vRDOT  DW _JUMP,_DROP1  ; 0 DEFER _ERR
 \ _vOK    DW _JUMP,_NOPX   ; 0 DEFER 
