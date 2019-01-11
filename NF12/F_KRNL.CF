@@ -6,20 +6,30 @@ INCLUDE NF12.C1
 241 =: --END--
 
 APT- _ABORT   =: ABORT   
-APT- _MAIN    =: @MAIN    
+APT- _@INIT   =: `INIT    
+APT- _HX      =: H;      
+APT- _H       =: H       
+APT- _TX      =: T;      
+APT- _T       =: T       
+APT- _0       =: 0       
+APT- _BL      =: BL      
+APT- _TBL     =: TBL     
+APT- _TBUF    =: TBUF    
+APT- _SBUF    =: SBUF    
+APT- _TIB     =: TIB     
+APT- _VNUMC   =: vNUMC   
+APT- _VTARG   =: vTARG     
+APT- _LTIBX   =: LTIBX   
+APT- _LTIB    =: LTIB    
+APT- _ETIB    =: ETIB  
+APT- _MSG     =: MESSAGE    
 APT- _MINUS   =: -   
 APT- _PLUS    =: +    
-APT- _DROP1   =: DROP;   
 APT- _SEMIGO  =: (GO;  
 APT- _EXECUT  =: EXECUTE  
 APT- _NOPX    =: NOP;    
 APT- _DZ0     =: (D#0
 APT- _SET2    =: (SET2    
-APT- _MARKF   =: MARK>
-APT- _ZCOMMA  =: Z,
-APT- _RELSB   =: RELS>      
-APT- _SWPST   =: SWAP!      
-APT- _ST      =: !      
 APT- _SET     =: (SET     
 APT- _LIT     =: (LIT     
 APT- _LD      =: @      
@@ -29,26 +39,6 @@ APT- _STR     =: STR
 APT- _CSTR    =: CSTR    
 APT- _?C@     =: ?C@     
 APT- _C@      =: C@      
-APT- _0       =: 0       
-APT- _BL      =: BL      
-APT- _TBL     =: TBL     
-APT- _TBUF    =: TBUF    
-APT- _SBUF    =: SBUF    
-APT- _TIB     =: TIB     
-APT- _VNUMC   =: vNUMC   
-APT- _VRDLN   =: vREADLN   
-APT- _VRDOT   =: vRDOT   
-APT- _VOK     =: vOK     
-APT- _VTARG   =: vTARG     
-APT- _REINI   =: REINI   
-APT- _INIT    =: @INIT    
-APT- _LTIBX   =: LTIBX   
-APT- _LTIB    =: LTIB    
-APT- _ETIB    =: ETIB    
-APT- _HX      =: H;      
-APT- _H       =: H       
-APT- _TX      =: T;      
-APT- _T       =: T       
 APT- _@COMM   =: @,   
 APT- __@COM   =: (@,   
 APT- _COMMA   =: ,   
@@ -56,7 +46,6 @@ APT- _STP     =: !+
 APT- _XLIT    =: ;LIT,  
 APT- _COMLIT  =: (LIT,  
 APT- _ABDOT   =: ((A"   
-APT- _DORDOT  =: ERR.  
 APT- _XN??    =: ;N??    
 APT- _N??     =: N??     
 APT- _??      =: ?? 
@@ -113,6 +102,8 @@ APT- _NAND    =: NAND
 APT- _NEG     =: NEG     
 APT- _ZEQ     =: 0=     
 APT- _NOT     =: NOT     
+APT- _ULESS   =: U<
+APT- _ODD     =: ODD
 APT- _TOKEN?  =: TOKEN?  
 APT- _TOKEN   =: TOKEN   
 APT- _WORD    =: WORD    
@@ -135,30 +126,22 @@ APT- _MKSTR   =: S>"!
 
 ' (DEF =: (JUMP 
 
-
-      \ LAST WORDS 
-
-\ INCLUDE EXT.CF      
-  
+: DROP;  DROPX ; UNW
+ 
 : STATE! POP (SET2
 : FINDEX  (JUMP ;;
 
-: EVAL NOP;
-: @EVAL \ _BRK 
-  TOKEN \ _BRK 
-  DROP; ?; FINDEX 
-\ SP@ STKP? ! H HEREP? ! T DICTP? !
-RECURSE ;
-' EVAL ' @MAIN T!
+: REINI  POP (SET2
+: @INIT  (JUMP ;;
 
-: (& @R+ RDROP  : AND NAND : NOT; NOT ;
-: ODD (& ,< 1 , 
+: vERR  NOP; ;  
+: vOK  NOP; ;  
 
-VAL' ODD =: BYE
+1 =: BYE
 
-: FIXER! !R ;
-
-: TARG:` : =H H    : =: 0 TOKEN?
+ INCLUDE EXT.CF      
+  
+: TARG:` : =H H    : =: 0 : =F TOKEN?
 : (=:     ?C@ 1 + T; MPUSH TWICE : !- PUSH !R- POP; ; UNW
       
       \   COMPILER
@@ -169,13 +152,51 @@ VAL' ODD =: BYE
 
       \   INTERPRETTER 
       
-: `INI H STR >DICT @EVAL TBL CSTR REINI vREADLN 
-: TARG,< STATE! : `INTER FIND \ _BRK 
-  IF @ FIXER! NOP; \ _BRK 
-  ;THEN ,< 
+: TARG,< STATE! 
+: `INTER FIND 
+  1 `STATE! _BRK 
+  IF @ CALL SKIP THEN (SET : `LASTWORD NOP; 
+  2 `STATE! _BRK
+  ;THEN 
+  3 `STATE! _BRK
+  ,< 
 ' ">NUM DEFER vNUM
 : TARG;  TARG,<  : TARG;; (@, ;;
- 
+
+      \ LAST WORDS 
+
+: EVAL NOP;
+: @EVAL 
+  4 `STATE! _BRK 
+  TOKEN 
+  5 `STATE! _BRK 
+  DROP; ?; FINDEX 
+  6 `STATE! _BRK
+  SP@ `STKP? !                \ DATA STACK POINTER
+  H `HEREP? !                 \ HEAP POINTER
+  T `DICTP? !                 \ DICTIONARY POINTER
+  (LIT `LASTWORD @ `LASTW? !  \ LAST EXECUTED WORD
+RECURSE ;
+
+: READLN TIB TBL 
+: vACCEPT NOP; ;
+
+: `INI H>DICT 
+  7 `STATE! _BRK
+    CALL 
+  AHEAD CSWAP> 
+    THEN 
+  8 `STATE! _BRK
+    REINI 
+    MESSAGE vERR           
+: QUIT TARG,< 
+: `QUIT READLN
+: `MAIN 
+  THEN 
+  9 `STATE! _BRK
+  EVAL vOK  `QUIT ;
+        
+        
       \   FIXES
       
 APT2 TARG:`   :`  
@@ -185,9 +206,9 @@ APT- TARG:   =: :
 APT- TARG>,  =: >, 
 APT2 TARG,<   ,<` 
  
-META `INI    @INIT 
-META `INTER FINDEX 
-HERE    VAL' H T!
+' `INI   ' `INIT T!   \ STARTUP
+META `INTER FINDEX    \ FORTH STATE
+HERE    VAL' H T!     \ FORTH HEAP
 
       \   WORD THE ONE
 12 , ' =: , 0 , "=:" -1 ALLOT \ HERE T>R 16 - 16 DUMP

@@ -16,14 +16,39 @@
 : ((." (?S ". ;
 : CR ."^M^J" 0 TO CNTC ;
 
+: SWAP! SWAP : ! PUSH (SET ;
+
 VAL' TBUF T@ 
-2- DUP CONST STKP?
-2- DUP CONST HEREP?
-2- DUP CONST DICTP?
-\ 2- DUP CONST STKP
-\ 2- DUP CONST STKP
+2- DUP CONST `STATE?
+2- DUP CONST `STKP?
+2- DUP CONST `HEREP?
+2- DUP CONST `DICTP?
+2- DUP CONST `LASTW?
 \ 2- DUP CONST STKP
 DROP
+
+: `STATE! `STATE? ! ;
+
+\ ----------------
+\ _vRDOT  DW _JUMP,_DROP1  ; 0 DEFER _ERR
+\ _vOK    DW _JUMP,_NOPX   ; 0 DEFER 
+\ _vRDLN  DW _JUMP,0 ; 0 DEFER 
+\ _REINI  DW _POP,_SET2
+\ _INIT   DW _JUMP,_RET
+\ APT- _MARKF   =: MARK>
+\ APT- _ZCOMMA  =: Z,
+\ APT- _RELSB   =: RELS>      
+\ APT- _SWPST   =: SWAP!      
+\ APT- _ST      =: !      
+\ APT- _DORDOT  =: ERR.  
+\ APT- _VRDLN   =: vREADLN   
+\ APT- _REINI   =: REINI   
+\ APT- _INIT    =: @INIT    
+\ APT- _VRDOT   =: vRDOT   
+\ APT- _VOK     =: vOK     
+\ : (& @R+ RDROP  : AND NAND : NOT; NOT ;
+\ : ODD (& ,< 1 , 
+\ : FIXER! !R ;
 
 
 
