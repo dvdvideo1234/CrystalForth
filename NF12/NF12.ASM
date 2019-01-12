@@ -163,7 +163,7 @@ P_ _ABORT
   
 _@INIT  DW 0  ; STARTUP ADDRESS  
 
-; VARIABLES
+; VARIABLES ---------------------------------
 ;
 ; 0 VALUE; H
 _HX     DW _H,_EX,_SET2
@@ -201,20 +201,17 @@ _TBL    DW _CON,80H
 _TBUF   DW _CON,@TBUF   
 _SBUF   DW _CON,@SBUF   
 _TIB    DW _CON,@TIB   
+
+;---------------------------------------
  
-; : - NEG         : + +2/         : DROP;  DROPX ; UNW
-;_MINUS  DW _NEG
-;_PLUS   DW _P2DIV
-;_DROP1  DW _DROPX ; UNW
+; HI LEVEL PRIMITIVES 
 
-; : (GO; @R+      : EXECUTE PUSH  : NOP; ;
-_SEMIGO DW _RLDP,_XR
-_EXECUT DW _PUSH  
+
+_DZ0    DW _POP,_XR
 _NOPX   DW _RET
-
-_DZ0    DW _POP,_XR,_RET
-; : (SET2 @R+ DROP !R RDROP; ; UNW
+; : (SET2 @R+ DROP 
 _SET2   DW _RLDP,_DROP
+; : (SET !R+ RDROP; ; UNW
 _SET    DW _RSTP,_RDRPX ; UNW
 
 ; _MARKF  DW  _H
@@ -225,12 +222,11 @@ _SET    DW _RSTP,_RDRPX ; UNW
 ; _ST     DW _PUSH
 ; _SET    DW _RSTP,_RDRPX ; UNW
 
-; : (LIT @R+ ;
-_LIT    DW _RLDP,_RET 
-
 ; : @ PUSH        : (CON @R       : EXIT RDROP; ; UNW
-_LD     DW _PUSH        
-_CON    DW _RLDP       
+__@COM  DW _DZ0   ; (@,
+_@COM   DW _XCOM  ; @,
+_LD     DW _PUSH  ; @     
+_CON    DW _RLDP  ; (CON     
 _EXIT   DW _RDRPX ; UNW
 ; 
 ; : STR PUSH @R+ XR POP; ; UNW 
@@ -239,22 +235,24 @@ _STR    DW _PUSH,_RLDP,_XR,_POPX
 ; : CSTR PUSH C@R+ XR POP; ; UNW 
 _CSTR   DW _PUSH,_RLDBP,_XR,_POPX 
 
-; : ?C@ DUP : C@ PUSH C@R+ RDROP; ; UNW 
-_?C@    DW _DUP 
-_C@     DW _PUSH,_RLDBP,_RDRPX
-
-
-; : @, PUSH   : (@, @R+ RDROP : ,  H; : !+ PUSH !R+ POP; ; UNW  
-__@COM  DW _DZ0 
-_@COMM  DW _LD  
+; : @, PUSH   : (@, @R+ RDROP 
+;_@@COM  DW _R 
+;_COMAER DW _RLDP,_SKIP
+; : ;, EX 
+_XCOM   DW _EX
+;: ,  H; : !+ PUSH !R+ POP; ; UNW 
 _COMMA  DW _HX 
-_STP    DW _PUSH,_RSTP,_POPX
+_STP    DW _PUSH,_RSTP
+_VAR    DW _POPX
 
-; : ;, EX , ;
 ;_XCOMMA DW _EX,_JUMP,_COMMA 
-_XLIT   DW _EX,_SEMIGO,_COMMA
+_XLIT   DW _EX
+_LITCC  DW _XCOM
 ; : (LIT, (@, (LIT ,<
-_COMLIT DW __@COM,_LIT 
+_COMLIT DW __@COM,_LIT
+; : (LIT @R+ ;  (#
+_LIT    DW _RLDP,_RET 
+
 
 ; : ((A" (?S SWAP DROP; ?; 
 _ABDOT  DW _OSTR,TO_+_MSG
@@ -265,7 +263,6 @@ _ABDOT  DW _OSTR,TO_+_MSG
 _XN??     DW _EX   
 _N??      DW _ZEQ;,_?? ;
 _??       DW _ABDOT
-          ;DW _BRK
           NAM_ "?" 
           DW _RET
           
@@ -303,13 +300,11 @@ P_ _OSTR          ; (?S
 
     
 P_ _IO  				  ; IF INPUT PARAMS = OUTPUT PARAMS 
-  ;PUSH  DX  ; PRESERVE REGISTERS
   XCHG  W,IP
   MOV   BX,[DSP]
   MOV   CX,[DSP+2]
   MOV   DX,[DSP+4]
   CALL  W	 ; ,"^\~|~?~^V^A+~^R~+~X+~^S~+~^Q~+~C~"
-  ;POP  	DX	; RESTORE REGISTERS
   JMPS  @RETURN
 
 ; IO           COMMANDS  (IO  ^^^^^^^
@@ -521,12 +516,6 @@ P_ _XOR				  ; XOR - LOGICAL PRIMITIVE
   XOR     NXT,TOP	  ; XOR TO SECOND DATA ELEMENT - NEXT
   JMPS    @DROP
   
-; P_ _MINUS
-;   NEG   TOP
-; P_ _PLUS
-;   ADD   NXT,TOP	  
-;   JMPS    @DROP
- 
 P_ _MDIV				  ; -/ DIVIDE PRIMITIVE
   SHL	  NXT,1     ; SHIFT LEFT NEXT TO CARRY
   RCL   TOP,1		  ; ROTATE LEFT WITH CARRY
@@ -587,11 +576,15 @@ P_ _0LESS
         ; : TOKEN?  ;#??  
 L_ _TOKEN?  
   DW _XN??
-        ; : TOKEN BL  ?C@ :;
+        ; : TOKEN BL  [ ?C@ ]
 _TOKEN:
-  DW _BL
-  DW _SEMIGO,_?C@
-        ; : WORD [ TBUF S>"! ] _XTBUF
+  DW _BL,_WORD
+; : ?C@ DUP : C@ PUSH C@R+ RDROP; ; UNW 
+_?C@    DW _DUP 
+_C@     DW _PUSH
+_BCON   DW _RLDBP,_RDRPX    ; (C@
+  
+; : WORD [ TBUF S>"! ] _XTBUF
 _WORD:
   DW _XTBUF
         ; : PARSE NOP; ETIB LTIB; (PARS ;
@@ -635,6 +628,8 @@ _PARSE:
   DEC     PB [BX]
   RET
   
+L_ _COMTICK
+  DW _XCOM
 L_ _TICK
   DW _XN??,_TOKEN? 
 L_ _FINDT
@@ -674,7 +669,7 @@ L_ _TONUMC
   
 ; : ">NUM CSTR (NUM   : ?? !"?" ;;  
 L_ _TONUM    
-  DW _CSTR,_SEMIGO,_??
+  DW _CSTR,_ATOI,_JUMP,_??
   ;DW _BRK
 
 L_ _ATOI
