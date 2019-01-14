@@ -2,6 +2,8 @@
 A386  = 0
 TO_   = -2
 AT_   = -4
+_BLNK = 32
+ 
 
 pd  equ dword ptr
 pw  equ word  ptr
@@ -174,7 +176,6 @@ _H      DW _CON,_EndMem
 _TX     DW _T,_EX,_SET2
 _T      DW _CON,@VOCTOP
  
-; 0 VALUE; LTIB
 ; 18 4 - 1K     U*  VAL' LTIB  T!
 _LTIBX  DW _LTIB,_EX,_SET2
 _LTIB   DW _CON,(18-5)*1024
@@ -185,22 +186,22 @@ _ETIB   DW _CON,18*1024+100H
         DW _SET2
 _MSG    DW _CON,0 ; MESSAGE
 
-_vNUMC  DW _JUMP,_TONUMC ; 0 DEFER 
-_vTARG  DW _JUMP,_T      ; 0 DEFER 
+_TBUF   DW _CON,@TBUF   
+
+_vNUMC  DW _JUMP,_TONUMC
+_vTARG  DW _JUMP,_T      
  
+; : THEN` HERE : SWAP! SWAP : ! PUSH @R+ RDROP ;
+_RELSP  DW 0
+_SWAPST DW _SWAP
+_ST     DW _PUSH,_RSTP,_RDRPX
+
+
+_MARKP  DW _H     ;: MARK>` H : Z, 0 , ;
+_ZCOM   DW _XCOM
 ; 0 CONST 0     \ >,
 _0      DW _CON,0
    
-; $20 CONST BL
-_BL     DW _CON,20H 
- 
-; $80 CONST TBL
-_TBL    DW _CON,80H 
-  
-; $FF00 CONST TBUF
-_TBUF   DW _CON,@TBUF   
-_SBUF   DW _CON,@SBUF   
-_TIB    DW _CON,@TIB   
 
 ;---------------------------------------
  
@@ -209,57 +210,31 @@ _TIB    DW _CON,@TIB
 
 _DZ0    DW _POP,_XR
 _NOPX   DW _RET
-; : (SET2 @R+ DROP 
 _SET2   DW _RLDP,_DROP
-; : (SET !R+ RDROP; ; UNW
-_SET    DW _RSTP,_RDRPX ; UNW
+_SET    DW _RSTP,_RDRPX 
 
-; _MARKF  DW  _H
-; _ZCOMMA DW  __@COM,0
-; _RELSB  DW  _H
-; _SWPST  DW  _SWAP
-; ; : ! PUSH        : (SET !R RDROP; ; UNW
-; _ST     DW _PUSH
-; _SET    DW _RSTP,_RDRPX ; UNW
-
-; : @ PUSH        : (CON @R       : EXIT RDROP; ; UNW
 __@COM  DW _DZ0   ; (@,
 _@COM   DW _XCOM  ; @,
 _LD     DW _PUSH  ; @     
 _CON    DW _RLDP  ; (CON     
-_EXIT   DW _RDRPX ; UNW
-; 
-; : STR PUSH @R+ XR POP; ; UNW 
+_EXIT   DW _RDRPX ; EXIT
 _STR    DW _PUSH,_RLDP,_XR,_POPX 
 
-; : CSTR PUSH C@R+ XR POP; ; UNW 
 _CSTR   DW _PUSH,_RLDBP,_XR,_POPX 
-
-; : @, PUSH   : (@, @R+ RDROP 
-;_@@COM  DW _R 
-;_COMAER DW _RLDP,_SKIP
-; : ;, EX 
 _XCOM   DW _EX
-;: ,  H; : !+ PUSH !R+ POP; ; UNW 
 _COMMA  DW _HX 
 _STP    DW _PUSH,_RSTP
 _VAR    DW _POPX
-
-;_XCOMMA DW _EX,_JUMP,_COMMA 
 _XLIT   DW _EX
 _LITCC  DW _XCOM
-; : (LIT, (@, (LIT ,<
 _COMLIT DW __@COM,_LIT
-; : (LIT @R+ ;  (#
 _LIT    DW _RLDP,_RET 
 
 
-; : ((A" (?S SWAP DROP; ?; 
 _ABDOT  DW _OSTR,TO_+_MSG
         ;DW _BRK
         DW _IF,_NOPX,_ABORT 
  
-; : ;#?? EX   : #?? 0=  ?? ;
 _XN??     DW _EX   
 _N??      DW _ZEQ;,_?? ;
 _??       DW _ABDOT
@@ -273,10 +248,6 @@ P_  _BRK
   INT   3
   JMP   @MAIN
 
-;L_ _TOBYTE
-;  DW _IO
-;  JMPS  @W_TO_B
-  
 L_ _BK
   DW _DUP,_IO
   CLR   AX
@@ -304,41 +275,34 @@ P_ _IO  				  ; IF INPUT PARAMS = OUTPUT PARAMS
   MOV   BX,[DSP]
   MOV   CX,[DSP+2]
   MOV   DX,[DSP+4]
-  CALL  W	 ; ,"^\~|~?~^V^A+~^R~+~X+~^S~+~^Q~+~C~"
+  CALL  W	 
+P_ _RET  
   JMPS  @RETURN
 
 ; IO           COMMANDS  (IO  ^^^^^^^
 
 ; CONTROL      COMMANDS  ----------------------------
 
-P_ _?SKIP			; ?SKIP
-  Zero?_    TOP  
-  JZ    @SKIPDR
-  JMPS  @MAIN
-
 P_ _IF	 			; (IF
   Zero?_    TOP  
-  JE    @JUMPDR 
-  
-P_ _SKIPDR
-@SKIPDR:
-  DROP_
+  drop_
+  JE    @JUMP 
 P_ _SKIP
 @SKIP:
   INC   ip
   INC   ip
   JMPS  @MAIN
 
-P_ _IFM    			; (IF-
-  JMPS  @IFM
-  
 P_ _NEXTP
   POP   DR
   INC   DR
-  JE    @SKIP  
+  Jns   @SKIP  
 @JUMPPH:
   PUSH  dr
   JMPS  @JUMP
+  
+_@dbg:  
+  jmp   @MAKESTR
     
 P_ _NEXT
   POP   DR
@@ -346,19 +310,14 @@ P_ _NEXT
   JS    @skip
   JMPS  @JUMPPH
   
+P_ _IFM    			; (IF-
+  JMPS  @IFM
+  
 P_ _MIF    			; (-IF
   INC   TOP
 @IFM:
   DEC   TOP			; DECREMENT TOP AND BRANCH ON POSITIVE 
   JS    @SKIP		; ON NEGATIVE - SKIP BRANCH
-  JMPS  @JUMP 
-  
-P_ _NFOR
-  NOT   TOP
-P_ _FOR
-  TO_R	TOP
-@JUMPDR:  
-  DROP_
 P_ _JUMP    			; (JUMP
 @JUMP:
   MOV   IP,[IP]		; JUST BRANCH
@@ -439,17 +398,21 @@ P_ _XA				  ; XA
   
 ; MAIN  LOOP  ---------------------------------------
 
-P_ _1PX
+P_ _1M
+  DEC   TOP
+  SKIPB
+P_ _1P
   INC   TOP
   SKIPA
 P_ _RDRPX
   R_TO  DR
-P_ _RET  
 @RETURN:
   r_to  IP			; POP IP FROM RETURN TOP ELEMENT  
+P_ _NOP
 @MAIN:
   MOV   DR,[IP]	
-  LEA   IP,[IP+2]
+  INC   IP
+  INC   IP
   test 	DRL,1		; ADDRESS ODD ?
   je    @nest		; NOT ODD ADDRESS - NEST THEN
   dec   DR			; MAKE ODD ADDRESS EVEN
@@ -463,14 +426,19 @@ P_ _EX
 
 ;  STACK COMMANDS   --------------------------------
 
+P_ _DROPX
+  R_TO  IP
+  SKIPa
 P_ _NIP
   SWAP_
 P_ _DROP				; DUPLICATE TOP
   JMPS  @DROP
 
-P_ _DROPX
-  R_TO  IP
-  SKIPB
+  
+P_ _NFOR
+  NOT   TOP
+P_ _FOR
+  mov   ip,[ip]
 P_ _PUSH				; PUSH
   TO_R	TOP
 @DROP:
@@ -578,7 +546,7 @@ L_ _TOKEN?
   DW _XN??
         ; : TOKEN BL  [ ?C@ ]
 _TOKEN:
-  DW _BL,_WORD
+  DW _LIT,_BLNK,_WORD
 ; : ?C@ DUP : C@ PUSH C@R+ RDROP; ; UNW 
 _?C@    DW _DUP 
 _C@     DW _PUSH

@@ -1,5 +1,9 @@
 =! `LASTWORD
+=! EXECUTE
+=! =H
+=! ID.
 
+$20 CONST BL
 :VALUE KEY  ;
 ' (BK   ' KEY  T!
 
@@ -14,8 +18,6 @@
 : TYPE+ TIMES| CSTR EMIT ;
 : ((." (?S ". ;
 : CR ."^M^J" 0 TO CNTC ;
-
-: SWAP! SWAP : ! PUSH (SET ;
 
 VAL' TBUF T@ 
 2- DUP CONST `STATE?
@@ -58,8 +60,10 @@ DROP
 \ : (& @R+ RDROP  : AND NAND : NOT; NOT ;
 \ : ODD (& ,< 1 , 
 \ : FIXER! !R ;
-
-
+\ APT-     _BL      =: BL      
+\ APT-     _TBL     =: TBL     
+\ APT-     _SBUF    =: SBUF    
+\ APT-     _TIB     =: TIB     
 
 
 
