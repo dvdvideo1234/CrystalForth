@@ -1,8 +1,16 @@
+; :TODO
+; 1 DEBUGGER
+; 2 UNIT TESTS FOR EVERY PRIMITIVE
+; 3 DESA ASEMBLER DESASEMBLER
+; 4 MODULED TARGET COMPILATION
 
-A386  = 0
+A386  = 1   ; 0 - NO DEBUGER
+
 TO_   = -2
 AT_   = -4
-_BLNK = 32
+VAL_  = 2
+
+_BLNK = 32  ; ASCII CODE OF SPACESYMBOL
  
 
 pd  equ dword ptr
@@ -115,6 +123,56 @@ nam_    macro   msg
 endstr  label   byte
         endm
 
+IF A386
+
+TRACE_OFF MACRO
+  CALL  @NO_TRACE
+ENDM
+
+TRACE_ON MACRO
+  CALL  @DO_TRACE
+ENDM
+
+
+ELSE
+
+TRACE_OFF MACRO
+  CALL  @RET
+ENDM
+
+ENDIF
+
+
+
+DEFER_ MACRO NAM,VAL
+L_ NAM  
+  DW _JUMP,VAL
+ENDM
+
+
+VECTOR_ MACRO NAM,VAL
+  ALIGN_ 0
+  DW _SET2
+  DEFER_ NAM,VAL
+ENDM
+
+DOER_ MACRO NAM2,VAL
+  ALIGN_ 0
+  DW _POP,_SET2
+  DEFER_ NAM2,VAL
+ENDM
+
+CONST_ MACRO NAM,VAL
+L_ NAM  
+  DW _CON,VAL
+ENDM
+
+
+VALUE_ MACRO NAM,VAL
+  ALIGN_ 0
+  DW _SET2
+  CONST_ NAM,VAL
+ENDM
 
 ; REGISTER usage
 ip  = BX  ; BX INSTRUCTION POINTER
@@ -160,41 +218,66 @@ L_ _START
 P_ _ABORT
   MOV   RSP,@R_TOP
   MOV   DSP,@S_TOP
-  CALL  @RET            ; HOLE FOR STOPPING DEBUGGER 
-  CALL  @RETURN
+  TRACE_OFF           ; HOLE FOR STOPPING DEBUGGER 
+  CALL  _@4TH
   
-_@INIT  DW 0  ; STARTUP ADDRESS  
+  DW _@INIT  ; STARTUP ADDRESS  
 
 ; VARIABLES ---------------------------------
 ;
 ; 0 VALUE; H
-_HX     DW _H,_EX,_SET2
-_H      DW _CON,_EndMem
+_HX     DW _H,_EX
+ VALUE_ _H,_EndMem
 
 ; $F800 VALUE; T
-        DW _SET2
-_TX     DW _T,_EX,_SET2
-_T      DW _CON,@VOCTOP
+_TX     DW _T,_EX
+ VALUE_ _T,@VOCTOP
  
 ; 18 4 - 1K     U*  VAL' LTIB  T!
-_LTIBX  DW _LTIB,_EX,_SET2
-_LTIB   DW _CON,(18-5)*1024
+_LTIBX  DW _LTIB,_EX
+ VALUE_ _LTIB,(18-3)*1024
 
 ; $100 18 1K U* + VALUE ETIB
-        DW _SET2
-_ETIB   DW _CON,18*1024+100H
-        DW _SET2
-_MSG    DW _CON,0 ; MESSAGE
+ VALUE_ _ETIB,18*1024+100H
+ VALUE_ _MSG,0 ; MESSAGE
 
 _TBUF   DW _CON,@TBUF   
 
-_vNUMC  DW _JUMP,_TONUMC
-_vTARG  DW _JUMP,_T      
+;0 VALUE; CNTC
+;:VALUE EMIT CNTC; 1+ ; 
+;' BEMIT   ' EMIT T!
+ VALUE_ @EMIT,_BEMIT
+_EMIT = @EMIT+2 
+        DW _CNTC,_1P
+ VALUE_ _CNTC,0  
+
+ DEFER_ _vNUMC,_TONUMC
+ DEFER_ _vTARG,_T      
+ DEFER_ _vERR,_NOPX
+ DEFER_ _vOK,_NOPX 
+
+;: STATE! POP (SET2
+;: FINDEX  (JUMP ;;
+;: REINI  POP (SET2
+;: @INIT  (JUMP ;;
+ DOER_ _@INIT,_NOPX
+ DOER_ _FINDEX,_NOPX
+ 
+
+;: OVER- OVER
+;: -  NEG 
+;: +  +2/
+;: DROP;  DROPX ; UNW
+_OVERM  DW _OVER
+_MINUS  DW _NEG
+_PLUS   DW _P2DIV
+_@DROPX DW _DROPX
+ 
  
 ; : THEN` HERE : SWAP! SWAP : ! PUSH @R+ RDROP ;
-_RELSP  DW 0
-_SWAPST DW _SWAP
-_ST     DW _PUSH,_RSTP,_RDRPX
+;_RELSP  DW 0
+;_SWAPST DW _SWAP
+;_ST     DW _PUSH,_RSTP,_RDRPX
 
 
 _MARKP  DW _H     ;: MARK>` H : Z, 0 , ;
@@ -207,6 +290,9 @@ _0      DW _CON,0
  
 ; HI LEVEL PRIMITIVES 
 
+_@PLUS  DW _RLDP,_RDROP,_P2DIV,_DROPX
+_DZ1    DW  _POP,_XR
+_ADD2   DW  _@PLUS,2
 
 _DZ0    DW _POP,_XR
 _NOPX   DW _RET
@@ -244,11 +330,14 @@ _??       DW _ABDOT
           
 ; IO COMMANDS vvvvvvvvvv  ---------------------------
 
+P_ _FROMF
+  JMP     IP
+  
 P_  _BRK
   INT   3
   JMP   @MAIN
 
-L_ _BK
+L_ _BKEY
   DW _DUP,_IO
   CLR   AX
   INT   16H
@@ -271,13 +360,14 @@ P_ _OSTR          ; (?S
 
     
 P_ _IO  				  ; IF INPUT PARAMS = OUTPUT PARAMS 
-  XCHG  W,IP
-  MOV   BX,[DSP]
+  MOV   W,[DSP]   ; IP = BX
   MOV   CX,[DSP+2]
   MOV   DX,[DSP+4]
+P_ _JSR  
+  XCHG  W,IP
   CALL  W	 
 P_ _RET  
-  JMPS  @RETURN
+  JMPS  _@4TH
 
 ; IO           COMMANDS  (IO  ^^^^^^^
 
@@ -302,7 +392,7 @@ P_ _NEXTP
   JMPS  @JUMP
   
 _@dbg:  
-  jmp   @MAKESTR
+  jmp   debugerr
     
 P_ _NEXT
   POP   DR
@@ -325,7 +415,9 @@ P_ _JUMP    			; (JUMP
 
 ; DATA TRANSFER  COMMANDS -----------------------------------
 
-P_ _BE
+L_ _@BEMIT
+  DW _VAR
+P_ _BEMIT
   MOV     AH,0EH
   INT     10H
   JMPS    @DROP
@@ -406,11 +498,13 @@ P_ _1P
   SKIPA
 P_ _RDRPX
   R_TO  DR
-@RETURN:
+_@4TH:
   r_to  IP			; POP IP FROM RETURN TOP ELEMENT  
 P_ _NOP
 @MAIN:
-  MOV   DR,[IP]	
+  MOV   DR,[IP]
+  ;JMPS  _@dbg
+@MAIN2:  
   INC   IP
   INC   IP
   test 	DRL,1		; ADDRESS ODD ?
@@ -418,6 +512,7 @@ P_ _NOP
   dec   DR			; MAKE ODD ADDRESS EVEN
   JMP   DR			; BRANCH TO PRIMITIVE
 P_ _EX
+_@JSR4TH:
   R_TO  DR
 @NEST:				  ; (NEST
   to_r  IP			; PUSH OLD IP
@@ -816,6 +911,59 @@ _TOTBUF:
   XCHG    AX,SI
   XCHG    AX,DI
   RET
+
+L_ debugerr
+
+  IF A386
+        
+  ;mov   pw saveIP,IP
+  TRACE_OFF
+  call  _@JSR4TH
+  DW @EMIT,TO_+@SV_EMIT
+  DW _@BEMIT,TO_+@EMIT
+L_ _@DBGW 
+  DW    0
+  DW @SV_EMIT,TO_+@EMIT
+  ;DW   TDUP2,HDOT,HDOT,TPUSH,TPUSH,TDUP2,HDOT,HDOT
+  ;DW   TPOP,TPOP,TSPGT,HDOT
+  ;DW   TRPGT,HDOT,TRAT,HDOT
+  ;dw   sav_Si,tdup
+  ;dw   ttwomi,tdup,hdot
+  ;DW   TSWAP,TFETCH,HDOT
+  ;dw   tfetch,hdot,HERE,HDOT
+  ;dw   SAV_AX,v_ID
+  dw   _BKEY,_FROMF
+  TRACE_ON
+  and   al,0dfh
+  cmp   al,'S'
+  DROP_
+  jne   @@2
+  TRACE_OFF
+@@2:    
+  POP   iP
+  MOV   DR,[IP]	
+  jmp   @MAIN2
+
+L_ _TROFF
+  DW    _JSR
+@NO_TRACE:
+  SKIPR DR
+  MOV   DR,[IP]
+  
+@X_TRACE:
+  XCHG  DR,PW @MAIN
+  RET
+  
+L_ _TRON
+  DW _JSR
+@DO_TRACE:
+  SKIPR DR
+  DB 0EBH,_@dbg-@MAIN2
+  JMPS  @X_TRACE
+  
+ VALUE_ @SV_EMIT
+ 
+  ENDIF
 
     
 L_ _EndMem

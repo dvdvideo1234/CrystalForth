@@ -1,4 +1,4 @@
-: |2- : 2- ,< H 2 + , >,  : 1- (IF-  ,< H 2 + , >,  ;
+: |2- EX : 2- ,< H 2 + , >,  : 1- (IF-  ,< H 2 + , >,  ;
 : AT' |2- : TO' |2- ' ; : |DROP EX DROPX ;
 : UNW |DROP : @H- |H : @- PUSH @R- POP; ; UNW
 : (#, @R+ , ; : (VAR3 @R+ DROP : (VAR2 @R+ DROP POP; ; UNW
@@ -11,3 +11,14 @@
 : THEN` HERE : SWAP! SWAP : ! PUSH @R+ RDROP ;
 : ?XEP| DUP : XEP| XR EXECUTE POP ;
 
+\  ;DW   TDUP2,HDOT,HDOT,TPUSH,TPUSH,TDUP2,HDOT,HDOT
+\  ;DW   TPOP,TPOP,TSPGT,HDOT
+\  ;DW   TRPGT,HDOT,TRAT,HDOT
+\  ;dw   sav_Si,tdup
+\  ;dw   ttwomi,tdup,hdot
+\  ;DW   TSWAP,TFETCH,HDOT
+\  ;dw   tfetch,hdot,HERE,HDOT
+
+: @DBG
+  2DUP H. H. PUSH PUSH 2DUP H. H. POP POP SP@ H. 
+  POP DUP PUSH H. @R H. H H. ;
