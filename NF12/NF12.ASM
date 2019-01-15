@@ -4,7 +4,7 @@
 ; 3 DESA ASEMBLER DESASEMBLER
 ; 4 MODULED TARGET COMPILATION
 
-A386  = 1   ; 0 - NO DEBUGER
+A386  = 0   ; 0 - NO DEBUGER
 
 TO_   = -2
 AT_   = -4
@@ -235,7 +235,7 @@ _TX     DW _T,_EX
  
 ; 18 4 - 1K     U*  VAL' LTIB  T!
 _LTIBX  DW _LTIB,_EX
- VALUE_ _LTIB,(18-3)*1024
+ VALUE_ _LTIB,(18-4)*1024
 
 ; $100 18 1K U* + VALUE ETIB
  VALUE_ _ETIB,18*1024+100H
@@ -255,6 +255,9 @@ _EMIT = @EMIT+2
  DEFER_ _vTARG,_T      
  DEFER_ _vERR,_NOPX
  DEFER_ _vOK,_NOPX 
+ DEFER_ _READLN,_NOPX   
+
+
 
 ;: STATE! POP (SET2
 ;: FINDEX  (JUMP ;;
@@ -916,22 +919,13 @@ L_ debugerr
 
   IF A386
         
-  ;mov   pw saveIP,IP
   TRACE_OFF
   call  _@JSR4TH
   DW @EMIT,TO_+@SV_EMIT
   DW _@BEMIT,TO_+@EMIT
 L_ _@DBGW 
-  DW    0
+  DW    _NOP
   DW @SV_EMIT,TO_+@EMIT
-  ;DW   TDUP2,HDOT,HDOT,TPUSH,TPUSH,TDUP2,HDOT,HDOT
-  ;DW   TPOP,TPOP,TSPGT,HDOT
-  ;DW   TRPGT,HDOT,TRAT,HDOT
-  ;dw   sav_Si,tdup
-  ;dw   ttwomi,tdup,hdot
-  ;DW   TSWAP,TFETCH,HDOT
-  ;dw   tfetch,hdot,HERE,HDOT
-  ;dw   SAV_AX,v_ID
   dw   _BKEY,_FROMF
   TRACE_ON
   and   al,0dfh
@@ -961,7 +955,7 @@ L_ _TRON
   DB 0EBH,_@dbg-@MAIN2
   JMPS  @X_TRACE
   
- VALUE_ @SV_EMIT
+ VALUE_ @SV_EMIT,0
  
   ENDIF
 

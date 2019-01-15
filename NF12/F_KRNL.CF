@@ -5,145 +5,9 @@ INCLUDE NF12.C1
            
 241 =: --END--
 
-APT-     _ABORT   =: ABORT   
-APT-     _HX      =: |H
-APT-     _H       =: H       
-APT-     _TX      =: |T      
-APT-     _T       =: T       
-APT-     _LTIBX   =: |LTIB   
-APT-     _LTIB    =: LTIB    
-APT-     _ETIB    =: ETIB  
-APT-     _MSG     =: MESSAGE    
-APT-     _TBUF    =: TBUF   
-APT-     _EMIT    =: EMIT   
-APT-     _CNTC    =: CNTC   
-APT-     _VNUMC   =: vNUMC   
-APT-     _VTARG   =: vTARG     
-APT-     _VERR    =: vERR     
-APT-     _VOK     =: vOK  
-APT-     _@INIT   =: @INIT
-APT-     _FINDEX  =: FINDEX
-  
-APT-     _OVERM   =: OVER-
-APT-     _MINUS   =: -
-APT-     _PLUS    =: +
-APT-     _@DROPX  =: DROP;
-\ APT-     _RELSP   =: _THEN
-\ APT-     _SWAPST  =: SWAP!
-\ APT-     _ST      =: !
-APT-     _MARKP   =: _MARK
-APT-     _ZCOM    =: Z,
-APT-     _0       =: 0       
-APT-     _DZ0     =: (D#0
-APT-     _SET2    =: (SET2    
-APT-     _SET     =: (SET     
-APT-     __@COM   =: (@,   
-APT-     _@COM    =: @,   
-APT-     _LD      =: @      
-APT-     _CON     =: (CON     
-APT-     _EXIT    =: EXIT    
-APT-     _STR     =: STR     
-APT-     _CSTR    =: CSTR    
-APT-     _XCOM    =: |,   
-APT-     _COMMA   =: ,   
-APT-     _STP     =: !+     
-APT-     _VAR     =: (VAR     
-APT-     _XLIT    =: |LIT,,  
-APT-     _LITCC   =: LIT,,  
-APT-     _COMLIT  =: LIT,  
-APT-     _LIT     =: (LIT     
-APT-     _ABDOT   =: ((A"   
-APT-     _XN??    =: |??#    
-APT-     _N??     =: ??#
-APT-     _??      =: ?? 
-APT-     _BRK     =: _BRK      
-APT-     _BKEY    =: BKEY      
-APT-     _OSTR    =: (?S   
-APT-     _IO      =: (IO      
-APT-     _RET     =: (;     
-APT-     _IF      =: (IF      
-APT-     _SKIP    =: SKIP    
-APT-     _IFM     =: (IF-     
-APT-     _NEXTP   =: (NEXT+   
-APT-     _@DBG    =: (@DBG  
-APT-     _NEXT    =: (NEXT    
-APT-     _MIF     =: (-IF     
-APT-     _NFOR    =: (FOR+    
-APT-     _FOR     =: (FOR     
-APT-     _JUMP    =: (DEF    
-APT-     _BEMIT   =: BEMIT      
-APT-     _RSTM    =: !R-   
-APT-     _RST     =: !R    
-APT-     _RLDM    =: @R-    
-APT-     _RLD     =: @R     
-APT-     _RLDP    =: @R+    
-APT-     _RSTBP   =: C!R+   
-APT-     _RSTP    =: !R+    
-APT-     _RLDBP   =: C@R+   
-APT-     _XR      =: XR      
-APT-     _XA      =: XA      
-APT-     _1M      =: 1-      
-APT-     _1P      =: 1+      
-APT-     _RDRPX   =: RDROP;   
-APT-     _NOP     =: NOP   
-APT-     _EX      =: EX      
-APT-     _NIP     =: NIP     
-APT-     _DROP    =: DROP    
-APT-     _DROPX   =: DROPX   
-APT-     _PUSH    =: PUSH    
-APT-     _J       =: J       
-APT-     _DUP     =: DUP     
-APT-     _STKP    =: SP@    
-APT-     _OVER    =: OVER    
-APT-     _POP     =: POP     
-APT-     _POPX    =: POP;    
-APT-     _RDROP   =: RDROP   
-APT-     _SWAP    =: SWAP    
-APT-     _XOR     =: XOR     
-APT-     _MDIV    =: -/    
-APT-     _P2DIV   =: +2/   
-APT-     _2DIV    =: 2/    
-APT-     _PMUL    =: +*    
-APT-     _D2DIV   =: D2/   
-APT-     _NAND    =: NAND    
-APT-     _NEG     =: NEG     
-APT-     _ZEQ     =: 0=     
-APT-     _NOT     =: NOT     
-APT-     _ULESS   =: U<
-APT-     _ODD     =: ODD
-APT-     _0LESS   =: 0<
-APT-     _TOKEN?  =: TOKEN?  
-APT-     _TOKEN   =: TOKEN   
-APT-     _?C@     =: ?C@     
-APT-     _C@      =: C@
-APT-     _BCON    =: (C@
-APT-     _WORD    =: WORD    
-APT-     _PARSE   =: PARSE   
-APT-     _PARS    =: (PARS    
-APT-     _CFNDTAR =: CFNDT
-APT-     _CFIND   =: CFND   
-APT-     _COMTICK =: ,'   
-APT-     _TICK    =: '   
-APT-     _FINDT   =: FIND    
-APT-     _FIND    =: FND    
-APT-     _TONUMC  =: ">NUMC  
-APT-     _TONUM   =: ">NUM   
-APT-     _ATOI    =: (ATOI    
-APT-     _HDICT   =: H>DICT   
-APT-     _TODICT  =: >DICT  
-APT-     _MPUSH   =: MPUSH   
-APT-     _XTBUF   =: |S>TBUF"!   
-APT-     _TOTBUF  =: S>TBUF"!  
-APT-     _MKSTR   =: S>"!   
-
-' (DEF =: (JUMP 
-
-\ =! STATE?
-
+INCLUDE ASSIGNES.CF
 \ INCLUDE EXT.CF      
   
-1 =: BYE
-
 : TARG:` : =H H    : =: 0 : =F TOKEN?
   \ DUP ID.
   \ 12 STATE?
@@ -186,8 +50,6 @@ APT-     _MKSTR   =: S>"!
   \ 6 STATE?
 RECURSE ;
 
-: READLN NOP ; \ TIB TBL 
-
 : `INI H>DICT 
   \ 7 STATE?
     CALL 
@@ -203,55 +65,12 @@ RECURSE ;
   \ 9 STATE?
   EVAL vOK  `QUIT ;
         
-        
+\ INCLUDE boots.cf
+
+
       \   FIXES
       
-APT-  (?S     =: (?S`  
-APT-  (IO     =: (IO`
-APT-  (IF     =: (IF`
-APT-  SKIP    =: SKIP`
-APT-  (IF-    =: (IF-`
-APT-  (NEXT+  =: (NEXT+`
-APT-  (NEXT   =: (NEXT`
-APT-  (-IF    =: (-IF`
-APT-  (FOR+   =: (FOR+` 
-APT-  (FOR    =: (FOR`
-THIDE (DEF   
-APT-  !R-     =: !R-`
-APT-  !R      =: !R
-APT-  @R-     =: @R-`
-APT-  @R      =: @R`
-APT-  @R+     =: @R+`
-APT-  C!R+    =: C!R+`
-APT-  !R+     =: !R+`
-APT-  C@R+    =: C@R+`
-APT-  XR      =: XR`
-APT-  XA      =: XA`
-APT-  RDROP;  =: RDROP;`
-APT2  (;         ;;`
-APT-  EX      =: EX`
-APT-  DROPX   =: DROP;`
-APT-  PUSH    =: PUSH`
-APT-  POP     =: POP`
-APT-  POP;    =: POP;`
-APT-  RDROP   =: RDROP`
-
- 
-APT2  TARG:`  :` 
-APT-  ((A"    =: (!" 
-APT2  TARG;   ;`  
-APT-  TARG:   =: :    
-APT-  TARG>,  =: >, 
-APT2  TARG,<  ,<` 
-\ APT2  _THEN   THEN`
-APT-  _MARK   =: MARK>`
-'  , THIDE ,  DUP
-              =: RELS<`
-              =: ,   
-' SWAP  THIDE SWAP  DUP  
-              =: CSWAP`    
-              =: SWAP    
-
+INCLUDE FIXER.CF
 
 META `INI   @INIT     \ STARTUP
 META `INTER FINDEX    \ FORTH STATE

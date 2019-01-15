@@ -1,0 +1,43 @@
+APT-  (?S     =: (?S`  
+APT-  (IO     =: (IO`
+APT-  (JSR    =: (JSR`
+APT-  (IF     =: (IF`
+APT-  SKIP    =: SKIP`
+APT-  (IF-    =: (IF-`
+APT-  (NEXT+  =: (NEXT+`
+APT-  (NEXT   =: (NEXT`
+APT-  (-IF    =: (-IF`
+APT-  (FOR+   =: (FOR+` 
+APT-  (FOR    =: (FOR`
+THIDE (DEF   
+APT-  !R-     =: !R-`
+APT-  !R      =: !R
+APT-  @R-     =: @R-`
+APT-  @R      =: @R`
+APT-  @R+     =: @R+`
+APT-  C!R+    =: C!R+`
+APT-  !R+     =: !R+`
+APT-  C@R+    =: C@R+`
+APT-  XR      =: XR`
+APT-  XA      =: XA`
+APT-  RDROP;  =: RDROP;`
+APT2  (;         ;;`
+APT-  EX      =: EX`
+APT-  DROPX   =: DROP;`
+APT-  PUSH    =: PUSH`
+APT-  POP     =: POP`
+APT-  POP;    =: POP;`
+APT-  RDROP   =: RDROP`
+
+ 
+APT2  TARG:`  :` 
+APT-  ((A"    =: (!" 
+APT2  TARG;   ;`  
+APT-  TARG:   =: :    
+APT-  TARG>,  =: >, 
+APT2  TARG,<  ,<` 
+APT-  ,       =: RELS<`
+'     RELS<`  =: ,   
+APT-  SWAP    =: CSWAP`    
+'     CSWAP`  =: SWAP    
+

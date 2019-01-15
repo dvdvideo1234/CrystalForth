@@ -1,69 +1,61 @@
+APT-     _@DBGW   =: @DBGW
+APT-     _TROFF   =: TROFF
+APT-     _TRON    =: TRON
+
 =! `LASTWORD
 =! EXECUTE
 =! =H
 =! ID.
 
+256 CONST 1B
+8   CONST bs
+13  CONST cr
 $20 CONST BL
+$40 CONST 1L
+-$700 CONST SBUF    
+-$600 CONST TIB     
+
 :VALUE KEY  ;
-' (BK   ' KEY  T!
+' BKEY   ' KEY  T!
 
-: TIMES| (FOR CALL BEGIN J EXECUTE 
-   THEN (NEXT RELEASE< RDROP; ; UNW
-: ;DROP EX DROP; ;   
-: ;SPC EX 
-: SPACE BL EMIT ;
-: ID. ;SPC
-: ". CSTR
-: TYPE ;DROP
-: TYPE+ TIMES| CSTR EMIT ;
-: ((." (?S ". ;
-: CR ."^M^J" 0 TO CNTC ;
-
-VAL' TBUF T@ 
-2- DUP CONST `STATE?
-2- DUP CONST `STKP?
-2- DUP CONST `HEREP?
-2- DUP CONST `DICTP?
-2- DUP CONST `LASTW?
-\ 2- DUP CONST STKP
-DROP
-
-: ??ID ID. (BK DROP ;
+: I= J : = - 0= ;
+: WITHIN OVER- PUSH - POP U< ; : C!+ PUSH C!R+ POP; ; UNW
+: 0?SKIP DUP IF @R+ PUSH ;THEN : .SKIP DROP @R+ DROP; ; UNW 
+: (OF OVER- .SKIP ?; : (GO XR SKIP : |DROP EX DROP; ; UNW
+: ..TIMES |DROP : .TIMES |DROP : TIMES  PUSH XR  : TIMES| (FOR
+ CALL BEGIN J EXECUTE    THEN (NEXT RELEASE< RDROP; ; UNW
+: SPACES TIMES| SKIP : |SPC EX : SPACE BL EMIT ;
+: ID. |SPC  : ". CSTR  : TYPE |DROP : TYPE+ TIMES| CSTR EMIT ;
+: ((." (?S ". ;  : |CR EX : CR ."^M^J" 0 TO CNTC ; 
+: `RDLN TIB 1L
+: ACCEPT OVER + PUSH DUP BEGIN KEY \ CASE 
+  cr OF DUP XR DROP ENDOF
+  bs OF OVER OVER- IF 1- bs EMIT SPACE bs EMIT THEN  ENDOF
+  DUP BL 1B WITHIN  IF DUP EMIT SWAP C!+ DUP THEN
+  DROP THEN THEN \ ;CASE 
+  DUP I= UNTIL  OVER- 
+EXIT ;
+META `RDLN READLN
 
 
-: STATE?
- `STATE? ! 
-  SP@ `STKP? !                \ DATA STACK POINTER
-  H `HEREP? !                 \ HEAP POINTER
-  T `DICTP? !                 \ DICTIONARY POINTER
-  (LIT `LASTWORD @ `LASTW? !  \ LAST EXECUTED WORD
-  _BRK
-;  
-  
-\ ----------------
-\ _vRDOT  DW _JUMP,_DROP1  ; 0 DEFER _ERR
-\ _vOK    DW _JUMP,_NOPX   ; 0 DEFER 
-\ _vRDLN  DW _JUMP,0 ; 0 DEFER 
-\ _REINI  DW _POP,_SET2
-\ _INIT   DW _JUMP,_RET
-\ APT- _MARKF   =: MARK>
-\ APT- _ZCOMMA  =: Z,
-\ APT- _RELSB   =: RELS>      
-\ APT- _SWPST   =: SWAP!      
-\ APT- _ST      =: !      
-\ APT- _DORDOT  =: ERR.  
-\ APT- _VRDLN   =: vREADLN   
-\ APT- _REINI   =: REINI   
-\ APT- _INIT    =: @INIT    
-\ APT- _VRDOT   =: vRDOT   
-\ APT- _VOK     =: vOK     
-\ : (& @R+ RDROP  : AND NAND : NOT; NOT ;
-\ : ODD (& ,< 1 , 
-\ : FIXER! !R ;
-\ APT-     _BL      =: BL      
-\ APT-     _TBL     =: TBL     
-\ APT-     _SBUF    =: SBUF    
-\ APT-     _TIB     =: TIB     
-
-
-
+\ VAL' TBUF T@ 
+\ 2- DUP CONST `STATE?
+\ 2- DUP CONST `STKP?
+\ 2- DUP CONST `HEREP?
+\ 2- DUP CONST `DICTP?
+\ 2- DUP CONST `LASTW?
+\ \ 2- DUP CONST STKP
+\ DROP
+\ 
+\ : ??ID ID. (BK DROP ;
+\ 
+\ 
+\ : STATE?
+\  `STATE? ! 
+\   SP@ `STKP? !                \ DATA STACK POINTER
+\   H `HEREP? !                 \ HEAP POINTER
+\   T `DICTP? !                 \ DICTIONARY POINTER
+\   (LIT `LASTWORD @ `LASTW? !  \ LAST EXECUTED WORD
+\   _BRK
+\ ;  
+\   
