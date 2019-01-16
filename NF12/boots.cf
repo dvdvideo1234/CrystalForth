@@ -6,12 +6,12 @@
 : QUAN  (#, (VAR3 : VALUE  (#, (SET2 : CONST =H ,ER (CON  , ,<
 : VQUAN (#, (VAR3 : VECTOR (#, (SET2 : DEFER =H ,ER (JUMP , ,<
 0 VALUE HOFS  : T>R HOFS - ; : 2DUP OVER OVER ;
-: _TWICE |,  2+  :; 
+: _TWICE |,  : HP 2+  :; 
 : _HERE H : R>T HOFS + ;
 : _THEN _HERE : SWAP! SWAP : ! PUSH @R+ RDROP; ; UNW
 : _IF   ,ER (IF   MARK> ,<
 : _IF-  ,ER (IF-  MARK> ,< 
-: ?XEP| DUP : XEP| XR EXECUTE POP ;
+: ?XEP| DUP : XEP| XR EXECUTE POP; ; UNW
 
 \ : @DBG
 \  2DUP H. H. PUSH PUSH 2DUP H. H. POP POP SP@ H. 

@@ -11,7 +11,7 @@ APT-  (FOR+   =: (FOR+`
 APT-  (FOR    =: (FOR`
 THIDE (DEF   
 APT-  !R-     =: !R-`
-APT-  !R      =: !R
+APT-  !R      =: !R`
 APT-  @R-     =: @R-`
 APT-  @R      =: @R`
 APT-  @R+     =: @R+`
@@ -20,9 +20,11 @@ APT-  !R+     =: !R+`
 APT-  C@R+    =: C@R+`
 APT-  XR      =: XR`
 APT-  XA      =: XA`
+APT-  (EXEC   =: (EXEC`
 APT-  RDROP;  =: RDROP;`
 APT2  (;         ;;`
 APT-  EX      =: EX`
+APT-  2+;     =: 2+;`
 APT-  DROPX   =: DROP;`
 APT-  PUSH    =: PUSH`
 APT-  POP     =: POP`
@@ -30,6 +32,7 @@ APT-  POP;    =: POP;`
 APT-  RDROP   =: RDROP`
 
  
+APT2  _THEN   THEN` 
 APT2  TARG:`  :` 
 APT-  ((A"    =: (!" 
 APT2  TARG;   ;`  
@@ -40,4 +43,6 @@ APT-  ,       =: RELS<`
 '     RELS<`  =: ,   
 APT-  SWAP    =: CSWAP`    
 '     CSWAP`  =: SWAP    
+APT2  _MARKP     CALL`
+'     CALL`   =: MARK>`
 

@@ -158,7 +158,7 @@ ENDM
 
 DOER_ MACRO NAM2,VAL
   ALIGN_ 0
-  DW _POP,_SET2
+  DW _pntSET
   DEFER_ NAM2,VAL
 ENDM
 
@@ -267,20 +267,15 @@ _EMIT = @EMIT+2
  DOER_ _FINDEX,_NOPX
  
 
-;: OVER- OVER
-;: -  NEG 
-;: +  +2/
-;: DROP;  DROPX ; UNW
-_OVERM  DW _OVER
-_MINUS  DW _NEG
-_PLUS   DW _P2DIV
-_@DROPX DW _DROPX
- 
  
 ; : THEN` HERE : SWAP! SWAP : ! PUSH @R+ RDROP ;
 ;_RELSP  DW 0
 ;_SWAPST DW _SWAP
 ;_ST     DW _PUSH,_RSTP,_RDRPX
+_THEN   DW _NOP   ; WILL BE SET TO HERE
+_swpst  dw _PUSH,_SKIP
+_pntSET dw _dz1,_xr,_RSTP,_RDRPX
+
 
 
 _MARKP  DW _H     ;: MARK>` H : Z, 0 , ;
@@ -293,13 +288,19 @@ _0      DW _CON,0
  
 ; HI LEVEL PRIMITIVES 
 
-_@PLUS  DW _RLDP,_RDROP,_P2DIV,_DROPX
+_rngstr dw _1p
+_OVERM  DW _OVER
+_MINUS  DW _NEG
+_PLUS   DW _P2DIV
+_@DROPX DW _DROPX
+ 
 _DZ1    DW  _POP,_XR
-_ADD2   DW  _@PLUS,2
+_ADD2   DW  _2px
 
 _DZ0    DW _POP,_XR
 _NOPX   DW _RET
-_SET2   DW _RLDP,_DROP
+_SET2   DW _DZ1
+_ST     DW _PUSH
 _SET    DW _RSTP,_RDRPX 
 
 __@COM  DW _DZ0   ; (@,
@@ -493,9 +494,9 @@ P_ _XA				  ; XA
   
 ; MAIN  LOOP  ---------------------------------------
 
-P_ _1M
-  DEC   TOP
-  SKIPB
+P_ _2px
+  INC   TOP
+  R_TO	ip			 
 P_ _1P
   INC   TOP
   SKIPA
@@ -510,10 +511,16 @@ P_ _NOP
 @MAIN2:  
   INC   IP
   INC   IP
+@MAIN3:  
   test 	DRL,1		; ADDRESS ODD ?
   je    @nest		; NOT ODD ADDRESS - NEST THEN
   dec   DR			; MAKE ODD ADDRESS EVEN
   JMP   DR			; BRANCH TO PRIMITIVE
+  
+P_ _EXEC
+	POPR_	DR
+  JMPS  @MAIN3
+  
 P_ _EX
 _@JSR4TH:
   R_TO  DR
