@@ -218,7 +218,7 @@ L_ _START
 P_ _ABORT
   MOV   RSP,@R_TOP
   MOV   DSP,@S_TOP
-  TRACE_OFF           ; HOLE FOR STOPPING DEBUGGER 
+  CALL  @RET            ; TRACE_OFF HOLE FOR STOPPING DEBUGGER
   CALL  _@4TH
   
   DW _@INIT  ; STARTUP ADDRESS  
@@ -341,6 +341,8 @@ P_  _BRK
   INT   3
   JMP   @MAIN
 
+L_ _@BKEY
+  DW _VAR
 L_ _BKEY
   DW _DUP,_IO
   CLR   AX
@@ -364,10 +366,11 @@ P_ _OSTR          ; (?S
 
     
 P_ _IO  				  ; IF INPUT PARAMS = OUTPUT PARAMS 
-  MOV   W,[DSP]   ; IP = BX
-  MOV   CX,[DSP+2]
   MOV   DX,[DSP+4]
-P_ _JSR  
+  MOV   CX,[DSP+2]
+P_ _IO2  
+  MOV   W,[DSP]   ; IP = BX
+P_ _IO1  
   XCHG  W,IP
   CALL  W	 
 P_ _RET  
@@ -395,7 +398,7 @@ P_ _NEXTP
   PUSH  dr
   JMPS  @JUMP
   
-_@dbg:  
+@dbg:  
   jmp   debugerr
     
 P_ _NEXT
@@ -925,13 +928,14 @@ _TOTBUF:
 L_ debugerr
 
   IF A386
-        
+  
+  ;DW 0,0
   TRACE_OFF
   call  _@JSR4TH
   DW @EMIT,TO_+@SV_EMIT
   DW _@BEMIT,TO_+@EMIT
-L_ _@DBGW 
-  DW    _NOP
+L_ _@DBGW     ; show stacks / address, code, nextcode & name  
+  DW    0,0   
   DW @SV_EMIT,TO_+@EMIT
   dw   _BKEY,_FROMF
   TRACE_ON
@@ -959,7 +963,7 @@ L_ _TRON
   DW _JSR
 @DO_TRACE:
   SKIPR DR
-  DB 0EBH,_@dbg-@MAIN2
+  DB 0EBH,@dbg-@MAIN2
   JMPS  @X_TRACE
   
  VALUE_ @SV_EMIT,0

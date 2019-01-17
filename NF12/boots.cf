@@ -1,26 +1,54 @@
-: ,ER (D#0 STR , @ PUSH ;   \ : AT' |2- : TO' |2- ' ; 
+\ : ,ER (D#0 STR , @ PUSH ;   \ : AT' |2- : TO' |2- ' ; 
 \ : |2- EX : 2- (@+ ,< -2 ,
 \ : UNW |DROP : @H- |H : @- PUSH @R- POP; ; UNW
-: (#, @R+ , ; : (GO; @R+ XR PUSH ;
-: (VAR3 @R+ DROP : (VAR2 @R+ DROP POP; ; UNW
-: QUAN  (#, (VAR3 : VALUE  (#, (SET2 : CONST =H ,ER (CON  , ,<
-: VQUAN (#, (VAR3 : VECTOR (#, (SET2 : DEFER =H ,ER (JUMP , ,<
-0 VALUE HOFS  : T>R HOFS - ; : 2DUP OVER OVER ;
-: _TWICE |,  : HP 2+  :; 
-: _HERE H : R>T HOFS + ;
-: _THEN _HERE : SWAP! SWAP : ! PUSH @R+ RDROP; ; UNW
-: _IF   ,ER (IF   MARK> ,<
-: _IF-  ,ER (IF-  MARK> ,< 
-: ?XEP| DUP : XEP| XR EXECUTE POP; ; UNW
+\ : (#, @R+ , ; : (GO; @R+ XR PUSH ;
+\ : (VAR3 @R+ DROP : (VAR2 @R+ DROP POP; ; UNW
+\ : QUAN  (#, (VAR3 : VALUE  (#, (SET2 : CONST =H ,ER (CON  , ,<
+\ : VQUAN (#, (VAR3 : VECTOR (#, (SET2 : DEFER =H ,ER (JUMP , ,<
+\ 0 VALUE HOFS  : T>R HOFS - ; : 2DUP OVER OVER ;
+\ : _TWICE |,  : HP 2+  :; 
+\ : _HERE H : R>T HOFS + ; ' _HERE ' _THEN T!
+\ : _IF   ,ER (IF   _MARKP ,<
+\ : _IF-  ,ER (IF-  _MARKP ,< 
+\ : ?XEP| DUP : XEP| XR EXECUTE POP; ; UNW
 
-\ : @DBG
-\  2DUP H. H. PUSH PUSH 2DUP H. H. POP POP SP@ H. 
-\  POP DUP PUSH H. @R H. H H. ;
-  
-  
-APT2  _THEN   THEN`
-APT2  _IF     IF`
-APT2  _IF-    IF-`
-APT2  _TWICE  TWICE`
-APT2  _HERE   BEGIN`
-'  BEGIN`     =: HERE
+2ALIGNED
+0 VALUE `@SV_EMIT
+
+HERE ' (NEXT 1- - ' (NEXT 3 - T!
+ 
+,"h~-^@h~"          \ TRACE_OFF / call _@JSR4TH
+' EX 1- HERE 2+ - ,
+>, TO EMIT TO `@SV_EMIT @BEMIT AT EMIT ,<
+=H @DBGW
+,"^@^@^@^@"         \ DW    0,0
+>, `@SV_EMIT AT EMIT BKEY 4TH> ,<
+,"h~^]^@"           \ TRACE_ON
+,"$"_~"             \ and   al,0dfh
+,"<S"               \ cmp   al,'S'
+,"-~u^C"            \ DROP_ jne   @@2
+,"h~^I^@"           \ TRACE_OFF   @@2:
+,"[^K~^O"           \ POP   iP /  MOV   DR,[IP]
+,"i~"               \ jmp   @MAIN2 / NOP "s~}~^P~" 
+' NOP 1+ HERE 2+ - ,
+
+2ALIGNED
+: TROFF (IO1 ,<  \ ,"^]^B"  \ DW    _JSR
+,"9~^K~^O"          \ SKIPR DR /  MOV   DR,[IP]   @X_TRACE:
+,"^G~^N"            \ XCHG  DR /,"^P~^B" \ PW @MAIN
+' NOP 1- ,
+,"C~"               \ RET
+
+2ALIGNED
+: TRON  (IO1 ,<  \ ,"^]^B"  \ DW    _JSR
+,"9~k~"             \ SKIPR DR / DB 0EBH,@dbg-@MAIN2
+' (NEXT 4 - ' NOP 1+ - C,     \ ,"!~"
+,"k~t~^P~"          \ JMPS @X_TRACE / NOP
+
+' TROFF 2+ ' ABORT 8 + - ' ABORT 6 + T!
+   
+\ APT2  _IF     IF`
+\ APT2  _IF-    IF-`
+\ APT2  _TWICE  TWICE`
+\ APT2  _HERE   BEGIN`
+\ '  BEGIN`     =: HERE

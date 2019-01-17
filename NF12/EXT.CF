@@ -1,61 +1,130 @@
-APT-     _@DBGW   =: @DBGW
-APT-     _TROFF   =: TROFF
-APT-     _TRON    =: TRON
+ =! EXECUTE
+ =! =H
+ =! ID.
 
-=! `LASTWORD
-=! EXECUTE
-=! =H
-=! ID.
+\ : ,ER (D#0 STR , @ PUSH ;   \ : AT' |2- : TO' |2- ' ; 
+\ \ : |2- EX : 2- (@+ ,< -2 ,
+\ \ : UNW |DROP : @H- |H : @- PUSH @R- POP; ; UNW
+\ : (#, @R+ , ; : (GO; @R+ XR PUSH ;
+\ : (VAR3 @R+ DROP : (VAR2 @R+ DROP POP; ; UNW
+\ : QUAN  (#, (VAR3 : VALUE  (#, (SET2 : CONST =H ,ER (CON  , ,<
+\ : VQUAN (#, (VAR3 : VECTOR (#, (SET2 : DEFER =H ,ER (JUMP , ,<
+\ 0 VALUE HOFS  : T>R HOFS - ; : 2DUP OVER OVER ;
+\ : _TWICE |,  : HP 2+  :; 
+\ : _HERE H : R>T HOFS + ; ' _HERE ' _THEN T!
+\ : _IF   ,ER (IF   _MARKP ,<
+\ : _IF-  ,ER (IF-  _MARKP ,< 
+\ : ?XEP| DUP : XEP| XR EXECUTE POP; ; UNW
 
+\ : @DBG
+\  2DUP H. H. PUSH PUSH 2DUP H. H. POP POP SP@ H. 
+\  POP DUP PUSH H. @R H. H H. ;
+  
+  
 256 CONST 1B
-8   CONST bs
-13  CONST cr
 $20 CONST BL
-$40 CONST 1L
--$700 CONST SBUF    
--$600 CONST TIB     
+\ 1024 CONST 1K
+\ 16  CONST 1H
+\ 8   CONST bs
+\ 13  CONST cr
+\ $40 CONST 1L
+\ -$700 CONST SBUF    
+\ -$600 CONST TIB     
+
+0 VALUE BLK
+0 VALUE SCR
+0 VALUE XY
 
 :VALUE KEY  ;
 ' BKEY   ' KEY  T!
 
-: I= J : = - 0= ;
-: WITHIN OVER- PUSH - POP U< ; : C!+ PUSH C!R+ POP; ; UNW
-: 0?SKIP DUP IF @R+ PUSH ;THEN : .SKIP DROP @R+ DROP; ; UNW 
-: (OF OVER- .SKIP ?; : (GO XR SKIP : |DROP EX DROP; ; UNW
-: ..TIMES |DROP : .TIMES |DROP : TIMES  PUSH XR  : TIMES| (FOR
+: (GO| @R+ XR PUSH ;
+: WITHIN OVER- PUSH - POP U< ; 
+: C!+ PUSH C!R+ POP; ; UNW
+: 0?SKIP DUP IF @R+ PUSH ;THEN 
+: .SKIP DROP @R+ DROP; ; UNW 
+: (OF OVER- .SKIP ?; 
+: (GO XR SKIP 
+: |DROP EX DROP ; \ ; UNW
+: ..TIMES |DROP 
+: .TIMES |DROP 
+: TIMES  PUSH XR  
+: TIMES| (FOR
  CALL BEGIN J EXECUTE    THEN (NEXT RELEASE< RDROP; ; UNW
-: SPACES TIMES| SKIP : |SPC EX : SPACE BL EMIT ;
-: ID. |SPC  : ". CSTR  : TYPE |DROP : TYPE+ TIMES| CSTR EMIT ;
-: ((." (?S ". ;  : |CR EX : CR ."^M^J" 0 TO CNTC ; 
-: `RDLN TIB 1L
-: ACCEPT OVER + PUSH DUP BEGIN KEY \ CASE 
-  cr OF DUP XR DROP ENDOF
-  bs OF OVER OVER- IF 1- bs EMIT SPACE bs EMIT THEN  ENDOF
-  DUP BL 1B WITHIN  IF DUP EMIT SWAP C!+ DUP THEN
-  DROP THEN THEN \ ;CASE 
-  DUP I= UNTIL  OVER- 
-EXIT ;
-META `RDLN READLN
+: SPACES TIMES| SKIP 
+: |SPC EX 
+: SPACE BL EMIT ;
+: ID. |SPC  
+: ". CSTR  
+: TYPE |DROP 
+: TYPE+ TIMES| CSTR EMIT ;
+: ((." (?S ". ;  
+: |CR EX 
+: CR ."^M^J" 0 TO CNTC ; 
+: >A| XR XA EXECUTE XA EXIT ; 
+: I= J : = - 0= ; 
+: U/ |DROP 
+: (/MD  >A| TWICE TWICE -/ -/ -/ -/ ; 
+: 1- IF- THEN ;; 
+: 1B* 1B 
+: U* >A| TWICE TWICE +* +* +* +* ;
+: W>BB 1B
+: U/MOD (/MD SWAP ; 
+\ : `RDLN TIB 1L
+\ : ACCEPT OVER + PUSH DUP BEGIN KEY \ CASE 
+\   cr OF DUP XR DROP ENDOF
+\   bs OF OVER OVER- IF 1- bs EMIT SPACE bs EMIT THEN  ENDOF
+\   DUP BL 1B WITHIN  IF DUP EMIT SWAP C!+ DUP THEN
+\   DROP THEN THEN \ ;CASE 
+\   DUP I= UNTIL  OVER- 
+\ EXIT ;
+\ META `RDLN READLN \ READLN FIXED
 
+\ : 0<>; 0= : 0; EXIT ?; ;; : A+L XEP| : I+ J + ;
+\ : `MEMTI| A+L 0 
+\ : TI| BLK XR LTIB PUSH ETIB PUSH PUSH CALL EX POP POP
+\  POP THEN TO BLK TO LTIB TO ETIB : /BLK BLK 0; 0 TO ETIB ;
+\ ' `MEMTI| ' EVAL T! \ EVAL FIXED
 
-\ VAL' TBUF T@ 
-\ 2- DUP CONST `STATE?
-\ 2- DUP CONST `STKP?
-\ 2- DUP CONST `HEREP?
-\ 2- DUP CONST `DICTP?
-\ 2- DUP CONST `LASTW?
-\ \ 2- DUP CONST STKP
-\ DROP
+\ : `SRC ETIB BLK 0; DUP 0<>; BLK XOR BLOCK 1K + DUP TO ETIB ;
+
+\ : 9>? 9 OVER U< 7 : AND NAND NOT ; : XY? 1K LTIB - ;
+\ : ALPHA 9>? + '0 + ;  : |KEY EX KEY DROP ; : W>B 255 AND ; 
+\ : B>HH W>B 1H U/MOD ; : . DUP 0< IF '- EMIT NEG THEN : U. |SPC 
+\ : ` 10 U/MOD 0?SKIP RECURSE : DIG. ALPHA EMIT ; 
+\ : H. W>BB CALL  : B. |SPC THEN B>HH TWICE DIG. ;
 \ 
-\ : ??ID ID. (BK DROP ;
+\ : `(ERR @BEMIT AT EMIT  @BKEY AT KEY CR TBUF ID. MESSAGE ID.
+\  CR BLK 0; BLK TO SCR 0 TO BLK XY? : >XY 1K 1- AND TO XY ;
+\ META `(ERR vERR    \ vERR FIXED
 \ 
-\ 
-\ : STATE?
-\  `STATE? ! 
-\   SP@ `STKP? !                \ DATA STACK POINTER
-\   H `HEREP? !                 \ HEAP POINTER
-\   T `DICTP? !                 \ DICTIONARY POINTER
-\   (LIT `LASTWORD @ `LASTW? !  \ LAST EXECUTED WORD
-\   _BRK
-\ ;  
-\   
+\ APT2  _IF     IF`
+\ APT2  _IF-    IF-`
+\ APT2  _TWICE  TWICE`
+\ APT2  _HERE   BEGIN`
+\ '  BEGIN`     =: HERE
+
+\ =! `LASTWORD
+
+ VAL' TBUF T@ 
+ 2- DUP CONST `STATE?
+ 2- DUP CONST `STKP?
+ 2- DUP CONST `HEREP?
+ 2- DUP CONST `DICTP?
+ 2- DUP CONST `LASTW?
+ \ 2- DUP CONST STKP
+ DROP
+ 
+ : ??ID ID. BKEY DROP ;
+ 
+ 
+ : STATE?
+  `STATE? ! 
+   SP@ `STKP? !                \ DATA STACK POINTER
+   H `HEREP? !                 \ HEAP POINTER
+   T `DICTP? !                 \ DICTIONARY POINTER
+  \ (LIT `LASTWORD @ `LASTW? !  \ LAST EXECUTED WORD
+   BREAK
+ ;  
+   
+
