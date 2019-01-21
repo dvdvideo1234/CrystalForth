@@ -1,0 +1,28 @@
+ =! @EXEC
+ =! EXECUTE
+ =! =H
+ =! ID.
+
+  
+
+ VAL' TBUF T@ 
+ 2- DUP CONST `STATE?
+ 2- DUP CONST `STKP?
+ 2- DUP CONST `HEREP?
+ 2- DUP CONST `DICTP?
+ 2- DUP CONST `LASTW?
+ \ 2- DUP CONST STKP
+ DROP
+ 
+ : ?ID DUP ID. BKEY DROP ;
+ 
+ 
+ : STATE?
+  `STATE? ! 
+   SP@ `STKP? !                \ DATA STACK POINTER
+   H `HEREP? !                 \ HEAP POINTER
+   T `DICTP? !                 \ DICTIONARY POINTER
+  \ (LIT `LASTWORD @ `LASTW? !  \ LAST EXECUTED WORD
+   BREAK
+ ;  
+   

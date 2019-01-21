@@ -10,9 +10,6 @@ TO_   = -2
 AT_   = -4
 VAL_  = 2
 
-_BLNK = 32  ; ASCII CODE OF SPACESYMBOL
- 
-
 pd  equ dword ptr
 pw  equ word  ptr
 pb  equ byte  ptr
@@ -239,44 +236,24 @@ _LTIBX  DW _LTIB,_EX
 
 ; $100 18 1K U* + VALUE ETIB
  VALUE_ _ETIB,18*1024+100H
- VALUE_ _MSG,0 ; MESSAGE
 
 _TBUF   DW _CON,@TBUF   
+_BL     DW _CON,' '  
 
-;0 VALUE; CNTC
-;:VALUE EMIT CNTC; 1+ ; 
-;' BEMIT   ' EMIT T!
+ DEFER_ _vTARG,_T      
+
  VALUE_ @EMIT,_BEMIT
 _EMIT = @EMIT+2 
         DW _CNTC,_1P
  VALUE_ _CNTC,0  
 
- DEFER_ _vNUMC,_TONUMC
- DEFER_ _vTARG,_T      
- DEFER_ _vERR,_NOPX
- DEFER_ _vOK,_NOPX 
- DEFER_ _READLN,_NOPX   
 
-
-
-;: STATE! POP (SET2
-;: FINDEX  (JUMP ;;
-;: REINI  POP (SET2
-;: @INIT  (JUMP ;;
  DOER_ _@INIT,_NOPX
  DOER_ _FINDEX,_NOPX
  
-
- 
-; : THEN` HERE : SWAP! SWAP : ! PUSH @R+ RDROP ;
-;_RELSP  DW 0
-;_SWAPST DW _SWAP
-;_ST     DW _PUSH,_RSTP,_RDRPX
 _THEN   DW _NOP   ; WILL BE SET TO HERE
 _swpst  dw _PUSH,_SKIP
 _pntSET dw _dz1,_xr,_RSTP,_RDRPX
-
-
 
 _MARKP  DW _H     ;: MARK>` H : Z, 0 , ;
 _ZCOM   DW _XCOM
@@ -310,33 +287,20 @@ _CON    DW _RLDP  ; (CON
 _EXIT   DW _RDRPX ; EXIT
 _STR    DW _PUSH,_RLDP,_XR,_POPX 
 
-_CSTR   DW _PUSH,_RLDBP,_XR,_POPX 
-_XCOM   DW _EX
-_COMMA  DW _HX 
-_STP    DW _PUSH,_RSTP
-_VAR    DW _POPX
-_XLIT   DW _EX
+_CSTR   DW _?C@,_U1P,_RET 
+_XCOM   DW _EX          ; |,
+_COMMA  DW _HX          ; ,
+_STP    DW _PUSH,_RSTP  ; !+
+_VAR    DW _POPX        ; (VAR
+_XLIT   DW _EX          ; |
 _LITCC  DW _XCOM
 _COMLIT DW __@COM,_LIT
 _LIT    DW _RLDP,_RET 
 
 
-_ABDOT  DW _OSTR,TO_+_MSG
-        ;DW _BRK
-        DW _IF,_NOPX,_ABORT 
- 
-_XN??     DW _EX   
-_N??      DW _ZEQ;,_?? ;
-_??       DW _ABDOT
-          NAM_ "?" 
-          DW _RET
-          
           
 ; IO COMMANDS vvvvvvvvvv  ---------------------------
 
-P_ _FROMF
-  JMP     IP
-  
 P_  _BRK
   INT   3
   JMP   @MAIN
@@ -390,34 +354,28 @@ P_ _SKIP
   INC   ip
   JMPS  @MAIN
 
-P_ _NEXTP
-  POP   DR
-  INC   DR
-  Jns   @SKIP  
-@JUMPPH:
-  PUSH  dr
-  JMPS  @JUMP
-  
+P_ _2MX
+  DEC   TOP
+  POP   IP
+P_ _1M
+  DEC   TOP
+  JMPS  @MAIN
+
 @dbg:  
   jmp   debugerr
     
 P_ _NEXT
-  POP   DR
-  DEC   DR
-  JS    @skip
-  JMPS  @JUMPPH
+  POP   W
+  DEC   W
+  PUSH  W
+  SKIPC DRL
   
 P_ _IFM    			; (IF-
-  JMPS  @IFM
-  
-P_ _MIF    			; (-IF
-  INC   TOP
-@IFM:
   DEC   TOP			; DECREMENT TOP AND BRANCH ON POSITIVE 
   JS    @SKIP		; ON NEGATIVE - SKIP BRANCH
-P_ _JUMP    			; (JUMP
+P_ _JUMP    		; (JUMP
 @JUMP:
-  MOV   IP,[IP]		; JUST BRANCH
+  MOV   IP,[IP]	; JUST BRANCH
   JMPS  @MAIN
 
 ; DATA TRANSFER  COMMANDS -----------------------------------
@@ -429,57 +387,23 @@ P_ _BEMIT
   INT     10H
   JMPS    @DROP
         
-P_ _RSTM			; !R-
-  R_TO 	W			; TAKE TOP OF THE RETURN STACK
-  DEc   W			; DECREMENT ADDRESS
-  DEc   W			; DECREMENT ADDRESS
-  SKIPB
-  
-P_ _RST			  ; !R
-  R_TO 	W			; TAKE TOP OF THE RETURN STACK
-  MOV   [W],TOP		; USE RETURN TOP AS DATA ADDRESS
-  JMPS  @WSAVE		; FETCH NEXT DATA TO TOP
-
-P_ _RLDM			; @R-
-  R_TO 	W			; TAKE TOP OF THE RETURN STACK
-  DEc   W			; DECREMENT ADDRESS
-  DEc   W			; DECREMENT ADDRESS
-  SKIPB
-  
-P_ _RLD			  ; @R
-  R_TO 	W			; TAKE TOP OF THE RETURN STACK
-  MOV   DR,[W]		; USE RETURN TOP AS DATA ADDRESS
-  JMPS  @DUPW ; 
-
-P_ _RLDP			; @R+
-  R_TO 	W			; TAKE TOP OF THE RETURN STACK
-  MOV   DR,[W]		; USE RETURN TOP AS DATA ADDRESS
-  inc   W			; INCREMENT ADDRESS
-  JMPS  @RINCW			; INCREMENT ADDRESS
-
-P_ _RSTBP			; C!R+
-  R_TO 	W			; USE RETURN TOP AS DATA ADDRESS
-  STOSB
-  JMPS  @WSAVE			; FETCH NEXT DATA TO TOP
-
-P_ _RSTP			; !R+
-  R_TO 	W			; USE RETURN TOP AS DATA ADDRESS
+P_ _RSTP			  ; !R+
+  R_TO 	W			  ; USE RETURN TOP AS DATA ADDRESS
   STOSW
 @WSAVE:
   TO_R  W
   DROP_
-  JMPS  @MAIN			; FETCH NEXT DATA TO TOP
+  JMPS  @MAIN		; FETCH NEXT DATA TO TOP
 
-P_ _RLDBP			  ; C@R+
+P_ _RLDP			  ; @R+
   R_TO 	W			  ; TAKE TOP OF THE RETURN STACK
-  MOV   DRL,[W]	; USE RETURN TOP AS DATA ADDRESS
-  CLR   DRH
-@RINCW:  
+  MOV   DR,[W]	; USE RETURN TOP AS DATA ADDRESS
+  inc   W			  ; INCREMENT ADDRESS
   inc   W			  ; INCREMENT ADDRESS
 @DUPW:  
   TO_R  W			  ; STORE ADDRESS BACK TO RETURN STACK
 @DUP:  
-  PUSHR_	TOP	    ; DUPLICATE DATA TOP REGISTER
+  PUSHR_	TOP	  ; DUPLICATE DATA TOP REGISTER
 @XCHG:  
   XCHG  TOP,DR
   JMPS  @MAIN
@@ -598,7 +522,7 @@ P_ _MDIV				  ; -/ DIVIDE PRIMITIVE
   CMP   TOP,ar		; COMPARE TOP WITH AR
   JB	  @MDIV		  ; IF BELOW SUBTRACT IS NOT POSSIBLE
   SUB   TOP,ar		; SUBTRACT SAR FROM TOP
-P_ U1P  
+P_ _U1P  
   INC	  NXT	      ; SUCSESSFULL SUBTRACT
 @MDIV:  
   JMPS  @MAIN
@@ -651,14 +575,15 @@ P_ _0LESS
  
         ; : TOKEN?  ;#??  
 L_ _TOKEN?  
-  DW _XN??
+  DW _NOP; _XN?? NEEDS TO FIX
         ; : TOKEN BL  [ ?C@ ]
 _TOKEN:
-  DW _LIT,_BLNK,_WORD
+  DW _BL,_WORD
 ; : ?C@ DUP : C@ PUSH C@R+ RDROP; ; UNW 
 _?C@    DW _DUP 
-_C@     DW _PUSH
-_BCON   DW _RLDBP,_RDRPX    ; (C@
+_C@     DW _LD
+_W_B    DW _LIT,255
+_AND    DW _NAND,_NOT,_RET
   
 ; : WORD [ TBUF S>"! ] _XTBUF
 _WORD:
@@ -666,7 +591,7 @@ _WORD:
         ; : PARSE NOP; ETIB LTIB; (PARS ;
 _PARSE:
   DW _NOPX,_ETIB,_LTIBX
-  ;,_BRK
+  DW _BRK
   
  L_ _PARS
   DW  _IO
@@ -694,24 +619,17 @@ _PARSE:
 ; searching
 ; -----------------------
 
- L_ _CFNDTAR
-  DW  _vTARG
+; L_ _CFNDTAR
  L_ _CFIND
-  ;DW _BRK
   DW  _IO      
   INC     PB [BX]
   CALL    @FIND  
   DEC     PB [BX]
   RET
   
-L_ _COMTICK
-  DW _XCOM
-L_ _TICK
-  DW _XN??,_TOKEN? 
-L_ _FINDT
-  DW _T
+L_ _TFIND?
+  DW _NOP
 L_ _FIND
-  ;DW _BRK
   DW  _IO
 @FIND:  
   CLR     CX 
@@ -737,16 +655,6 @@ L_ _FIND
   RET
 
 ;----------------   NUMBERS	 ---------------------
-
-; : ">NUMC ;,  (LIT, :;
- 
-L_ _TONUMC   
-  DW _XLIT; _XCOMMA,_SEMIGO,_COMLIT 
-  
-; : ">NUM CSTR (NUM   : ?? !"?" ;;  
-L_ _TONUM    
-  DW _CSTR,_ATOI,_JUMP,_??
-  ;DW _BRK
 
 L_ _ATOI
   DW  _IO
@@ -968,6 +876,9 @@ L_ _TRON
   
  VALUE_ @SV_EMIT,0
  
+P_ _FROMF
+  JMP     IP
+  
   ENDIF
 
     

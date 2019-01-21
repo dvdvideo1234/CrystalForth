@@ -1,111 +1,25 @@
-$100 ORG!                 
-
-INCLUDE NF12.CF
-INCLUDE NF12.C1
-\ ' _ENDMEM DUP H.
-\ ' _NEXT 1- DUP H. 
-\ DUP 2- T@ + - . (BK DROP   
-           
+$100 ORG!   INCLUDE NF12.CF
+            INCLUDE NF12.C1           
 241 =: --END--
 
-INCLUDE ASSIGNES.CF
+INCLUDE ASSIGNES.CF \ NOT COMMENT THIS
 
-INCLUDE EXT.CF
+INCLUDE TEST1.CF
   
-: TARG:` : =H H    : =: 0 : =F TOKEN?
-  DUP ID.
-  1 STATE?
-: (=:     ?C@ 1+ |T MPUSH TWICE : !- PUSH !R- POP; ; UNW
-      
-      \   COMPILER
-      
-: TARG: NOP =H      : TARG>, AT FINDEX \ STATE!   
-  CFNDT IF @ DUP ODD IF CSWAP> , ;THEN
-  vTARG FND vNUMC ?; @, ;THEN
-: EXECUTE PUSH ;
-
-      \   INTERPRETTER 
-      
-: TARG,< AT FINDEX \ STATE! 
-: `INTER FIND 
-  2 STATE?
-    IF
-: @EXEC  
-    @ (EXEC  
-  3 STATE?
-    ;; THEN 
-  4 STATE?
-  ,< 
-' ">NUM DEFER vNUM
-: TARG;  NOP TARG,<  : ;, (@, ;;
-
-      \ LAST WORDS 
-
-
-: (MAC (D#0
-: SEVAL CSTR
-: EVAL NOP
-: @EVAL 
-    TOKEN 
-  5 STATE? 
-    DROP; ?; 
-  DUP ID.
-  6 STATE?  
-    FINDEX 
-  7 STATE?
-RECURSE ;
-
-: `INI H>DICT 
-  8 STATE?
-      CALL 
-    AHEAD CSWAP> 
-      THEN 
-  9 STATE?
-    AT @INIT 
-    vERR           
-: QUIT TARG,< 
-: `QUIT READLN
-: `MAIN 
-    THEN 
-  10 STATE?
-    EVAL vOK  `QUIT ;
+INCLUDE BODY.CF     \ MAIN EVAL =:
         
-\ INCLUDE EXT.CF      
+INCLUDE EXT.CF      
 
 \ INCLUDE boots.cf  \ DEBUGGER ADDING
 
       \   FIXES
       
-INCLUDE FIXER.CF
+INCLUDE FIXER.CF    \ NOT COMMENT THIS
 
-META `INI   @INIT     \ STARTUP
-META `INTER FINDEX    \ FORTH STATE
-HERE    VAL' H T!     \ FORTH HEAP
-
-      \   WORD THE ONE
-12 , ' =: , 0 , "=:" -1 ALLOT \ HERE T>R 16 - 16 DUMP
-THIDE =:  0 , 0 , 0 C,  
-
-      \ ALIGNING TO 1K
-      
-\ 10 ALLOT       
-
-      \ STATISTICS
-      
-CR ."_BODY_LENGTH_" VAL' H T@ $100 - . CR
-CR ."_CODE_LENGTH_" HERE $100 - . CR
-CR 1K $100 + HERE - ."BYTES_TO_ADD__" . CR
-
-      \ SAVE RESULT
-      
-TSAVE PIF.COM 
-
-
-      \ PREPARE NEW WORDS TO BE ASSIGNED 
-      
 USING PIF.COM
-\ NAMES
-RNAMES
+ 5 19 LFBLK WIPES
+ 5 RNAMES
+10 FREAD FURTHER.CF
 USING PB5.COM
 
 _END_OF_COMPILATION_

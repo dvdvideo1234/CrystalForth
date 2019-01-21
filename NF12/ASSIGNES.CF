@@ -6,15 +6,11 @@ APT-     _T       =: T
 APT-     _LTIBX   =: |LTIB   
 APT-     _LTIB    =: LTIB    
 APT-     _ETIB    =: ETIB  
-APT-     _MSG     =: MESSAGE    
 APT-     _TBUF    =: TBUF   
+APT-     _BL      =: BL   
 APT-     _EMIT    =: EMIT   
 APT-     _CNTC    =: CNTC   
-APT-     _VNUMC   =: vNUMC   
 APT-     _VTARG   =: vTARG     
-APT-     _VERR    =: vERR     
-APT-     _VOK     =: vOK  
-APT-     _READLN  =: READLN  
 APT-     _@INIT   =: @INIT
 APT-     _FINDEX  =: FINDEX
 APT-     _THEN    =: _THEN
@@ -31,6 +27,7 @@ APT-     _0       =: 0
 APT-     _DZ1     =: (D#1
 APT-     _ADD2    =: 2+
 APT-     _DZ0     =: (D#0
+APT-     _NOPX    =: NOP;
 APT-     _SET2    =: (SET2    
 APT-     _ST      =: !
 APT-     _SET     =: (SET     
@@ -44,16 +41,11 @@ APT-     _CSTR    =: CSTR
 APT-     _XCOM    =: |,   
 APT-     _COMMA   =: ,   
 APT-     _STP     =: !+     
-APT-     _VAR     =: (VAR     
-APT-     _XLIT    =: |LIT,,  
-APT-     _LITCC   =: LIT,,  
-APT-     _COMLIT  =: LIT,  
+\ APT-     _VAR     =: (VAR     
+APT-     _XLIT    =: (|LIT,,  
+APT-     _LITCC   =: (LIT,,  
+APT-     _COMLIT  =: (LIT,  
 APT-     _LIT     =: (LIT     
-APT-     _ABDOT   =: ((A"   
-APT-     _XN??    =: |??#    
-APT-     _N??     =: ??#
-APT-     _??      =: ?? 
-APT-     _FROMF   =: 4TH>      
 APT-     _BRK     =: BREAK      
 APT-     _@BKEY   =: @BKEY     
 APT-     _BKEY    =: BKEY      
@@ -65,22 +57,16 @@ APT-     _RET     =: (;
 APT-     _IF      =: (IF      
 APT-     _SKIP    =: SKIP    
 APT-     _IFM     =: (IF-     
-APT-     _NEXTP   =: (NEXT+   
+APT-     _2MX     =: 2-;   
 APT-     _NEXT    =: (NEXT    
-APT-     _MIF     =: (-IF     
+APT-     _1M      =: 1-     
 APT-     _NFOR    =: (FOR+    
 APT-     _FOR     =: (FOR     
 APT-     _JUMP    =: (DEF    
 APT-     _@BEMIT  =: @BEMIT      
 APT-     _BEMIT   =: BEMIT      
-APT-     _RSTM    =: !R-   
-APT-     _RST     =: !R    
-APT-     _RLDM    =: @R-    
-APT-     _RLD     =: @R     
 APT-     _RLDP    =: @R+    
-APT-     _RSTBP   =: C!R+   
 APT-     _RSTP    =: !R+    
-APT-     _RLDBP   =: C@R+   
 APT-     _XR      =: XR      
 APT-     _XA      =: XA      
 APT-     _2PX     =: 2+;      
@@ -118,19 +104,16 @@ APT-     _TOKEN?  =: TOKEN?
 APT-     _TOKEN   =: TOKEN   
 APT-     _?C@     =: ?C@     
 APT-     _C@      =: C@
-APT-     _BCON    =: (C@
+APT-     _W_B     =: W>B
+APT-     _AND     =: AND
 APT-     _WORD    =: WORD    
 APT-     _PARSE   =: PARSE   
 APT-     _PARS    =: (PARS    
-APT-     _CFNDTAR =: CFNDT
 APT-     _CFIND   =: CFND   
-APT-     _COMTICK =: ,'   
-APT-     _TICK    =: '   
-APT-     _FINDT   =: FIND    
+\ APT-     _LOCATE  =: LOCATE    
+APT-     _TFIND?  =: FND?    
 APT-     _FIND    =: FND    
-APT-     _TONUMC  =: ">NUMC  
-APT-     _TONUM   =: ">NUM   
-APT-     _ATOI    =: (ATOI    
+APT-     _ATOI    =: (NUM    
 APT-     _HDICT   =: H>DICT   
 APT-     _TODICT  =: >DICT  
 APT-     _MPUSH   =: MPUSH   
@@ -139,3 +122,29 @@ APT-     _TOTBUF  =: S>TB"!
 APT-     _MKSTR   =: S>"!   
 ' (DEF =: (JUMP 
 1 =: BYE
+
+ \ DEFER vNUMC,_TONUMC
+' NOP;  DEFER vERR
+' NOP;  DEFER vOK
+' NOP;  DEFER READLN
+ 
+0 VALUE MESSAGE
+: 0<>; 0= : 0; EXIT ?; ;;
+: ((A"  (?S TO MESSAGE  0;  ABORT ; UNW
+ 
+: |N?? EX  : N??  0= : ??  !"?" ;;
+' |N?? ' FND?   T!
+' |N?? ' TOKEN? T!
+          
+: ORG! H - ,<
+ 0 VALUE  HOFS  
+: T>R HOFS - ; 
+: _HERE H : R>T HOFS + ; 
+' _HERE ' _THEN T!
+TO' H =: OBJ! 
+          
+: ">NUMC NOP (|LIT,, 
+: ">NUM NOP CSTR (NUM  ?? ;
+ 
+: |2- EX : 2- 2-; ; UNW
+          

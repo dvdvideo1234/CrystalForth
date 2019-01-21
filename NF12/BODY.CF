@@ -1,0 +1,67 @@
+
+
+: N: DUP
+: =, |, 
+: TARG:` NOP      \ HOLE FOR EVEN?
+: =H H    
+: =: 0 TOKEN? NOP \ HOLE FOR SAME?
+  DUP ID.
+  1 STATE?
+: (=:  ?C@ 1+ |T MPUSH  TWICE 
+: !- 2- !+ 2-; ; UNW 
+      
+      \   INTERPRETTER 
+      
+: TARG,< AT FINDEX 
+  2 STATE? 
+: `INTER T FND
+  3 STATE?
+ ">NUM ?;
+: @EXEC   @ 
+  DUP `LASTW? !
+  4 STATE?
+: EXECUTE (EXEC  ;
+ 
+      \   COMPILER
+      
+: TARG: NOP =H      
+: TARG>, TO FINDEX 
+  vTARG CFND IF @ DUP ODD EXECUTE ?; , ;THEN
+  vTARG FND ">NUMC ?; @, ;;
+
+: TARG;  NOP TARG,<  
+: ,; (@, ;;
+
+      \ LAST WORDS 
+
+
+: (MAC (D#0
+: SEVAL CSTR
+: EVAL NOP
+: @EVAL 
+    TOKEN 
+  5 STATE? 
+    DROP; ?; 
+  DUP ID.
+  6 STATE?  
+    FINDEX 
+  7 STATE?
+RECURSE ;
+
+: INIZ H>DICT 
+  \ BREAK
+  \ $A55A (LIT,,
+  \ BREAK
+  8 STATE?
+      CALL 
+    AHEAD CSWAP> 
+      THEN 
+  9 STATE?
+    TO @INIT 
+    vERR           
+: QUIT TARG,< 
+: `QUIT READLN
+: `MAIN 
+    THEN 
+  10 STATE?
+    EVAL vOK  `QUIT ;

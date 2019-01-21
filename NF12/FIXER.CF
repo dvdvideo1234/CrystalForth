@@ -5,20 +5,13 @@ APT-  (IO1    =: (IO1`
 APT-  (IF     =: (IF`
 APT-  SKIP    =: SKIP`
 APT-  (IF-    =: (IF-`
-APT-  (NEXT+  =: (NEXT+`
+APT-  2-;     =: 2-;`
 APT-  (NEXT   =: (NEXT`
-APT-  (-IF    =: (-IF`
 APT-  (FOR+   =: (FOR+` 
 APT-  (FOR    =: (FOR`
 THIDE (DEF   
-APT-  !R-     =: !R-`
-APT-  !R      =: !R`
-APT-  @R-     =: @R-`
-APT-  @R      =: @R`
 APT-  @R+     =: @R+`
-APT-  C!R+    =: C!R+`
 APT-  !R+     =: !R+`
-APT-  C@R+    =: C@R+`
 APT-  XR      =: XR`
 APT-  XA      =: XA`
 APT-  (EXEC   =: (EXEC`
@@ -35,6 +28,9 @@ APT-  RDROP   =: RDROP`
  
 APT2  _THEN   THEN` 
 APT2  TARG:`  :` 
+\ APT-  (LIT,,  =: (#,,
+APT-  (LIT,   =: (#,
+APT-  (LIT    =: (# 
 APT-  ((A"    =: (!" 
 APT2  TARG;   ;`  
 APT-  TARG:   =: :    
@@ -46,4 +42,32 @@ APT-  SWAP    =: CSWAP`
 '     CSWAP`  =: SWAP    
 APT2  _MARKP     CALL`
 '     CALL`   =: MARK>`
+APT2  _HERE   BEGIN`
+'  BEGIN`     =: HERE
 
+
+META INIZ   @INIT     \ STARTUP
+META `INTER FINDEX    \ FORTH STATE
+HERE    VAL' H T!     \ FORTH HEAP
+
+      \   WORD THE ONE
+12 , ' =: , 0 , "=:" -1 ALLOT \ HERE T>R 16 - 16 DUMP
+THIDE =:  0 , 0 , 0 C,  
+
+      \ ALIGNING TO 1K
+      
+\ 10 ALLOT       
+
+      \ STATISTICS
+      
+CR ."_BODY_LENGTH_" VAL' H T@ $100 - . CR
+CR ."_CODE_LENGTH_" HERE $100 - . CR
+CR 1K $100 + HERE - ."BYTES_TO_ADD__" . CR
+
+      \ SAVE RESULT
+      
+TSAVE PIF.COM 
+
+
+      \ PREPARE NEW WORDS TO BE ASSIGNED 
+      
