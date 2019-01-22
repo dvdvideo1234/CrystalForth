@@ -1,7 +1,5 @@
 APT-  (?S     =: (?S`  
 APT-  (IO     =: (IO`
-APT-  (IO2    =: (IO2`
-APT-  (IO1    =: (IO1`
 APT-  (IF     =: (IF`
 APT-  SKIP    =: SKIP`
 APT-  (IF-    =: (IF-`
@@ -27,12 +25,10 @@ APT-  RDROP   =: RDROP`
 
  
 APT2  _THEN   THEN` 
-APT2  TARG:`  :` 
 \ APT-  (LIT,,  =: (#,,
 APT-  (LIT,   =: (#,
 APT-  (LIT    =: (# 
 APT-  ((A"    =: (!" 
-APT2  TARG;   ;`  
 APT-  TARG:   =: :    
 APT-  TARG>,  =: >, 
 APT2  TARG,<  ,<` 

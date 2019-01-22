@@ -1,67 +1,97 @@
-
-
-: N: DUP
+: N: DUP 
 : =, |, 
-: TARG:` NOP      \ HOLE FOR EVEN?
-: =H H    
-: =: 0 TOKEN? NOP \ HOLE FOR SAME?
-  DUP ID.
-  1 STATE?
-: (=:  ?C@ 1+ |T MPUSH  TWICE 
-: !- 2- !+ 2-; ; UNW 
+: =H _HERE 
+: =: 0 
+: =F TOKEN? 
+
+  TEST? DUP ID. 0 STATE?
+  
+: @SAME? NOP
+: (=:  ?C@ 1+ >T TWICE
+: N>T  2 H !+ !
+: H>T H STR >T ; 
+      
       
       \   INTERPRETTER 
       
 : TARG,< AT FINDEX 
-  2 STATE? 
+
+  TEST? $11 STATE? 
+  
 : `INTER T FND
-  3 STATE?
- ">NUM ?;
-: @EXEC   @ 
-  DUP `LASTW? !
-  4 STATE?
-: EXECUTE (EXEC  ;
+
+  TEST? $12 STATE? 
+  
+      ">NUM ?;
+: @EXEC @  
+
+  TEST? DUP `LASTW? ! $13 STATE?
+  
+: EXECUTE (EXEC ;
+ 
  
       \   COMPILER
       
 : TARG: NOP =H      
-: TARG>, TO FINDEX 
-  vTARG CFND IF @ DUP ODD EXECUTE ?; , ;THEN
-  vTARG FND ">NUMC ?; @, ;;
+: TARG>, TO FINDEX
 
-: TARG;  NOP TARG,<  
-: ,; (@, ;;
+  TEST?  $21 STATE?
+
+    vTARG CFND
+    
+  TEST?  $22 STATE?
+    
+ IF @ DUP ODD
+
+  TEST?  $23 STATE?
+
+ EXECUTE ?; , ;THEN  vTARG FND
+
+  TEST?  $23 STATE?
+
+ ">NUMC ?;
+
+  TEST?  $24 STATE?
+
+ @, ;;
+\ : TARG;  NOP TARG,<  : ,; (@, ;;
 
       \ LAST WORDS 
 
 
-: (MAC (D#0
-: SEVAL CSTR
-: EVAL NOP
-: @EVAL 
-    TOKEN 
-  5 STATE? 
-    DROP; ?; 
-  DUP ID.
-  6 STATE?  
-    FINDEX 
-  7 STATE?
-RECURSE ;
+: (MAC (D#0  
+: SEVAL CSTR 
+: EVAL NOP 
+: @EVAL TOKEN
 
-: INIZ H>DICT 
-  \ BREAK
-  \ $A55A (LIT,,
-  \ BREAK
-  8 STATE?
-      CALL 
-    AHEAD CSWAP> 
-      THEN 
-  9 STATE?
-    TO @INIT 
-    vERR           
+  TEST? $31 STATE? 
+  
+      DROP; ?;
+      
+  TEST? DUP ID. $32 STATE?
+  
+      FINDEX
+      
+  TEST? $33 STATE?
+  
+ RECURSE ;
+
+: INIZ H>T
+
+  TEST? $41 STATE?
+  
+      CALL  AHEAD CSWAP>  
+      THEN
+      
+  TEST? $42 STATE?
+  
+        TO @INIT vERR           
 : QUIT TARG,< 
-: `QUIT READLN
-: `MAIN 
-    THEN 
-  10 STATE?
-    EVAL vOK  `QUIT ;
+: `QUIT READLN 
+: `MAIN     THEN
+
+  TEST? $43 STATE?
+  
+        EVAL vOK  `QUIT ;
+
+\ =P GAGA

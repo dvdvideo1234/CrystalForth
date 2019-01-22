@@ -232,7 +232,7 @@ _TX     DW _T,_EX
  
 ; 18 4 - 1K     U*  VAL' LTIB  T!
 _LTIBX  DW _LTIB,_EX
- VALUE_ _LTIB,(18-4)*1024
+ VALUE_ _LTIB,(18-5)*1024
 
 ; $100 18 1K U* + VALUE ETIB
  VALUE_ _ETIB,18*1024+100H
@@ -332,9 +332,7 @@ P_ _OSTR          ; (?S
 P_ _IO  				  ; IF INPUT PARAMS = OUTPUT PARAMS 
   MOV   DX,[DSP+4]
   MOV   CX,[DSP+2]
-P_ _IO2  
   MOV   W,[DSP]   ; IP = BX
-P_ _IO1  
   XCHG  W,IP
   CALL  W	 
 P_ _RET  
@@ -555,7 +553,7 @@ P_ _NEG
 P_ _ZEQ
   NEG   TOP
   SBB   TOP,TOP
-P_ _NOT
+;P_ _NOT
   JMPS  @NOT
    
 P_ _ULESS
@@ -580,14 +578,61 @@ L_ _TOKEN?
 _TOKEN:
   DW _BL,_WORD
 ; : ?C@ DUP : C@ PUSH C@R+ RDROP; ; UNW 
+  ; DW _BRK
 _?C@    DW _DUP 
 _C@     DW _LD
 _W_B    DW _LIT,255
-_AND    DW _NAND,_NOT,_RET
+_AND    DW _NAND
+_NOT    DW _DUP,_NAND,_RET
   
 ; : WORD [ TBUF S>"! ] _XTBUF
 _WORD:
-  DW _XTBUF
+  ;DW _BRK
+
+;TBUF S>"! ]  
+  DW      _PARSE
+_TOTBUF:
+  DW      _TBUF
+  DW _BRK
+  
+ L_ _MKSTR         ; S>"!
+  DW _IO
+	POPR_   DI
+	POPR_	  CX
+  MOV     CH,0
+  ADD     DI,CX
+  INC     DI          ; SPACE FOR LENGTH
+  MOV     PB [DI],'`' ; IMMEDIATE SIGN
+_@MAKESTR:  
+  XCHG    AX,SI
+  to_r    CX
+  ADD     SI,CX       ; AFTER NAME ADDRESS
+  STD                 ; BACKWARDS
+  CMPSB               ; PREPARE FOR DIRECTION
+  REP     MOVSB       ; NAME (MEMORY) MOVE
+  CLD
+  r_to    cx
+  MOV     [DI],CL     ; LENGTH OF THE STRING
+  XCHG    AX,SI
+  XCHG    AX,DI
+  RET
+
+; : H>DICT H STR  : >DICT T; MPUSH ;
+;     
+;L_ _N_T       ; NUMBER TO DICT
+;  DW _H,_ST,_H,_LIT,2  
+L_ _TODICT   
+  DW _TX 
+  
+L_ _MPUSH ; TOP OF DICTIONARY   IN DI
+  ;DW _BRK
+  DW _IO
+	POPR_   DI
+	POPR_	  CX
+  CALL    _@MAKESTR
+  INC     AX
+  RET
+
         ; : PARSE NOP; ETIB LTIB; (PARS ;
 _PARSE:
   DW _NOPX,_ETIB,_LTIBX
@@ -613,7 +658,9 @@ _PARSE:
 	DEC   	DI
 @@WEX:                  ; END OF THE SOURCE  IN DI
 	SUB     DI,[DSP+2]    ; LENGTH OF THE WORD
-  JMPS    @DCX2
+  MOV     NXT,DI
+  XCHG    TOP,CX
+  RET
 	
 ; -----------------------
 ; searching
@@ -648,7 +695,7 @@ L_ _FIND
   jNZ 	  @FND?
 	MOV		  CL,2
 	ADD		  [DI+2],CX
-@DCX2:  
+;@DCX2:  
   MOV     NXT,DI
 @DCX: 
   XCHG    TOP,CX
@@ -788,51 +835,6 @@ OPTAB   DB "%&$#'^"
 	AND	  	AL,31
 	JMPS  	@@ACCUM
   
-; : H>DICT H STR  : >DICT T; MPUSH ;
-;     
-L_ _HDICT    
-  DW _H,_STR  
-L_ _TODICT   
-  DW _TX 
-  
-L_ _MPUSH ; TOP OF DICTIONARY   IN DI
-  ;DW _BRK
-  DW _IO
-	POPR_   DI
-	POPR_	  CX
-  CALL    @MAKESTR
-  INC     AX
-  RET
-
-;TBUF S>"! ]  
-L_ _XTBUF
-  DW      _EX
-_TOTBUF:
-  DW      _TBUF
-  
- L_ _MKSTR         ; S>"!
-  ;DW _BRK
-  DW _IO
-	POPR_   DI
-	POPR_	  CX
-  MOV     CH,0
-  ADD     DI,CX
-  INC     DI          ; SPACE FOR LENGTH
-  MOV     PB [DI],'`' ; IMMEDIATE SIGN
-@MAKESTR:  
-  XCHG    AX,SI
-  to_r    CX
-  ADD     SI,CX       ; AFTER NAME ADDRESS
-  STD                 ; BACKWARDS
-  CMPSB               ; PREPARE FOR DIRECTION
-  REP     MOVSB       ; NAME (MEMORY) MOVE
-  CLD
-  r_to    cx
-  MOV     [DI],CL     ; LENGTH OF THE STRING
-  XCHG    AX,SI
-  XCHG    AX,DI
-  RET
-
 L_ debugerr
 
   IF A386
