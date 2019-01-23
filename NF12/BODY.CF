@@ -1,31 +1,34 @@
+
 : N: DUP 
 : =, |, 
 : =H _HERE 
 : =: 0 
 : =F TOKEN? 
 
-  TEST? DUP ID. 0 STATE?
+  TEST? DUP ID. 0 STATE? BREAK
   
 : @SAME? NOP
-: (=:  ?C@ 1+ >T TWICE
+: (=:  ?C@ 1+ CALL
+ TWICE
 : N>T  2 H !+ !
-: H>T H STR >T ; 
+: H>T H>STR   THEN
+: >T T; MPUSH ; 
       
       
       \   INTERPRETTER 
       
 : TARG,< AT FINDEX 
 
-  TEST? $11 STATE? 
+  TEST? $11 STATE? BREAK
   
 : `INTER T FND
 
-  TEST? $12 STATE? 
+  TEST? $12 STATE? BREAK
   
       ">NUM ?;
 : @EXEC @  
 
-  TEST? DUP `LASTW? ! $13 STATE?
+  TEST? DUP `LASTW? ! $13 STATE? BREAK
   
 : EXECUTE (EXEC ;
  
@@ -35,23 +38,23 @@
 : TARG: NOP =H      
 : TARG>, TO FINDEX
 
-  TEST?  $21 STATE?
+  TEST?  $21 STATE? BREAK
 
     vTARG CFND
     
-  TEST?  $22 STATE?
+  TEST?  $22 STATE? BREAK
     
  IF @ DUP ODD
 
-  TEST?  $23 STATE?
+  TEST?  $23 STATE? BREAK
 
  EXECUTE ?; , ;THEN  vTARG FND
 
-  TEST?  $23 STATE?
+  TEST?  $23 STATE? BREAK
 
  ">NUMC ?;
 
-  TEST?  $24 STATE?
+  TEST?  $24 STATE? BREAK
 
  @, ;;
 \ : TARG;  NOP TARG,<  : ,; (@, ;;
@@ -62,35 +65,38 @@
 : (MAC (D#0  
 : SEVAL CSTR 
 : EVAL NOP 
+
+  TEST? CR ."EVAL" $30 STATE? BREAK
+  
 : @EVAL TOKEN
 
-  TEST? $31 STATE? 
+  TEST? $31 STATE? BREAK
   
       DROP; ?;
       
-  TEST? DUP ID. $32 STATE?
+  TEST? DUP ID. $32 STATE? BREAK
   
       FINDEX
       
-  TEST? $33 STATE?
+  TEST? $33 STATE? BREAK
   
  RECURSE ;
 
 : INIZ H>T
 
-  TEST? $41 STATE?
+  TEST? CR ."TEST" $41 STATE? BREAK
   
       CALL  AHEAD CSWAP>  
       THEN
       
-  TEST? $42 STATE?
+  TEST? $42 STATE? BREAK
   
         TO @INIT vERR           
 : QUIT TARG,< 
 : `QUIT READLN 
 : `MAIN     THEN
 
-  TEST? $43 STATE?
+  TEST? $43 STATE? BREAK
   
         EVAL vOK  `QUIT ;
 

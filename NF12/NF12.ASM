@@ -217,96 +217,13 @@ P_ _ABORT
   MOV   DSP,@S_TOP
   CALL  @RET            ; TRACE_OFF HOLE FOR STOPPING DEBUGGER
   CALL  _@4TH
-  
-  DW _@INIT  ; STARTUP ADDRESS  
-
-; VARIABLES ---------------------------------
-;
-; 0 VALUE; H
-_HX     DW _H,_EX
- VALUE_ _H,_EndMem
-
-; $F800 VALUE; T
-_TX     DW _T,_EX
- VALUE_ _T,@VOCTOP
- 
-; 18 4 - 1K     U*  VAL' LTIB  T!
-_LTIBX  DW _LTIB,_EX
- VALUE_ _LTIB,(18-5)*1024
-
-; $100 18 1K U* + VALUE ETIB
- VALUE_ _ETIB,18*1024+100H
-
-_TBUF   DW _CON,@TBUF   
-_BL     DW _CON,' '  
-
- DEFER_ _vTARG,_T      
-
- VALUE_ @EMIT,_BEMIT
-_EMIT = @EMIT+2 
-        DW _CNTC,_1P
- VALUE_ _CNTC,0  
-
-
- DOER_ _@INIT,_NOPX
- DOER_ _FINDEX,_NOPX
- 
-_THEN   DW _NOP   ; WILL BE SET TO HERE
-_swpst  dw _PUSH,_SKIP
-_pntSET dw _dz1,_xr,_RSTP,_RDRPX
-
-_MARKP  DW _H     ;: MARK>` H : Z, 0 , ;
-_ZCOM   DW _XCOM
-; 0 CONST 0     \ >,
-_0      DW _CON,0
-   
-
-;---------------------------------------
- 
-; HI LEVEL PRIMITIVES 
-
-_rngstr dw _1p
-_OVERM  DW _OVER
-_MINUS  DW _NEG
-_PLUS   DW _P2DIV
-_@DROPX DW _DROPX
- 
-_DZ1    DW  _POP,_XR
-_ADD2   DW  _2px
-
-_DZ0    DW _POP,_XR
-_NOPX   DW _RET
-_SET2   DW _DZ1
-_ST     DW _PUSH
-_SET    DW _RSTP,_RDRPX 
-
-__@COM  DW _DZ0   ; (@,
-_@COM   DW _XCOM  ; @,
-_LD     DW _PUSH  ; @     
-_CON    DW _RLDP  ; (CON     
-_EXIT   DW _RDRPX ; EXIT
-_STR    DW _PUSH,_RLDP,_XR,_POPX 
-
-_CSTR   DW _?C@,_U1P,_RET 
-_XCOM   DW _EX          ; |,
-_COMMA  DW _HX          ; ,
-_STP    DW _PUSH,_RSTP  ; !+
-_VAR    DW _POPX        ; (VAR
-_XLIT   DW _EX          ; |
-_LITCC  DW _XCOM
-_COMLIT DW __@COM,_LIT
-_LIT    DW _RLDP,_RET 
-
-
+_@INI:  
+  DW 0  ; STARTUP ADDRESS  
           
 ; IO COMMANDS vvvvvvvvvv  ---------------------------
 
-P_  _BRK
-  INT   3
-  JMP   @MAIN
-
 L_ _@BKEY
-  DW _VAR
+  DW 0    ;_VAR
 L_ _BKEY
   DW _DUP,_IO
   CLR   AX
@@ -332,8 +249,11 @@ P_ _OSTR          ; (?S
 P_ _IO  				  ; IF INPUT PARAMS = OUTPUT PARAMS 
   MOV   DX,[DSP+4]
   MOV   CX,[DSP+2]
+P_ _IO2  				  ; IF INPUT PARAMS = OUTPUT PARAMS 
   MOV   W,[DSP]   ; IP = BX
+P_ _IO1  				  ; IF INPUT PARAMS = OUTPUT PARAMS 
   XCHG  W,IP
+  INT   3
   CALL  W	 
 P_ _RET  
   JMPS  _@4TH
@@ -357,6 +277,10 @@ P_ _2MX
   POP   IP
 P_ _1M
   DEC   TOP
+  SKIPB
+
+P_  _BRK
+  INT   3
   JMPS  @MAIN
 
 @dbg:  
@@ -379,7 +303,7 @@ P_ _JUMP    		; (JUMP
 ; DATA TRANSFER  COMMANDS -----------------------------------
 
 L_ _@BEMIT
-  DW _VAR
+  DW 0    ;_VAR
 P_ _BEMIT
   MOV     AH,0EH
   INT     10H
@@ -396,8 +320,7 @@ P_ _RSTP			  ; !R+
 P_ _RLDP			  ; @R+
   R_TO 	W			  ; TAKE TOP OF THE RETURN STACK
   MOV   DR,[W]	; USE RETURN TOP AS DATA ADDRESS
-  inc   W			  ; INCREMENT ADDRESS
-  inc   W			  ; INCREMENT ADDRESS
+  SCASW			    ; INCREMENT ADDRESS
 @DUPW:  
   TO_R  W			  ; STORE ADDRESS BACK TO RETURN STACK
 @DUP:  
@@ -571,29 +494,6 @@ P_ _0LESS
   SHL   TOP,1
   JMPS  @ODD
  
-        ; : TOKEN?  ;#??  
-L_ _TOKEN?  
-  DW _NOP; _XN?? NEEDS TO FIX
-        ; : TOKEN BL  [ ?C@ ]
-_TOKEN:
-  DW _BL,_WORD
-; : ?C@ DUP : C@ PUSH C@R+ RDROP; ; UNW 
-  ; DW _BRK
-_?C@    DW _DUP 
-_C@     DW _LD
-_W_B    DW _LIT,255
-_AND    DW _NAND
-_NOT    DW _DUP,_NAND,_RET
-  
-; : WORD [ TBUF S>"! ] _XTBUF
-_WORD:
-  ;DW _BRK
-
-;TBUF S>"! ]  
-  DW      _PARSE
-_TOTBUF:
-  DW      _TBUF
-  DW _BRK
   
  L_ _MKSTR         ; S>"!
   DW _IO
@@ -617,29 +517,19 @@ _@MAKESTR:
   XCHG    AX,DI
   RET
 
-; : H>DICT H STR  : >DICT T; MPUSH ;
-;     
-;L_ _N_T       ; NUMBER TO DICT
-;  DW _H,_ST,_H,_LIT,2  
-L_ _TODICT   
-  DW _TX 
   
 L_ _MPUSH ; TOP OF DICTIONARY   IN DI
-  ;DW _BRK
   DW _IO
 	POPR_   DI
 	POPR_	  CX
+_@MPUSH1:
   CALL    _@MAKESTR
+_@MPUSH2:
   INC     AX
   RET
 
-        ; : PARSE NOP; ETIB LTIB; (PARS ;
-_PARSE:
-  DW _NOPX,_ETIB,_LTIBX
-  DW _BRK
-  
  L_ _PARS
-  DW  _IO
+  DW  _IO 
   XCHG    CX,AX
   MOV     DI,BX    
 	JCXZ 	  @@SKIPX
@@ -666,11 +556,10 @@ _PARSE:
 ; searching
 ; -----------------------
 
-; L_ _CFNDTAR
  L_ _CFIND
   DW  _IO      
   INC     PB [BX]
-  CALL    @FIND  
+  CALL    _@FIND  
   DEC     PB [BX]
   RET
   
@@ -678,7 +567,7 @@ L_ _TFIND?
   DW _NOP
 L_ _FIND
   DW  _IO
-@FIND:  
+_@FIND:  
   CLR     CX 
 @FND?:  
   ADD     AX,CX
@@ -695,7 +584,6 @@ L_ _FIND
   jNZ 	  @FND?
 	MOV		  CL,2
 	ADD		  [DI+2],CX
-;@DCX2:  
   MOV     NXT,DI
 @DCX: 
   XCHG    TOP,CX
@@ -703,36 +591,12 @@ L_ _FIND
 
 ;----------------   NUMBERS	 ---------------------
 
-L_ _ATOI
-  DW  _IO
-
 @@ADR   = BX
 @@ACC   = DI
 @@IND   = SI
 @@BASE  = CX
 @@OPADR = DX  ; OPTION ADDRESS
   
-  PUSH    DSP
-  XCHG    TOP,@@IND
-  LEA     @@ADR,[@@ADR+@@IND]
-  NOT     @@IND
-	CALL	  @@ATOI
-  XCHG    TOP,@@IND
-  POP     DSP
-  MOV     NXT,@@ACC
-  RET
-
-@@ATOI:
-	MOV     AL,10   	; BASE 10 INITIALLY
-	CALL  	@@SGN
-	CALL  	@@numini
-@@GETC:	
-  MOV     AL,[@@ADR+@@IND]
-	CALL  	@@OPADR
-  INC     @@IND
-  JNZ     @@GETC
-  RET
-
 COMOPT  DW @@KOLI,@@TICK,@@DIEZ,@@HEX,@@OCT,@@BIN
 ;OPTAB   DB "^'#$&%"
 OPTAB   DB "%&$#'^"
@@ -756,6 +620,12 @@ OPTAB   DB "%&$#'^"
 @@EXSGN: 
   RET
 
+@@ERNUM:	
+	DEC   	@@IND
+@@STATE:	
+	pop   	@@OPADR    ; rdrop
+	RET
+  
 @@DIEZ:	
 	XCHG  	@@acc,AX
   
@@ -798,12 +668,6 @@ OPTAB   DB "%&$#'^"
   DEC     @@IND
   JMP     @@OPADR
   
-@@ERNUM:	
-	DEC   	@@IND
-@@STATE:	
-	pop   	@@OPADR    ; rdrop
-	RET
-  
 @@N5:	
   POP     DI 
 	cmp   	al,'9'+1
@@ -835,6 +699,29 @@ OPTAB   DB "%&$#'^"
 	AND	  	AL,31
 	JMPS  	@@ACCUM
   
+@@ATOI:
+	MOV     AL,10   	; BASE 10 INITIALLY
+	CALL  	@@SGN
+	CALL  	@@numini
+@@GETC:	
+  MOV     AL,[@@ADR+@@IND]
+	CALL  	@@OPADR
+  INC     @@IND
+  JNZ     @@GETC
+  RET
+
+L_ _ATOI
+  DW  _IO
+  PUSH    DSP
+  XCHG    TOP,@@IND
+  LEA     @@ADR,[@@ADR+@@IND]
+  NOT     @@IND
+	CALL	  @@ATOI
+  XCHG    TOP,@@IND
+  POP     DSP
+  MOV     NXT,@@ACC
+  RET
+
 L_ debugerr
 
   IF A386

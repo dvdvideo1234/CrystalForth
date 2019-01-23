@@ -1,0 +1,145 @@
+\ REDEFINITIONS ------------------------
+
+1 =: BYE          
+' (DEF =: (JUMP     
+
+\ FORWARD DEFINITIONS ------------------------
+
+=! (CON   
+=! (PNT!    
+=! _HERE  
+=! H;    
+=! H
+
+\ HI LEVEL PRIMITIVES  ---------------------
+
+: RANGE>S 1+  
+: OVER- OVER 
+: - NEG 
+: + +2/ 
+: DROP; DROPX 
+; UNW
+
+: (D#0 POP XR 
+: NOP; 
+;  
+   
+: (D#1 POP XR 
+: 2+ 2+; 
+; UNW
+
+: (SET2 (D#1  
+: ! PUSH     
+: (SET !R+ RDROP; 
+; UNW 
+
+: (LIT @R+ ;
+
+: _THEN _HERE 
+: SWAP! PUSH SKIP 
+: (PNT! (D#1 XR !R+ RDROP; 
+; UNW         
+
+: |2- EX 
+: 2- 2-; 
+; UNW
+
+: |, EX  
+: , H;  
+: !+ PUSH !R+  
+: (VAR POP; 
+; UNW
+
+: _MARKP  H   
+: Z, |, ,<
+  0  CONST 0
+
+: (@, (D#0  
+: @, |,  
+: @ PUSH  
+: (CON @R+ 
+: EXIT RDROP; 
+; UNW
+
+\ VARIABLES ------------------
+ 
+    0 VALUE; H
+    0 VALUE MESSAGE
+$F800 VALUE; T
+
+: ORG! H - ,<    0 VALUE  HOFS  
+: T>R HOFS - ; 
+: _HERE H : R>T HOFS + ; 
+TO' H =: OBJ! 
+
+' NOP;  DEFER vERR
+' NOP;  DEFER vOK
+' NOP;  DEFER READLN
+ 
+   >, (PNT! ,<   0  DEFER @INIT
+' @INIT ' _@INI T!  
+   >, (PNT! ,<   0  DEFER FINDEX
+ 
+18 5 - 1K U*        VALUE; LTIB 
+18 1K U* $100 +     VALUE ETIB
+
+$F800 CONST TBUF  
+  32  CONST BL   
+
+' T     DEFER vTARG      
+' BEMIT VALUE @EMIT >, CALL 1+ (SET2 THEN ,<
+0 CONST CNTC 
+VAL' @EMIT =: EMIT
+
+   
+
+\ COMPILER BASIS ------------------------
+
+
+: H>STR H 
+: STR PUSH @R+ XR POP; 
+; UNW 
+
+: (|LIT,, EX  
+: (LIT,,  |, 
+: (LIT, (@, (LIT 
+;; UNW
+
+: 0<>;  0= 
+: 0;    EXIT ?; 
+;;
+
+: ((A"  (?S TO MESSAGE  0;  ABORT ; UNW 
+: |N?? EX  
+: N??  0= 
+: ??  !"?" 
+;;
+
+: TOKEN?  |N??  
+: TOKEN BL 
+    CALL \ WORD
+: ?C@ DUP 
+: C@ @ 
+: W>B 255 
+: AND NAND 
+: NOT DUP NAND 
+; 
+    THEN
+: WORD 
+    CALL \ PARSE
+: S>TB! TBUF S>"! 
+;
+    THEN
+: PARSE  NOP; ETIB LTIB; (PARS 
+;
+
+: CSTR ?C@ U1+ ;
+: ">NUMC NOP (|LIT,, 
+: ">NUM NOP CSTR (NUM  ?? ;
+ 
+
+\ FIXES ----------------------------
+          
+' |N?? ' FND?   T!
+' (VAR ' @BKEY  T!    
+' (VAR ' @BEMIT T!  

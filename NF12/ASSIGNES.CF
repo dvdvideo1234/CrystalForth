@@ -1,50 +1,5 @@
 APT-     _ABORT   =: ABORT   
-APT-     _HX      =: |H     \ START OF VARIABLES
-APT-     _H       =: H       
-APT-     _TX      =: |T      
-APT-     _T       =: T       
-APT-     _LTIBX   =: |LTIB   
-APT-     _LTIB    =: LTIB    
-APT-     _ETIB    =: ETIB  
-APT-     _TBUF    =: TBUF   
-APT-     _BL      =: BL   
-APT-     _EMIT    =: EMIT   
-APT-     _CNTC    =: CNTC   
-APT-     _VTARG   =: vTARG     
-APT-     _@INIT   =: @INIT
-APT-     _FINDEX  =: FINDEX
-APT-     _THEN    =: _THEN
-APT-     _MARKP   =: _MARKP
-APT-     _SWPST   =: SWAP!
-APT-     _PNTSET  =: (PNT!
-APT-     _RNGSTR  =: RANGE>S
-APT-     _OVERM   =: OVER-  \ START OF CODE WORDS
-APT-     _MINUS   =: -
-APT-     _PLUS    =: +
-APT-     _@DROPX  =: DROP;
-APT-     _ZCOM    =: Z,
-APT-     _0       =: 0       
-APT-     _DZ1     =: (D#1
-APT-     _ADD2    =: 2+
-APT-     _DZ0     =: (D#0
-APT-     _NOPX    =: NOP;
-APT-     _SET2    =: (SET2    
-APT-     _ST      =: !
-APT-     _SET     =: (SET     
-APT-     __@COM   =: (@,   
-APT-     _@COM    =: @,   
-APT-     _LD      =: @      
-APT-     _CON     =: (CON     
-APT-     _EXIT    =: EXIT    
-APT-     _STR     =: STR     
-APT-     _CSTR    =: CSTR    
-APT-     _XCOM    =: |,   
-APT-     _COMMA   =: ,   
-APT-     _STP     =: !+     
-APT-     _XLIT    =: (|LIT,,  
-APT-     _LITCC   =: (LIT,,  
-APT-     _COMLIT  =: (LIT,  
-APT-     _LIT     =: (LIT     
+APT-     _@INI    =: _@INI   
 APT-     _BRK     =: BREAK      
 APT-     _@BKEY   =: @BKEY     
 APT-     _BKEY    =: BKEY      
@@ -86,6 +41,7 @@ APT-     _RDROP   =: RDROP
 APT-     _SWAP    =: SWAP    
 APT-     _XOR     =: XOR     
 APT-     _MDIV    =: -/    
+APT-     _U1P     =: U1+    
 APT-     _P2DIV   =: +2/   
 APT-     _2DIV    =: 2/    
 APT-     _PMUL    =: +*    
@@ -93,51 +49,13 @@ APT-     _D2DIV   =: D2/
 APT-     _NAND    =: NAND    
 APT-     _NEG     =: NEG     
 APT-     _ZEQ     =: 0=     
-APT-     _NOT     =: NOT     
 APT-     _ULESS   =: U<
 APT-     _ODD     =: ODD
 APT-     _0LESS   =: 0<
-APT-     _TOKEN?  =: TOKEN?  
-APT-     _TOKEN   =: TOKEN   
-APT-     _?C@     =: ?C@     
-APT-     _C@      =: C@
-APT-     _W_B     =: W>B
-APT-     _AND     =: AND
-APT-     _WORD    =: WORD    
-APT-     _PARSE   =: PARSE   
 APT-     _PARS    =: (PARS    
 APT-     _CFIND   =: CFND   
 APT-     _TFIND?  =: FND?    
 APT-     _FIND    =: FND    
 APT-     _ATOI    =: (NUM    
-APT-     _TODICT  =: >T  
 APT-     _MPUSH   =: MPUSH   
 APT-     _MKSTR   =: S>"!   
-' (DEF =: (JUMP 
-1 =: BYE
-
- \ DEFER vNUMC,_TONUMC
-' NOP;  DEFER vERR
-' NOP;  DEFER vOK
-' NOP;  DEFER READLN
- 
-0 VALUE MESSAGE
-: 0<>; 0= : 0; EXIT ?; ;;
-: ((A"  (?S TO MESSAGE  0;  ABORT ; UNW
- 
-: |N?? EX  : N??  0= : ??  !"?" ;;
-' |N?? ' FND?   T!
-' |N?? ' TOKEN? T!
-          
-: ORG! H - ,<
- 0 VALUE  HOFS  
-: T>R HOFS - ; 
-: _HERE H : R>T HOFS + ; 
-' _HERE ' _THEN T!
-TO' H =: OBJ! 
-          
-: ">NUMC NOP (|LIT,, 
-: ">NUM NOP CSTR (NUM  ?? ;
- 
-: |2- EX : 2- 2-; ; UNW
-          

@@ -2,6 +2,8 @@
  =! EXECUTE
  =! =H
  =! ID.
+ =! ((."
+ =! CR
 
   
 
@@ -23,6 +25,6 @@
    H `HEREP? !                 \ HEAP POINTER
    T `DICTP? !                 \ DICTIONARY POINTER
   \ (LIT `LASTWORD @ `LASTW? !  \ LAST EXECUTED WORD
-   BREAK
+   
  ;  
    
