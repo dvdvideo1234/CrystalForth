@@ -106,6 +106,15 @@ $40 CONST 1L
 EXIT ;
 META `RDLN READLN \ READLN FIXED
 
+\ DEBUGERR
+: TROFF  (IO1 ,<  ,"9~^K~" =P _@X_TRACE ,"^O^G~^N^F~^AC~"
+: TRON   (IO1 ,<  ,"9~k~E~k~t~^P~"
+
+: _@DBGW0  ,< VAL' TROFF CALL, ' _@JSR4TH CALL, 
+: _@DBGW1   NOP FROMF ,<   VAL' TRON  CALL,
+,"$"_~<S-~u^C"  VAL' TROFF CALL, ,"[^K~^O" ' _NOP 1+ $E9 ,R
+,"^P~"
+
 APT2  _IF     IF`
 APT2  _IF-    IF-`
 APT2  _TWICE  TWICE`

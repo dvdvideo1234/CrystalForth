@@ -282,7 +282,7 @@ P_  _BRK
   JMPS  @MAIN
 
 @dbg:  
-  jmp   debugerr
+  jmp   _debugerr
     
 P_ _NEXT
   POP   W
@@ -363,7 +363,7 @@ P_ _NOP
   JMP   DR			; BRANCH TO PRIMITIVE
   
 P_ _EX
-_@TO4TH:
+_@JSR4TH:
   R_TO  DR
 @NEST:				  ; (NEST
   to_r  IP			; PUSH OLD IP
@@ -619,147 +619,148 @@ L_ _ATOI
   RET
 
   
- L_ _MKSTR         ; S>"!
-  DW _IO
-	POPR_   DI
-	POPR_	  CX
-  MOV     CH,0
-  ADD     DI,CX
-  INC     DI          ; SPACE FOR LENGTH
-  MOV     PB [DI],'`' ; IMMEDIATE SIGN
-_@MAKESTR:  
-  XCHG    AX,SI
-  to_r    CX
-  ADD     SI,CX       ; AFTER NAME ADDRESS
-  STD                 ; BACKWARDS
-  CMPSB               ; PREPARE FOR DIRECTION
-  REP     MOVSB       ; NAME (MEMORY) MOVE
-  CLD
-  r_to    cx
-  MOV     [DI],CL     ; LENGTH OF THE STRING
-  XCHG    AX,SI
-  XCHG    AX,DI
-  RET
-
+; L_ _MKSTR         ; S>"!
+;  DW _IO
+;	POPR_   DI
+;	POPR_	  CX
+;  MOV     CH,0
+;  ADD     DI,CX
+;  INC     DI          ; SPACE FOR LENGTH
+;  MOV     PB [DI],'`' ; IMMEDIATE SIGN
+;_@MAKESTR:  
+;  XCHG    AX,SI
+;  to_r    CX
+;  ADD     SI,CX       ; AFTER NAME ADDRESS
+;  STD                 ; BACKWARDS
+;  CMPSB               ; PREPARE FOR DIRECTION
+;  REP     MOVSB       ; NAME (MEMORY) MOVE
+;  CLD
+;  r_to    cx
+;  MOV     [DI],CL     ; LENGTH OF THE STRING
+;  XCHG    AX,SI
+;  XCHG    AX,DI
+;  RET
+;
+;  
+;L_ _MPUSH ; TOP OF DICTIONARY   IN DI
+;  DW _IO
+;	POPR_   DI
+;	POPR_	  CX
+;_@MPUSH1:
+;  CALL    _@MAKESTR
+;  ;_@MPUSH2:
+;  INC     AX
+;  RET
+;
+; L_ _PARS
+;  DW  _IO 
+;  XCHG    CX,AX
+;  MOV     DI,BX    
+;	JCXZ 	  @@SKIPX
+;	SUB  	  DI,CX	   
+;	CMP  	  AL,' '
+;	JNE  	  @@SKIPX
+;	REPE 	  SCASB
+;	JE   	  @@SKIPX
+;	DEC  	  DI
+;	INC  	  CX
+;@@SKIPX:
+;  MOV     [DSP+2],DI  ;  START OF THE SOURCE
+;	JCXZ  	@@WEX        
+;	REPNE 	SCASB        
+;	JNE   	@@WEX        
+;	DEC   	DI           
+;@@WEX:                ; END OF THE SOURCE  IN DI
+;	SUB     DI,[DSP+2]   ; LENGTH OF THE WORD
+;  MOV     NXT,DI
+;  XCHG    TOP,CX
+;  RET
+;	
+;; -----------------------
+;; searching
+;; -----------------------
+;
+;L_ _TFIND?
+;  DW _NOP
+;L_ _FIND
+;  DW  _IO
+;_@FIND:  
+;  CLR     CX 
+;@FND?:  
+;  ADD     AX,CX
+;  MOV     DI,AX
+;  LEA 	  DI,[DI+4]
+;  mov 	  cl,PB [Di]
+;  jcxz	  @DCX ;not_fnd
+;  inc 	  cx
+;  PUSH    SI
+;  MOV     SI,BX
+;  repe	  cmpsb
+;  POP     SI
+;  XCHG    AX,DI
+;  jNZ 	  @FND?
+;	MOV		  CL,2
+;	ADD		  [DI+2],CX
+;  MOV     NXT,DI
+;@DCX: 
+;  XCHG    TOP,CX
+;  RET
+;
+; L_ _CFIND
+;  DW  _IO      
+;  INC     PB [BX]
+;_@CFIND:  
+;  CALL    _@FIND  
+;  DEC     PB [BX]
+;  RET
   
-L_ _MPUSH ; TOP OF DICTIONARY   IN DI
-  DW _IO
-	POPR_   DI
-	POPR_	  CX
-_@MPUSH1:
-  CALL    _@MAKESTR
-  ;_@MPUSH2:
-  INC     AX
-  RET
-
- L_ _PARS
-  DW  _IO 
-  XCHG    CX,AX
-  MOV     DI,BX    
-	JCXZ 	  @@SKIPX
-	SUB  	  DI,CX	   
-	CMP  	  AL,' '
-	JNE  	  @@SKIPX
-	REPE 	  SCASB
-	JE   	  @@SKIPX
-	DEC  	  DI
-	INC  	  CX
-@@SKIPX:
-  MOV     [DSP+2],DI    ;  START OF THE SOURCE
-	JCXZ  	@@WEX
-	REPNE 	SCASB
-	JNE   	@@WEX
-	DEC   	DI
-@@WEX:                  ; END OF THE SOURCE  IN DI
-	SUB     DI,[DSP+2]    ; LENGTH OF THE WORD
-  MOV     NXT,DI
-  XCHG    TOP,CX
-  RET
-	
-; -----------------------
-; searching
-; -----------------------
-
-L_ _TFIND?
-  DW _NOP
-L_ _FIND
-  DW  _IO
-_@FIND:  
-  CLR     CX 
-@FND?:  
-  ADD     AX,CX
-  MOV     DI,AX
-  LEA 	  DI,[DI+4]
-  mov 	  cl,PB [Di]
-  jcxz	  @DCX ;not_fnd
-  inc 	  cx
-  PUSH    SI
-  MOV     SI,BX
-  repe	  cmpsb
-  POP     SI
-  XCHG    AX,DI
-  jNZ 	  @FND?
-	MOV		  CL,2
-	ADD		  [DI+2],CX
-  MOV     NXT,DI
-@DCX: 
-  XCHG    TOP,CX
-  RET
-
- L_ _CFIND
-  DW  _IO      
-  INC     PB [BX]
-_@CFIND:  
-  CALL    _@FIND  
-  DEC     PB [BX]
-  RET
+;P_ _FROMF
+;  JMP     IP
   
-L_ debugerr
+L_ _debugerr
 
   IF A386
   
-  ;DW 0,0
+L_ _TROFF
+  DW    _IO1
+@NO_TRACE:
+  SKIPR DR
+  MOV   DR,[IP]
+  
+_@X_TRACE:
+  XCHG  DR,PW @MAIN
+  RET
+  
+L_ _TRON
+  DW _IO1
+@DO_TRACE:
+  SKIPR DR
+  DB 0EBH,@dbg-@MAIN2
+  JMPS  _@X_TRACE
+  
+; VALUE_ @SV_EMIT,0
+ 
+L_ _@DBGW0
   TRACE_OFF
   call  _@JSR4TH
-  DW @EMIT,TO_+@SV_EMIT
-  DW _@BEMIT,TO_+@EMIT
-L_ _@DBGW     ; show stacks / address, code, nextcode & name  
-  DW    0,0   
-  DW @SV_EMIT,TO_+@EMIT
-  dw   _BKEY,_FROMF
+  ;DW @EMIT,TO_+@SV_EMIT
+  ;DW _@BEMIT,TO_+@EMIT
+_@DBGW1:        ; show stacks / address, code, nextcode & name  
+  DW    0       ;DW @SV_EMIT,TO_+@EMIT
+  dw   0;_FROMF   ;_BKEY,
+_@DBGW2:
   TRACE_ON
   and   al,0dfh
   cmp   al,'S'
   DROP_
   jne   @@2
+_@DBGW3:
   TRACE_OFF
 @@2:    
   POP   iP
   MOV   DR,[IP]	
   jmp   @MAIN2
 
-L_ _TROFF
-  DW    _JSR
-@NO_TRACE:
-  SKIPR DR
-  MOV   DR,[IP]
-  
-@X_TRACE:
-  XCHG  DR,PW @MAIN
-  RET
-  
-L_ _TRON
-  DW _JSR
-@DO_TRACE:
-  SKIPR DR
-  DB 0EBH,@dbg-@MAIN2
-  JMPS  @X_TRACE
-  
- VALUE_ @SV_EMIT,0
- 
-P_ _FROMF
-  JMP     IP
-  
   ENDIF
 
     

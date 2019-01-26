@@ -14,6 +14,7 @@
 
 : EXECUTE PUSH ;
 : (LIT @R+ ;
+=P FROMF ,"~c~"
 
 : RANGE>S 1+  
 : OVER- OVER 
