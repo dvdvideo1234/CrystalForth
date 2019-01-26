@@ -1,7 +1,7 @@
       
       \   INTERPRETTER 
       
-: TARG,< AT FINDEX 
+: TARG,< TO FINDEX 
 
   TEST? $11 STATE? BREAK
   
@@ -10,11 +10,11 @@
   TEST? $12 STATE? BREAK
   
       ">NUM ?;
-: @EXEC @  
+: @EXEC @?ODD EXECUTE ?;
 
   TEST? DUP `LASTW? ! $13 STATE? BREAK
   
-: EXECUTE (EXEC ;
+ CALL SKIP THEN (SET NOP ;
  
  
       \   COMPILER
@@ -24,15 +24,15 @@
 
   TEST?  $21 STATE? BREAK
 
-    vTARG CFND
+    TCFND
     
   TEST?  $22 STATE? BREAK
     
- IF @ DUP ODD
+ IF @?ODD
 
   TEST?  $23 STATE? BREAK
 
- EXECUTE ?; , ;THEN  vTARG FND
+ EXECUTE ?; , ;THEN  TFND
 
   TEST?  $23 STATE? BREAK
 

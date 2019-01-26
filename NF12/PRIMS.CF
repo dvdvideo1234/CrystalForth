@@ -1,6 +1,5 @@
 \ REDEFINITIONS ------------------------
 
-1 =: BYE          
 ' (DEF =: (JUMP   
 
 \ FORWARD DEFINITIONS ------------------------
@@ -12,6 +11,9 @@
 =! H
 
 \ HI LEVEL PRIMITIVES  ---------------------
+
+: EXECUTE PUSH ;
+: (LIT @R+ ;
 
 : RANGE>S 1+  
 : OVER- OVER 
@@ -32,8 +34,6 @@
 : ! PUSH     
 : (SET !R+ RDROP; 
 ; UNW 
-
-: (LIT @R+ ;
 
 : _THEN _HERE 
 : SWAP! PUSH SKIP 
@@ -61,6 +61,15 @@
 : EXIT RDROP; 
 ; UNW
 
+: @?ODD @
+: ?ODD DUP
+: ODD (@&; ,< 
+=H BYE 1 ,
+
+: TIMES PUSH XR
+: TIMES| (FOR CALL BEGIN J EXECUTE THEN (NEXT RELEASE<
+: 2EXIT RDROP RDROP; ; UNW
+
 \ VARIABLES ------------------
  
     0 VALUE; H
@@ -85,6 +94,7 @@ TO' H =: OBJ!
 
 $F800 CONST TBUF  
   32  CONST BL   
+\  0   VALUE (LTB
 
 ' T     DEFER vTARG      
 ' BEMIT VALUE @EMIT >, CALL 1+ (SET2 THEN ,<
@@ -116,22 +126,28 @@ VAL' @EMIT =: EMIT
 ;;
 
 : TOKEN?  |N??  
-: TOKEN BL 
-    CALL \ WORD
-: ?C@ DUP 
-: C@ @ 
-: W>B (@&; ,< 255 , >,
-    THEN
-: WORD 
-    CALL \ PARSE
-: S>TB! TBUF S>"! 
-;
-    THEN
-: PARSE  NOP; ETIB LTIB; (PARS 
-;
+: TOKEN BL  CALL \ WORD
+: ?C@ DUP : C@ @ : W>B (@&; ,< 255 , >,
+            THEN
+: WORD  CALL \ PARSE
+: S>TB! TBUF  : S>"! (IO ,< ,"^W~-~^Q~-~5~^@^Cy~GF~^E`"
+=H `_@MAKESTR  ,"^V~Q^Cq~}~&~s~$~|~Y^H~^M^V~^W~C~^P~"
+>,      THEN
+: PARSE  NOP; ETIB LTIB; : (LTB! NOP (IO ,< 
+,"^Q~^K~{~c~^L+y~<_u^Fs~.~t^BOA^I~"
+,"|^Bc~^Er~.~u^AO+|^B^I~<^Q~C~"
 
-: H>T H>STR   
-: >T T; MPUSH ; 
+
+: H>T H>STR   : >T T;  : MPUSH (IO ,< 
+,"^W~-~^Q~-~" ' `_@MAKESTR CALL, ,"@C~^P~"
+
+: TFND  vTARG : FND    (IO : `_@FIND ,<
+,"3I~^CA~^K~x~^M~}^D^J~^Mc~^QAV^K~s~s~&~"^"
+,"^W~uk~1~^B^AM^B^I~<^Q~C~"
+
+: TCFND vTARG : CFND (IO ,< ,""~~^G"  ' `_@FIND CALL, 
+,""~~^OC~"
+
       
 : N: DUP 
 : =, |, 
@@ -153,6 +169,4 @@ VAL' @EMIT =: EMIT
 
 \ FIXES ----------------------------
           
-' |N?? ' FND?   T!
-\ ' (VAR ' @BKEY  T!    
 ' (VAR ' @BEMIT T!  

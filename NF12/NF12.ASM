@@ -357,18 +357,13 @@ P_ _NOP
 @MAIN2:  
   INC   IP
   INC   IP
-@MAIN3:  
   test 	DRL,1		; ADDRESS ODD ?
   je    @nest		; NOT ODD ADDRESS - NEST THEN
   dec   DR			; MAKE ODD ADDRESS EVEN
   JMP   DR			; BRANCH TO PRIMITIVE
   
-P_ _EXEC
-	POPR_	DR
-  JMPS  @MAIN3
-  
 P_ _EX
-_@JSR4TH:
+_@TO4TH:
   R_TO  DR
 @NEST:				  ; (NEST
   to_r  IP			; PUSH OLD IP
@@ -489,10 +484,6 @@ P_ _0LESS
 @MAIN_1:  
   JMPS  @MAIN
   
-P_ _ODD
-  and   TOP,1
-  JMPS  @MAIN_1
- 
 ;----------------   NUMBERS	 ---------------------
 
 @@ADR   = BX
@@ -689,13 +680,6 @@ _@MPUSH1:
 ; searching
 ; -----------------------
 
- L_ _CFIND
-  DW  _IO      
-  INC     PB [BX]
-  CALL    _@FIND  
-  DEC     PB [BX]
-  RET
-  
 L_ _TFIND?
   DW _NOP
 L_ _FIND
@@ -722,6 +706,14 @@ _@FIND:
   XCHG    TOP,CX
   RET
 
+ L_ _CFIND
+  DW  _IO      
+  INC     PB [BX]
+_@CFIND:  
+  CALL    _@FIND  
+  DEC     PB [BX]
+  RET
+  
 L_ debugerr
 
   IF A386
