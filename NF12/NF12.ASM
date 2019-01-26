@@ -222,17 +222,15 @@ _@INI:
           
 ; IO COMMANDS vvvvvvvvvv  ---------------------------
 
-L_ _@BKEY
-  DW 0    ;_VAR
-L_ _BKEY
-  DW _DUP,_IO
-  CLR   AX
+
+P_ _AND@X
+  AND   TOP,[IP]
+  POP   IP
+  SKIPA
+  
+P_ _INT16
   INT   16H
-  ZERO?_ TOPL
-  JE  @RET
-@W_TO_B:  
-  CLR   TOPH
-@RET: RET
+  JMPS  @MAIN
 
 P_ _OSTR          ; (?S
   R_TO 	W			    ; TAKE TOP OF THE RETURN STACK
@@ -253,7 +251,7 @@ P_ _IO2  				  ; IF INPUT PARAMS = OUTPUT PARAMS
   MOV   W,[DSP]   ; IP = BX
 P_ _IO1  				  ; IF INPUT PARAMS = OUTPUT PARAMS 
   XCHG  W,IP
-  INT   3
+  ;INT   3
   CALL  W	 
 P_ _RET  
   JMPS  _@4TH
@@ -476,7 +474,7 @@ P_ _NEG
 P_ _ZEQ
   NEG   TOP
   SBB   TOP,TOP
-;P_ _NOT
+P_ _NOT
   JMPS  @NOT
    
 P_ _ULESS
@@ -484,111 +482,17 @@ P_ _ULESS
   DROP_
   SKIPR  CX
   
-P_ _ODD
-  SHR   TOP,1
-@ODD:  
-  SBB   TOP,TOP
-  JMPS  @MAIN
-  
 P_ _0LESS
   SHL   TOP,1
-  JMPS  @ODD
+@ODD:  
+  SBB   TOP,TOP
+@MAIN_1:  
+  JMPS  @MAIN
+  
+P_ _ODD
+  and   TOP,1
+  JMPS  @MAIN_1
  
-  
- L_ _MKSTR         ; S>"!
-  DW _IO
-	POPR_   DI
-	POPR_	  CX
-  MOV     CH,0
-  ADD     DI,CX
-  INC     DI          ; SPACE FOR LENGTH
-  MOV     PB [DI],'`' ; IMMEDIATE SIGN
-_@MAKESTR:  
-  XCHG    AX,SI
-  to_r    CX
-  ADD     SI,CX       ; AFTER NAME ADDRESS
-  STD                 ; BACKWARDS
-  CMPSB               ; PREPARE FOR DIRECTION
-  REP     MOVSB       ; NAME (MEMORY) MOVE
-  CLD
-  r_to    cx
-  MOV     [DI],CL     ; LENGTH OF THE STRING
-  XCHG    AX,SI
-  XCHG    AX,DI
-  RET
-
-  
-L_ _MPUSH ; TOP OF DICTIONARY   IN DI
-  DW _IO
-	POPR_   DI
-	POPR_	  CX
-_@MPUSH1:
-  CALL    _@MAKESTR
-_@MPUSH2:
-  INC     AX
-  RET
-
- L_ _PARS
-  DW  _IO 
-  XCHG    CX,AX
-  MOV     DI,BX    
-	JCXZ 	  @@SKIPX
-	SUB  	  DI,CX	   
-	CMP  	  AL,' '
-	JNE  	  @@SKIPX
-	REPE 	  SCASB
-	JE   	  @@SKIPX
-	DEC  	  DI
-	INC  	  CX
-@@SKIPX:
-  MOV     [DSP+2],DI    ;  START OF THE SOURCE
-	JCXZ  	@@WEX
-	REPNE 	SCASB
-	JNE   	@@WEX
-	DEC   	DI
-@@WEX:                  ; END OF THE SOURCE  IN DI
-	SUB     DI,[DSP+2]    ; LENGTH OF THE WORD
-  MOV     NXT,DI
-  XCHG    TOP,CX
-  RET
-	
-; -----------------------
-; searching
-; -----------------------
-
- L_ _CFIND
-  DW  _IO      
-  INC     PB [BX]
-  CALL    _@FIND  
-  DEC     PB [BX]
-  RET
-  
-L_ _TFIND?
-  DW _NOP
-L_ _FIND
-  DW  _IO
-_@FIND:  
-  CLR     CX 
-@FND?:  
-  ADD     AX,CX
-  MOV     DI,AX
-  LEA 	  DI,[DI+4]
-  mov 	  cl,PB [Di]
-  jcxz	  @DCX ;not_fnd
-  inc 	  cx
-  PUSH    SI
-  MOV     SI,BX
-  repe	  cmpsb
-  POP     SI
-  XCHG    AX,DI
-  jNZ 	  @FND?
-	MOV		  CL,2
-	ADD		  [DI+2],CX
-  MOV     NXT,DI
-@DCX: 
-  XCHG    TOP,CX
-  RET
-
 ;----------------   NUMBERS	 ---------------------
 
 @@ADR   = BX
@@ -720,6 +624,102 @@ L_ _ATOI
   XCHG    TOP,@@IND
   POP     DSP
   MOV     NXT,@@ACC
+@RET: 
+  RET
+
+  
+ L_ _MKSTR         ; S>"!
+  DW _IO
+	POPR_   DI
+	POPR_	  CX
+  MOV     CH,0
+  ADD     DI,CX
+  INC     DI          ; SPACE FOR LENGTH
+  MOV     PB [DI],'`' ; IMMEDIATE SIGN
+_@MAKESTR:  
+  XCHG    AX,SI
+  to_r    CX
+  ADD     SI,CX       ; AFTER NAME ADDRESS
+  STD                 ; BACKWARDS
+  CMPSB               ; PREPARE FOR DIRECTION
+  REP     MOVSB       ; NAME (MEMORY) MOVE
+  CLD
+  r_to    cx
+  MOV     [DI],CL     ; LENGTH OF THE STRING
+  XCHG    AX,SI
+  XCHG    AX,DI
+  RET
+
+  
+L_ _MPUSH ; TOP OF DICTIONARY   IN DI
+  DW _IO
+	POPR_   DI
+	POPR_	  CX
+_@MPUSH1:
+  CALL    _@MAKESTR
+  ;_@MPUSH2:
+  INC     AX
+  RET
+
+ L_ _PARS
+  DW  _IO 
+  XCHG    CX,AX
+  MOV     DI,BX    
+	JCXZ 	  @@SKIPX
+	SUB  	  DI,CX	   
+	CMP  	  AL,' '
+	JNE  	  @@SKIPX
+	REPE 	  SCASB
+	JE   	  @@SKIPX
+	DEC  	  DI
+	INC  	  CX
+@@SKIPX:
+  MOV     [DSP+2],DI    ;  START OF THE SOURCE
+	JCXZ  	@@WEX
+	REPNE 	SCASB
+	JNE   	@@WEX
+	DEC   	DI
+@@WEX:                  ; END OF THE SOURCE  IN DI
+	SUB     DI,[DSP+2]    ; LENGTH OF THE WORD
+  MOV     NXT,DI
+  XCHG    TOP,CX
+  RET
+	
+; -----------------------
+; searching
+; -----------------------
+
+ L_ _CFIND
+  DW  _IO      
+  INC     PB [BX]
+  CALL    _@FIND  
+  DEC     PB [BX]
+  RET
+  
+L_ _TFIND?
+  DW _NOP
+L_ _FIND
+  DW  _IO
+_@FIND:  
+  CLR     CX 
+@FND?:  
+  ADD     AX,CX
+  MOV     DI,AX
+  LEA 	  DI,[DI+4]
+  mov 	  cl,PB [Di]
+  jcxz	  @DCX ;not_fnd
+  inc 	  cx
+  PUSH    SI
+  MOV     SI,BX
+  repe	  cmpsb
+  POP     SI
+  XCHG    AX,DI
+  jNZ 	  @FND?
+	MOV		  CL,2
+	ADD		  [DI+2],CX
+  MOV     NXT,DI
+@DCX: 
+  XCHG    TOP,CX
   RET
 
 L_ debugerr

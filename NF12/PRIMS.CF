@@ -1,7 +1,7 @@
 \ REDEFINITIONS ------------------------
 
 1 =: BYE          
-' (DEF =: (JUMP     
+' (DEF =: (JUMP   
 
 \ FORWARD DEFINITIONS ------------------------
 
@@ -120,10 +120,7 @@ VAL' @EMIT =: EMIT
     CALL \ WORD
 : ?C@ DUP 
 : C@ @ 
-: W>B 255 
-: AND NAND 
-: NOT DUP NAND 
-; 
+: W>B (@&; ,< 255 , >,
     THEN
 : WORD 
     CALL \ PARSE
@@ -133,6 +130,22 @@ VAL' @EMIT =: EMIT
 : PARSE  NOP; ETIB LTIB; (PARS 
 ;
 
+: H>T H>STR   
+: >T T; MPUSH ; 
+      
+: N: DUP 
+: =, |, 
+: =H _HERE 
+: =: 0 
+: =F TOKEN? 
+
+  TEST? DUP ID. 0 STATE? BREAK
+  
+: @SAME? NOP
+: (=:  ?C@ 1+ T; MPUSH
+ TWICE
+: !-  2- !+ 2-; ; UNW
+
 : CSTR ?C@ U1+ ;
 : ">NUMC NOP (|LIT,, 
 : ">NUM NOP CSTR (NUM  ?? ;
@@ -141,5 +154,5 @@ VAL' @EMIT =: EMIT
 \ FIXES ----------------------------
           
 ' |N?? ' FND?   T!
-' (VAR ' @BKEY  T!    
+\ ' (VAR ' @BKEY  T!    
 ' (VAR ' @BEMIT T!  
