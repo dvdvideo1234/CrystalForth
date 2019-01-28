@@ -12,6 +12,8 @@ APT-  @R+     =: @R+`
 APT-  !R+     =: !R+`
 APT-  XR      =: XR`
 APT-  XA      =: XA`
+APT-  @EXEC   =: @EXEC`      
+APT-  EXECUTE =: EXECUTE`
 APT-  (@&;    =: (@&;`
 APT-  RDROP;  =: RDROP;`
 APT2  (;         ;;`
@@ -42,9 +44,9 @@ APT2  _HERE   BEGIN`
 '  BEGIN`     =: HERE
 
 
-META INIZ   @INIT     \ STARTUP
-META `INTER FINDEX    \ FORTH STATE
-HERE    VAL' H T!     \ FORTH HEAP
+META INIZ     @INIT     \ STARTUP
+META `INTERP  FINDEX    \ FORTH STATE
+HERE    VAL' H T!       \ FORTH HEAP
 
       \   WORD THE ONE
 12 , ' =: , 0 , "=:" -1 ALLOT \ HERE T>R 16 - 16 DUMP

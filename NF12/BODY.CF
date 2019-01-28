@@ -1,71 +1,33 @@
-      
+
       \   INTERPRETTER 
       
-: TARG,< TO FINDEX 
+: TARG,< TO FINDEX : `INTERP
+  \ '3 EMIT
+  NFND 
+  \ '4 EMIT
+  ,< 0 WARY    []TO >,
+ ">NUM ">NUMC @EXEC @, ,< 
 
-  TEST? $11 STATE? BREAK
-  
-: `INTER T FND
-
-  TEST? $12 STATE? BREAK
-  
-      ">NUM ?;
-: @EXEC @?ODD EXECUTE ?;
-
-  TEST? DUP `LASTW? ! $13 STATE? BREAK
-  
- CALL SKIP THEN (SET NOP ;
- 
  
       \   COMPILER
       
-: TARG: NOP =H      
-: TARG>, TO FINDEX
+: TARG: NOP =H : TARG>, TO FINDEX vTARG CFND []TO ;
+     
 
-  TEST?  $21 STATE? BREAK
+      \ FUNCTION EVAL 
 
-    TCFND
-    
-  TEST?  $22 STATE? BREAK
-    
- IF @?ODD
+: (MAC (D#0  : SEVAL CSTR  : EVAL NOP 
+: @EVAL 
+  \ '0 EMIT BREAK
+  TOKEN DROP; ?; 
+  \ 'F EMIT BREAK
+  FINDEX 
+  \ '1 EMIT
+  @EXEC 
+  \ '2 EMIT
+  RECURSE ;
 
-  TEST?  $23 STATE? BREAK
-
- EXECUTE ?; , ;THEN  TFND
-
-  TEST?  $23 STATE? BREAK
-
- ">NUMC ?;
-
-  TEST?  $24 STATE? BREAK
-
- @, ;;
-\ : TARG;  NOP TARG,<  : ,; (@, ;;
-
-      \ LAST WORDS 
-
-
-: (MAC (D#0  
-: SEVAL CSTR 
-: EVAL NOP 
-
-  TEST? CR ."EVAL" $30 STATE? BREAK
-  
-: @EVAL TOKEN
-
-  TEST? $31 STATE? BREAK
-  
-      DROP; ?;
       
-  TEST? DUP ID. $32 STATE? BREAK
-  
-      FINDEX
-      
-  TEST? $33 STATE? BREAK
-  
- RECURSE ;
-
 : INIZ H>T
 
   TEST? CR ."TEST" $41 STATE? BREAK
@@ -83,5 +45,3 @@
   TEST? $43 STATE? BREAK
   
         EVAL vOK  `QUIT ;
-
-\ =P GAGA

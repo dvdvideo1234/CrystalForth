@@ -300,8 +300,6 @@ P_ _JUMP    		; (JUMP
 
 ; DATA TRANSFER  COMMANDS -----------------------------------
 
-L_ _@BEMIT
-  DW 0    ;_VAR
 P_ _BEMIT
   MOV     AH,0EH
   INT     10H
@@ -340,12 +338,28 @@ P_ _XA				  ; XA
   
 ; MAIN  LOOP  ---------------------------------------
 
+P_ _LARY
+  SHL   TOP,1
+P_ _WARY
+  SHL   TOP,1
+P_ _BARY
+  ADD   TOP,IP
+  JMPS  _@4TH
+
+p_ _EXEC@
+  XCHG  TOP,W
+  MOV   TOP,[W]
+P_ _EXEC
+  POPR_ DR
+  JMPS  @MAIN3
+  
 P_ _2px
   INC   TOP
   R_TO	ip			 
 P_ _1P
   INC   TOP
   SKIPA
+  
 P_ _RDRPX
   R_TO  DR
 _@4TH:
@@ -357,6 +371,7 @@ P_ _NOP
 @MAIN2:  
   INC   IP
   INC   IP
+@MAIN3:  
   test 	DRL,1		; ADDRESS ODD ?
   je    @nest		; NOT ODD ADDRESS - NEST THEN
   dec   DR			; MAKE ODD ADDRESS EVEN
@@ -676,15 +691,23 @@ L_ _ATOI
 ;  XCHG    TOP,CX
 ;  RET
 ;	
-;; -----------------------
-;; searching
-;; -----------------------
+; -----------------------
+; searching
+; -----------------------
 ;
 ;L_ _TFIND?
 ;  DW _NOP
 ;L_ _FIND
 ;  DW  _IO
-;_@FIND:  
+;_@FIND: 
+;  call    _@FIND1
+;  PUSH    SI
+;  MOV     SI,BX
+;  repe	  cmpsb
+;  POP     SI
+;  ret
+;_@FIND1: 
+;  pop     dx
 ;  CLR     CX 
 ;@FND?:  
 ;  ADD     AX,CX
@@ -693,30 +716,46 @@ L_ _ATOI
 ;  mov 	  cl,PB [Di]
 ;  jcxz	  @DCX ;not_fnd
 ;  inc 	  cx
-;  PUSH    SI
-;  MOV     SI,BX
-;  repe	  cmpsb
-;  POP     SI
+;  call    dx
 ;  XCHG    AX,DI
 ;  jNZ 	  @FND?
 ;	MOV		  CL,2
 ;	ADD		  [DI+2],CX
 ;  MOV     NXT,DI
 ;@DCX: 
-;  XCHG    TOP,CX
+;  mov    TOP,CX
 ;  RET
 ;
 ; L_ _CFIND
 ;  DW  _IO      
+;  PUSH    TOP
 ;  INC     PB [BX]
-;_@CFIND:  
+;_@CFIND1:  
 ;  CALL    _@FIND  
 ;  DEC     PB [BX]
+;  POP     Dx
+;  Jcxz    _@CFIND2    ; not found` search once more 
+;  mov     di,[di]
+;  shr     di,1
+;  jc      _@CFIND3    ; primitive found -> compile
+;  ret                 ; else execute
+;_@CFIND2: 
+;  XCHG    TOP,Dx
+;  CALL    _@FIND  
+;_@CFIND3:  
+;  INC     TOP         ; compile
 ;  RET
-  
+; 
 ;P_ _FROMF
 ;  JMP     IP
-  
+
+; R  NOFND  NOPRIM  PRIM
+;-------------------------
+; I  NUM    @EXEC   @EXEC
+; C  NUM,   @,      @,
+; C`  --    @EXEC   @,
+;    NUM NUM, @EXEC @,
+
 L_ _debugerr
 
   IF A386

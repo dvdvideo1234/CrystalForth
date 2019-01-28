@@ -2,17 +2,17 @@
 : AT' |2- : TO' |2- : ' TOKEN? T : LOCATE FND? @ ; 
 : (R#, @R+ , ; 
 : (GO; @R+ XR PUSH ; 
-: |DROP EX DROPX ; -2 ALLOT
+: |DROP EX DROPX ; UNW
 : UNW |DROP 
 : @H- |H 
-: @- 2- DUP @ ; 
+: @- 2- @+ 2-; ; UNW 
 
-: (VAR3  @R+ DROP : (VAR2  @R+ DROP : (VAR POP; ; UNW
+: (VAR3  @R+ DROP : (VAR2  @R+ DROP POP; ; UNW
 : QUAN (R#, (VAR3 : VALUE (R#, (SET2 : CONST =H ,ER (CON , ,<
 : VQUAN (R#, (VAR3 : VECTOR (R#, (SET2 
 : DEFER =H  ,ER (JUMP , ,<  \ FURTHER
 
-: _TWICE |,  : HP _HERE 2+ ; 
+: _TWICE |,  : HP _HERE 2+; ; UNW
 : _IF   ,ER (IF   _MARKP ,<
 : _IF-  ,ER (IF-  _MARKP ,< 
 : DXEP| DUP : XEP| XR EXECUTE POP; ; UNW

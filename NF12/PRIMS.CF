@@ -1,20 +1,30 @@
 \ REDEFINITIONS ------------------------
 
-' (DEF =: (JUMP   
+' (DEF  =: (JUMP   
+1       =: BYE
 
 \ FORWARD DEFINITIONS ------------------------
 
-=! (CON   
+=! |,   
 =! (PNT!    
-=! _HERE  
-=! H;    
-=! H
 
 \ HI LEVEL PRIMITIVES  ---------------------
 
-: EXECUTE PUSH ;
+: (D#0 POP XR 
+: NOP; 
+;  
+   
+: (@, (D#0  
+: @, |,  
+: @ PUSH  
+: (CON @R+ 
+: EXIT RDROP; 
+; UNW
+
 : (LIT @R+ ;
-=P FROMF ,"~c~"
+\ =P 4TH>  ,"~c~"  \ FROMF
+\ =P 4TH>; ,"^K~K~[~a~^P~" \ _RET4TH
+\ =P _RET4TH ,"^K~K~[Q^K~^OC~^P~"
 
 : RANGE>S 1+  
 : OVER- OVER 
@@ -23,10 +33,8 @@
 : DROP; DROPX 
 ; UNW
 
-: (D#0 POP XR 
-: NOP; 
-;  
-   
+\ : (WARY DUP + : (BARY POP + ;
+
 : (D#1 POP XR 
 : 2+ 2+; 
 ; UNW
@@ -36,36 +44,11 @@
 : (SET !R+ RDROP; 
 ; UNW 
 
-: _THEN _HERE 
-: SWAP! PUSH SKIP 
-: (PNT! (D#1 XR !R+ RDROP; 
-; UNW         
-
 : |2- EX 
 : 2- 2-; 
 ; UNW
 
-: |, EX  
-: , H;  
-: !+ PUSH !R+  
-: (VAR POP; 
-; UNW
-
-: _MARKP  H   
-: Z, |, ,<
-  0  CONST 0
-
-: (@, (D#0  
-: @, |,  
-: @ PUSH  
-: (CON @R+ 
-: EXIT RDROP; 
-; UNW
-
-: @?ODD @
-: ?ODD DUP
-: ODD (@&; ,< 
-=H BYE 1 ,
+: |DROP EX DROPX ; UNW
 
 : TIMES PUSH XR
 : TIMES| (FOR CALL BEGIN J EXECUTE THEN (NEXT RELEASE<
@@ -73,9 +56,9 @@
 
 \ VARIABLES ------------------
  
-    0 VALUE; H
-    0 VALUE MESSAGE
-$F800 VALUE; T
+    0 VALUE;  H
+    0 VALUE   MESSAGE
+$F800 VALUE;  T
 
 : ORG! H - ,<    0 VALUE  HOFS  
 : T>R HOFS - ; 
@@ -85,10 +68,6 @@ TO' H =: OBJ!
 ' NOP;  DEFER vERR
 ' NOP;  DEFER vOK
 ' NOP;  DEFER READLN
- 
-   >, (PNT! ,<   0  DEFER @INIT
-' @INIT ' _@INI T!  
-   >, (PNT! ,<   0  DEFER FINDEX
  
 18 5 - 1K U*        VALUE; LTIB 
 18 1K U* $100 +     VALUE ETIB
@@ -102,11 +81,28 @@ $F800 CONST TBUF
 0 CONST CNTC 
 VAL' @EMIT =: EMIT
 
-   
+   >, (PNT! ,<   0  DEFER @INIT
+' @INIT ' _@INI T!  
+   >, (PNT! ,<   0  DEFER FINDEX   
 
 \ COMPILER BASIS ------------------------
 
+: _MARKP  H   
+: Z, |, ,<
+  0  CONST 0
 
+: _THEN _HERE 
+: SWAP! PUSH SKIP 
+: (PNT! (D#1 XR !R+ RDROP; 
+; UNW         
+
+: |, EX  
+: , H;  
+: !+ PUSH !R+  
+: (VAR POP; 
+; UNW
+
+: ,; (@, ;;
 : H>STR H 
 : STR PUSH @R+ XR POP; 
 ; UNW 
@@ -142,14 +138,10 @@ VAL' @EMIT =: EMIT
 : H>T H>STR   : >T T;  : MPUSH (IO ,< 
 ,"^W~-~^Q~-~" ' `_@MAKESTR CALL, ,"@C~^P~"
 
-: TFND  vTARG : FND    (IO : `_@FIND ,<
-,"3I~^CA~^K~x~^M~}^D^J~^Mc~^QAV^K~s~s~&~"^"
-,"^W~uk~1~^B^AM^B^I~<^Q~C~"
-
-: TCFND vTARG : CFND (IO ,< ,""~~^G"  ' `_@FIND CALL, 
-,""~~^OC~"
-
-      
+: CSTR ?C@ U1+ ;
+: ">NUMC (|LIT,, 
+: ">NUM CSTR (NUM  ?? ;
+ 
 : N: DUP 
 : =, |, 
 : =H _HERE 
@@ -163,11 +155,12 @@ VAL' @EMIT =: EMIT
  TWICE
 : !-  2- !+ 2-; ; UNW
 
-: CSTR ?C@ U1+ ;
-: ">NUMC NOP (|LIT,, 
-: ">NUM NOP CSTR (NUM  ?? ;
- 
+\ : AT' |2- : TO' |2- : ' |@ 
+: WHERE |N??
+: NFND T  : FND (IO : `_@FIND ,< ,"h~^G^@V^K~s~s~&~"^C~"
+,"Z3I~^CA~^K~x~^M~}^D^J~^Mc~^MA~R~^W~uo~"
+,"1~^B^AM^B^I~<^K~A~C~"
 
-\ FIXES ----------------------------
-          
-' (VAR ' @BEMIT T!  
+: CFND (IO ,<  ,"P"~~^G"  ' `_@FIND CALL,
+,""~~^OZc~^G^K~=Q~o~r^EC~^R~" ' `_@FIND CALL, ,"@C~"
+
