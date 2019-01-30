@@ -282,7 +282,7 @@ P_  _BRK
   JMPS  @MAIN
 
 @dbg:  
-  jmp   _debugerr
+  jmp   @RET
     
 P_ _NEXT
   POP   W
@@ -494,9 +494,7 @@ P_ _ULESS
   
 P_ _0LESS
   SHL   TOP,1
-@ODD:  
   SBB   TOP,TOP
-@MAIN_1:  
   JMPS  @MAIN
   
 ;----------------   NUMBERS	 ---------------------
@@ -756,7 +754,7 @@ L_ _ATOI
 ; C`  --    @EXEC   @,
 ;    NUM NUM, @EXEC @,
 
-L_ _debugerr
+; L_ _debugerr
 
   IF A386
   
@@ -801,7 +799,6 @@ _@DBGW3:
   jmp   @MAIN2
 
   ENDIF
-
     
 L_ _EndMem
 

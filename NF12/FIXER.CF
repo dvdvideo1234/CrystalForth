@@ -1,5 +1,5 @@
-APT-  (?S     =: (?S`  
-APT-  (IO     =: (IO`
+APT-  (?S     =: ("R+`  
+APT-  (IO     =: IO;`
 APT-  (IF     =: (IF`
 APT-  SKIP    =: SKIP`
 APT-  (IF-    =: (IF-`
@@ -13,17 +13,17 @@ APT-  !R+     =: !R+`
 APT-  XR      =: XR`
 APT-  XA      =: XA`
 APT-  @EXEC   =: @EXEC`      
-APT-  EXECUTE =: EXECUTE`
+APT-  EXECUTE =: EXEC`
 APT-  (@&;    =: (@&;`
-APT-  RDROP;  =: RDROP;`
+APT-  RDROP;  =: R>.;`
 APT2  (;         ;;`
 APT-  EX      =: EX`
 APT-  2+;     =: 2+;`
-APT-  DROPX   =: DROP;`
-APT-  PUSH    =: PUSH`
-APT-  POP     =: POP`
-APT-  POP;    =: POP;`
-APT-  RDROP   =: RDROP`
+APT-  DROPX   =: .;`
+APT-  PUSH    =: >R`
+APT-  POP     =: R>`
+APT-  POP;    =: R>;`
+APT-  RDROP   =: R>.`
 
  
 APT2  _THEN   THEN` 
@@ -42,10 +42,11 @@ APT2  _MARKP     CALL`
 '     CALL`   =: MARK>`
 APT2  _HERE   BEGIN`
 '  BEGIN`     =: HERE
+APT2  TARG;   ;`
 
 
 META INIZ     @INIT     \ STARTUP
-META `INTERP  FINDEX    \ FORTH STATE
+META `INTERP  LOCATE    \ FORTH STATE
 HERE    VAL' H T!       \ FORTH HEAP
 
       \   WORD THE ONE

@@ -1,13 +1,41 @@
-'2 EMIT   32 EMIT
+: ;, (@, ;; ; 
+: AT' |2- 
+: TO' |2- 
+: ' TOKEN? T 
+: FIND WHERE? @ ;;
+; 
+' ;,  ' ;` !
+
+: TO TO' EXEC ; 
+: TO` TO' , ;
+: AT AT' EXEC ; 
+: AT` AT' , ;
+
+: (R#, @R+ , ; 
+
+: (GO| @R+ XR >R ; 
+
+: ?>R| DUP 
+: >R| XR EXEC R>; 
+; H 2- TO H
+
+: UNW |DROP 
+: @H- |H 
+: @- 2- 
+: ?@ ?>R| @  
+; 
+
+
+CR : GAGA 'S EMIT ; CR
+GAGA SPACE '! EMIT READLN DROP DROP CR
+
+32 EMIT
+'3 EMIT   32 EMIT
 'Z EMIT  
 BYE
+
 '1 EMIT  ' H 2 - =: OBJ!
 32 EMIT
-T 5 + C@ EMIT
-T 6 + C@ EMIT
-T 7 + C@ EMIT
-T 8 + C@ EMIT
-
 '2 EMIT   32 EMIT
 'Z EMIT  
 =H GAGA ' (LIT @ , 'G , ' ;;` @ ,

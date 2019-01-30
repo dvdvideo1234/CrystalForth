@@ -7,10 +7,12 @@
 
 =! |,   
 =! (PNT!    
+TEST? =! ID.
+\ =! GAGA
 
 \ HI LEVEL PRIMITIVES  ---------------------
 
-: (D#0 POP XR 
+: (D#0 POP XR       \ DOES0 PRIMITIVE
 : NOP; 
 ;  
    
@@ -83,7 +85,7 @@ VAL' @EMIT =: EMIT
 
    >, (PNT! ,<   0  DEFER @INIT
 ' @INIT ' _@INI T!  
-   >, (PNT! ,<   0  DEFER FINDEX   
+   >, (PNT! ,<   0  DEFER LOCATE   
 
 \ COMPILER BASIS ------------------------
 
@@ -102,7 +104,8 @@ VAL' @EMIT =: EMIT
 : (VAR POP; 
 ; UNW
 
-: ,; (@, ;;
+\ : ,; (@, ;;
+
 : H>STR H 
 : STR PUSH @R+ XR POP; 
 ; UNW 
@@ -117,6 +120,7 @@ VAL' @EMIT =: EMIT
 ;;
 
 : ((A"  (?S TO MESSAGE  0;  ABORT ; UNW 
+
 : |N?? EX  
 : N??  0= 
 : ??  !"?" 
@@ -124,18 +128,27 @@ VAL' @EMIT =: EMIT
 
 : TOKEN?  |N??  
 : TOKEN BL  CALL \ WORD
-: ?C@ DUP : C@ @ : W>B (@&; ,< 255 , >,
+
+  NOP \ TEST? DUP ID.
+  
+: ?C@ DUP 
+: C@ @ 
+: W>B (@&; ,< 255 , >,
             THEN
 : WORD  CALL \ PARSE
-: S>TB! TBUF  : S>"! (IO ,< ,"^W~-~^Q~-~5~^@^Cy~GF~^E`"
+: S>TB! TBUF  
+: S>"! (IO ,< ,"^W~-~^Q~-~5~^@^Cy~GF~^E`"
 =H `_@MAKESTR  ,"^V~Q^Cq~}~&~s~$~|~Y^H~^M^V~^W~C~^P~"
 >,      THEN
-: PARSE  NOP; ETIB LTIB; : (LTB! NOP (IO ,< 
+: PARSE  NOP ETIB LTIB; 
+: (LTB! NOP (IO ,< 
 ,"^Q~^K~{~c~^L+y~<_u^Fs~.~t^BOA^I~"
 ,"|^Bc~^Er~.~u^AO+|^B^I~<^Q~C~"
 
 
-: H>T H>STR   : >T T;  : MPUSH (IO ,< 
+: H>T H>STR   
+: >T T;  
+: MPUSH (IO ,< 
 ,"^W~-~^Q~-~" ' `_@MAKESTR CALL, ,"@C~^P~"
 
 : CSTR ?C@ U1+ ;
@@ -147,20 +160,22 @@ VAL' @EMIT =: EMIT
 : =H _HERE 
 : =: 0 
 : =F TOKEN? 
-
-  TEST? DUP ID. 0 STATE? BREAK
-  
 : @SAME? NOP
-: (=:  ?C@ 1+ T; MPUSH
- TWICE
-: !-  2- !+ 2-; ; UNW
+: (=:  ?C@ 1+ T; MPUSH TWICE
+: !-  2- 
+: ?! !+ 2-; ; UNW
 
-\ : AT' |2- : TO' |2- : ' |@ 
-: WHERE |N??
-: NFND T  : FND (IO : `_@FIND ,< ,"h~^G^@V^K~s~s~&~"^C~"
+: WHERE? |N??
+: FND (IO 
+: `_@FIND ,< ,"h~^G^@V^K~s~s~&~"^C~" HERE =: `_@FIND?
 ,"Z3I~^CA~^K~x~^M~}^D^J~^Mc~^MA~R~^W~uo~"
 ,"1~^B^AM^B^I~<^K~A~C~"
 
 : CFND (IO ,<  ,"P"~~^G"  ' `_@FIND CALL,
 ,""~~^OZc~^G^K~=Q~o~r^EC~^R~" ' `_@FIND CALL, ,"@C~"
 
+\ FIXES -----------------------
+
+APT-  H;    =: |H 
+APT-  T;    =: |T 
+APT-  LTIB; =: |LTIB

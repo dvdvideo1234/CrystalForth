@@ -1,54 +1,20 @@
-\ : ,ER (D#0 STR , @ PUSH ;   \ : AT' |2- : TO' |2- ' ; 
-\ : |2- EX : 2- (@+ ,< -2 ,
-\ : UNW |DROP : @H- |H : @- PUSH @R- POP; ; UNW
-\ : (#, @R+ , ; : (GO; @R+ XR PUSH ;
-\ : (VAR3 @R+ DROP : (VAR2 @R+ DROP POP; ; UNW
-\ : QUAN  (#, (VAR3 : VALUE  (#, (SET2 : CONST =H ,ER (CON  , ,<
-\ : VQUAN (#, (VAR3 : VECTOR (#, (SET2 : DEFER =H ,ER (JUMP , ,<
-\ 0 VALUE HOFS  : T>R HOFS - ; : 2DUP OVER OVER ;
-\ : _TWICE |,  : HP 2+  :; 
-\ : _HERE H : R>T HOFS + ; ' _HERE ' _THEN T!
-\ : _IF   ,ER (IF   _MARKP ,<
-\ : _IF-  ,ER (IF-  _MARKP ,< 
-\ : ?XEP| DUP : XEP| XR EXECUTE POP; ; UNW
+
+\ DEBUGERR
 
 2ALIGNED
-0 VALUE `@SV_EMIT
+=P 4TH>  ,"~c~"  \ FROMF
 
-HERE ' (NEXT 1- - ' (NEXT 3 - T!
- 
-,"h~-^@h~"          \ TRACE_OFF / call _@JSR4TH
-' EX 1- HERE 2+ - ,
->, TO EMIT TO `@SV_EMIT @BEMIT AT EMIT ,<
-=H @DBGW
-,"^@^@^@^@"         \ DW    0,0
->, `@SV_EMIT AT EMIT BKEY 4TH> ,<
-,"h~^]^@"           \ TRACE_ON
-,"$"_~"             \ and   al,0dfh
-,"<S"               \ cmp   al,'S'
-,"-~u^C"            \ DROP_ jne   @@2
-,"h~^I^@"           \ TRACE_OFF   @@2:
-,"[^K~^O"           \ POP   iP /  MOV   DR,[IP]
-,"i~"               \ jmp   @MAIN2 / NOP "s~}~^P~" 
-' NOP 1+ HERE 2+ - ,
+: TROFF (IO1 ,< ,"9~^K~^O"  HERE =: `@X_TRACE  
+,"^G~^N"   ' NOP 1- ,  ,"C~"
 
-2ALIGNED
-: TROFF (IO1 ,<  \ ,"^]^B"  \ DW    _JSR
-,"9~^K~^O"          \ SKIPR DR /  MOV   DR,[IP]   @X_TRACE:
-,"^G~^N"            \ XCHG  DR /,"^P~^B" \ PW @MAIN
-' NOP 1- ,
-,"C~"               \ RET
+: TRON   (IO1 ,<  ,"9~k~E~k~" 
+' `@X_TRACE HERE 1+ - C, ,"^P~"
 
-2ALIGNED
-: TRON  (IO1 ,<  \ ,"^]^B"  \ DW    _JSR
-,"9~k~"             \ SKIPR DR / DB 0EBH,@dbg-@MAIN2
-' (NEXT 4 - ' NOP 1+ - C,     \ ,"!~"
-,"k~t~^P~"          \ JMPS @X_TRACE / NOP
+: @DBG  ,< VAL' TROFF CALL, ' _@JSR4TH CALL, 
+: @DBG1   NOP 4TH> ,<   VAL' TRON  CALL,
+,"$"_~<S-~u^C"  VAL' TROFF CALL, ,"[^K~^O" ' NOP 1+ $E9 ,R
+,"^P~"
 
-' TROFF 2+ ' ABORT 8 + - ' ABORT 6 + T!
-   
-\ APT2  _IF     IF`
-\ APT2  _IF-    IF-`
-\ APT2  _TWICE  TWICE`
-\ APT2  _HERE   BEGIN`
-\ '  BEGIN`     =: HERE
+' TROFF 2+ ' ABORT 8 + - 
+' ABORT 6 + T!
+
