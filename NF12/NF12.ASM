@@ -225,13 +225,8 @@ _@INI:
 
 P_ _AND@X
   AND   TOP,[IP]
-  POP   IP
-  SKIPA
+  JMPS  _@4TH  
   
-P_ _INT16
-  INT   16H
-  JMPS  @MAIN
-
 P_ _OSTR          ; (?S
   R_TO 	W			    ; TAKE TOP OF THE RETURN STACK
   MOV   DRL,[W]	  ; USE RETURN TOP AS DATA ADDRESS

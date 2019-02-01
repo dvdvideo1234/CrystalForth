@@ -1,4 +1,3 @@
-
 2ALIGNED
 : WFIND (IO ,< ,"h~^D^@;]|~C~" ' `_@FIND? $E9 ,R
 
@@ -81,7 +80,9 @@ META CR vOK \ vOK FIXED
 : BLK>SCR BLK ,< 0 VALUE SCR
 
 ' BEMIT VALUE StdEmit
-: BKEY 0 (KBDI DUP W>B 0; W>B ;
+
+: WAITKEY |DROP 
+: BKEY [ DUP W>B 0; W>B ;; ] 0 (IO ,< ,"M~^VC~^P~"
 ' BKEY  VALUE StdKey
 
 :VALUE KEY  ;

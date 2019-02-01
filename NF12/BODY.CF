@@ -1,7 +1,46 @@
+: TOKEN?  |N??  
+: TOKEN BL  CALL \ WORD
+
+  NOP  TEST? DUP ID.  WAITKEY
+  
+: ?C@ DUP 
+: C@ @ 
+: W>B (@&; ,< 255 , >,
+            THEN
+: WORD  CALL \ PARSE
+: S>TB! TBUF  
+: S>"! (IO ,< ,"^W~-~^Q~-~5~^@^Cy~GF~^E`"
+=H `_@MAKESTR  ,"^V~Q^Cq~}~&~s~$~|~Y^H~^M^V~^W~C~^P~"
+>,      THEN
+: PARSE  NOP ETIB |LTIB
+: (LTB! NOP (IO ,< 
+,"^Q~^K~{~c~^L+y~<_u^Fs~.~t^BOA^I~"
+,"|^Bc~^Er~.~u^AO+|^B^I~<^Q~C~"
+
+
+: H>T H>STR   
+: >T |T  
+: MPUSH (IO ,< 
+,"^W~-~^Q~-~" ' `_@MAKESTR CALL, ,"@C~^P~"
+
+: CSTR ?C@ U1+ ;
+: ">NUMC (|LIT,, 
+: ">NUM CSTR (NUM  ?? ;
+ 
+: N: DUP 
+: =, |, 
+: =H _HERE 
+: =: 0            \ MAIN ENTRY MAKER
+: =F TOKEN? 
+: @SAME? NOP
+: (=:  ?C@ 1+ |T MPUSH TWICE
+: !-  2- 
+: ?! !+ 2-; ; UNW
+
 
       \   INTERPRETTER 
       
-: TARG; NOP
+: TARG; ;,
 : TARG,< TO LOCATE 
 : `INTERP T FND  ,< 
 0 WARY []TO >,  ">NUM ">NUMC @EXEC @, ,< 
@@ -11,8 +50,7 @@
       
 : TARG: NOP =H 
 : TARG>, TO LOCATE 
-    TEST? DUP ID. KEY DROP 
-
+   \ TEST? DUP ID. KEY DROP 
 vTARG CFND []TO ;
      
 

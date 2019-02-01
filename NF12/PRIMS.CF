@@ -5,10 +5,8 @@
 
 \ FORWARD DEFINITIONS ------------------------
 
-=! |,   
-=! (PNT!    
-TEST? =! ID.
-\ =! GAGA
+      =! |,   =! (PNT!    
+TEST? =! ID.  =! TOKEN?   =! =H   =! CSTR  =! W>B
 
 \ HI LEVEL PRIMITIVES  ---------------------
 
@@ -50,17 +48,13 @@ TEST? =! ID.
 : 2- 2-; 
 ; UNW
 
-: |DROP EX DROPX ; UNW
-
-: TIMES PUSH XR
-: TIMES| (FOR CALL BEGIN J EXECUTE THEN (NEXT RELEASE<
-: 2EXIT RDROP RDROP; ; UNW
-
 \ VARIABLES ------------------
  
     0 VALUE;  H
+APT- H;   =:  |H      
     0 VALUE   MESSAGE
 $F800 VALUE;  T
+APT- T;   =:  |T      
 
 : ORG! H - ,<    0 VALUE  HOFS  
 : T>R HOFS - ; 
@@ -72,6 +66,7 @@ TO' H =: OBJ!
 ' NOP;  DEFER READLN
  
 18 5 - 1K U*        VALUE; LTIB 
+APT- LTIB;   =:  |LTIB      
 18 1K U* $100 +     VALUE ETIB
 
 $F800 CONST TBUF  
@@ -99,12 +94,12 @@ VAL' @EMIT =: EMIT
 ; UNW         
 
 : |, EX  
-: , H;  
+: , |H  
 : !+ PUSH !R+  
 : (VAR POP; 
 ; UNW
 
-\ : ,; (@, ;;
+: ;, (@, ;;
 
 : H>STR H 
 : STR PUSH @R+ XR POP; 
@@ -126,45 +121,6 @@ VAL' @EMIT =: EMIT
 : ??  !"?" 
 ;;
 
-: TOKEN?  |N??  
-: TOKEN BL  CALL \ WORD
-
-  NOP \ TEST? DUP ID.
-  
-: ?C@ DUP 
-: C@ @ 
-: W>B (@&; ,< 255 , >,
-            THEN
-: WORD  CALL \ PARSE
-: S>TB! TBUF  
-: S>"! (IO ,< ,"^W~-~^Q~-~5~^@^Cy~GF~^E`"
-=H `_@MAKESTR  ,"^V~Q^Cq~}~&~s~$~|~Y^H~^M^V~^W~C~^P~"
->,      THEN
-: PARSE  NOP ETIB LTIB; 
-: (LTB! NOP (IO ,< 
-,"^Q~^K~{~c~^L+y~<_u^Fs~.~t^BOA^I~"
-,"|^Bc~^Er~.~u^AO+|^B^I~<^Q~C~"
-
-
-: H>T H>STR   
-: >T T;  
-: MPUSH (IO ,< 
-,"^W~-~^Q~-~" ' `_@MAKESTR CALL, ,"@C~^P~"
-
-: CSTR ?C@ U1+ ;
-: ">NUMC (|LIT,, 
-: ">NUM CSTR (NUM  ?? ;
- 
-: N: DUP 
-: =, |, 
-: =H _HERE 
-: =: 0 
-: =F TOKEN? 
-: @SAME? NOP
-: (=:  ?C@ 1+ T; MPUSH TWICE
-: !-  2- 
-: ?! !+ 2-; ; UNW
-
 : WHERE? |N??
 : FND (IO 
 : `_@FIND ,< ,"h~^G^@V^K~s~s~&~"^C~" HERE =: `_@FIND?
@@ -174,8 +130,3 @@ VAL' @EMIT =: EMIT
 : CFND (IO ,<  ,"P"~~^G"  ' `_@FIND CALL,
 ,""~~^OZc~^G^K~=Q~o~r^EC~^R~" ' `_@FIND CALL, ,"@C~"
 
-\ FIXES -----------------------
-
-APT-  H;    =: |H 
-APT-  T;    =: |T 
-APT-  LTIB; =: |LTIB

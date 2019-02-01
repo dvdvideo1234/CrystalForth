@@ -8,6 +8,7 @@ APT-  (NEXT   =: (NEXT`
 APT-  (FOR+   =: (FOR+` 
 APT-  (FOR    =: (FOR`
 THIDE (DEF   
+APT-  (JUMP   =: (JUMP`
 APT-  @R+     =: @R+`
 APT-  !R+     =: !R+`
 APT-  XR      =: XR`
@@ -33,16 +34,18 @@ APT-  (LIT    =: (#
 APT-  ((A"    =: (!" 
 APT-  TARG:   =: :    
 APT-  TARG>,  =: >, 
-APT2  TARG,<  ,<` 
+APT2  TARG,<     ,<` 
+APT2  =H         :`
+' :`          =: =H 
 APT-  ,       =: RELS<`
 '     RELS<`  =: ,   
 APT-  SWAP    =: CSWAP`    
 '     CSWAP`  =: SWAP    
 APT2  _MARKP     CALL`
 '     CALL`   =: MARK>`
-APT2  _HERE   BEGIN`
+APT2  _HERE      BEGIN`
 '  BEGIN`     =: HERE
-APT2  TARG;   ;`
+APT2  TARG;      ;`
 
 
 META INIZ     @INIT     \ STARTUP
