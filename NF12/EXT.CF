@@ -167,3 +167,23 @@ APT2  _IF     IF`
 APT2  _IF-    IF-`
 APT2  _TWICE  TWICE`
 
+
+\ DEBUGERR
+
+2ALIGNED
+=P 4TH>  ,"~c~"  \ FROMF
+
+: TROFF (IO1 ,< ,"9~^K~^O"  HERE =: `@X_TRACE  
+,"^G~^N"   ' NOP 1- ,  ,"C~"
+
+: TRON   (IO1 ,<  ,"9~k~E~k~" 
+' `@X_TRACE HERE 1+ - C, ,"^P~"
+
+: @DBG  ,< VAL' TROFF CALL, ' _@JSR4TH CALL, 
+: @DBG1   NOP 4TH> ,<   VAL' TRON  CALL,
+,"$"_~<S-~u^C"  VAL' TROFF CALL, ,"[^K~^O" ' NOP 1+ $E9 ,R
+,"^P~"
+
+' TROFF 2+ ' ABORT 8 + - 
+' ABORT 6 + T!
+

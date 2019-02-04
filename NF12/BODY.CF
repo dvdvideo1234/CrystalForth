@@ -13,7 +13,7 @@
 =H `_@MAKESTR  ,"^V~Q^Cq~}~&~s~$~|~Y^H~^M^V~^W~C~^P~"
 >,      THEN
 : PARSE  NOP ETIB |LTIB
-: (LTB! NOP (IO ,< 
+: (LTB! PRELT! (IO ,< 
 ,"^Q~^K~{~c~^L+y~<_u^Fs~.~t^BOA^I~"
 ,"|^Bc~^Er~.~u^AO+|^B^I~<^Q~C~"
 
@@ -21,21 +21,37 @@
 : H>T H>STR   
 : >T |T  
 : MPUSH (IO ,< 
-,"^W~-~^Q~-~" ' `_@MAKESTR CALL, ,"@C~^P~"
+    ,"^W~-~^Q~-~" 
+    ' `_@MAKESTR 
+    CALL, 
+    ,"@C~^P~"
 
 : CSTR ?C@ U1+ ;
 : ">NUMC (|LIT,, 
-: ">NUM CSTR (NUM  ?? ;
+: ">NUM CSTR (NUM  ?? 
+;
  
-: N: DUP 
-: =, |, 
-: =H _HERE 
-: =: 0            \ MAIN ENTRY MAKER
-: =F TOKEN? 
-: @SAME? NOP
-: (=:  ?C@ 1+ |T MPUSH TWICE
-: !-  2- 
-: ?! !+ 2-; ; UNW
+: TARG:!
+    NOP     \ BE ALIGMENT CHK
+: =H 
+    HERE 
+: =: 
+    0            \ MAIN ENTRY MAKER
+: =F 
+    TOKEN? 
+: @SAME? 
+    NOP     \ BE SAME? CHK
+: (=:  
+    ?C@ 
+    1+ 
+    |T 
+    MPUSH 
+    TWICE
+: !-  
+       CALL \ 2- 
+: ?! 
+    !+ THEN
+: 2- (@+; ,< -2 , 
 
 
       \   INTERPRETTER 
@@ -58,8 +74,9 @@ vTARG CFND []TO ;
 
 : (MAC    (D#0  
 : "EVAL   CSTR  
-: EVAL    NOP 
-: @EVAL   TOKEN DROP; ?; LOCATE @EXEC RECURSE ;
+: EVAL    NOP   \ BE  MEMTI| 
+: @EVAL   NOP   \ BE  STACK CHK
+    TOKEN DROP; ?; LOCATE @EXEC RECURSE ;
     \ TEST?  ' MEMTI| ' EVAL T! \ EVAL FIXED
 
       \ INITIALIZATION, TESTING & MAIN LOOP

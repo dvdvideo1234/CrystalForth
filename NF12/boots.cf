@@ -1,20 +1,142 @@
+: CALL, $E8 : ,R CALL : REL, HERE 2+ - , ;; THEN : C, |H 
+: (C!+ !+ : 1- (@+; ,< -1 , : ODD (@&; ,< 1 , : JUMP, $E9 ,R ; 
+: |ALIGNED EX : ALIGNED HERE ODD 0; : NOP, $90 C, ;
+: \ |LTIB DUP 0; 1- (@&; ,< -64 ,   \ NOW WE HAVE COMMENTS
+
+: WHERE? TOKEN? vTARG FND ;         \ SEARCH A WORD & WADDRESS
+: |2- EX 2- ;   : AT' |2-   : TO' |2-   : ' WHERE? N?? @ ;
+: VAL' ' 2+ ; : META ' : IS VAL' ! ;    : WFIND (IO ,<
+ $04E8 , $3B00 , $FC5D , $E9C3 , ' @FIND? $E9 ,R 2ALIGNED
+
+: TIMES PUSH XR : TIMES| (FOR CALL BEGIN J EXECUTE THEN (NEXT
+ RELEASE< : 2EXIT RDROP RDROP; ;    \ ITERATORS & PRINTING
+: SPACES TIMES| : SPACE BL EMIT ; : |SPC EX SPACE ;
+: ID. |SPC : ". CSTR : TYPE |DROP : TYPE+ TIMES| CSTR EMIT ;
+
+: ((." (?S ". ;  : |CR EX : CR ((." ,< $D02 , $A , >,
+  0 TO CNTC ;   : _OK ((." ,< $2003 , $4B4F , >, CR 
+      ((." ,< $3E02 ,  $3E , >, ;;
+: `(ERR1 CR ((." ,< 3 C, 'E C, 'R C, 'R C, >, BYE ; 
+
+META _OK vOK        META `(ERR1 vERR    \ vERR FIXED
+
+: (GO; @R+ XR PUSH ; : (R#, @R+ , ;     \ COMPILER
+: ,ER (D#0 STR , @ PUSH ; : UNW -2 : ALLOT |H + ; 
+: (D#2 POP XR : 4+ (@+; ,< 4 ,          : (GO| @R+ XR PUSH ;
+: (VAR3  @R+ DROP : (VAR2  @R+ DROP POP; ; UNW  
+
+: DXEP| DUP : XEP| XR EXECUTE RDROP; ; UNW  
+: QUAN (R#, (VAR3 : VALUE (R#, (SET2 : CONST =H ,ER (CON , ,<
+: VQUAN (R#, (VAR3 : VECTOR (R#, (SET2 
+: DEFER =H ,ER (JUMP , ,<  
+: -ROT SWAP : USWAP XEP| SWAP ;     : ROT USWAP SWAP ;
+
+' |ALIGNED  VECTOR v",   : CSTR, CSTR  : STR,  v",  DUP C, 
+: S, |DROP TIMES| CSTR  C, ; : BS, CSTR  S, ;
+
+\ : TO TO' EXEC ; : TO` TO' , ; : AT AT' EXEC ;  : AT` AT' , ;
+
+: TREXE| PUSH J XR : IXEC J PUSH ; : I J ;  : A! PUSH XA EXIT ; 
+: A@ XA I XA ; : 0>A| 0 : >A| XR XA EXECUTE XA EXIT ;
+
+$10 CONST 1H    $40 CONST 1L    256 CONST 1B    1024 CONST 1K
+
+: U/ |DROP  : (/MD  >A| 0 TWICE TWICE -/ -/ -/ -/ ; 
+: U* |DROP  : UM*   >A| 0 TWICE TWICE +* +* +* +* ;
+: UMOD |DROP    : U/MOD (/MD SWAP ; 
+
+: 9>? 9 OVER U< : 7& (@&; ,< 7 ,    : S6 PUSH PUSH PUSH 
+    CALL POP POP POP THEN           : S3 |SPC TREXE| ROT DUP  
+: H. 1B U/MOD CALL  : B. |SPC W>B THEN 1H U/MOD TWICE  
+: DIG. (GO| EMIT    : ALPHA 9>? +   : '0'+ (@+; ,< '0 , 
+  
+
+: XY? 1K LTIB - ;
+: In1K   (@&; ,< 1K 1- ,
+: ZBLK      0 ,< 0 VALUE BLK
+: BLK>SCR BLK ,< 0 VALUE SCR
+
+: WAITKEY |DROP 
+: BKEY CALL DUP W>B 0; W>B ;; THEN 0 (IO ,< $16CD , $90C3 ,
+' BKEY  VALUE StdKey
+
+: StdKey! StdKey ,< 
+' BKEY  VALUE `KEY  >, (; ,<    
+VAL' `KEY =: KEY
+
+: `(ERR StdEmit! StdKey! CR TBUF ID. MESSAGE ID. CR BLK 0;
+   BLK>SCR ZBLK   : XY!  XY?    : >XY In1K ,< 0 VALUE XY
+
+META `(ERR vERR    \ vERR FIXED
+
+: ?ID. T WFIND IF 4+ ID. ;THEN  : $. '$ EMIT H. ;
+
+: A+L XEP| 
+: I+ J + 
+;
+: MEMTI| A+L 0  : TI| BLK XR LTIB PUSH ETIB PUSH PUSH CALL
+  EX POP POP POP THEN  TO BLK TO LTIB TO ETIB 
+: /BLK BLK 0; 0 TO ETIB 
+;
+
+: 0?SKIP DUP IF @R+ PUSH ;THEN  : .SKIP DROP @R+ DROP; ;  UNW
+: (OF OVER- (IF .SKIP           : (GO XR DROP; ; UNW
+
+: . DUP 0< IF '- EMIT NEG THEN  : U. |SPC 
+: ` 10 U/MOD 0?SKIP RECURSE DIG. ;
+
+8 CONST bs  13  CONST cr  -$700 CONST SBUF  -$600 CONST TIB
+
+: WITHIN OVER- PUSH - POP U< ;  : = - 0= ; : 2DUP OVER OVER ;
+\ : `SRC BLK 0; ETIB 0<>; BLK BLOCK 1K + TO ETIB ;
+: `RDLN TIB 1L  : ACCEPT OVER + PUSH DUP BEGIN KEY \ CASE 
+  cr OF DUP XR DROP ENDOF
+  bs OF 2DUP - IF 1- bs EMIT SPACE bs EMIT THEN  ENDOF
+  DUP BL 1B WITHIN  IF DUP EMIT SWAP (C!+ DUP THEN  \ CASEND
+  DROP THEN THEN  DUP I = UNTIL  OVER- EXIT ;
+
+META `RDLN READLN \ READLN FIXED
+
+
+: CSP! SP@ ,< 0 VALUE CSP
+: CSP? SP@ CSP - ;
+\ THIDE ;`
+   
+\ : ;`  ,;  CSP? TARG,< ?; ;;
+
 
 \ DEBUGERR
 
+' (; =: @MAIN
 2ALIGNED
-=P 4TH>  ,"~c~"  \ FROMF
+=P 4TH>  $E3FF , \ ,"~c~"  \ FROMF
 
-: TROFF (IO1 ,< ,"9~^K~^O"  HERE =: `@X_TRACE  
-,"^G~^N"   ' NOP 1- ,  ,"C~"
+: TROFF (IO ,< $8BB9 , $0F C, 
+HERE =: `@X_TRACE   $0E87 , ' @MAIN , $C3 C, 
 
-: TRON   (IO1 ,<  ,"9~k~E~k~" 
-' `@X_TRACE HERE 1+ - C, ,"^P~"
+: TRON   (IO ,<  $EBB9 ,  ' (NEXT 4 - ' @MAIN 2+ - C, 
+ $EB C, ' `@X_TRACE HERE 1+ - C, 
 
-: @DBG  ,< VAL' TROFF CALL, ' _@JSR4TH CALL, 
-: @DBG1   NOP 4TH> ,<   VAL' TRON  CALL,
-,"$"_~<S-~u^C"  VAL' TROFF CALL, ,"[^K~^O" ' NOP 1+ $E9 ,R
-,"^P~"
 
-' TROFF 2+ ' ABORT 8 + - 
-' ABORT 6 + T!
+2ALIGNED
+: @DBG      ,<  VAL' TROFF CALL,    ' _@JSR4TH CALL, >, NOP 
+ CR POP POP POP POP S3 PUSH PUSH PUSH PUSH
+ S6 J H. I H. I @ DUP  H. ?ID. BKEY
+4TH> ,< VAL' TRON  CALL,    $DF24 , $533C ,  $75AD , 03 C,
+        VAL' TROFF CALL,    $8B5B , $F C, ' @MAIN 2+ $E9 ,R 
+2ALIGNED
+
+' @DBG ' (NEXT 1- -     ' (NEXT 3 - T!
+' TROFF 2+ ' ABORT 8 + - ' ABORT 6 + T!
+
+: WORDS CR T BEGIN 4+ ?C@ WHILE DUP ID. CSTR + REPEAT DROP ;
+
+
+: _IF   ,ER (IF   _MARKP ,<
+: _IF-  ,ER (IF-  _MARKP ,< 
+APT2  _IF     IF`
+APT2  _IF-    IF-`
+
+
+
 

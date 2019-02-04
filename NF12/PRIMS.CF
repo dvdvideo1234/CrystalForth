@@ -1,7 +1,6 @@
 \ REDEFINITIONS ------------------------
 
 ' (DEF  =: (JUMP   
-1       =: BYE
 
 \ FORWARD DEFINITIONS ------------------------
 
@@ -10,7 +9,7 @@ TEST? =! ID.  =! TOKEN?   =! =H   =! CSTR  =! W>B
 
 \ HI LEVEL PRIMITIVES  ---------------------
 
-: (D#0 POP XR       \ DOES0 PRIMITIVE
+: (D#0 POP XR       \ DOES_0 PRIMITIVE
 : NOP; 
 ;  
    
@@ -22,6 +21,9 @@ TEST? =! ID.  =! TOKEN?   =! =H   =! CSTR  =! W>B
 ; UNW
 
 : (LIT @R+ ;
+: 1+ (@+; ,< 1 , 
+HERE 2- =: BYE
+ 
 \ =P 4TH>  ,"~c~"  \ FROMF
 \ =P 4TH>; ,"^K~K~[~a~^P~" \ _RET4TH
 \ =P _RET4TH ,"^K~K~[Q^K~^OC~^P~"
@@ -36,17 +38,14 @@ TEST? =! ID.  =! TOKEN?   =! =H   =! CSTR  =! W>B
 \ : (WARY DUP + : (BARY POP + ;
 
 : (D#1 POP XR 
-: 2+ 2+; 
-; UNW
+: 2+ (@+; ,< 2 , 
 
 : (SET2 (D#1  
 : ! PUSH     
 : (SET !R+ RDROP; 
 ; UNW 
 
-: |2- EX 
-: 2- 2-; 
-; UNW
+: |DROP EX DROPX ; UNW
 
 \ VARIABLES ------------------
  
@@ -58,7 +57,7 @@ APT- T;   =:  |T
 
 : ORG! H - ,<    0 VALUE  HOFS  
 : T>R HOFS - ; 
-: _HERE H : R>T HOFS + ; 
+: HERE H : R>T HOFS + ; 
 TO' H =: OBJ! 
 
 ' NOP;  DEFER vERR
@@ -68,13 +67,16 @@ TO' H =: OBJ!
 18 5 - 1K U*        VALUE; LTIB 
 APT- LTIB;   =:  |LTIB      
 18 1K U* $100 +     VALUE ETIB
+: PRELT! LTIB ,< 0 VALUE PRELT \ IB
 
 $F800 CONST TBUF  
   32  CONST BL   
-\  0   VALUE (LTB
-
 ' T     DEFER vTARG      
-' BEMIT VALUE @EMIT >, CALL 1+ (SET2 THEN ,<
+
+' BEMIT VALUE StdEmit
+: StdEmit! StdEmit ,<
+' BEMIT VALUE @EMIT 
+>, CALL 1+ (SET2 THEN ,<
 0 CONST CNTC 
 VAL' @EMIT =: EMIT
 
@@ -88,7 +90,7 @@ VAL' @EMIT =: EMIT
 : Z, |, ,<
   0  CONST 0
 
-: _THEN _HERE 
+: _THEN HERE 
 : SWAP! PUSH SKIP 
 : (PNT! (D#1 XR !R+ RDROP; 
 ; UNW         
@@ -121,9 +123,8 @@ VAL' @EMIT =: EMIT
 : ??  !"?" 
 ;;
 
-: WHERE? |N??
 : FND (IO 
-: `_@FIND ,< ,"h~^G^@V^K~s~s~&~"^C~" HERE =: `_@FIND?
+: `_@FIND ,< ,"h~^G^@V^K~s~s~&~"^C~" HERE =: @FIND?
 ,"Z3I~^CA~^K~x~^M~}^D^J~^Mc~^MA~R~^W~uo~"
 ,"1~^B^AM^B^I~<^K~A~C~"
 

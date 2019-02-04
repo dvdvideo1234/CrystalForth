@@ -1,0 +1,220 @@
+\ 27
+{ INIT} 
+FORGET TT 
+: TT ;; 
+
+INCLUDE PIFBLK3.CF
+
+CREATE `SPEC? ,T ",!. 
+: OP[]! POP 0 OPER[] 8 CMOVE ;;
+: TERR. TO MESSAGE RESTART ; 
+0 WARY `STR
+>, CSTR, BS, TERR. ". ,< 
+: `PFX  `SPEC? CSTR ROT BSCAN ;
+0 WARY `STR, >, TB" BS, TB! TB." ,<   \ : STR- 1- XEP 1+ ;
+: `OK" OVER C@ '" - NOP ?; OVER 1+ C@ '" <> STR- ?; ;;
+: `STR@ [ TO XK ] XK XEP CSTR `OK" 2- OVER C! "PK ;
+: STR? DUP NAME> 1- C@ '" = PUSH DUP 1+ C@ `PFX
+                        DUP TO XK  -1 <> POP AND ;
+: `NUM STR? NUM? ?; `STR@ XK `STR @EXEC ;
+: `NUM, STR? NUM?, ?; `STR@ XK `STR, @EXEC ;
+: `EXE >NF< NAME> PUSH 2 I+ @ ODD 
+  IF POP A" NOT DEFINED!" ;THEN
+  RDROP EXEC ; 
+: `COM >NF< NAME> PUSH 2 I+ @ ODD IF DROP
+ H I@ , POP ! ;THEN RDROP , ;
+
+
+\ 28
+\ : S0 40 TO SCR 0 TO XY S ; 
+: T=: ;<D> (=: ;;  
+' ' =: T'
+: TWORDS  ;<D> WORDS ; 
+: %  ' >NF< T=: ;; 
+: %2 ' TOKEN? T=: ;;
+: OBJ! TO H ; 
+: ORG! H - TO HOFS ; 
+: TFND TD @ FI ;
+: 2ALIGNED HERE 2 ALIGN 
+: HERE! HERE - ALLOT ;
+\ : ;STATE STATE XCHG EXECUTE POP TO STATE ;
+\ : CALL! ;H XEP HERE SWAP HERE!  CALL, ;
+: N: DUP 
+: =, ;, 
+: =H HERE DUP ODD A" ADDRESS NOT ALIGNED! "
+: =: PUSH     TOKEN? TFND NIP 0= IF POP TBUF T=: ;THEN
+           >NF< NAME> PUSH 2 I+ @ ODD IF 2 I+ @ 3 - 2 I+ !
+       BEGIN I WHILE I@ J POP ! PUSH REPEAT 2EXIT ;THEN
+ 1 A" ALREADY DEFINED!" ;
+
+
+
+
+
+\ 29
+0 VAR `T_DATA  
+0 VALUE `T_HND     
+0 VAR `TOTAL
+
+: TWRITE1 
+  `T_DATA ! 
+  `T_DATA SWAP
+: TWRITE3 DUP 
+  `TOTAL +! 
+  `T_HND  Fwrite ;; \  CR _DX H. _CX . _AX . ;
+: TPRUNE 
+    ESC 
+    PRUNE 
+    ESC 
+;
+: ADDZONE ;RNG> 
+: ADDBLK BLOCK 1K TWRITE3 ;
+: TSAVE  TPRUNE  
+    `TOTAL OFF 
+    TOKEN? FOPEN {  FCREATE} 
+    TO `T_HND   
+    TD 2+ H OVER- TWRITE3
+    2 TD @  " --END--" TFND ??# DROP 
+    >NF< SWAP - 1+ TWRITE1
+    TD @   `T_DATA @ 1-  TWRITE3               
+    1 0 TWRITE1
+    `T_HND Fclose
+;
+
+
+
+
+
+\ 30
+'" ?M: :CODE code;"  
+'" ?M: :(GO; (GO;" 
+
+: TGO :(GO; MARK> ;
+M: :.RDRP .RDROP; 
+: LOOP` NEXT` :.RDRP ;
+: T:;T ,< TO' :;` @ , >, :(GO; <RELS ; 
+: SCAN"C =H :(BSC ;
+: D# >, HERE EX END! ;
+: 0#> D# :(DZ#0 ;  
+: TDOES :CODE 0#> DROP ;
+: 1#> D# :(DZ#1 ;  
+: 2#> D# :(DZ#2 ;
+M: TWICE` CALL THEN; 
+: TRICE PUSH J XCHG J PUSH ;
+: `3, XEP TRICE , ;
+: `3MRK> TRICE H Z, ; 
+: `2RLS> TWICE 
+: `RLS> HERE SWAP! 
+;
+: `CLRY XEP `2RLS> LOOPS Z, ; 
+: `PICK XEP TRICE 2PICK ;
+: STACK: `PICK
+: STACK! `3, HERE 2- =: `3MRK> `CLRY `RLS> ;
+: ;2ALIGNED EX 2ALIGNED END! ;
+
+
+
+\ 31
+{ DEFINITIONS } \ : VARCON :(VAR2 CONST ;
+: =H;, =H ;, ;
+: QUAN    :(VAR3  
+: VALUE   :(SET2  
+: CONST
+ =H;,     :(CON ;
+: VQUAN   :(VAR3  
+: VECTOR  :(SET2  
+: DEFER
+ =H;,     :(DEF ;
+: VALUE; HERE DUP 6 + ,  :EX  " =: " TOKEN? "+  " ;" "+!
+     >SVL TO LTIB     VALUE ;
+: :VALUE >, :(SET2  :(CON =H :(RET ;
+: :RECURSE TD @ N>C , ;
+
+: `4ARY 2* 
+: `2ARY 2* 
+: `ARY =H  EX  CLARY ;
+: CREATE UNW :; 
+: VARIABLE 0  
+: VAR  =H;,   :(VAR ;
+: BARY `ARY   :(BARY ; 
+: WARY `2ARY  :(WARY ;
+: LARY `4ARY  :(LARY ;
+
+\ 32
+: INITO    
+    FX NOP AT v",   
+    FX T AT vT
+    FX :=? AT vISW?   
+    FX 2+ AT vADJ
+    FX (; TO ESC 
+    
+ CALL NUM?  EXEC NUM?, , THEN OP[]! 
+;
+
+: TvIS:? ODD 0= ;  
+: TD@ TD @ ;
+: TINIT    
+    FX ;2ALIGNED AT v",  
+    FX TD@ AT vT
+    FX TvIS:? AT vISW?   
+    FX NOP AT vADJ
+ 
+   CALL `NUM `EXE `NUM, `COM THEN OP[]! 
+; { TINIT}
+
+: T: (ZST =H >, ;
+
+: .BLK #. /DBG ;
+: STOP (LIT TO ESC  @  (LIT (; - 0; MARK@ HIDROP INITO ;;
+: START STOP 
+: EGG CR CR ." EGG " 
+  23000 HIPUSH MARK!  
+  FX NOP TO ESC
+  " TARAMPOL.CF" INCLUDED \ 34 LOAD      
+   <H> TINIT  
+  " F_KRNL.CF" INCLUDED \ 36 62 THRU 
+;;
+\ 33 LOAD
+
+\ 33
+: =! 0 =: 
+: USED+ TD @  NAME> 2+ INC 
+;
+: T:: =H TWICE  USED+ ;  
+: =P HERE 1+ =: ; 
+: ;2- EX 2- ;
+: AT' ;2- 
+: TO' ;2- 
+: ' [ >NF< NAME> 2+ @ ODD A" UNDEFINED!" ] ;?# TOKEN? TFND 
+; 
+: VAL' ' 2+ ;
+: @' ' 
+: T@ T>R @ 
+;  
+: META ' VAL' 
+: T! T>R ! 
+;
+: TTO TO' , ; 
+: TAT AT' , ;
+: THACK ' @HACK ; 
+: TSEE  ' @SEE ;             
+: TDEF    ;<D> DEF ;
+: T=USED  ;<D> =USED ; 
+: T>USED  ;<D> >USED ; 
+: THIDE   ;<D> HIDE ;
+: APT-  ' THIDE :; 
+: REUSE >LT< TO LTIB 
+;
+: APT2 APT- 
+: APT THIDE REUSE =: 
+;
+: COM>0 ." LENGTH = " $100 - . ;
+: STAT? CR ." |BODY " VAL' T@ COM>0 ." |CODE " HERE COM>0
+  1K $100 + HERE - ." |BYTES TO ADD = " . CR
+;
+: WORD_THE_ONE '  \ =:
+ 12 ,  , Z, 2 C, '= C, ': C,  Z, Z, 0 C,  ;
+
+: : T: ;
+
+PRUNE

@@ -1,75 +1,59 @@
 APT-  (?S     =: ("R+`  
-APT-  (IO     =: IO;`
+APT-  (@&;    =: (@&;`
+APT-  (@+;    =: (@+;`
+APT-  (IO     =: (IO;`
+APT-  (JUMP   =: (JUMP`
 APT-  (IF     =: (IF`
-APT-  SKIP    =: SKIP`
+APT-  SKIP    =: (SKIP`
 APT-  (IF-    =: (IF-`
-APT-  2-;     =: 2-;`
 APT-  (NEXT   =: (NEXT`
 APT-  (FOR+   =: (FOR+` 
 APT-  (FOR    =: (FOR`
 THIDE (DEF   
-APT-  (JUMP   =: (JUMP`
 APT-  @R+     =: @R+`
 APT-  !R+     =: !R+`
 APT-  XR      =: XR`
 APT-  XA      =: XA`
 APT-  @EXEC   =: @EXEC`      
 APT-  EXECUTE =: EXEC`
-APT-  (@&;    =: (@&;`
-APT-  RDROP;  =: R>.;`
+APT-  RDROP;  =: RDROP;`
 APT2  (;         ;;`
 APT-  EX      =: EX`
-APT-  2+;     =: 2+;`
-APT-  DROPX   =: .;`
-APT-  PUSH    =: >R`
-APT-  POP     =: R>`
-APT-  POP;    =: R>;`
-APT-  RDROP   =: R>.`
+APT-  DROPX   =: DROP;`
+APT-  PUSH    =: PUSH`
+APT-  POP     =: POP`
+APT-  POP;    =: POP;`
+APT-  RDROP   =: RDROP`
 
  
-APT2  _THEN   THEN` 
-\ APT-  (LIT,,  =: (#,,
-APT-  (LIT,   =: (#,
-APT-  (LIT    =: (# 
-APT-  ((A"    =: (!" 
-APT-  TARG:   =: :    
-APT-  TARG>,  =: >, 
-APT2  TARG,<     ,<` 
-APT2  =H         :`
-' :`          =: =H 
-APT-  ,       =: RELS<`
-'     RELS<`  =: ,   
-APT-  SWAP    =: CSWAP`    
-'     CSWAP`  =: SWAP    
-APT2  _MARKP     CALL`
-'     CALL`   =: MARK>`
-APT2  _HERE      BEGIN`
-'  BEGIN`     =: HERE
-APT2  TARG;      ;`
+APT2  _THEN       THEN` 
+APT2  TARG:!      :`
+APT-  (LIT,   =:  !#`
+'     !#`     =:  (#,
+APT-  (LIT    =:  (# 
+APT-  ((A"    =:  (!" 
+APT-  TARG:   =:  :    
+APT-  TARG>,  =:  >, 
+APT2  TARG,<      ,<` 
+APT-  ,       =:  RELS<`
+'     RELS<`  =:  ,   
+APT-  SWAP    =:  CSWAP`    
+'     CSWAP`  =:  SWAP    
+APT2  _MARKP      CALL`
+'     CALL`   =:  MARK>`
+APT2  HERE        BEGIN`
+'  BEGIN`     =:  HERE
+APT2  TARG;       ;`
 
 
-META INIZ     @INIT     \ STARTUP
-META `INTERP  LOCATE    \ FORTH STATE
-HERE    VAL' H T!       \ FORTH HEAP
+META INIZ     @INIT           \ TARGET FORTH STARTUP
+META `INTERP  LOCATE          \ TARGET FORTH INITIAL STATE
+HERE    VAL' H T!             \ TARGET FORTH HEAP
 
-      \   WORD THE ONE
-12 , ' =: , 0 , "=:" -1 ALLOT \ HERE T>R 16 - 16 DUMP
-THIDE =:  0 , 0 , 0 C,  
+WORD_THE_ONE =:  THIDE =:     \ WORD THE ONE
 
-      \ ALIGNING TO 1K
+STAT? H           \ STATISTICS & ALIGNING TO 1K
       
-\ 10 ALLOT       
-
-      \ STATISTICS
-      
-CR ."_BODY_LENGTH_" VAL' H T@ $100 - . CR
-CR ."_CODE_LENGTH_" HERE $100 - . CR
-CR 1K $100 + HERE - ."BYTES_TO_ADD__" . CR
-
-      \ SAVE RESULT
-      
-TSAVE PIF.COM 
-
+TSAVE PIF.COM     \ SAVE RESULT
 
       \ PREPARE NEW WORDS TO BE ASSIGNED 
-      

@@ -220,11 +220,12 @@ P_ _ABORT
 _@INI:  
   DW 0  ; STARTUP ADDRESS  
           
-; IO COMMANDS vvvvvvvvvv  ---------------------------
-
-
 P_ _AND@X
   AND   TOP,[IP]
+  JMPS  _@4TH  
+  
+P_ _PLUS@X
+  ADD   TOP,[IP]
   JMPS  _@4TH  
   
 P_ _OSTR          ; (?S
@@ -238,21 +239,6 @@ P_ _OSTR          ; (?S
   XCHG  DR,W
   JMPS  @DUPW ; 
 
-    
-P_ _IO  				  ; IF INPUT PARAMS = OUTPUT PARAMS 
-  MOV   DX,[DSP+4]
-  MOV   CX,[DSP+2]
-P_ _IO2  				  ; IF INPUT PARAMS = OUTPUT PARAMS 
-  MOV   W,[DSP]   ; IP = BX
-P_ _IO1  				  ; IF INPUT PARAMS = OUTPUT PARAMS 
-  XCHG  W,IP
-  ;INT   3
-  CALL  W	 
-P_ _RET  
-  JMPS  _@4TH
-
-; IO           COMMANDS  (IO  ^^^^^^^
-
 ; CONTROL      COMMANDS  ----------------------------
 
 P_ _IF	 			; (IF
@@ -265,16 +251,9 @@ P_ _SKIP
   INC   ip
   JMPS  @MAIN
 
-P_ _2MX
-  DEC   TOP
-  POP   IP
-P_ _1M
-  DEC   TOP
-  SKIPB
-
-P_  _BRK
-  INT   3
-  JMPS  @MAIN
+P_ _RDRPX
+  R_TO  DR
+  JMPS  _@4TH
 
 @dbg:  
   jmp   @RET
@@ -295,11 +274,6 @@ P_ _JUMP    		; (JUMP
 
 ; DATA TRANSFER  COMMANDS -----------------------------------
 
-P_ _BEMIT
-  MOV     AH,0EH
-  INT     10H
-  JMPS    @DROP
-        
 P_ _RSTP			  ; !R+
   R_TO 	W			  ; USE RETURN TOP AS DATA ADDRESS
   STOSW
@@ -329,10 +303,9 @@ P_ _XA				  ; XA
   R_TO	W			  ; EXCHANGE RETURN TOP ELEMENT
   TO_R 	ar			; 
   MOV	ar,W		  ; WITH ADDED REGISTER
+P_ _NOP
   JMPS  @MAIN 
   
-; MAIN  LOOP  ---------------------------------------
-
 P_ _LARY
   SHL   TOP,1
 P_ _WARY
@@ -348,24 +321,35 @@ P_ _EXEC
   POPR_ DR
   JMPS  @MAIN3
   
-P_ _2px
-  INC   TOP
-  R_TO	ip			 
-P_ _1P
-  INC   TOP
-  SKIPA
-  
-P_ _RDRPX
-  R_TO  DR
+
+; IO COMMANDS vvvvvvvvvv  ---------------------------
+    
+P_ _BEMIT
+  MOV     AH,0EH
+  INT     10H
+  JMPS    @DROP
+        
+P_ _IO  				  ; IF INPUT PARAMS = OUTPUT PARAMS 
+  PUSH  IP
+  MOV   BX,[DSP]   
+  MOV   CX,[DSP+2]
+  MOV   DX,[DSP+4]
+  POP   W
+  ;INT   3
+  CALL  W	 
+
+; IO           COMMANDS  (IO  ^^^^^^^
+
+; MAIN  LOOP  ---------------------------------------
+
+P_ _RET  
 _@4TH:
   r_to  IP			; POP IP FROM RETURN TOP ELEMENT  
-P_ _NOP
 @MAIN:
   MOV   DR,[IP]
   ;JMPS  _@dbg
 @MAIN2:  
-  INC   IP
-  INC   IP
+  LEA   IP,[IP+2]
 @MAIN3:  
   test 	DRL,1		; ADDRESS ODD ?
   je    @nest		; NOT ODD ADDRESS - NEST THEN
@@ -468,6 +452,9 @@ P_ _D2DIV
   RCR   NXT,1     ; SHIFT RIGHT NEXT WITH CARRY
   JMPS  @MAIN
    
+P_ _OR  				  ; OR - LOGICAL PRIMITIVE
+  NOT   TOP
+  NOT   NXT
 P_ _NAND				  ; NAND - LOGICAL PRIMITIVE
   AND   NXT,TOP	  ; AND TO SECOND DATA ELEMENT - NEXT
   DROP_

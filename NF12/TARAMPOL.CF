@@ -1,0 +1,51 @@
+\ 34  \ % ;CASE` % CASE` 
+% ESC 
+% ,<` 
+%2 MARK> CALL`  
+%2 MARK> [`
+% TWICE` 
+% ?;` 
+% ;THEN`          
+% {`    
+% \`
+% AHEAD`  
+% REPEAT`  
+% AGAIN`   
+% UNTIL`  
+% BEGIN`  
+% WHILE`
+% IF`  
+% THEN`         
+% ;;`   
+% -IF`
+% IND<` 
+% IND>` 
+% DO>`  
+% DO<`  
+% LOOP` 
+% NEXT` 
+% <NEXT`
+% UNTIL-` 
+% ]`  
+% FOR`  
+% FOR>`          
+% IF-` 
+% CSWAP>`
+%2 TAT AT`      
+%2 TTO TO`
+%2 :RDROP (RDROP` 
+%2 :(DROP (DROP`
+%2 :RECURSE RECURSE`   
+%2 T:: :` 
+%2 :(IF IO`     
+%2 :(1- (1-`
+% ;`    
+%2 TGO GO;`    
+%2 TDOES DOES>`    
+%2 T:;T :;`
+%2 <RELS RELEASE<`
+%2 TOF OF`    
+%2 TELSE ELSE`   
+%2 TELSE ENDOF`
+%2 TEST? TEST?`
+
