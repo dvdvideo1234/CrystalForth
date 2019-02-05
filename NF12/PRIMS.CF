@@ -71,7 +71,7 @@ APT- LTIB;   =:  |LTIB
 
 $F800 CONST TBUF  
   32  CONST BL   
-' T     DEFER vTARG      
+' T   DEFER vTARG      
 
 ' BEMIT VALUE StdEmit
 : StdEmit! StdEmit ,<
@@ -130,4 +130,31 @@ VAL' @EMIT =: EMIT
 
 : CFND (IO ,<  ,"P"~~^G"  ' `_@FIND CALL,
 ,""~~^OZc~^G^K~=Q~o~r^EC~^R~" ' `_@FIND CALL, ,"@C~"
+
+: TOKEN?  |N??  
+: TOKEN BL  CALL NOP  \ TEST? DUP ID.  WAITKEY 
+: ?C@ DUP   : C@ @  : W>B (@&; ,< 255 , >,
+            THEN
+: WORD  CALL    \ PARSE
+: S>TB! TBUF    : S>"! (IO ,<   ,"^W~-~^Q~-~5~^@^Cy~GF~^E`"
+=H `_@MAKESTR   ,"^V~Q^Cq~}~&~s~$~|~Y^H~^M^V~^W~C~^P~"
+>,      THEN    : PARSE  NOP ETIB |LTIB PRELT! (IO ,< 
+,"^Q~^K~{~c~^L+y~<_u^Fs~.~t^BOA^I~"
+,"|^Bc~^Er~.~u^AO+|^B^I~<^Q~C~"
+
+
+: H>T H>STR     : >T |T     : MPUSH (IO ,<     ,"^W~-~^Q~-~" 
+    ' `_@MAKESTR CALL,      ,"@C~^P~"
+
+: CSTR ?C@ U1+ ;
+: ">NUMC (|LIT,, 
+: ">NUM CSTR (NUM  ?? 
+;
+ 
+: TARG:!    NOP             \ BE ALIGMENT CHK
+: =H HERE : =: 0            \ MAIN ENTRY MAKER
+: =F TOKEN? : @SAME? NOP    \ BE SAME? CHK
+: (=:  ?C@ 1+ |T MPUSH TWICE
+: !-    CALL    : ?! !+ THEN
+: 2- (@+; ,< -2 , 
 

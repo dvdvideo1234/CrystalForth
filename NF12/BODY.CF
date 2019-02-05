@@ -1,58 +1,3 @@
-: TOKEN?  |N??  
-: TOKEN BL  CALL \ WORD
-
-  NOP  TEST? DUP ID.  WAITKEY
-  
-: ?C@ DUP 
-: C@ @ 
-: W>B (@&; ,< 255 , >,
-            THEN
-: WORD  CALL \ PARSE
-: S>TB! TBUF  
-: S>"! (IO ,< ,"^W~-~^Q~-~5~^@^Cy~GF~^E`"
-=H `_@MAKESTR  ,"^V~Q^Cq~}~&~s~$~|~Y^H~^M^V~^W~C~^P~"
->,      THEN
-: PARSE  NOP ETIB |LTIB
-: (LTB! PRELT! (IO ,< 
-,"^Q~^K~{~c~^L+y~<_u^Fs~.~t^BOA^I~"
-,"|^Bc~^Er~.~u^AO+|^B^I~<^Q~C~"
-
-
-: H>T H>STR   
-: >T |T  
-: MPUSH (IO ,< 
-    ,"^W~-~^Q~-~" 
-    ' `_@MAKESTR 
-    CALL, 
-    ,"@C~^P~"
-
-: CSTR ?C@ U1+ ;
-: ">NUMC (|LIT,, 
-: ">NUM CSTR (NUM  ?? 
-;
- 
-: TARG:!
-    NOP     \ BE ALIGMENT CHK
-: =H 
-    HERE 
-: =: 
-    0            \ MAIN ENTRY MAKER
-: =F 
-    TOKEN? 
-: @SAME? 
-    NOP     \ BE SAME? CHK
-: (=:  
-    ?C@ 
-    1+ 
-    |T 
-    MPUSH 
-    TWICE
-: !-  
-       CALL \ 2- 
-: ?! 
-    !+ THEN
-: 2- (@+; ,< -2 , 
-
 
       \   INTERPRETTER 
       
@@ -72,8 +17,7 @@ vTARG CFND []TO ;
 
       \ FUNCTION EVAL 
 
-: (MAC    (D#0  
-: "EVAL   CSTR  
+: (MAC    (D#0  : "EVAL   CSTR  
 : EVAL    NOP   \ BE  MEMTI| 
 : @EVAL   NOP   \ BE  STACK CHK
     TOKEN DROP; ?; LOCATE @EXEC RECURSE ;
@@ -89,5 +33,6 @@ vTARG CFND []TO ;
 
               AHEAD CSWAP> THEN TO @INIT vERR           
 : QUIT TARG,< 
-: `QUIT READLN  
+: `QUIT READLN
+	\ TEST? DBG.
 : `MAIN       THEN   EVAL vOK  `QUIT ;

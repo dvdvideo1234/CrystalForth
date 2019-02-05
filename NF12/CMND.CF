@@ -1,0 +1,73 @@
+===================
+\MINICOMP
+ ALLOT UNW HERE CSP? CSP! (NUM SP@ IS META VAL' ALIGNED @, (@,
+ \ NOP, , >, (|LIT,, (LIT,, ;, Z, OBJ! R>T T>R HOFS ORG! JUMP,
+ C, REL, ,R CALL, ' TO' AT'
+
+===================
+\DEBUGGER
+ ID. $. ?ID. @ID. DBG. R3 WID. .WID. @DBG @FIND? TRON
+ TROFF 4TH> @MAIN S3 S6
+
+====================
+\MEMORY
+ @ CSTR ! (C!+ STR H>STR !+ SWAP! ?! !- MPUSH >T H>T PARSE
+ S>"! S>TB! C@ ?C@
+ 
+============
+\MATH & LOGIC
+ - 1- 2- + 1+ 2+ 4+ '0'+ RANGE>S 0< U< NOT 0= NEG NAND D2/ +*
+ 2/ +2/ U1+ -/ XOR In1K 7& 9>? U/MOD UMOD UM* U* (/MD U/ ODD
+ = WITHIN ALPHA W>B
+ 
+===================
+\CONTROL
+ 0<>; 0; ?? N?? ABORT QUIT _@INI INIZ BYE EXIT 2EXIT
+
+====================
+\VARIABLES
+ LOCATE @INIT EMIT CNTC @EMIT StdEmit vTARG PRELT ETIB LTIB
+ READLN vOK vERR T MESSAGE H CSP KEY StdKey SCR BLK []TO
+
+===================
+\CONSTANTS
+ 0 BL 1K 1B 1L 1H TIB SBUF cr bs TBUF
+
+====================
+\STACK
+ DUP? 2PICK 2DUP I OVER DUP J DROP NIP NOP ROT USWAP SWAP OVER-
+ -ROT
+
+====================
+\IO
+ ACCEPT BKEY _OK CR TYPE+ TYPE ". SPACE SPACES CR? U. . DIG. B.
+ H. BEMIT WAITKEY
+
+====================
+\PARSERS
+ ">NUM ">NUMC WORD TOKEN WORDS @EVAL EVAL "EVAL TOKEN?
+
+====================
+\MAKERS
+ (=: @SAME? =F =: =H DEFER VECTOR VQUAN CONST VALUE QUAN :
+ 
+====================
+\SEARCHERS
+ WHERE? CFND FND WFIND 
+ 
+====================
+\COMMON
+ StdEmit! PRELT! /BLK I+ A+L XY >XY XY! StdKey! BLK>SCR ZBLK
+ XY? A@ A! (# (#, TIMES
+
+==============================
+\COMPILER
+ |, ;` BEGIN` MARK>` CALL` CSWAP` RELS<` ,<` !#` :` THEN`
+ RDROP` POP;` POP` PUSH` DROP;` EX` ;;` RDROP;` EXEC` @EXEC`
+ XA` XR` !R+` @R+` (FOR` (FOR+` (NEXT` (IF-` (SKIP` (IF` (JUMP`
+ (IO;` (@+;` (@&;` ("R+` (MAC IF-` IF` BS, S, STR, CSTR, v",
+ XEP| UNDER (GO| ,ER (R#, (GO; |CR ((" ((." |SPC TIMES| |2-
+ |ALINED |N?? |LTIB |DROP |H |T |WAIT DUP|= TI| MEMTI| >A|
+ 0>A| DROP; (CON (SET (SET2 NOP; (D#0 (D#1 (D#2 (PNT! (VAR
+ (VAR2 (VAR3 (BARY (WARY (LARY (QARY (!"
+ 

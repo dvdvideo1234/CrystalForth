@@ -180,7 +180,7 @@ NXT   EQU PW [DSP]
 topL= AL  ; AX DATA STACK TOP REGISTER
 topH= AH  ; AX DATA STACK TOP REGISTER
 w   = di  ; DI WORK REGISTER
-ar  = BP  ; BP ARITHMETIC ( ADDRESS ) register 
+ar  = DX  ; DX ARITHMETIC ( ADDRESS ) register 
 DR  = CX  ; CX DATA REGISTER
 DRL = CL  ; CX DATA REGISTER
 DRH = CH  ; CX DATA REGISTER
@@ -306,6 +306,8 @@ P_ _XA				  ; XA
 P_ _NOP
   JMPS  @MAIN 
   
+P_ _QARY
+  SHL   TOP,1
 P_ _LARY
   SHL   TOP,1
 P_ _WARY
@@ -330,13 +332,14 @@ P_ _BEMIT
   JMPS    @DROP
         
 P_ _IO  				  ; IF INPUT PARAMS = OUTPUT PARAMS 
-  PUSH  IP
+  PUSH  AR IP
   MOV   BX,[DSP]   
   MOV   CX,[DSP+2]
   MOV   DX,[DSP+4]
   POP   W
   ;INT   3
-  CALL  W	 
+  CALL  W
+  POP  	AR
 
 ; IO           COMMANDS  (IO  ^^^^^^^
 
@@ -452,9 +455,6 @@ P_ _D2DIV
   RCR   NXT,1     ; SHIFT RIGHT NEXT WITH CARRY
   JMPS  @MAIN
    
-P_ _OR  				  ; OR - LOGICAL PRIMITIVE
-  NOT   TOP
-  NOT   NXT
 P_ _NAND				  ; NAND - LOGICAL PRIMITIVE
   AND   NXT,TOP	  ; AND TO SECOND DATA ELEMENT - NEXT
   DROP_
@@ -486,6 +486,7 @@ P_ _0LESS
 @@IND   = SI
 @@BASE  = CX
 @@OPADR = DX  ; OPTION ADDRESS
+@@AR	= BP
   
 COMOPT  DW @@KOLI,@@TICK,@@DIEZ,@@HEX,@@OCT,@@BIN
 ;OPTAB   DB "^'#$&%"
@@ -503,10 +504,10 @@ OPTAB   DB "%&$#'^"
 @@DNEG:  
 	;NEG   	@@acc
 	not   	@@acc
-	not   	AR
+	not   	@@AR
 	inc   	@@acc
   jne     @@EXSGN
-	inc   	AR
+	inc   	@@AR
 @@EXSGN: 
   RET
 
@@ -521,7 +522,7 @@ OPTAB   DB "%&$#'^"
   
 @@numini:	
 	CLR   	@@acc      ; ZEROING ACCUMULATOR
-  CLR     AR        ; HI PART ACCUMULATOR
+  CLR     @@AR        ; HI PART ACCUMULATOR
   SKIPA
 @@HEX:
   MOV     AL,16
@@ -571,14 +572,14 @@ OPTAB   DB "%&$#'^"
 	cmp   	ax,@@base
 	jnc   	@@ERNUM
 @@ACCUM:	
-	Xchg  	AR,AX
+	Xchg  	@@AR,AX
 	mul   	@@base
-	Xchg  	AR,AX
+	Xchg  	@@AR,AX
 	Xchg  	@@acc,AX
 	mul   	@@base
 	Xchg  	@@acc,AX
 	add   	@@acc,ax
-  ADC     AR,DX
+	ADC     @@AR,DX
 	JMPS    @@NORMAL?
   
 @@TICK:  
@@ -602,13 +603,14 @@ OPTAB   DB "%&$#'^"
 
 L_ _ATOI
   DW  _IO
-  PUSH    DSP
+  PUSH    @@AR DSP
   XCHG    TOP,@@IND
   LEA     @@ADR,[@@ADR+@@IND]
   NOT     @@IND
-	CALL	  @@ATOI
+  CALL	  @@ATOI
+  MOV     AR,@@AR
   XCHG    TOP,@@IND
-  POP     DSP
+  POP     DSP @@AR
   MOV     NXT,@@ACC
 @RET: 
   RET
