@@ -31,6 +31,8 @@ APT2  TARG:!      :`
 APT-  (LIT,   =:  !#`
 '     !#`     =:  (#,
 APT-  (LIT    =:  (# 
+APT-  (("     =:  (" 
+APT-  ((."    =:  (." 
 APT-  ((A"    =:  (!" 
 APT-  TARG:   =:  :    
 APT-  TARG>,  =:  >, 

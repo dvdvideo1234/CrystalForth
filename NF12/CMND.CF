@@ -66,7 +66,7 @@
  RDROP` POP;` POP` PUSH` DROP;` EX` ;;` RDROP;` EXEC` @EXEC`
  XA` XR` !R+` @R+` (FOR` (FOR+` (NEXT` (IF-` (SKIP` (IF` (JUMP`
  (IO;` (@+;` (@&;` ("R+` (MAC IF-` IF` BS, S, STR, CSTR, v",
- XEP| UNDER (GO| ,ER (R#, (GO; |CR ((" ((." |SPC TIMES| |2-
+ XEP| UNDER (GO| ,ER (R#, (GO; |CR (" (." |SPC TIMES| |2-
  |ALINED |N?? |LTIB |DROP |H |T |WAIT DUP|= TI| MEMTI| >A|
  0>A| DROP; (CON (SET (SET2 NOP; (D#0 (D#1 (D#2 (PNT! (VAR
  (VAR2 (VAR3 (BARY (WARY (LARY (QARY (!"
