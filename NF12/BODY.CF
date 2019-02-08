@@ -1,38 +1,28 @@
 
       \   INTERPRETTER 
       
-: TARG; ;,
-: TARG,< TO LOCATE 
+: TARG; ;, 
+: TARG,< TO LOCATE  
 : `INTERP T FND  ,< 
-0 WARY []TO >,  ">NUM ">NUMC @EXEC @, ,< 
+0 WARY []OPER >,  ">NUM ">NUMC @EXEC @, ,< 
 
  
       \   COMPILER
       
 : TARG: NOP =H 
-: TARG>, TO LOCATE 
-   \ TEST? DUP ID. KEY DROP 
-vTARG CFND []TO ;
+: TARG>, TO LOCATE  vTARG CFND []OPER ;
      
 
       \ FUNCTION EVAL 
 
-: (MAC    (D#0  : "EVAL   CSTR  
+: (MAC    (D#0  
+: "EVAL   CSTR  
 : EVAL    NOP   \ BE  MEMTI| 
 : @EVAL   NOP   \ BE  STACK CHK
     TOKEN DROP; ?; LOCATE @EXEC RECURSE ;
-    \ TEST?  ' MEMTI| ' EVAL T! \ EVAL FIXED
 
       \ INITIALIZATION, TESTING & MAIN LOOP
       
-: INIZ H>T CALL  
-    \ TEST? SP@ H. CR
-    \ TEST? 1 2 3 4 5 6 S6 DROP DROP DROP DROP DROP DROP
-    \ TEST? CR (LIT =: ?ID.  
-    \ TEST? KEY DROP SP@ H. CR 
-
-              AHEAD CSWAP> THEN TO @INIT vERR           
-: QUIT TARG,< 
-: `QUIT READLN
-	\ TEST? DBG.
+: INIZ H>T CALL  AHEAD CSWAP> THEN TO @INIT vERR           
+: QUIT TARG,<  : `QUIT READLN
 : `MAIN       THEN   EVAL vOK  `QUIT ;

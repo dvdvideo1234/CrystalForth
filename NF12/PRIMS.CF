@@ -2,31 +2,33 @@
 
 ' (DEF  =: (JUMP   
 
-\ FORWARD DEFINITIONS ------------------------
-
-      =! |,   =! (PNT!    
-TEST? =! ID.  =! TOKEN?   =! =H   =! CSTR  =! W>B
-
 \ HI LEVEL PRIMITIVES  ---------------------
 
+: 1+ (@+; ,< 1 , 
+HERE 2- =: BYE
+ 
 : (D#0 POP XR       \ DOES_0 PRIMITIVE
 : NOP; 
 ;  
    
+: (D#1 POP XR       \ DOES_1 PRIMITIVE
+: 2+ (@+; ,< 2 , 
+
+: _THEN NOP     \ HERE TO FIX
+: SWAP! PUSH SKIP 
+: (PNT! (D#1 XR !R+ RDROP; ; UNW         
+
+: (SET2 (D#1  
+: ! PUSH     
+: (SET !R+ RDROP; 
+; UNW 
+
 : (@, (D#0  
-: @, |,  
+: @, NOP        \ |,   TO FIX
 : @ PUSH  
 : (CON @R+ 
 : EXIT RDROP; 
 ; UNW
-
-: (LIT @R+ ;
-: 1+ (@+; ,< 1 , 
-HERE 2- =: BYE
- 
-\ =P 4TH>  ,"~c~"  \ FROMF
-\ =P 4TH>; ,"^K~K~[~a~^P~" \ _RET4TH
-\ =P _RET4TH ,"^K~K~[Q^K~^OC~^P~"
 
 : RANGE>S 1+  
 : OVER- OVER 
@@ -36,16 +38,6 @@ HERE 2- =: BYE
 ; UNW
 
 \ : (WARY DUP + : (BARY POP + ;
-
-: (D#1 POP XR 
-: 2+ (@+; ,< 2 , 
-
-: (SET2 (D#1  
-: ! PUSH     
-: (SET !R+ RDROP; 
-; UNW 
-
-: |DROP EX DROPX ; UNW
 
 \ VARIABLES ------------------
  
@@ -57,7 +49,8 @@ APT- T;   =:  |T
 
 : ORG! H - ,<    0 VALUE  HOFS  
 : T>R HOFS - ; 
-: HERE H : R>T HOFS + ; 
+: HERE H : R>T HOFS + ;
+' HERE  ' _THEN T!      \ DO FIX
 TO' H =: OBJ! 
 
 ' NOP;  DEFER vERR
@@ -70,6 +63,7 @@ APT- LTIB;   =:  |LTIB
 : PRELT! LTIB ,< 0 VALUE PRELT \ IB
 
 $F800 CONST TBUF  
+: SPACES NOP : SPACE NOP ,<
   32  CONST BL   
 ' T   DEFER vTARG      
 
@@ -84,22 +78,18 @@ VAL' @EMIT =: EMIT
 ' @INIT ' _@INI T!  
    >, (PNT! ,<   0  DEFER LOCATE   
 
-\ COMPILER BASIS ------------------------
-
-: _MARKP  H   
-: Z, |, ,<
-  0  CONST 0
-
-: _THEN HERE 
-: SWAP! PUSH SKIP 
-: (PNT! (D#1 XR !R+ RDROP; 
-; UNW         
+\ COMPILER BASIC PRIMITIVES  ------------
 
 : |, EX  
 : , |H  
 : !+ PUSH !R+  
 : (VAR POP; 
 ; UNW
+' |, ' @, T!        \ DO FIX
+
+: _MARKP  H   
+: Z, |, ,<
+  0  CONST 0
 
 : ;, (@, ;;
 
@@ -109,8 +99,8 @@ VAL' @EMIT =: EMIT
 
 : (|LIT,, EX  
 : (LIT,,  |, 
-: (LIT, (@, (LIT 
-;; UNW
+: (LIT,   |, (VAR 
+: (LIT @R+ ;
 
 : 0<>;  0= 
 : 0;    EXIT ?; 
@@ -123,12 +113,12 @@ VAL' @EMIT =: EMIT
 : ??  !"?" 
 ;;
 
-: FND (IO 
+: FND (IO; 
 : `_@FIND ,< ,"h~^G^@V^K~s~s~&~"^C~" HERE =: @FIND?
 ,"Z3I~^CA~^K~x~^M~}^D^J~^Mc~^MA~R~^W~uo~"
 ,"1~^B^AM^B^I~<^K~A~C~"
 
-: CFND (IO ,<  ,"P"~~^G"  ' `_@FIND CALL,
+: CFND (IO; ,<  ,"P"~~^G"  ' `_@FIND CALL,
 ,""~~^OZc~^G^K~=Q~o~r^EC~^R~" ' `_@FIND CALL, ,"@C~"
 
 : TOKEN?  |N??  
@@ -136,14 +126,14 @@ VAL' @EMIT =: EMIT
 : ?C@ DUP   : C@ @  : W>B (@&; ,< 255 , >,
             THEN
 : WORD  CALL    \ PARSE
-: S>TB! TBUF    : S>"! (IO ,<   ,"^W~-~^Q~-~5~^@^Cy~GF~^E`"
+: S>TB! TBUF    : S>"! (IO; ,<   ,"^W~-~^Q~-~5~^@^Cy~GF~^E`"
 =H `_@MAKESTR   ,"^V~Q^Cq~}~&~s~$~|~Y^H~^M^V~^W~C~^P~"
->,      THEN    : PARSE  NOP ETIB |LTIB PRELT! (IO ,< 
+>,      THEN    : PARSE  NOP ETIB |LTIB PRELT! (IO; ,< 
 ,"^Q~^K~{~c~^L+y~<_u^Fs~.~t^BOA^I~"
 ,"|^Bc~^Er~.~u^AO+|^B^I~<^Q~C~"
 
 
-: H>T H>STR     : >T |T     : MPUSH (IO ,<     ,"^W~-~^Q~-~" 
+: H>T H>STR     : >T |T     : MPUSH (IO; ,<     ,"^W~-~^Q~-~" 
     ' `_@MAKESTR CALL,      ,"@C~^P~"
 
 : CSTR ?C@ U1+ ;

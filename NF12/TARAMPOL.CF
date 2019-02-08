@@ -43,9 +43,8 @@
 %2 TGO GO;`    
 %2 TDOES DOES>`    
 %2 T:;T :;`
-%2 <RELS RELEASE<`
+%2 <RELS RELS<`
 %2 TOF OF`    
-%2 TELSE ELSE`   
-%2 TELSE ENDOF`
+\ %2 TELSE ELSE`   %2 TELSE ENDOF`
 %2 TEST? TEST?`
 
