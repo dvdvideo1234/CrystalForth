@@ -332,14 +332,15 @@ P_ _BEMIT
   JMPS    @DROP
         
 P_ _IO  				  ; IF INPUT PARAMS = OUTPUT PARAMS 
-  PUSH  AR IP
-  MOV   BX,[DSP]   
-  MOV   CX,[DSP+2]
+  ;PUSH  AR IP
+  PUSH  IP
   MOV   DX,[DSP+4]
+  MOV   CX,[DSP+2]
+  MOV   BX,[DSP]   
   POP   W
   ;INT   3
   CALL  W
-  POP  	AR
+  ;POP  	AR
 
 ; IO           COMMANDS  (IO  ^^^^^^^
 
@@ -423,10 +424,6 @@ P_ _SWAP
    
 ; MATH, LOGIC AND SHIFT COMMANDS   +2/ +* -/ NAND
 
-P_ _XOR				  ; XOR - LOGICAL PRIMITIVE
-  XOR     NXT,TOP	  ; XOR TO SECOND DATA ELEMENT - NEXT
-  JMPS    @DROP
-  
 P_ _MDIV				  ; -/ DIVIDE PRIMITIVE
   SHL	  NXT,1     ; SHIFT LEFT NEXT TO CARRY
   RCL   TOP,1		  ; ROTATE LEFT WITH CARRY
@@ -782,6 +779,10 @@ _@DBGW3:
   MOV   DR,[IP]	
   jmp   @MAIN2
 
+P_ _XOR				  ; XOR - LOGICAL PRIMITIVE
+  XOR     NXT,TOP	  ; XOR TO SECOND DATA ELEMENT - NEXT
+  JMPS    @DROP
+  
   ENDIF
     
 L_ _EndMem

@@ -1,3 +1,197 @@
+^M EMIT ^J EMIT 'A EMIT 
+: ?ODD DUP : ODD (@&; ,< 1 , : N: DUP : =, |, =: ; : (" ("R+ ; 
+: I@ J @ ; HERE >, (D#0 : C@, C@ : C, |H : C!+ PUSH W>B I@ DUP
+W>B - + !R+ POP : 1- (@+; ,< -1 , =, NOP, $90 , : C! C!+ DROP ;
+: |ALIGNED EX : ALIGNED HERE ODD 0; NOP, ; : (R#, @R+ , ;
+: \ |LTIB DUP 0; 1- (@&; ,< -64 , \ NOW COMMENTS AVAILABLE
+
+: ,ER (D#0 : (#,EX STR , : @EXECUTE @ : EXECUTE PUSH ; 
+: H,ER (D#0 HERE ?ODD ?? =: (#,EX ; : (CON. (D#1 @ EMIT ;
+: |UNW EX : UNW -2 : ALLOT |H + ;   : |SPC EX SPACE ; 
+
+: 0>A| 0 : >A| XR XA EXEC XA RDROP; ; UNW : @+ PUSH @R+ POP; ;
+ UNW : |DROP EX : DROPX DROP; ; UNW  : |2- EX 2- ; 
+: U/ |DROP : (/MD >A| 0 CALL THEN  CALL THEN -/ -/ -/ -/ ; 
+: UMOD |DROP : U/MOD (/MD : CSWAP` SWAP ; : (|GO @R+ XR PUSH ;
+: U* |DROP : UM*   >A| 0 CALL THEN  CALL THEN +* +* +* +* ;
+: (UNDER @R+ PUSH : XEP| XR EXEC POP; ; UNW : A+L XEP| : I+ 
+J + ; : (VAR3  @R+ DROP : (VAR2  @R+ DROP POP; ; UNW 
+
+'B EMIT 
+
+: IF`   ,ER (IF`  MARK>` ,<   : IF-`  ,ER (IF-` MARK>` ,< 
+: AGAIN` ,ER (JUMP` RELS<` ,< : NEXT` THEN` (R#, (NEXT RELS<` ;
+: FOR` (R#, (FOR MARK>` BEGIN` SWAP ; ' IF` =: WHILE`
+: AHEAD` ,ER (JUMP` MARK>` ,< : UNTIL` ,ER (IF` RELS<` ,< 
+: UNTIL-` ,ER (IF-` RELS<` ,< : (OF OVER-  IF @R+  XR DROP; 
+: (?.SKIP DUP IF (; THEN THEN DROP @R+ DROP; ; UNW 
+'D EMIT 
+
+: WHERE? |N?? TOKEN? vTARG FND ; : ' WHERE? @+ @ ODD ?? ; : AT'
+|2- : TO' |2- : ADR' ' ?ODD ?? ; : TO` TO' , ; : AT` AT' , ; 
+: TO TO' PUSH ; : AT AT' PUSH ; 
+: VAL' ADR' 2+ ; : META ' : IS VAL' ! ; : BE ADR' ! ; 
+: ..TIMES |DROP : .TIMES |DROP : TIMES PUSH XR : TIMES|
+ FOR J EXEC NEXT : 2EXIT RDROP RDROP; ;    UNW
+META (CON. SPACES   ' TIMES| BE SPACES   
+5 SPACES 'C EMIT 
+
+: CREATE |UNW : VARIABLE 0 : VAR H,ER (VAR , ,< \ MAKERS
+'1 VAR TT TT @ EMIT BYE
+: QUAN (R#, (VAR3 : VALUE (R#, (SET2 : CONST H,ER (CON , ,<
+'2 EMIT
+: VQUAN (R#, (VAR3 : VECTOR (R#, (SET2 : DEFER H,ER (JUMP , ,< 
+'3 EMIT
+: BCONST (R#, (CON. CONST ; ' |ALIGNED  VECTOR v", \ VARIABLES
+'4 EMIT
+8 BCONST bs  10 BCONST lf  13 BCONST cr  '[ BCONST c[  : |[] c[
+EX ,< '] BCONST c] : |CR EX : CR TO cr TO lf  0 TO CNTC ;
+CR '5 EMIT
+$10 CONST 1H    $40 CONST 1L    256 CONST 1B    1024 CONST 1K
+'E EMIT
+
+: WORD, CSTR : STR, v", DUP C, : S, |DROP TIMES| CSTR  C, ; 
+: M: '; : ?M: =H WORD (R#, (MAC WORD, ;
+: BS, CSTR  S, ; : >"` '" WORD, ;
+
+: (D#2 POP XR : 4+ (@+; ,< 4 , 
+: = - 0= ; : I J ; : A@ XA I XA ; 
+: TREXE| PUSH J XR : (IXEC J PUSH ; 
+: 2PICK (UNDER : NUP OVER SWAP ; : WITHIN OVER- (UNDER - U< ; 
+: -ROT SWAP : USWAP XEP| SWAP ; : ROT USWAP SWAP ; 
+'F EMIT
+
+
+
+: 2DUP OVER OVER ; 
+: A! PUSH XA RDROP; ; UNW 
+    
+HERE  >, (D#0 C@, : REL, HERE 2+ - , ; 
+N: CALL, $E8 ,  =, JUMP, $E9 ,  HERE  >, (D#0 C@, : BREL, HERE
+1+ - DUP -128 128 WITHIN N?? C, ; =, JMPS, $EB , 
+'G EMIT
+ 
+\ MACROS
+
+\ ERR
+: `HALT CR 'E EMIT 'R EMIT 'R EMIT BYE ; 
+META `HALT  vERR 
+
+: (." ("R+ (SKIP : ID. |SPC : ". CSTR : TYPE |DROP 
+: TYPE+ TIMES| CSTR EMIT ;
+: |CR EX : CR (." ,< $D02 , $A , >, 0 TO CNTC ;  
+: _OK (." ,< $2003 , $4B4F , >, CR 
+      (." ,< $3E02 ,  $3E , >, ;     META _OK vOK        
+\ NUMOUT
+: `9>? 9 OVER U< : `7& (@&; ,< 7 , : S6 (|GO CALL  XEP| XEP|
+ XEP| THEN : S3 |SPC TREXE|  ROT DUP  : H. 1B U/MOD CALL  
+: B. |SPC THEN W>B 1H U/MOD CALL THEN : DIG. (|GO EMIT    
+: ALPHA `9>? +   : `'0'+ (@+; ,< '0 , 
+\ ERROUT
+: XY? 1K LTIB - ; : `In1K   (@&; ,< 1K 1- , : `ZBLK 0 ,<
+0 VALUE BLK : `BLK>SCR BLK ,<  0 VALUE SCR
+: |WAIT EX : WAITKEY |DROP 
+: BKEY CALL DUP W>B 0; W>B (; THEN 0 (IO; ,< $16CD , $90C3 ,
+' BKEY  VALUE StdKey : `StdKey! StdKey ,< ' BKEY  VALUE `KEY
+  >, (; ,<    VAL' `KEY =: KEY
+
+    
+SPACE $F DIG.
+: `(ERR StdEmit! `StdKey! CR TBUF ID. MESSAGE ID. CR BLK 0;
+   `BLK>SCR `ZBLK : XY!  XY? : >XY `In1K ,< 0 VALUE XY
+META `(ERR vERR    \ vERR FIXED
+
+$67 H.
+
+: MEMTI| A+L 0 : TI| BLK XR LTIB PUSH ETIB PUSH PUSH CALL EX
+POP POP POP THEN TO BLK TO LTIB TO ETIB : /BLK BLK 0; 0 
+TO ETIB ;
+
+'H EMIT 
+
+ GAGAGA
+
+   
+
+
+: . DUP 0< IF '- EMIT NEG THEN  
+: U. |SPC : `1 lf U/MOD  (?.SKIP `1  DIG. ;
+
+ -$700 CONST SBUF  -$600 CONST TIB
+ 
+-1 U. BYE
+
+\ : `SRC BLK 0; ETIB 0<>; BLK BLOCK 1K + TO ETIB ;
+
+: CR?    cr OF NIP DUP ;THEN
+ bs OF 2PICK OVER- 0; 1- bs EMIT SPACE bs EMIT ;THEN
+ DUP BL 1B WITHIN  (IF DROP; DUP EMIT SWAP C!+ ; 
+    
+: `RDLN TIB 1L 
+: ACCEPT 
+  |SPC OVER + OVER BEGIN KEY CR? 2DUP = UNTIL NIP OVER- ;
+
+META `RDLN READLN \ READLN FIXED
+
+
+: CSP! SP@ ,< 
+0 VALUE CSP
+: CSP? SP@ CSP - ;
+\ THIDE ;`
+   
+\ : ;`  ,;  CSP? TARG,< ?; ;;
+
+
+\ DEBUGERR
+
+: WFIND vTARG (IO; ,<
+ $04E8 , $3B00 , $FC5D , $C3 C, ' @FIND? $E9 ,R 2ALIGNED
+
+0 VALUE SAVEMT
+: `.WID. ID. 
+: `WID. 4+ ID. ; 
+: `EMTIN TO EMIT TO SAVEMT  StdEmit! CR ;
+: R3 POP POP POP J H. PUSH J H. PUSH J H. PUSH ;
+: @ID. DUP H. STR DUP H. SWAP @ H.  
+: ?ID. WFIND IF `WID. ;THEN  2- WFIND IF "_TO" `.WID. ;THEN
+  2-  WFIND IF "_AT" `.WID. ;THEN 4+  : $. '$ EMIT H. 
+;
+: DBG. `EMTIN R3 I |WAIT   
+: `DBG SPACE (UNDER S3 HERE H. vTARG H. A@ H.
+ SPACE @ID. SAVEMT AT EMIT ;
+
+
+' (; =: @MAIN
+2ALIGNED
+=P 4TH>  $E3FF , \ ,"~c~"  \ FROMF
+
+: TROFF (IO; ,< $8BB9 , $0F C, 
+HERE =: `@X_TRACE   $0E87 , ' @MAIN , $C3 C, 
+
+: TRON   (IO; ,<  $EBB9 ,  ' (NEXT 4 - ' @MAIN 2+ - C, 
+ $EB C, ' `@X_TRACE HERE 1+ - C, 
+
+
+2ALIGNED
+: @DBG      ,<  VAL' TROFF CALL,    ' _@JSR4TH CALL, >, 
+ `EMTIN R3 I `DBG BKEY  4TH> ,< 
+VAL' TRON  CALL,    $DF24 , $533C ,  $75AD , 03 C,
+VAL' TROFF CALL,    $8B5B , $F C, ' @MAIN 2+ $E9 ,R 
+2ALIGNED
+: TRACE ' TRON EXEC TROFF ;
+
+' @DBG ' (NEXT 1- -     ' (NEXT 3 - T!
+' TROFF 2+ ' ABORT 8 + - ' ABORT 6 + T!
+
+: WORDS CR T BEGIN 4+ ?C@ WHILE DUP ID. CSTR + 
+72 CNTC U< IF CR THEN REPEAT DROP ;
+
+
+
+
+
+BYE
+
 '1 EMIT
 CR ' EMIT ?ID. 
 CR

@@ -1,8 +1,8 @@
 : \ |LTIB DUP 0; 1 - (@&; ,< -64 ,   \ NOW WE HAVE COMMENTS
 
-: @+ PUSH @R+ POP; ; UNW
+: |2- EX 2- ; 
 : ODD (@&; ,< 1 , 
-: |2- EX 2- ;  
+: @+ PUSH @R+ POP; ; 
  
 \ STACK   
 : |DROP EX DROPX ; UNW
@@ -134,15 +134,13 @@ HERE  >, (D#0 C@,
 
 
 \ PRINTING
-: |SPC EX SPACE ;
-: `GAGA 
+: ((." (?S SKIP
 : ID. |SPC 
 : ". CSTR 
 : TYPE |DROP 
 : TYPE+ TIMES| CSTR EMIT 
 ;
 
-: ((." (?S ". ; 
 : ((" (?S ; 
 : |CR EX 
 : CR ((." ,< $D02 , $A , >, 0 TO CNTC 
@@ -242,8 +240,8 @@ META `RDLN READLN \ READLN FIXED
 : `EMTIN TO EMIT TO SAVEMT  StdEmit! CR ;
 : R3 POP POP POP J H. PUSH J H. PUSH J H. PUSH ;
 : @ID. DUP H. STR DUP H. SWAP @ H.  
-: ?ID. WFIND IF `WID. ;THEN  2- WFIND IF "_TO" `.WID. ;THEN
-  2-  WFIND IF "_AT" `.WID. ;THEN 4+  : $. '$ EMIT H. 
+: ?ID. WFIND IF `WID. ;THEN  2+ WFIND IF "_TO" `.WID. ;THEN
+  2+  WFIND IF "_AT" `.WID. ;THEN 4 -  : $. '$ EMIT H. 
 ;
 : DBG. `EMTIN R3 I |WAIT   
 : `DBG SPACE (UNDER S3 HERE H. vTARG H. A@ H.
@@ -274,6 +272,17 @@ VAL' TROFF CALL,    $8B5B , $F C, ' @MAIN 2+ $E9 ,R
 
 : WORDS CR T BEGIN 4+ ?C@ WHILE DUP ID. CSTR + 
 72 CNTC U< IF CR THEN REPEAT DROP ;
+
+\ 0 VALUE `WW 
+\ 0 VALUE `STR
+\ : `;WW `WW EX TO `WW ; 
+\ : ;[] '[ EMIT EX '] EMIT ;
+\ : `STR0 0 TO `STR CR DUP 2- H. OVER H. OVER ?ID.
+\ : `STR1 OVER @R+ - IF ;THEN PUSH (?S TO `STR POP ;
+\ : SEE ' : @SEE TO `WW : SL bs TIMES| 
+\ : WW `;WW @+ `STR0 ((A" `STR1 ((" `STR1 ((." `STR 0;
+\    ;[] `STR ". ;
+\ : TEST 1 2 3 "1234" ;
 
 
 : _IF   ,ER (IF   _MARKP ,<

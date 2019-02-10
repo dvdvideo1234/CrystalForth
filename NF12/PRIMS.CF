@@ -14,8 +14,6 @@ HERE 2- =: BYE
 : (D#1 POP XR       \ DOES_1 PRIMITIVE
 : 2+ (@+; ,< 2 , 
 
-: _THEN NOP     \ HERE TO FIX
-: SWAP! PUSH SKIP 
 : (PNT! (D#1 XR !R+ RDROP; ; UNW         
 
 : (SET2 (D#1  
@@ -49,20 +47,22 @@ APT- T;   =:  |T
 
 : ORG! H - ,<    0 VALUE  HOFS  
 : T>R HOFS - ; 
-: HERE H : R>T HOFS + ;
-' HERE  ' _THEN T!      \ DO FIX
+: HERE H : R>T HOFS + ;;
+: _THEN HERE     
+: SWAP! SWAP ! ;
 TO' H =: OBJ! 
 
 ' NOP;  DEFER vERR
 ' NOP;  DEFER vOK
 ' NOP;  DEFER READLN
  
-18 5 - 1K U*        VALUE; LTIB 
+33 6 - 1K U*        VALUE; LTIB 
 APT- LTIB;   =:  |LTIB      
-18 1K U* $100 +     VALUE ETIB
-: PRELT! LTIB ,< 0 VALUE PRELT \ IB
+33 1K U* $100 +     VALUE ETIB
+0 VALUE PRELT \ PRELTIB
 
 $F800 CONST TBUF  
+: |SPC EX SKIP
 : SPACES NOP : SPACE NOP ,<
   32  CONST BL   
 ' T   DEFER vTARG      
@@ -128,7 +128,7 @@ VAL' @EMIT =: EMIT
 : WORD  CALL    \ PARSE
 : S>TB! TBUF    : S>"! (IO; ,<   ,"^W~-~^Q~-~5~^@^Cy~GF~^E`"
 =H `_@MAKESTR   ,"^V~Q^Cq~}~&~s~$~|~Y^H~^M^V~^W~C~^P~"
->,      THEN    : PARSE  NOP ETIB |LTIB PRELT! (IO; ,< 
+>,      THEN    : PARSE  NOP ETIB |LTIB DUP TO PRELT (IO; ,< 
 ,"^Q~^K~{~c~^L+y~<_u^Fs~.~t^BOA^I~"
 ,"|^Bc~^Er~.~u^AO+|^B^I~<^Q~C~"
 

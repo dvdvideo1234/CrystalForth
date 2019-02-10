@@ -2,6 +2,18 @@ META INIZ     @INIT           \ TARGET FORTH STARTUP
 META `INTERP  LOCATE          \ TARGET FORTH INITIAL STATE
 HERE    VAL' H T!             \ TARGET FORTH HEAP
 
+TEST? ' (MAC ' WORD, 2- T!
+TEST? APT-  (("     =:  (" 
+TEST? APT-  ((."    =:  (." 
+APT-  ((A"    =:  (!" 
+
+THIDE (DEF   
+THIDE (WARY   
+THIDE @INIT    
+THIDE _@INI    
+THIDE U1+    
+THIDE INIZ   
+
 APT-  (?S     =: ("R+`  
 APT-  (@&;    =: (@&;`
 APT-  (@+;    =: (@+;`
@@ -13,12 +25,6 @@ APT-  (IF-    =: (IF-`
 APT-  (NEXT   =: (NEXT`
 APT-  (FOR+   =: (FOR+` 
 APT-  (FOR    =: (FOR`
-THIDE (DEF   
-THIDE (WARY   
-THIDE @INIT    
-THIDE _@INI    
-THIDE U1+    
-THIDE INIZ   
 APT-  @R+     =: @R+`
 APT-  !R+     =: !R+`
 APT-  XR      =: XR`
@@ -26,7 +32,7 @@ APT-  XA      =: XA`
 APT-  @EXEC   =: @EXEC`      
 APT-  EXEC    =: EXEC`
 APT-  RDROP;  =: RDROP;`
-APT2  (;         ;;`
+APT-  (;      =: (;`
 APT-  EX      =: EX`
 APT-  DROPX   =: DROP;`
 APT-  PUSH    =: PUSH`
@@ -40,23 +46,17 @@ APT2  TARG:!      :`
 APT-  (LIT,   =:  !#`
 '     !#`     =:  (#,
 APT-  (LIT    =:  (# 
-TEST? APT-  (("     =:  (" 
-TEST? APT-  ((."    =:  (." 
-TEST? APT-  ((A"    =:  (!" 
 APT-  TARG:   =:  :    
 APT-  TARG>,  =:  >, 
 APT2  TARG,<      ,<` 
 APT2  ,           RELS<`
 '     RELS<`  =:  ,   
-APT-  SWAP    =:  CSWAP`    
-'     CSWAP`  =:  SWAP    
 APT2  _MARKP      CALL`
 '     CALL`   =:  MARK>`
 APT2  HERE        BEGIN`
 '  BEGIN`     =:  HERE
 APT2  TARG;       ;`
 
-TEST? ' (MAC ' WORD, 2- T!
 
 WORD_THE_ONE =:  THIDE =:     \ WORD THE ONE
 
