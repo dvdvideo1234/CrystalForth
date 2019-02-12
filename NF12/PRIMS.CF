@@ -4,6 +4,8 @@
 
 \ HI LEVEL PRIMITIVES  ---------------------
 
+: @+ PUSH @R+ POP; ; UNW
+
 : 1+ (@+; ,< 1 , 
 HERE 2- =: BYE
  
@@ -52,9 +54,9 @@ APT- T;   =:  |T
 : SWAP! SWAP ! ;
 TO' H =: OBJ! 
 
-' NOP;  DEFER vERR
-' NOP;  DEFER vOK
-' NOP;  DEFER READLN
+' BYE  DEFER vERR
+' BYE  DEFER vOK
+' BYE  DEFER READLN
  
 33 6 - 1K U*        VALUE; LTIB 
 APT- LTIB;   =:  |LTIB      
@@ -62,9 +64,9 @@ APT- LTIB;   =:  |LTIB
 0 VALUE PRELT \ PRELTIB
 
 $F800 CONST TBUF  
-: |SPC EX SKIP
-: SPACES NOP : SPACE NOP ,<
-  32  CONST BL   
+\ : |SPC EX SKIP
+\ : SPACES NOP : SPACE NOP ,<
+\   32  CONST BL   
 ' T   DEFER vTARG      
 
 ' BEMIT VALUE StdEmit
@@ -122,7 +124,7 @@ VAL' @EMIT =: EMIT
 ,""~~^OZc~^G^K~=Q~o~r^EC~^R~" ' `_@FIND CALL, ,"@C~"
 
 : TOKEN?  |N??  
-: TOKEN BL  CALL NOP  \ TEST? DUP ID.  WAITKEY 
+: TOKEN 32  CALL NOP  \ TEST? DUP ID.  WAITKEY 
 : ?C@ DUP   : C@ @  : W>B (@&; ,< 255 , >,
             THEN
 : WORD  CALL    \ PARSE
@@ -141,6 +143,8 @@ VAL' @EMIT =: EMIT
 : ">NUM CSTR (NUM  ?? 
 ;
  
+: N: DUP 
+: =, |, 
 : TARG:!    NOP             \ BE ALIGMENT CHK
 : =H HERE : =: 0            \ MAIN ENTRY MAKER
 : =F TOKEN? : @SAME? NOP    \ BE SAME? CHK
