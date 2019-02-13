@@ -35,7 +35,6 @@ APT-     _POP     =: POP
 APT-     _POPX    =: POP;    
 APT-     _RDROP   =: RDROP   
 APT-     _SWAP    =: SWAP    
-\ APT-     _XOR     =: XOR     
 APT-     _MDIV    =: -/    
 APT-     _U1P     =: U1+    
 APT-     _P2DIV   =: +2/   
