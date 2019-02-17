@@ -4,22 +4,22 @@
 : TARG; ;, 
 : TARG,< TO LOCATE  
 : `INTERP T FND  ,< 
-0 WARY []OPER >,  ">NUM ">NUMC @EXEC @, ,< 
+0 WARY []OPER >,  ">NUM ">NUMC @EXECUTE @, ,< 
 
  
       \   COMPILER
       
-: TARG: NOP =H 
-: TARG>, TO LOCATE  vTARG CFND []OPER ;
+: TARG: (NOP =H 
+: >, TO LOCATE  vTARG CFND []OPER ;
      
 
       \ FUNCTION EVAL 
 
 : (MAC    (D#0  
 : "EVAL   CSTR  
-: EVAL    NOP   \ BE  MEMTI| 
-: @EVAL   NOP   \ BE  STACK CHK
-    TOKEN DROP; ?; LOCATE @EXEC RECURSE ;
+: EVAL    (NOP   \ BE  MEMTI| 
+: @EVAL   (NOP   \ BE  STACK CHK
+    TOKEN DROP; ?; LOCATE @EXECUTE RECURSE ;
 
       \ INITIALIZATION, TESTING & MAIN LOOP
       

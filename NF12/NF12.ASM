@@ -306,8 +306,8 @@ P_ _XA				  ; XA
 P_ _NOP
   JMPS  @MAIN 
   
-P_ _QARY
-  SHL   TOP,1
+;P_ _QARY
+;  SHL   TOP,1
 P_ _LARY
   SHL   TOP,1
 P_ _WARY
@@ -316,12 +316,12 @@ P_ _BARY
   ADD   TOP,IP
   JMPS  _@4TH
 
-p_ _EXEC@
-  XCHG  TOP,W
-  MOV   TOP,[W]
-P_ _EXEC
-  POPR_ DR
-  JMPS  @MAIN3
+;p_ _EXEC@
+;  XCHG  TOP,W
+;  MOV   TOP,[W]
+;P_ _EXEC
+;  POPR_ DR
+;  JMPS  @MAIN3
   
 
 ; IO COMMANDS vvvvvvvvvv  ---------------------------
@@ -337,6 +337,7 @@ P_ _IO  				  ; IF INPUT PARAMS = OUTPUT PARAMS
   MOV   DX,[DSP+4]
   MOV   CX,[DSP+2]
   MOV   BX,[DSP]   
+_@IO:  
   POP   W
   ;INT   3
   CALL  W
@@ -379,8 +380,8 @@ P_ _DROP				; DUPLICATE TOP
   JMPS  @DROP
 
   
-P_ _NFOR
-  NOT   TOP
+;P_ _NFOR
+;  NOT   TOP
 P_ _FOR
   mov   ip,[ip]
 P_ _PUSH				; PUSH
