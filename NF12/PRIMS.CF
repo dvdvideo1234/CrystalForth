@@ -4,6 +4,8 @@
 
 \ HI LEVEL PRIMITIVES  ---------------------
 
+: (D#2 (POP (XR 
+: 4+ (@+; ,< 4 , 
 : 1+ (@+; ,< 1 , 
 HERE 2- =: BYE
  
@@ -40,7 +42,7 @@ HERE 2- =: BYE
 \ VARIABLES ------------------
  
 : |H CALL (EX (SET2 THEN ,<     0 CONST H
-    0 VALUE   MESSAGE
+    0 VALUE   MESSAGE    TO' MESSAGE =: MSG!
 : |T CALL (EX (SET2 THEN ,< $F800 CONST T
 
 : ORG! H - ,<    0 VALUE  HOFS  
@@ -60,8 +62,6 @@ TO' H =: OBJ!
 \ 0 VALUE PRELT \ PRELTIB
 
 $F800 CONST TBUF  
-\ : |SPC EX SKIP
-\ : SPACES NOP : SPACE NOP ,<
   32  CONST BL   
 ' T   DEFER vTARG      
 
@@ -90,6 +90,7 @@ VAL' @EMIT =: EMIT
   0  CONST 0
 
 : ;, (@, ;;
+: (, (POP , ;
 
 : H>STR H 
 : STR (PUSH (@R+ (XR (POP; 
@@ -97,14 +98,14 @@ VAL' @EMIT =: EMIT
 
 : (|LIT,, (EX  
 : (LIT,,  |, 
-: (LIT,   |, (VAR 
+: (LIT,   (,
 : (LIT (@R+ ;
 
 : 0<>;  (0= 
 : 0;    EXIT ?; 
 ;;
 
-: ((A"  ("R+ TO MESSAGE  0;  (ABORT ; UNW 
+: ((A"  ("R+ TO MESSAGE  0;  : RESTART (ABORT ; UNW 
 
 : |N?? (EX  
 : N??  (0= 
@@ -122,8 +123,7 @@ VAL' @EMIT =: EMIT
 ,"^Q~^K~{~c~^L+y~<_u^Fs~.~t^BOA^I~"
 ,"|^Bc~^Er~.~u^AO+|^B^I~<^Q~C~"
 
-: WHERE? |N?? : ?' TOKEN? vTARG 
-: FND (IO; 
+: FND?? |N?? : FND' TOKEN? : TFND vTARG   : FND (IO; 
 : `_@FIND ,< ,"h~^G^@V^K~s~s~&~"^C~" HERE =: @FIND?
 ,"Z3I~^CA~^K~x~^M~}^D^J~^Mc~^MA~R~^W~uo~"
 ,"1~^B^AM^B^I~<^K~A~C~"
@@ -136,7 +136,7 @@ VAL' @EMIT =: EMIT
 
 : CSTR ?C@ (U1+ ;
 : ">NUMC (|LIT,, 
-: ">NUM CSTR ATOI (SKIP : |?? (EX ?? ;
+: ">NUM CSTR ATOI ?? ;
  
 : N: (DUP 
 : =, |, 
@@ -144,11 +144,9 @@ VAL' @EMIT =: EMIT
 : =H HERE : =: 0            \ MAIN ENTRY MAKER
 : =F TOKEN? : @SAME? (NOP    \ BE SAME? CHK
 : (=:  ?C@ 1+ |T MPUSH TWICE
-: !-    CALL    : ?! !+ THEN
+: !-    CALL  !+ THEN
 : 2- (@+; ,< -2 , 
 
-: (H,ER (D#0 TARG:!  STR , 
 : @EXECUTE @
 : EXECUTE (PUSH 
 ;
-

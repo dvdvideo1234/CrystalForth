@@ -8,35 +8,10 @@ TEST? APT-  ((."    =:  (."
 APT-  ((A"    =:  (!" 
 
 THIDE (DEF   
-THIDE @INIT    
+THIDE @INIT 
+THIDE @EMIT    
 THIDE _@INI    
 THIDE INIZ   
-
-\ APT-  (?S     =: ("R+`  
-\ APT-  (@&;    =: (@&;`
-\ APT-  (@+;    =: (@+;`
-\ APT-  (IO;    =: (IO;`
-\ APT-  (JUMP   =: (JUMP`
-\ APT-  (IF     =: (IF`
-\ APT-  SKIP    =: (SKIP
-\ APT-  (IF-    =: (IF-`
-\ APT-  (NEXT   =: (NEXT`
-\ APT-  (FOR+   =: (FOR+` 
-\ APT-  (FOR    =: (FOR`
-\ APT-  @R+     =: @R+`
-\ APT-  !R+     =: !R+`
-\ APT-  XR      =: XR`
-\ APT-  XA      =: XA`
-\ APT-  @EXEC   =: @EXEC`      
-\ APT-  EXEC    =: EXEC`
-\ APT-  RDROP;  =: RDROP;`
-\ APT-  (;      =: (;`
-\ APT-  EX      =: EX`
-\ APT-  DROPX   =: DROP;`
-\ APT-  PUSH    =: PUSH`
-\ APT-  POP     =: POP`
-\ APT-  POP;    =: POP;`
-\ APT-  RDROP   =: RDROP`
 
  
 APT2  _THEN       THEN` 
