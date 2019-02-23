@@ -27,19 +27,22 @@ N: NEG`   ,' (NEG    N: 0=`    ,' (0=    N: U<`    ,' (U<
 N: NOT`   ,' (NOT    N: BEMIT` ,' (BEMIT N: RDROP;` ,' (RDROP;
 =, 0<`    ,' (0<     
 
-\ ERROUT & BYE
+\ COMMON WORDS, ERROUT & BYE
+: (UNDER @R+ PUSH : XEP| XR EXECUTE POP; ; UNW 
+: A+L XEP| : I+ J + ;       : IXEC J PUSH ;
 : |DROP EX : DROP DROP; ; UNW ' ;, =: ;;`  : C;` (JUMP` ,<`
-: C:` MARK>` : ?` (|GO SWAP! : ADR' ' (DUP ODD?? : NOP ; 
-: X:` ADR' (PUSH ; : FOR` (FOR` MARK>` BEGIN` : SWAP SWAP ; 
+: C:` MARK>` : ?` (|GO SWAP! : ADR' ' DUP ODD?? : NOP ; 
+: X:` ADR' PUSH ; : FOR` (FOR` MARK>` BEGIN` : SWAP SWAP ; 
 : NEXT` THEN` (NEXT` RELS<` RDROP` ; : ..TIMES |DROP : .TIMES
 |DROP : TIMES PUSH XR : TIMES| FOR J EXECUTE NEXT : EXIT RDROP;
 ; UNW : (."` (, "R+ : ". CSTR : TYPE |DROP TIMES| CSTR EMIT ; 
 : |SPC EX : SPACE BL SKIP : |EMIT EX EMIT ; : ID. |SPC C; ".  
-: _ERR TBUF ID. MESSAGE ID. BYE ; ' _ERR ADR' vERR 2+ !
+: = - 0= ; : AND NAND NOT ; : -ROT SWAP : USWAP XEP| SWAP ; 
+: 0>A| 0 : >A| XR XA EXECUTE : AXIT XA RDROP; ; UNW
+: ROT USWAP SWAP ; : I J ; : A@ XA I XA ; : A! PUSH C; AXIT 
+\ : _ERR TBUF ID. MESSAGE ID. BYE ; ' _ERR ADR' vERR 2+ !
  
 \ CONTROL
-: (UNDER @R+ PUSH : XEP| XR EXECUTE POP; ; UNW 
-: A+L XEP| : I+ J + ;       : IXEC J PUSH ;
 : GO|` (|GO` MARK>` ;       : AHEAD` (JUMP` MARK>` ; 
 : ELSE` AHEAD` SWAP THEN` ; : AGAIN` (JUMP` RELS<` ;
 : WHILE` GO| ? SWAP         : IF`   (IF`  MARK>` ;   
@@ -68,6 +71,7 @@ N: NOT`   ,' (NOT    N: BEMIT` ,' (BEMIT N: RDROP;` ,' (RDROP;
 0#> `@A'+ PUSH ; N: AT  -4 ,  =, TO  -2 ,  : VAL@ VAL' @ ;
 ' NOP VECTOR `vDO : `DO ' TO `vDO POP ; : DO# `DO TOKEN? ">NUM
 `vDO ; : ZDO `DO 0 `vDO ; : DO `DO `vDO ; : DO' `DO ' `vDO ;
+' |ALIGNED VECTOR v",  : `ZBLK 0 ,< 0 VALUE BLK
 
 \ HIDE UNNECESSARY WORDS
 DO HIDE 53 TIMES   (ABORT (@&; (@+; ("R+ (IO; (; (IF (SKIP (IF-
@@ -76,45 +80,31 @@ DO HIDE 53 TIMES   (ABORT (@&; (@+; ("R+ (IO; (; (IF (SKIP (IF-
  (RDROP (SWAP (-/ (U1+ (+2/ (2/ (+* (D2/ (NAND (NEG (0= (NOT
  (U< (0< ;, (SET2 (CON (VAR (MAC (!" (SP@ DROP; NOP;
 
-\ VARIABLES 
-: CSP! SP@ ,< 0 VALUE CSP  : CSP? SP@ CSP - ;
-DO# BCONST 4 TIMES   8 bs  '- c-  13 cr  10 lf  
-' |ALIGNED VECTOR v",     DO# CONST 6 
-TIMES  $10 1H  -$700 SBUF  -$600 TIB  1024 1K  $40 1L  256 1B 
-: |HLD CALL EX (SET2 THEN ,< 0 CONST HLD 
-: |SCR CALL EX (SET2 THEN ,< 0 CONST SCR
-: BASE! 2- W>B 2+ ,< 10 VALUE BASE 
-: `ZBLK 0 ,< 0 VALUE BLK  
-
 \ MACRO & STR,
 : M: ';  : ?M: =H WORD (MAC` : WORD, CSTR v", : STR, DUP C, 
 : S, |DROP TIMES| CSTR  C, ; : BS, CSTR  S, ; : A"` (!"` 
 : "STR,  '" WORD  WORD, ; : ."` (."` "STR, ; : "` ("` "STR, ; 
-: |CR EX : CR TO cr TO lf  0 TO CNTC ; : |[] ." [" EX ." ]" ; 
-: [ID] CSTR : [S] |SPC |DROP : [TYPE] |[] TIMES| CSTR DUP BL U<
- IF DROP '. THEN EMIT ; : _OK ."  Ok" CR ." >>" ; : MEMTI| A+L 
+: |[] ." [" EX ." ]" ; : [ID] CSTR : [S] |SPC |DROP : [TYPE] 
+|[] TIMES| CSTR DUP BL U< IF DROP '. THEN EMIT ;  : MEMTI| A+L 
  0 : TI| BLK XR LTIB PUSH ETIB PUSH PUSH CALL EX POP POP POP
- THEN TO BLK TO LTIB TO ETIB : /BLK BLK 0; 0 TO ETIB ; 
+ THEN TO BLK TO LTIB TO ETIB : /BLK BLK 0; 0 TO ETIB ;
+M: TWICE|` CALL THEN; M: TRICE|` CALL TWICE| THEN;
+M: |VAL;` CALL EX (SET2 THEN ,<;     ' MEMTI| BE EVAL 
+ 
+\ VARIABLES 
+DO# BCONST 4 TIMES   8 bs  '- c-  13 cr  10 lf     
+: BASE! 2- W>B 2+ ,< 10 VALUE BASE     DO# CONST 6 
+TIMES  $10 1H  -$700 SBUF  -$600 TIB  1024 1K  $40 1L  256 1B 
+: |HLD |VAL; 0 CONST HLD    : |SCR |VAL; 0 CONST SCR
+: |CR EX : CR TO cr TO lf 0 TO CNTC ; : _OK ."  Ok" CR ." >>" ;
+: CSP! SP@ ,< 0 VALUE CSP  : CSP? SP@ CSP - ;
 
-\ NUMOUT 
-: = - 0= ; : AND NAND NOT ; : -ROT SWAP : USWAP XEP| SWAP ; 
-: ROT USWAP SWAP ; : 0>A| 0 : >A| XR XA EXECUTE XA C; EXIT
-: U/ |DROP : (/MD >A| 0 CALL THEN  CALL THEN -/ -/ -/ -/ ; 
+\ MULTIPLY, DIVIDE & MODULO
+: U/ |DROP : (/MD >A| 0 TWICE|  TWICE| -/ -/ -/ -/ ; 
 : UMOD |DROP : U/MOD (/MD SWAP ; 
-: U* |DROP : UM*  >A| 0 CALL THEN  CALL THEN +* +* +* +* ;
-: `9>? 9 OVER U< (@&; ,< 7 , : S6 GO|  XEP| XEP| XEP|  THEN 
-: S3 |SPC CALL CALL THEN THEN ROT DUP : H. 1B U/MOD CALL
-: B. |SPC THEN W>B 1H U/MOD CALL THEN : DIG. |EMIT   
-: ALPHA `9>? +   : 48+ (@+; ,< '0 , 
-
-: ?TAB HLD - : SPACES TIMES| SPACE ; : # BASE U/MOD : HOLD |HLD
- 1+ ; : <# 0 TO HLD BASE! ; : <#>| <# EX ?TAB : #> DROP HLD
-TIMES| DIG. ;  : `6 DUP 0< 0; NEG EX -10 SWAP HOLD ; : U. 0 
-: U.RS |SPC : U.R lf : U.R# <#>| : u. 31 AND XEP| : S# UNTILZ| 
-# DUP ; : . 0 : .RS |SPC : .R lf : .R# <#>| SWAP `6 SWAP C; u. 
-
-12345 10 .R
-
+: U* |DROP : UM*  >A| 0 TWICE|  TWICE| +* +* +* +* ;
+: MOD1K   (@&; ,< 1K 1- , 
+ 
 \ KEY StdKey WAITKEY
 : BKEY? CALL 1L AND 0= ;; THEN 1B (IO; ,< $16CD , $589C , $90C3
  , : |WAIT EX  : WAITKEY |DROP : BKEY BEGIN BKEY? UNTIL
@@ -123,6 +113,27 @@ TIMES| DIG. ;  : `6 DUP 0< 0; NEG EX -10 SWAP HOLD ; : U. 0
 ' `KEY 2+ =: KEY : /LINE? 0<>; |CR BKEY 27 = 0;  : EOS! cr ,< 
 0 VALUE EOS : EOS| EOS XR PUSH 0 TO EOS EX POP TO EOS ;
  
+\ NUMOUT \ tab NUMOUT 
+: `9>? 9 OVER U< (@&; ,< 7 , : S6 GO|  XEP| XEP| XEP|  THEN 
+: S3 |SPC TRICE| ROT DUP : H. 1B U/MOD CALL
+: B. |SPC THEN W>B 1H U/MOD TWICE| : DIG. |EMIT   
+: ALPHA `9>? +   : 48+ (@+; ,< '0 , 
+: ?TAB HLD - : SPACES TIMES| SPACE ; : <# 0 TO HLD BASE! ;  
+: # BASE U/MOD : HOLD |HLD 1+ ; : <#>| <# EX ?TAB : #> DROP HLD
+TIMES| DIG. ; : `6 DUP 0< 0; NEG EX XEP| -10 SWAP HOLD ; : U. 0 
+: U.RS |SPC : U.R lf : U.R# <#>| : u. 31 AND XEP| : S# UNTILZ| 
+# DUP ; : . 0 : .RS |SPC : .R lf : .R# <#>| SWAP `6 SWAP C; u. 
+
+\ DEBUGERR 1
+: 2@ |DROP 4+ : 2@- @- @- ; : 2! !+ ! ; 0 VAR `DBGSAV Z, Z, 
+: `EMTIN TO EMIT A@ `DBGSAV 2! StdEmit! CR ; : R3 POP POP POP J
+ H. PUSH J H. PUSH J H. PUSH ; : `.WID. ID. : WID. 4+ ID. ; 
+: @ID. DUP H. STR DUP H. SWAP @ H.  : ?ID. WFIND IF WID. ;;
+ THEN  2+ WFIND IF " TO" (JUMP `.WID. THEN 2+ WFIND IF  " AT" 
+ (JUMP `.WID. THEN 4 -  : $. '$ EMIT H. ; : DBG. `EMTIN R3 I
+ |WAIT : `DBG SPACE (UNDER S3 HERE H. vTARG H. `DBGSAV @ H.
+ SPACE @ID. `DBGSAV 2@ A! AT EMIT ;
+
 \ CMOVE, WORDS & DEA - DICTIONARY ENTRY ADDRESS
 : >DEA 4+ : NAME> CSTR + ; : DEA? 4+ C@ ; : NAME. XEP| J DEA?
  1 + CNTC + 80 U< /LINE?  J 4+ ID. ; : WORDS EOS| CR 0 T BEGIN
@@ -132,11 +143,11 @@ TIMES| DIG. ;  : `6 DUP 0< 0; NEG EX -10 SWAP HOLD ; : U. 0
 : CMOVE> A+L SWAP MPUSH C; MSG! 
 : CMOVE |DROP FOR PUSH CSTR POP C!+ NEXT C; MSG! 
 
-\ SCAN & READLN
+\ BSCAN, SCAN, (BSC & READLN
 : BSCAN W>B PUSH XR PUSH J FOR CSTR J - IF X: -ROT NEXT : NFND
  J PUSH : /SCAN THEN DROP POP NOT RDROP POP + ; : SCAN PUSH XR
  PUSH J FOR STR J - IF ? /SCAN NEXT C; NFND 
-: 2DUP OVER OVER ; : I J ; : 2PICK PUSH OVER XR POP; ; UNW
+: 2DUP OVER OVER ; : 2PICK PUSH OVER XR POP; ; UNW
 0#> PUSH W>B XR CSTR I BSCAN 1+ XR POP DUP 0; NIP ;
 =, (BSC  2 C, cr C, bs C, ALIGNED 
 : `BS 2PICK OVER- 0; 1- TO bs SPACE TO bs ;
@@ -145,92 +156,29 @@ TIMES| DIG. ;  : `6 DUP 0< 0; NEG EX -10 SWAP HOLD ; : U. 0
 : _RL  TIB 1L : ACCEPT |SPC EOS| OVER + OVER BEGIN KEY 
 (BSC `TABKEY @EXECUTE EOS  UNTIL    NIP OVER-   ;
 
-: >1K   (@&; ,< 1K 1- , : XY? 1K LTIB - ; \ : |BYE EX BYE ; 
+\ ERROR ROUTINE ESTABLISH    : |BYE EX BYE ; 
+: XY? 1K LTIB - ; 
 : `(ERR StdEmit! `StdKey! CR TBUF ID. MESSAGE ID. CR BLK 0;
-   BLK TO SCR  `ZBLK : XY!  XY? : >XY >1K ,< 0 VALUE XY
-META `(ERR vERR    
- ' MEMTI| BE EVAL 
-META _OK vOK  
-META _RL READLN
+   BLK TO SCR  `ZBLK : XY!  XY? : >XY MOD1K ,< 0 VALUE XY
+META `(ERR vERR    META _OK vOK    META _RL READLN
 
-=FDYFGHDFGH-
-
-\ : A@ XA I XA ; : A! PUSH XA EXIT ; UNW 
- 
-M: TWICE` CALL THEN; M: |VAL` CALL EX (SET2 THEN ,<;
-
-SPACE 12345 . -12345 .
-
-\ : ;`  ,;  CSP? TARG,< ?; ;;
-
-
-\ DEBUGERR
-0#> C@, : REL, HERE 2+ - , ; N: CALL, $E8 ,  =, JUMP, $E9 ,  
-0#> C@, : BREL, HERE 1+ - 
-: BREL?, DUP (W2 ,< -128 , 128 , >, N?? C, ; =, JMPS, $EB , 
-'2 EMIT
-
-: WFIND vTARG (IO; ,<
- $04E8 , $3B00 , $FC5D , $C3 C, ' @FIND? JUMP, ALIGNED
- 
-'3 EMIT
-'Z EMIT
-
-0 VALUE SAVEMT  : `.WID. ID. : WID. 4+ ID. ; 
-: `EMTIN TO EMIT TO SAVEMT  StdEmit! CR ;
-: R3 POP POP POP J H. PUSH J H. PUSH J H. PUSH ;
-'1 EMIT
-: @ID. DUP H. STR DUP H. SWAP @ H.  : ?ID. WFIND IF WID. ;;
- THEN  2+ WFIND 
-IF 
-,< '3 EMIT >, 
-" TO" 
-,< '4 EMIT >, 
-(JUMP `.WID. THEN
-  2+ WFIND IF 
-,< '5 EMIT >, 
-  " AT" 
-,< '6 EMIT >, 
-  (JUMP `.WID. THEN
-  4 -  : $. '$ EMIT H. ;
-'7 EMIT
-: DBG. `EMTIN R3 I |WAIT   
-: `DBG SPACE (UNDER S3 HERE H. vTARG H. A@ H.
- SPACE @ID. SAVEMT AT EMIT ;
- 
-'4 EMIT
-
+\ DEBUGERR 2 STEP BY STEP
 VAL@ ;;` =: @MAIN  ALIGNED  HERE 1+ =: 4TH>  $E3FF , 
-
-'3 EMIT  \ BYE
-
 : TROFF (IO; ,< $8BB9 , $0F C, 
 HERE =: `@X_TRACE   $0E87 , ' @MAIN , $C3 C, 
-
 : TRON   (IO; ,<  $EBB9 ,  VAL@ (NEXT` 4 - ' @MAIN 2+ - BREL?, 
   ' `@X_TRACE JMPS, ALIGNED
-  
-: @DBG      ,<  VAL' TROFF CALL,    VAL@ EX` 1- CALL, >, 
+  : @DBG      ,<  VAL' TROFF CALL,    VAL@ EX` 1- CALL, >, 
  `EMTIN R3 I `DBG BKEY  4TH> ,< 
 VAL' TRON  CALL,    $DF24 , $533C ,  $75AD , 03 C,
 VAL' TROFF CALL,    $8B5B , $F C, ' @MAIN 2+ JUMP, ALIGNED
-
 : TRACE ' TRON EXECUTE TROFF ;
 ' @DBG VAL@ (NEXT` 1- -      VAL@ (NEXT` 3 - !
 ' TROFF 2+ VAL@ ABORT` 8 + - VAL@ ABORT` 6 + !
 
-
-\ 1 2 TRACE +* \ 
-\ WORDS
-
-CR T NAME. EOS .
-12345 . $1234 H. HERE . CR 
-BYE
- 
-META _RL READLN \ READLN FIXED
-READLN TYPE
-
 FGSDFGSDFGSD---
+=FDYFGHDFGH-
+
 
 
 \ PREPARE FOR COMPILING EDITOR
@@ -238,12 +186,12 @@ FGSDFGSDFGSD---
 : |NIP EX NIP ;
 
 \ COMPARING PRIMITIVES  
-: RED| 2DUP EX >?; CSWAP` ; 
+: RED| 2DUP EX IF ? SWAP ; 
 : UMAX |NIP : URED RED| U< ; : UMIN |DROP URED ; 
 : MAX |NIP  : REDI RED| : < - 0< ; : <> - : 0<> 0= 0= ;
-: MIN |DROP >; REDI
+: MIN |DROP C; REDI
 
-0#> C@  : FILL (PUSH FOR J SWAP C!+ NEXT : .EXIT DROP RDROP ;
+0#> C@  : FILL PUSH FOR J SWAP C!+ NEXT : .EXIT DROP RDROP ;
 N: ERASE Z,  =, BLANK BL ,   TO' .EXIT =: .2EXIT
 
 : ONPLACE GO| DUP XEP| TWICE NUP THEN : REVERT BEGIN 1- 2DUP U<
@@ -421,3 +369,4 @@ SWITCH: `EK `ONEC C^ J -: `<- C^ K -: `-> C^ X -: `CUT 127
 \ : ;` `(SP @H- (DUP ODD (IF MARK> , (JUMP ;;` 
 \    THEN (JUMP` (JUMP , ,<  
 \ ' CSP! ' : !
+\ : ;`  ,;  CSP? TARG,< ?; ;;

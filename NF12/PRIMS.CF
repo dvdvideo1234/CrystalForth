@@ -67,8 +67,7 @@ $F800 CONST TBUF
 
 ' (BEMIT VALUE StdEmit
 : StdEmit! StdEmit ,<
-' (BEMIT VALUE @EMIT 
->, CALL 1+ (SET2 THEN ,<
+' (BEMIT VALUE @EMIT   >, CALL 1+ (SET2 THEN ,<
 0 CONST CNTC 
 VAL' @EMIT =: EMIT
 
@@ -105,7 +104,7 @@ VAL' @EMIT =: EMIT
 : 0;    EXIT ?; 
 ;;
 
-: ((A"  ("R+ TO MESSAGE  0;  : RESTART (ABORT ; UNW 
+: ((A"  ("R+ MSG!  0;  : RESTART (ABORT ; UNW 
 
 : |N?? (EX  
 : N??  (0= 
