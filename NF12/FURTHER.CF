@@ -102,15 +102,7 @@ TIMES  $10 1H  -$700 SBUF  -$600 TIB  1024 1K  $40 1L  256 1B
 : |HLD |VAL; 0 CONST HLD    : |SCR |VAL; 0 CONST SCR
 : ?|CR 0; : |CR EX : CR TO cr TO lf 0 TO CNTC ; 
 : _OK ."  Ok" CR ." >>" ;
-: CSP! SP@ ,< 0 VALUE CSP  : CSP? SP@ CSP - ;
 
-\ MULTIPLY, DIVIDE & MODULO
-: >LO 1B : U/ |DROP : (/MD >A| 0 TWICE|  TWICE| -/ -/ -/ -/ ; 
-: UMOD |DROP : U/MOD (/MD SWAP ; 
-: >HI 1B : U* |DROP : UM*  >A| 0 TWICE|  TWICE| +* +* +* +* ;
-: 1KMOD (@&; ,< 1K 1- , : W>BB 1B U/MOD ; : B>HH W>B 1H U/MOD ;
-: `9>? 9 OVER U< : 8MOD (@&; ,< 7 ,  
- 
 \ KEY StdKey WAITKEY
 : BKEY? CALL 1L AND 0= ;; THEN 1B (IO; ,< $16CD , $589C , $90C3
  , : |WAIT EX  : WAITKEY |DROP : BKEY BEGIN BKEY? UNTIL
@@ -118,6 +110,13 @@ TIMES  $10 1H  -$700 SBUF  -$600 TIB  1024 1K  $40 1L  256 1B
 ' BKEY VALUE StdKey : `StdKey! StdKey ,< ' BKEY VALUE `KEY ;;`
 ' `KEY 2+ =: KEY : /LINE? 0<>; |CR BKEY 27 = 0;  : EOS! cr ,< 
 0 VALUE EOS : EOS| EOS XR PUSH 0 TO EOS EX POP TO EOS ;
+ 
+\ MULTIPLY, DIVIDE & MODULO
+: >LO 1B : U/ |DROP : (/MD >A| 0 TWICE|  TWICE| -/ -/ -/ -/ ; 
+: UMOD |DROP : U/MOD (/MD SWAP ; 
+: >HI 1B : U* |DROP : UM*  >A| 0 TWICE|  TWICE| +* +* +* +* ;
+: 1KMOD (@&; ,< 1K 1- , : W>BB 1B U/MOD ; : B>HH W>B 1H U/MOD ;
+: `9>? 9 OVER U< : 8MOD (@&; ,< 7 ,  
  
 \ NUMOUT \ tab NUMOUT 
 : S6 GO|  XEP| XEP| XEP|  THEN : S3 |SPC TRICE| ROT DUP 
@@ -144,13 +143,13 @@ TIMES| DIG. ; : `6 DUP 0< 0; NEG EX XEP| -10 SWAP HOLD ; : U. 0
 U/MOD SWAP 0; 1+ ; : `BDM |SPC .TIMES| CSTR B. ; : DUMP 1H
  UNITS? .TIMES| : DU CR DUP H. SPACE 1H 2DUP `BDM [TYPE] ;
 
-\ CMOVE, WORDS & DEA - DICTIONARY ENTRY ADDRESS
-: >DEA 4+ : NAME> CSTR + ; 
-: `NAMOV? DXEP| 5+ C@ '` - 0; J @ 1B HERE  WITHIN 0;
- J DUP >DEA OVER- MESSAGE SWAP 
+\ CMOVE, PRUNE & DEA - DICTIONARY ENTRY ADDRESS
+: >DEA 4+ : NAME> CSTR + ; : `NAMOV? DXEP| 5+ C@ '` - 0; J @ 1B
+ HERE  WITHIN 0; J DUP >DEA OVER- MESSAGE SWAP 
 : CMOVE |DROP FOR PUSH CSTR POP C!+ NEXT C; MSG! 
 : PRUNE HERE MSG! CALL |T DROP PUSH HERE MESSAGE OVER- POP
  MPUSH ;THEN T CALL WHILE| `NAMOV? >DEA THEN DUP : DEA? 4+ C@ ;
+\ WORDS 
 : `NAME. XEP| J DEA?
  1 + CNTC + 80 U< /LINE?  J 4+ ID. ; : WORDS EOS| CR 0 T BEGIN
  DUP DEA? WHILE `NAME. >DEA U1+ EOS UNTIL THEN DROP . ; 
@@ -175,6 +174,7 @@ U/MOD SWAP 0; 1+ ; : `BDM |SPC .TIMES| CSTR B. ; : DUMP 1H
 : XY? 1K LTIB - ; : |XY CALL EX : >XY 1KMOD (SET2 THEN 
 ,< 0 CONST XY : `(ERR StdEmit! `StdKey! CR TBUF ID. MESSAGE ID.
 CR BLK 0; BLK TO SCR  `ZBLK : XY!  XY? >XY ;
+: CSP! SP@ ,< 0 VALUE CSP  : CSP? SP@ CSP - ;
 META `(ERR vERR    META _OK vOK    META _RL READLN
 
 \ DEBUGERR 2 \ STEP BY STEP
@@ -210,11 +210,10 @@ HIDE ABORT`
  SWAP C!+ NEXT : .EXIT DROP RDROP; ; UNW ' .EXIT 2- =: .2EXIT
 N: ERASE Z,  =, BLANK BL ,  
 
-: ONPLACE GO| DXEP| TWICE| NUP THEN : REVERT |2DROP CALL 
-WHILE| PUSH PUSH J C@ I C@ J C! POP C!+ POP THEN 1- 2DUP U< ;
-
 \ EMPTY FOR NOW STUBS
 : UPDATE ; : -BUF ; : /BUFS ; : FLUSH ;
+: ONPLACE GO| DXEP| TWICE| NUP THEN : `REVERT |2DROP CALL 
+WHILE| PUSH PUSH J C@ I C@ J C! POP C!+ POP THEN 1- 2DUP U< ;
 
 : { '} PARSE 2DROP ;    ' { =: {`
 ' \ =: \`       \ COMMENTS WORKS NOW IN COMPILER STATE
@@ -244,155 +243,100 @@ ZDO VALUE 5 TIMES _FL _AX _BX _CX _DX
 0 24 >POS: PAGE 26  CRS  : HOME D0 GOTOXY ; 
 
 ' (# =: (LIT
+: TEST 1 2 3 " 1234" ; 0 VALUE `ADR2 : `" (WSC ,< 3 , >, (!" ("
+ (." ,< : `|WW |VAL; 0 CONST `WW : `A:? WFIND IF ? DROP ." : " 
+WID. ; : SEE ' : @SEE TO `WW : SL bs TIMES| : WW `|WW CR DUP H.
+ DUP `A:? STR DUP H. DUP ?ID. `" 1+ 0; PUSH "R+ [ID] POP ;
+ 
+
+
 17 . \ 17 BLOCK1 OF EDITOR
 ZDO VALUE 6 TIMES  `PDATA `INS  `SZ  `ALTER `X `Y
 ' ETIB =: `EOS^ 
 
+: `MOVER CONST DOES> @ : `XY+ |XY + ; 4 `MOVER `4+> 
+-1 `MOVER `<-  1 `MOVER `->  -64 `MOVER `L_UP 64 `MOVER `L_DN    
+: `L_END |XY : `/L (@|; ,< 63 , : `<_| `L_DN  : `L_BEG |XY L/ ;
+: `|POS XY EX `PDATA + ; : `POS^ `|POS ;; ,< 
+: `LINE/ `|POS L/ ;  : `/LINE `|POS `/L ; : `EOL `|POS `/L 1+ ;
+: `PREPINS XEP|  `POS^ J `SZ - DUP : `SZBLANK `SZ BLANK ;
+: `|DELPOS `POS^ DUP `SZ + OVER `SZBLANK EX ONPLACE ;
+: `|INSPOS EX `PREPINS ONPLACE ; : `SZMOV `/LINE `POS^ - ;
+: `REST 1K XY - ;
+
+
 18 . \  BLOCK2 OF EDITOR
 : `XY>CR XY 1L U/MOD TO `Y TO `X ; : `_INS `INS 0= TO `INS ; 
-: `MOVER CONST DOES> @ |XY + ; 75 15 >POS: `ENDPOS EOS! ; 
+75 15 >POS: `ENDPOS EOS! ; : `ESQ/E /BUFS `ENDPOS ; 
 72 0 >POS: `.INS `INS IF ." INS" ;THEN ." OVT" ; 
 70 2 >POS: `.INBUF XY NU. ; : `Q/ED FLUSH `ENDPOS ; 
-70 4 >POS: `.X.Y `X 3 U.R `Y 3 U.R ; : `ESQ/E /BUFS `ENDPOS ; 
-: `PC: CONST DOES> @ SKIP : `POS^ XY : `P+ `PDATA + ; 
+70 4 >POS: `.X.Y `X 3 U.R `Y 3 U.R ; 
 70 6 >POS: `.CH `POS^ C@ DUP '$ EMIT B. 3 .R ; 
 70 8 >POS: `.TEST ."  TEST " `Y . ;
 : `STATE. `.INS `.INBUF `.CH `XY>CR `.X.Y
 : `POSXY `X 4+ `Y GOTOXY ;
--1 `MOVER `<-  1 `MOVER `->  -64 `MOVER `L_UP 64 `MOVER `L_DN   
-4 `MOVER `4+>  : `TAB> `4+> SKIP : `<TAB  `<- |XY (@&; ,< -4 , 
+: `|LDRU 1 TO `SZ EX UPDATE `POSXY `LINE/ `Y TO cr .LINE DROP ;
+: `TAB> `4+> SKIP : `<TAB  `<- |XY (@&; ,< -4 , 
 : `RELOAD SCR BLOCK DUP TO `PDATA 1K + TO ETIB  SPTRTOP? ;
+
+19 . \  BLOCK2 OF EDITOR
+: `1L<?| 1L   : `>SZ?| TO `SZ 
+: `SZ<?| `REST `SZ U< IF RDROP; THEN : `|RDRC EX SKIP
 : `RESET -BUF : `LOADRAW `RELOAD : `REDRAW HOME `PDATA .BLOCK ;
 : `B SCR- SKIP : `N SCR+ `LOADRAW ; : `ZPOS 0 TO XY ;  
-: `ALT GO| ? `LOADRAW |SCR TO `ALTER `ALTER ; 
-: `L_END |XY : `/L (@|; ,< 63 , : `<_| `L_DN  : `L_BEG |XY L/ ;
+: `ALT GO| ? `LOADRAW `ALTER |SCR TO `ALTER ; 
+: `DELL `1L<?| : `DO-DEL `|DELPOS `EOS^ ; 
+: `INSL `1L<?| : `DO-INS `|INSPOS `EOS^ ; 
+: `INSC `|LDRU CALL `POS^ C! ;THEN `INS 0; `SZMOV 0; `|INSPOS
+ `EOL ; : `BS `<-  : `DELC `|LDRU `|DELPOS `EOL ; : `ONEC DUP
+ BL U< IF : `WHAT? DROP : WHAT? 7 EMIT ;THEN `INSC `-> ;
+: `TEST BL `POS^ C@ U< ;  : `<XY0; `<- : `XY0; XY C; 0;
+: `BACK BEGIN `<XY0; `TEST UNTIL BEGIN `<XY0; `TEST 0= UNTIL 
+`-> ; : `ADV `REST TO LTIB BL PARSE TO `SZ DROP XY! `XY0; `<- ;
+ 
+20 . \  BLOCK2 OF EDITOR
+: `AW `ADV : `PREP { ARE} `BACK  : `SKIP `ADV `-> ;
+: `SCR; `ZPOS `<- : `PREPARE `L_END `PREP ;
+: `altS 1L 1+ `>SZ?| 1L TO `SZ `POS^
+`<_| `DO-INS `POS^ 2DUP - NUP - ONPLACE ; 
+: `COPY `1L<?| RDROP : `DO-COPY `POS^ `SZ DUP `XY+ >S ; 
+: `CUT `1L<?| : `DO-CUT `DO-COPY  `SZ NEG `XY+ `DO-DEL ;
+: `BKCW `AW `BACK `BACK 
+: `CUTW `AW `SZ 0; `SZ 1+ TO `SZ `BACK `|RDRC `DO-CUT `PREP ; 
+: `MOVE `CUTW `SZ 0; GO| ? `SKIP 
+: `PASTE SPTR C@ DUP TO `SZ 0; `SZ<?| 
+: `DO-PASTE `DO-INS S> 1+ `POS^ `SZ CMOVE ; 
 
-960 `PC: `PLL  : `LE^ XY `/L `P+ ; : `SZMOV `LE^ `POS^ - ;
-: `LINE/ XY  L/ `P+ ;  
-: `/LINE XY `/L `P+ ;
-: `LDRAW `POSXY `LINE/ `Y TO cr .LINE DROP ;
-: `CANINSC `LE^ C@ BL = ; 
-: `|LDRU 1 TO `SZ EX `LDRAW UPDATE ;
-
-: `DELC `|LDRU  `.TEST
- `SZMOV IF `POS^ 1+ SWAP `SZMOV CMOVE THEN BL `LE^ C! ;
-: `WIPE : `ADV   : `BACK  : `SCR; 
-: `altS  : `DELL  ;
-
-: `CUT   : `BKCW : `BS    : `CUTW  : `PREPARE 
-: `COPY : `PASTE : `MOVE  
-: `INSL  
-;
-: `ONEC DUP BL U<  IF : `WHAT? DROP : WHAT? 7 EMIT     ;THEN
-    DROP \ `INSC `-> 
-;
+: `WIPE ;
 
 
-21 . {  BLOCK5 OF EDITOR \ KEY CONSTANTS}
-\  kaA kLEFT kUP kHOME kEND kPGUP kPGDN kDOWN kRIGHT kINS kDEL
-\  kaW kcRIGHT kcLEFT kcEND ksTAB kcHOME kaS kaD 
- @' (BSC =, `EFtblC DO# C, 20 TIMES  19
- 30 75 72 71 79 73 81 80 77 82 83   17 116 115 117 15 119 31 32
+
+21 . \  BLOCK5 OF EDITOR \ KEY CONSTANTS}
+DO# =: 19 TIMES 
+30 kaA 75 kLEFT 72 kUP 71 kHOME 79 kEND 73 kPGUP 81 kPGDN
+80 kDOWN 77 kRIGHT 82 kINS 83 kDEL 17 kaW 116 kcRIGHT
+115 kcLEFT 117 kcEND 15 ksTAB 119 kcHOME 31 kaS 32 kaD
+ 
+@' (BSC =, `EFtblC 19 C,  DO' C, 19 TIMES 
+ kaA kLEFT kUP kHOME kEND kPGUP kPGDN kDOWN kRIGHT kINS kDEL
+ kaW kcRIGHT kcLEFT kcEND ksTAB kcHOME kaS kaD 
+
 ALIGNED : `EFtbl (WARY  
  `WHAT? `ALT `<- `L_UP `L_BEG `L_END `B `N `L_DN `-> `_INS
  `DELC `WIPE `ADV `BACK `SCR; `<TAB `ZPOS `altS `DELL ,<
 
- @' (BSC =, `EKtblC DO# C, 21 TIMES
-20 ^J ^K ^X 127 ^H ^D ^M ^G ^Z ^N ^B ^R ^I ^C ^V ^Q ^F ^A ^[ ^S
+22 . \  BLOCK5 OF EDITOR \ KEY CONSTANTS
+ @' (BSC =, `EKtblC  20 C, DO# C, 20 TIMES
+^J ^K ^X 127 ^H ^D ^M ^G ^Z ^N ^B ^R ^I ^C ^V ^Q ^F ^A ^[ ^S
 ALIGNED : `EKtbl (WARY
  `ONEC `<- `-> `CUT `BKCW `BS `DELC `<_| `CUTW `PREPARE `N `B
  `RESET `TAB> `COPY `PASTE `ESQ/E `MOVE `ADV `Q/ED `INSL  ,<
-\ EDITOR1 
 : `@KEY KEY W>BB DUP 
-    IF     NIP `EFtblC `EFtbl 
-	;THEN DROP `EKtblC `EKtbl ;
+    IF     NIP `EFtblC `EFtbl 	;THEN DROP `EKtblC `EKtbl ;
 : EDIT TO SCR : PE PAGE : E  D0 MEMTI| `LOADRAW EOS|
  BEGIN `STATE. `@KEY @EXECUTE EOS UNTIL ;  
 
 
-: TEST 1 2 3 " 1234" ; 0 VALUE `ADR2 : `" (WSC ,< 3 , >, (!" ("
-(." ,< : `|WW |VAL; 0 CONST `WW : `A:? WFIND IF ? DROP ." : " 
-WID. ; : SEE ' : @SEE TO `WW : SL bs TIMES| : WW `|WW CR DUP H.
- DUP `A:? STR DUP H. DUP ?ID. `" 1+ 0; PUSH "R+ [ID] POP ;
- 
-EDITOR
-\ : `(SP CSP? (IF C: ,<` ;
-\ : ;` `(SP @H- (DUP ODD (IF MARK> , (JUMP ;;` 
-\    THEN (JUMP` (JUMP , ,<  
-\ ' CSP! ' : !
-\ : ;`  ,;  CSP? TARG,< ?; ;;
+23 . \  BLOCK5 OF EDITOR \ KEY CONSTANTS}
 
-: `L_DN 1L 
-: `XY+ `;LRUD + 
-;    
-: `L_UP 1L 
-: `XY- NEG `XY+ 
-;
-: `L_END `;LRUD 
-: `/L  1L 1- OR 
-;  
-: `EOL `;LPOS `/L 1+ ;
-: `1L<?; 1L 
-: `>SZ?; TO `SZ 
-: `SZ<?; 1K XY - `SZ U< IF  
-: `ERR.EXIT `ERR2 '? EMIT C; .2EXIT 
-: `;RDRC THEN EX  
-: `RDRC  `REDRAW UPDATE 
-;
-: `WIPE `;RDRC 1K TIMES| `EOS^ J - 1- 
-: `IWIPE   DUP C@ BL U< IF ? DROP  BL C; SWAPC! 
-
-19 . \  BLOCK3 OF EDITOR
-: `APOS  0 `TAB& ; 
-: `LINE/ `;LPOS  L/ ;  
-: `/LINE `;LPOS `/L ;
-: `LDRAW `POSXY `LINE/ XY 1L U/ 1+ cr EMIT .LINE DROP ;
-: `ALT SCR `ALTER TO SCR TO `ALTER `LOADRAW ;
-: `ADV 1K XY - TO LTIB BL PARSE TO `SZ DROP `?XY >XY XY 0; `<- ;
-: `TEST BL `POS^ C@ U< ;  
-: `BACK  BEGIN `<- XY 0; `TEST UNTIL
-         BEGIN `<- XY 0; `TEST 0= UNTIL `-> ;
-: `;INSPOS EX PUSH `POS^ I `SZ - DUP `SZ BLANK POP ONPLACE ;
-: `;DELPOS `POS^ DUP `SZ + OVER `SZ BLANK EX ONPLACE ;
-: `AW `ADV 
-: `PREP { ARE} `BACK  
-: `SKIP `ADV `-> 
-;
-
-20 . \  BLOCK4 OF EDITOR
-: `DELL `1L<?; 
-: `DO-DEL `;DELPOS `EOS^ 
-; 
-: `INSL `1L<?;
-: `DO-INS `;INSPOS `EOS^ 
-; 
-.( 20.1 )
-: `altS 1L 1+ `>SZ?; 1L TO `SZ `POS^
-`<_| `DO-INS `POS^ 2DUP - NUP - ONPLACE ; 
-: `COPY `1L<?; RDROP
-: `DO-COPY `POS^ `SZ DUP `XY+ >S 
-; 
-: `CUT `1L<?; 
-: `DO-CUT `DO-COPY  `SZ `XY- `DO-DEL 
-;
-: `BKCW `AW `BACK `BACK 
-: `CUTW `AW `SZ 0; `SZ 1+ TO `SZ `BACK `;RDRC `DO-CUT `PREP 
-; 
-.( 20.3 )
-: `MOVE `CUTW `SZ 0; GO| ? `SKIP   SFGDFGHDFG
-,<  .( 20.33 ) >,
-: `PASTE SPTR C@ DUP TO `SZ 0; `SZ<?; 
-,<  .( 20.37 ) >,
-: `DO-PASTE `DO-INS S> 1+ `POS^ `SZ CMOVE 
-; 
-.( 20.4 )
-: `;LDRU 1 TO `SZ EX 
-: `LDRU `LDRAW UPDATE ;
-: `INSC `;LDRU CALL `POS^ C! ;THEN `INS 0; `;INSPOS `EOL ;
-.( 20.6 )
-: `BS `<- 
-: `DELC `;LDRU `;DELPOS `EOL ; 
-: `SCR; `APOS `<- 
-: `PREPARE `L_END `PREP ;
-.( 20.9 )
-
+EDITOR----
