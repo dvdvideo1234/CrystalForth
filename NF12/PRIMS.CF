@@ -43,7 +43,7 @@ HERE 2- =: BYE
  
 : |H CALL (EX (SET2 THEN ,<     0 CONST H
     0 VALUE   MESSAGE    TO' MESSAGE =: MSG!
-: |T CALL (EX (SET2 THEN ,< $F800 CONST T
+: |T CALL (EX (SET2 THEN ,< $E800 CONST T
 
 : ORG! H - ,<    0 VALUE  HOFS  
 : T>R HOFS - ; 
