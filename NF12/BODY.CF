@@ -1,7 +1,7 @@
 
       \   INTERPRETTER 
       
-: TARG; ;, 
+: TARG; (;,  \ ;` WILL BE ;;` 
 : TARG,< TO LOCATE  
 : `INTERP T FND  ,< 
 0 WARY []OPER >,  ">NUM ">NUMC @EXECUTE @, ,< 
@@ -15,10 +15,8 @@
 
       \ FUNCTION EVAL 
 
-: (MAC    (D#0  
-: "EVAL   CSTR  
-: EVAL    (NOP   \ BE  MEMTI| 
-: @EVAL   (NOP   \ BE  STACK CHK
+        \ BE  MEMTI|       BE  STACK CHK
+: EVAL    (NOP   : @EVAL   (NOP   
     TOKEN DROP; ?; LOCATE @EXECUTE RECURSE ;
 
       \ INITIALIZATION, TESTING & MAIN LOOP

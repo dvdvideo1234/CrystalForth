@@ -2,29 +2,34 @@
 
 '  (JUMP   =:  (DEF
 
-\ HI LEVEL PRIMITIVES  ---------------------
+\ HI LEVEL PRIMITIVES  --------------------- 
+
+: @+ (PUSH (@R+ (POP; ; UNW
 
 : (D#2 (POP (XR 
 : 4+ (@+; ,< 4 , 
+
 : 1+ (@+; ,< 1 , 
 HERE 2- =: BYE
  
-: (D#0 (POP (XR       \ DOES_0 PRIMITIVE
+: (D#0 (POP (XR     \ DOES_0 PRIMITIVE
 : NOP; 
 ;  
    
-: (D#1 (POP (XR       \ DOES_1 PRIMITIVE
+: (D#1 (POP (XR     \ DOES_1 PRIMITIVE
 : 2+ (@+; ,< 2 , 
 
-: (PNT! (D#1 (XR (!R+ (RDROP; ; UNW         
-
-: (SET2 (D#1  
+: (PNT! (D#1 (POP (SKIP  
+: _THEN (NOP        \ HERE    TO FIX     
+: SWAP! (SWAP
 : ! (PUSH     
 : (SET (!R+ (RDROP; 
 ; UNW 
 
-: (@, (D#0  
-: @, (NOP        \ |,   TO FIX
+
+: (SET2 (D#1 ! ;
+
+: @I (J
 : @ (PUSH  
 : (CON (@R+ 
 : EXIT (RDROP; 
@@ -37,20 +42,17 @@ HERE 2- =: BYE
 : DROP; (DROP; 
 ; UNW
 
-\ : (WARY DUP + : (BARY POP + ;
-
 \ VARIABLES ------------------
  
 : |H CALL (EX (SET2 THEN ,<     0 CONST H
     0 VALUE   MESSAGE    TO' MESSAGE =: MSG!
-: |T CALL (EX (SET2 THEN ,< $E800 CONST T
+: |T CALL (EX (SET2 THEN ,< $D800 CONST T
 
 : ORG! H - ,<    0 VALUE  HOFS  
 : T>R HOFS - ; 
 : HERE H : R>T HOFS + ;;
-: _THEN HERE     
-: SWAP! (SWAP ! ;
 TO' H =: OBJ! 
+' HERE ' _THEN T!
 
 ' BYE  DEFER vERR
 ' BYE  DEFER vOK
@@ -62,7 +64,7 @@ TO' H =: OBJ!
 \ 0 VALUE PRELT \ PRELTIB
 
 $F800 CONST TBUF  
-  32  CONST BL   
+\  32  CONST BL   
 ' T   DEFER vTARG      
 
 ' (BEMIT VALUE StdEmit
@@ -71,34 +73,35 @@ $F800 CONST TBUF
 0 CONST CNTC 
 VAL' @EMIT =: EMIT
 
-   >, (PNT! ,<   0  DEFER @INIT
+   >,  (PNT! ,<   0  DEFER @INIT
 ' @INIT ' _@INI T!  
-   >, (PNT! ,<   0  DEFER LOCATE   
+   >,  (PNT! ,<   0  DEFER LOCATE   
 
 \ COMPILER BASIC PRIMITIVES  ------------
 
-: |, (EX  
-: , |H  
-: !+ (PUSH (!R+  
+: (@,  (D#0
+: @,   @    (SKIP
+: (R,  (POP (SKIP
+: |,   (EX  
+: ,    |H  
+: !+   (PUSH (!R+  
 : (VAR (POP; 
 ; UNW
-' |, ' @, T!        \ DO FIX
 
 : _MARKP  H   
 : Z, |, ,<
   0  CONST 0
 
-: ;, (@, ;;
-: (, (POP , ;
-
 : H>STR H 
-: STR (PUSH (@R+ (XR (POP; 
-; UNW 
+: STR @+ : SWAP (SWAP ; 
 
-: (|LIT,, (EX  
-: (LIT,,  |, 
-: (LIT,   (,
+
+: (|#,, (EX  
+: (#,,  |, 
+: (LIT, (R,
 : (LIT (@R+ ;
+
+: (;,  (@, ;;
 
 : 0<>;  (0= 
 : 0;    EXIT ?; 
@@ -112,7 +115,7 @@ VAL' @EMIT =: EMIT
 ;;
 
 : TOKEN?  |N??  
-: TOKEN BL  CALL (NOP  \ TEST? DUP ID.  WAITKEY 
+: TOKEN 32  CALL (NOP  \ TEST? DUP ID.  WAITKEY 
 : ?C@ (DUP   : C@ @  : W>B (@&; ,< 255 , >,
             THEN
 : WORD  CALL    \ PARSE
@@ -133,14 +136,14 @@ VAL' @EMIT =: EMIT
 : H>T H>STR     : >T |T     : MPUSH (IO; ,<     ,"^W~-~^Q~-~" 
     ' `_@MAKESTR CALL,      ,"@C~^P~"
 
-: CSTR ?C@ (U1+ ;
-: ">NUMC (|LIT,, 
+: CSTR ?C@ : U1+ (U1+ ;
+: ">NUMC (|#,, 
 : ">NUM CSTR ATOI ?? ;
  
 : N: (DUP 
 : =, |, 
 : TARG:!    (NOP             \ BE ALIGMENT CHK
-: =H HERE : =: 0            \ MAIN ENTRY MAKER
+: =H HERE : =: 0             \ MAIN ENTRY MAKER
 : =F TOKEN? : @SAME? (NOP    \ BE SAME? CHK
 : (=:  ?C@ 1+ |T MPUSH TWICE
 : !-    CALL  !+ THEN

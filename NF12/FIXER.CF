@@ -11,7 +11,8 @@ THIDE (DEF
 THIDE @INIT 
 THIDE @EMIT    
 THIDE _@INI    
-THIDE INIZ   
+THIDE INIZ 
+THIDE (ABORT  
 
  
 APT2  _THEN       THEN` 
@@ -20,7 +21,7 @@ APT-  (LIT,   =:  !#`
 '     !#`     =:  (#,
 APT-  (LIT    =:  (# 
 APT-  TARG:   =:  :    
-\ APT-  TARG>,  =:  >, 
+APT-  DROP;   =:  DROP
 APT2  TARG,<      ,<` 
 APT2  ,           RELS<`
 '     RELS<`  =:  ,   
@@ -29,6 +30,7 @@ APT2  _MARKP      CALL`
 APT2  HERE        BEGIN`
 '  BEGIN`     =:  HERE
 APT2  TARG;       ;`
+APT2  (;,         ;;`
 
 
 WORD_THE_ONE =:  THIDE =:     \ WORD THE ONE
