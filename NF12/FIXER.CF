@@ -9,7 +9,7 @@ APT-  ((A"    =:  (!"
 
 THIDE (DEF   
 THIDE @INIT 
-THIDE @EMIT    
+\ THIDE @EMIT    
 THIDE _@INI    
 THIDE INIZ 
 THIDE (ABORT  

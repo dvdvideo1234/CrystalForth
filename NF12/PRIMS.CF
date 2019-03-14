@@ -8,6 +8,7 @@
 
 : (D#2 (POP (XR 
 : 4+ (@+; ,< 4 , 
+: (V3 (D#2 ;; 
 
 : 1+ (@+; ,< 1 , 
 HERE 2- =: BYE
@@ -75,7 +76,7 @@ VAL' @EMIT =: EMIT
 
    >,  (PNT! ,<   0  DEFER @INIT
 ' @INIT ' _@INI T!  
-   >,  (PNT! ,<   0  DEFER LOCATE   
+>, (V3 (PNT! ,<   0  DEFER LOCATE   
 
 \ COMPILER BASIC PRIMITIVES  ------------
 
@@ -131,7 +132,7 @@ VAL' @EMIT =: EMIT
 ,"1~^B^AM^B^I~<^K~A~C~"
 
 : CFND (IO; ,<  ,"P"~~^G"  ' `_@FIND CALL,
-,""~~^OZc~^G^K~=Q~o~r^EC~^R~" ' `_@FIND CALL, ,"@C~"
+,""~~^OZc~^AC~^R~" ' `_@FIND CALL, ,"@C~"
 
 : H>T H>STR     : >T |T     : MPUSH (IO; ,<     ,"^W~-~^Q~-~" 
     ' `_@MAKESTR CALL,      ,"@C~^P~"

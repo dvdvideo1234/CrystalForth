@@ -1,9 +1,7 @@
 
       \   INTERPRETTER 
       
-: TARG; (;,  \ ;` WILL BE ;;` 
-: TARG,< TO LOCATE  
-: `INTERP T FND  ,< 
+: TARG; (;,    : TARG,< TO LOCATE  : `INTERP T FND  ,< 
 0 WARY []OPER >,  ">NUM ">NUMC @EXECUTE @, ,< 
 
  
@@ -21,6 +19,5 @@
 
       \ INITIALIZATION, TESTING & MAIN LOOP
       
-: INIZ H>T CALL  AHEAD CSWAP> THEN TO @INIT vERR           
-: QUIT TARG,<  : `QUIT READLN
-: `MAIN       THEN   EVAL vOK  `QUIT ;
+: INIZ H>T CALL  AHEAD CSWAP> THEN TO @INIT vERR : QUIT TARG,<
+: `QUIT READLN  : `MAIN       THEN   EVAL vOK  `QUIT ;
