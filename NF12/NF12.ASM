@@ -218,8 +218,13 @@ P_ _ABORT
   CALL  @RET            ; TRACE_OFF HOLE FOR STOPPING DEBUGGER
   CALL  _@4TH
 _@INI:  
-  DW 0  ; STARTUP ADDRESS  
+  DW 0,0,0  ; STARTUP ADDRESS  & HI RESULT OF ATOI
           
+P_ _GO
+  PUSH  TOP
+  drop_
+  JMPS  _@4TH  
+  
 P_ _AND@X
   AND   TOP,[IP]
   JMPS  _@4TH  
@@ -241,6 +246,19 @@ P_ _OSTR          ; (?S
 
 ; CONTROL      COMMANDS  ----------------------------
 
+P_ _ARP			    ; A@
+  TO_R  AR
+  SKIPB
+P_ _RSTKP			; RSTACK PTR
+  TO_R  RSP
+  SKIPB
+P_ _STKP			; STACK PTR
+  TO_R  DSP
+  JMPS  @POP
+
+@dbg:  
+  jmp   @RET
+    
 P_ _IF	 			; (IF
   Zero?_    TOP  
   drop_
@@ -251,19 +269,6 @@ P_ _SKIP
   INC   ip
   JMPS  @MAIN
 
-P_ _RDRPX
-  R_TO  DR
-  JMPS  _@4TH
-
-@dbg:  
-  jmp   @RET
-    
-P_ _NEXT
-  POP   W
-  DEC   W
-  PUSH  W
-  SKIPC DRL
-  
 P_ _IFM    			; (IF-
   DEC   TOP			; DECREMENT TOP AND BRANCH ON POSITIVE 
   JS    @SKIP		; ON NEGATIVE - SKIP BRANCH
@@ -317,20 +322,27 @@ P_ _BARY
   JMPS  _@4TH
 
 ; IO COMMANDS vvvvvvvvvv  ---------------------------
-    
+
 P_ _BEMIT
   MOV     AH,0EH
   INT     10H
   JMPS    @DROP
         
+P_ _DROPX	  ; (A!;
+  TO_R	TOP
+  DROP_
+P_ _RDRPX
+P_ _RTOA	  ; (R>A!;
+  JMPS  @IO
 P_ _IO  				  ; IF INPUT PARAMS = OUTPUT PARAMS 
-  PUSH  IP
+  PUSH  AR IP
   MOV   DX,[DSP+4]
   MOV   CX,[DSP+2]
   MOV   BX,[DSP]   
-_@IO:  
   POP   W
   CALL  W
+@IO:  
+  POP	AR
 
 ; IO           COMMANDS  (IO  ^^^^^^^
 
@@ -341,7 +353,6 @@ _@4TH:
   r_to  IP			; POP IP FROM RETURN TOP ELEMENT  
 @MAIN:
   MOV   DR,[IP]
-  ;JMPS  _@dbg
 @MAIN2:  
   LEA   IP,[IP+2]
 @MAIN3:  
@@ -360,19 +371,9 @@ _@JSR4TH:
 
 ;  STACK COMMANDS   --------------------------------
 
-P_ _DROPX
-  R_TO  IP
-  SKIPa
-P_ _NIP
-  SWAP_
 P_ _DROP				; DUPLICATE TOP
   JMPS  @DROP
 
-  
-;P_ _NFOR
-;  NOT   TOP
-P_ _FOR
-  mov   ip,[ip]
 P_ _PUSH				; PUSH
   TO_R	TOP
 @DROP:
@@ -392,26 +393,9 @@ P_ _DUP				; DUPLICATE TOP
   R_TO  DR		; - THIS WAY WE ACHIVE DUPLICATE OF TOP
   JMPS  @DUP		
   
-P_ _STKP			; STACK PTR
-  TO_R  DSP
-  SKIPA
-P_ _OVER			; DUPLICATE NEXT
-  TO_R  NXT
 P_ _POP				; POP 
   JMPS  @POP
-  
-P_ _POPX			; POP 
-  R_TO  DR
-  R_TO  IP
-  JMPS  @DUP
-  
-P_ _RDROP
-  R_TO  DR
-  SKIPA
-P_ _SWAP
-  SWAP_
-  JMPS  @MAIN
-   
+     
 ; MATH, LOGIC AND SHIFT COMMANDS   +2/ +* -/ NAND
 
 P_ _MDIV				  ; -/ DIVIDE PRIMITIVE
@@ -595,7 +579,7 @@ L_ _ATOI
   LEA     @@ADR,[@@ADR+@@IND]
   NOT     @@IND
   CALL	  @@ATOI
-  MOV     AR,@@AR
+  MOV     PW _@INI+4,@@AR
   XCHG    TOP,@@IND
   POP     DSP @@AR
   MOV     NXT,@@ACC
