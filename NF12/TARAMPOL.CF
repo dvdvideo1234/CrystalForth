@@ -18,11 +18,6 @@
 % THEN`         
 % ;;`   
 % -IF`
-% IND<` 
-% IND>` 
-% DO>`  
-% DO<`  
-% LOOP` 
 % NEXT` 
 % <NEXT`
 % UNTIL-` 
@@ -33,14 +28,11 @@
 % CSWAP>`
 %2 TAT AT`      
 %2 TTO TO`
-%2 :RDROP (RDROP` 
-%2 :(DROP (DROP`
 %2 :RECURSE RECURSE`   
 %2 T:: :` 
 %2 :(IF IO`     
 %2 :(1- (1-`
 % ;`    
-%2 TGO GO;`    
 %2 TDOES DOES>`    
 %2 T:;T :;`
 %2 <RELS RELS<`

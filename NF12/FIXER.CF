@@ -1,27 +1,15 @@
-META INIZ     @INIT           \ TARGET FORTH STARTUP
-META `INTERP  LOCATE          \ TARGET FORTH INITIAL STATE
-META (CON     _@INI 
 HERE    VAL' H T!             \ TARGET FORTH HEAP
-VAL' _@INI =: HI#
+META `INTERP  LOCATE          \ TARGET FORTH INITIAL STATE
+' H>T ' QUIT 6 - T!           \ LOADER OF INITIAL DICTIONARY
+' EVAL 2+ AT' QUIT T!         \ MAIN EVAL FUNCTION
+' (CON ' HI# T!               \ TARGET FORTH HI# OF >NUM
 
-THIDE (DEF   
-THIDE @INIT 
-THIDE _@INI    
-THIDE INIZ 
-THIDE (ABORT
-THIDE @STATE
+THIDE (DEF      THIDE COLD         
 
-
-APT-  NOP;    =:  NOP
-APT-  ((A"    =:  (!"
-APT2  TARG:!      :`
-APT-  (LIT    =:  (# 
-APT-  TARG:   =:  :    
-APT-  DROP;   =:  DROP
-APT2  TARG,<      ,<` 
-APT2  _THEN       THEN`
-APT2  _BEGIN      BEGIN`
-APT2  TARG;       ;`
+APT-  NOP;    =:  NOP        APT-  ((A"    =:  (!"
+APT2  TARG:!      :`         APT-  (LIT    =:  (# 
+APT-  TARG:   =:  :          APT-  DROP;   =:  DROP
+APT2  TARG,<      ,<`        APT2  TARG;       ;`
 
 WORD_THE_ONE =:  THIDE =:     \ WORD THE ONE
 

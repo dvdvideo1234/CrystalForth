@@ -1,23 +1,25 @@
-
       \   INTERPRETTER 
       
-: TARG; (;,    : TARG,< TO LOCATE  : `INTERP T FND  ,< 
+: ,<? 0<>;    
+: TARG,< TO LOCATE  
+: `INTERP T FND  ,< 
 0 WARY []OPER >,  ">NUM `">NUMC @EXEC @, ,< 
-
  
       \   COMPILER
       
-: TARG: (NOP TARG:!  : >, TO LOCATE  vTARG CFND []OPER ;
-     
+: TARG: (NOP TARG:!  
+: >, TO LOCATE
+  vTARG CFND []OPER ;
 
       \ FUNCTION EVAL 
-                               \ BE  MEMTI|       BE  STACK CHK
-: (MAC (D#0 (NOP : "EVAL CSTR  : EVAL  (NOP   : @EVAL   (NOP   
-    TOKEN 
-	
-	DROP; ?; LOCATE @EXEC RECURSE ;
-
-      \ INITIALIZATION & MAIN LOOP
-      
-: INIZ H>T CALL  AHEAD CSWAP> THEN TO @INIT vERR : QUIT TARG,<
-: `QUIT READLN  : `MAIN       THEN   EVAL vOK  `QUIT ;
+                               
+: EVAL  (NOP      \ BE  MEMTI|       
+: `@EVAL   (NOP   \ BE  STACK CHK  
+ \ BRK
+ TOKEN
+ \ BRK
+ DROP; ?; LOCATE 
+ \ BRK
+ @EXEC
+ \ BRK
+ RECURSE ;
