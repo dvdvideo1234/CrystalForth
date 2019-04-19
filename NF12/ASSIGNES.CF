@@ -15,13 +15,14 @@ APT-     _NEXT    =: (NEXT
 APT-     _IFM     =: (IF-     
 APT-     _FOR     =: (FOR     
 APT-     _JUMP    =: (JUMP    
-APT-     _OF      =: (OF
+\ APT-     _OF      =: (OF
 APT-     _COLD    =: COLD
 APT-     _QARY    =: (QARY    
 APT-     _LARY    =: (LARY    
 APT-     _WARY    =: (WARY        
 APT-     _BARY    =: (BARY    
 APT-     _RET     =: (;     
+APT-     _TRON    =: TRON
 APT-     _TROFF   =: (TROFF;
 \ DATA TRANSFER  COMMANDS ----------
 APT-     _RSTP    =: (!R+    
@@ -29,7 +30,6 @@ APT-     _RLDP    =: (@R+
 APT-     _XR      =: (XR      
 APT-     _XA      =: (XA      
 \ MAIN  LOOP  ----------------------
-APT-     _TRON    =: TRON
 APT-     _EX      =: (EX      
 APT-     _NOP     =: (NOP   
 \ IO COMMANDS ---------------------

@@ -10,6 +10,7 @@ APT-  NOP;    =:  NOP        APT-  ((A"    =:  (!"
 APT2  TARG:!      :`         APT-  (LIT    =:  (# 
 APT-  TARG:   =:  :          APT-  DROP;   =:  DROP
 APT2  TARG,<      ,<`        APT2  TARG;       ;`
+APT-  <RELS_  =:  <RELS`
 
 WORD_THE_ONE =:  THIDE =:     \ WORD THE ONE
 

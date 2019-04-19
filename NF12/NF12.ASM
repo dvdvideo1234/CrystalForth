@@ -120,24 +120,24 @@ nam_    macro   msg
 endstr  label   byte
         endm
 
-IF A386
-
-TRACE_OFF MACRO
-  CALL  @NO_TRACE
-ENDM
-
-TRACE_ON MACRO
-  CALL  @DO_TRACE
-ENDM
-
-
-ELSE
-
-TRACE_OFF MACRO
-  CALL  @RET
-ENDM
-
-ENDIF
+;IF A386
+;
+;TRACE_OFF MACRO
+;  CALL  @NO_TRACE
+;ENDM
+;
+;TRACE_ON MACRO
+;  CALL  @DO_TRACE
+;ENDM
+;
+;
+;ELSE
+;
+;TRACE_OFF MACRO
+;  CALL  @RET
+;ENDM
+;
+;ENDIF
 
 
 
@@ -280,10 +280,18 @@ P_ _NEXT            ; (NEXT
   PUSH  dr
   jmps  @POS
   
+@RESET:
+  POP  IP
+P_ _COLD
+  MOV   RSP,@R_TOP-2
+  MOV   DSP,@S_TOP-2
+  CALL  @NO_TRACE
+  JMPS  @MAIN  
+
 @DBG:   
   JMP   @RET
 
-P_ _IFM             ; (IF-
+P_ _IFM             ; (IF- TROFF
   DEC   TOP         ; DECREMENT TOP AND BRANCH ON POSITIVE 
 @POS:  
   JS    @SKIP       ; ON NEGATIVE - SKIP BRANCH
@@ -297,18 +305,6 @@ P_ _JUMP            ; (JUMP
   MOV   IP,[IP] ; JUST BRANCH
   JMPS  @MAIN
   
-P_ _OF
-  CMP  TOP,NXT
-  DROP_
-  JNE  @JUMP
-  JMPS @SKIPDR
-@RESET:
-  POP  IP
-P_ _COLD
-  MOV   RSP,@R_TOP-2
-  MOV   DSP,@S_TOP-2
-  JMPS  @MAIN  
-
 P_ _QARY
   SHL   TOP,1
 P_ _LARY

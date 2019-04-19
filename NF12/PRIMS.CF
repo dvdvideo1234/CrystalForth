@@ -1,20 +1,18 @@
 \ REDEFINITIONS ------------------------
 
 '  (JUMP   =:  (DEF
-
-  
-=! H 
+ 
+=! SWAP
 =! (LIT, 
-=! TARG,<  =! ?C@
+=! TARG,<  
+=! ?C@
+=! TARG:!
 
 \ HI LEVEL PRIMITIVES  --------------------- 
-
-: ODD (@&; ,< 1 , 
 
 : |DROP (EX 
 : DROP; (DROP; 
 
-: (_ (DROP 
 : (LIT (@R+ ;
 : @+ (PUSH (@R+ (POP ;
 
@@ -25,10 +23,7 @@
 : CSTR ?C@ 
 : U1+ (U1+ ;
 
-: |EXEC (EX
-: EXECUTE (PUSH ; 
-
-: @EXEC |EXEC
+: @I (J
 : @ (PUSH  
 : (CON (@R+ 
 : EXIT (RDRP; 
@@ -41,11 +36,6 @@
 : (D#1 (POP (XR     \ DOES_1 PRIMITIVE
 : 2+ (@+; ,< 2 , 
 
-: H>STR H 
-: STR  @+ 
-: SWAP (PUSH 
-: `XPOP (XR (POP ; 
-
 : (PNT! (D#1 (POP
 : SWAP! SWAP (SKIP \ !
 : (SET2 (D#1 
@@ -54,6 +44,11 @@
 
 : |H CALL (EX (SET2 THEN ,< 
     0 CONST H
+
+: H>STR H 
+: STR  @+ 
+: SWAP (PUSH 
+: `XPOP (XR (POP ; 
 
 : (D#2 (POP (XR 
 : 4+ (@+; ,< 4 , 
@@ -68,14 +63,15 @@
 : 0;    EXIT ?; 
 ;;
 
-: "SKIP| (J (EX (POP CSTR + |EXEC
+>, CSTR + 
 : ALIGN 1+
 : EVEN  (@&; ,< -2 ,
+: ("SKIP (J (POP (POP AT ALIGN (PUSH (SKIP
+: @EXEC @
+: EXECUTE (PUSH ; 
 
-
-: TROFF (TROFF;
 : (0" (0=
-: ((A" "SKIP| SWAP (IF DROP; COLD TROFF TARG,< vERR QUIT ,<
+: ((A" ("SKIP SWAP (IF DROP; COLD TARG,< vERR QUIT ,<
 
 : RNG| RANGE>S 
 : STR| (XR (POP 
@@ -90,15 +86,15 @@
 $D800 CONST T
 \ $D800 CONST EDGE
 
-: LASTH! H ,< 0 VALUE LASTH 
-
 : |LTIB CALL (EX (SET2 THEN ,<    
 22 3 - 1K U*        CONST LTIB 
 \ 22 6 - 1K U*        CONST LTIB 
 22 1K U* $100 +     VALUE ETIB
 \ 0 VALUE PRELT \ PRELTIB
 
-$F800 CONST  TBUF  
+$F800 CONST  TBUF 
+: |SPC (EX
+: SPC (NOP ,<      \ SPC FIXED WITH |C.
   32  CONST  BL   
 ' T   VECTOR vTARG      
 
@@ -115,6 +111,11 @@ $F800 CONST  TBUF
 : !+   (PUSH (!R+  
 : (VAR (POP
 ; 
+
+: :|, TARG:! 
+: |, (EX 
+: <RELS_ , 
+: LASTH! H ,< 0 VALUE LASTH 
 
 : (@,  (D#0
 : @,   LASTH! @ , ;
