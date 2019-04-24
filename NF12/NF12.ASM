@@ -120,27 +120,6 @@ nam_    macro   msg
 endstr  label   byte
         endm
 
-;IF A386
-;
-;TRACE_OFF MACRO
-;  CALL  @NO_TRACE
-;ENDM
-;
-;TRACE_ON MACRO
-;  CALL  @DO_TRACE
-;ENDM
-;
-;
-;ELSE
-;
-;TRACE_OFF MACRO
-;  CALL  @RET
-;ENDM
-;
-;ENDIF
-
-
-
 DEFER_ MACRO NAM,VAL
 L_ NAM  
   DW _JUMP,VAL
@@ -246,6 +225,11 @@ P_ _TROFF
 ;P_ _4TH
 ;  JMP  IP
   
+P_ _2PUSHX
+  TO_R  TOP
+  DROP_
+P_ _PUSHX
+  TO_R  TOP
 P_ _DROPX     
   DROP_
   skipa
@@ -265,7 +249,7 @@ P_ _PLUS@X
 P_ _IF              ; (IF
   Zero?_    TOP  
   JE    @JMPDR 
-;P_ _SKIPDR  
+P_ _SKIPDR  
 @SKIPDR:
   drop_
 P_ _SKIP
@@ -316,6 +300,11 @@ P_ _BARY
 P_ _RET  
   JMPS  _@4TH
 
+P_ _POPX
+  R_TO  DR
+  R_TO  IP
+  JMPS  @DUP
+  
 ; DATA TRANSFER  COMMANDS -----------------------------------
 
 P_ _RSTP              ; !R+
@@ -380,8 +369,7 @@ P_ _IO                    ; IF INPUT PARAMS = OUTPUT PARAMS
   MOV   CX,[DSP+2]
   MOV   BX,[DSP]   
 @IO:  
-  POP   W
-;  INT 3
+  POP   W  ;  INT 3
   CALL  W
   JMPS  _@4TH
 

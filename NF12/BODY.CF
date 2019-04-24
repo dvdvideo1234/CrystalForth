@@ -1,25 +1,25 @@
       \   INTERPRETTER 
       
-: ,<? 0<>;    
-: TARG,< TO LOCATE  
-: `INTERP T FND  ,< 
+: `,<? 0<>; : TARG,< AT LOCATE  : `INTERP T TO `_@FIND  ,< 
 0 WARY []OPER >,  ">NUM `">NUMC @EXEC @, ,< 
  
       \   COMPILER
       
-: TARG: (NOP TARG:!  
-: >, TO LOCATE
-  vTARG CFND []OPER ;
+: TARG: CSP! TARG:!  : >, AT LOCATE   vTARG CFND []OPER ;
 
       \ FUNCTION EVAL 
-                               
-: EVAL  (NOP      \ BE  MEMTI|       
+                
+: `SEVAL CSTR   
+: EVAL  `MEMTI|     
 : `@EVAL   (NOP   \ BE  STACK CHK  
- \ BRK
- TOKEN
- \ BRK
- DROP; ?; LOCATE 
- \ BRK
- @EXEC
- \ BRK
- RECURSE ;
+ TOKEN    DROP; ?; LOCATE @EXEC RECURSE ;
+
+      \ COMPILE & EXECUTE MACRO 
+	  
+: D# HERE >, CSP!  
+: |LASTH (EX LASTH! ; 
+: (MAC `(D#0 `STATE @ (PUSH >, `SEVAL (POP `STATE ! ; 
+: M: ';  : ?M: <M> HOFS (PUSH 0 TO HOFS TARG:! (, (MAC `",
+ (POP TO HOFS <M> ;
+ 
+

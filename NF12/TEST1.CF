@@ -128,7 +128,7 @@ SPC H H. H DUP U. .   DFH-DFG-HDF-GHD-FGH
 
 \ EMPTY FOR NOW STUBS
 
-: { '} PARSE 2DROP ;    ' { =: {`
+: { '} PARSE 2DROP ;    ' { =: {` \ }
 ' \ =: \`       \ COMMENTS WORKS NOW IN COMPILER STATE
 \ : _BLK 1K U* 1B + ;  ' _BLK DEFER BLOCK
 

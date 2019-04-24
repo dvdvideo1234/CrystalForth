@@ -4,6 +4,8 @@ APT-     _1P      =: 1+
 APT-     _BYE     =: BYE
 \ CONTROL      COMMANDS  ----------------------
 \ APT-     _BRK     =: BRK  
+APT-     _2PUSHX  =: (2PUSH;   
+APT-     _PUSHX   =: (PUSH;   
 APT-     _DROPX   =: (DROP;   
 APT-     _AND@X   =: (@&;  
 APT-     _2RDRPX  =: (2RDRP;   
@@ -22,6 +24,7 @@ APT-     _LARY    =: (LARY
 APT-     _WARY    =: (WARY        
 APT-     _BARY    =: (BARY    
 APT-     _RET     =: (;     
+APT-     _POPX    =: (POP;
 APT-     _TRON    =: TRON
 APT-     _TROFF   =: (TROFF;
 \ DATA TRANSFER  COMMANDS ----------
