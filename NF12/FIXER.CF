@@ -3,17 +3,18 @@ META `INTERP  LOCATE          \ TARGET FORTH INITIAL STATE
 ' H>T ' QUIT 6 - T!           \ LOADER OF INITIAL DICTIONARY
 ' EVAL 2+  AT' QUIT T!        \ MAIN EVAL FUNCTION
 ' `OK      TO' QUIT T!        \ FIX  
-' `READLN    ' QUIT T!        \ COMMANDLINE INPUT ROUTINE 
 ' (CON ' HI# T!               \ TARGET FORTH HI# OF >NUM
 
-THIDE (DEF      THIDE COLD         
+THIDE (DEF      THIDE COLD    THIDE CALL`    
 
 APT-  NOP;    =:  NOP        APT-  ((A"    =:  (!"
 APT2  TARG:!      :`         APT-  (LIT    =:  (# 
 APT-  TARG:   =:  :          APT-  DROP;   =:  DROP
 APT2  TARG,<      ,<`        APT2  TARG;       ;`
 APT-  ((."    =:  (."        APT-  (("     =:  ("
-\ APT-  <RELS_  =:  <RELS`
+APT2  _BEGIN      BEGIN`     APT2  _MARK       [`
+APT-  `<RELS_ =:  <RELS`     '     [`      =: CALL`
+'    [`       =:  MARK>`
 
 WORD_THE_ONE =:  THIDE =:     \ WORD THE ONE
 

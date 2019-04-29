@@ -9,17 +9,15 @@
 
       \ FUNCTION EVAL 
                 
-: `SEVAL CSTR   
-: EVAL  `MEMTI|     
-: `@EVAL   (NOP   \ BE  STACK CHK  
+: `SEVAL CSTR : EVAL `MEMTI| : `@EVAL  `STACK 
  TOKEN    DROP; ?; LOCATE @EXEC RECURSE ;
 
       \ COMPILE & EXECUTE MACRO 
 	  
-: D# HERE >, CSP!  
-: |LASTH (EX LASTH! ; 
-: (MAC `(D#0 `STATE @ (PUSH >, `SEVAL (POP `STATE ! ; 
+: (MAC (D#0 `STATE @ (PUSH >, `SEVAL (POP `STATE ! ; 
 : M: ';  : ?M: <M> HOFS (PUSH 0 TO HOFS TARG:! (, (MAC `",
  (POP TO HOFS <M> ;
+: D# HERE >, CSP!  
+: |LASTH (EX LASTH! ; 
  
 
