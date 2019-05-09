@@ -44,8 +44,8 @@ HERE 1+ =: `BRK $CC C, ' (NOP 1- $E9 ,R
 : @+ (PUSH (@R+ (POP; ; UNW
 
 : A! (PUSH (XA (RDRP; 
-: (2CON (D#0
-: @2 @+
+: `(2CON (D#0
+: `@2 @+
 : @ (PUSH  
 : (CON (@R+ 
 : EXIT (RDRP; ; UNW
@@ -54,33 +54,47 @@ HERE 1+ =: `BRK $CC C, ' (NOP 1- $E9 ,R
 : 0;    EXIT ?; 
 ;;
 
-: ?C@ (DUP  
+: `CSTR- 1-
+: `?C@ (DUP  
 : C@ @  
 : W>B (@&; ,< 255 ,
 
 : `@|+ @ 
 : |+ (EX 
-: + (+2/ (DROP; TWICE TWICE TWICE
+: + (+2/ (DROP; CALL TWICE TWICE THEN TWICE
 : 2* |+ (DUP ; 
 
-: RANGE>S 1+ 
+: `RANGE>S 1+ 
 : OVER- (OVER
 : - |+ (NEG ;
 
-: C@+ TO SWAP
-: CSTR ?C@ 
+: `C@+ TO SWAP
+: CSTR `?C@ 
 : U1+ (U1+ ;
 
-: >DEA 4+ 
+: `>DEA 4+ 
 : NAME> CSTR + ; 
 : @I (J @ ; 
 
->,   NAME> 
-: ALIGN 1+
-: EVEN  (@&; ,< -2 ,
-: ("SKIP (J (POP (POP  TO ALIGN (2PUSH;
+>, (PUSH 
+: `(BSCN (XR CSTR (POP 
+: BSCAN W>B A! (DUP  (PUSH (FOR CALL BEGIN
+ CSTR (A@ - (IF CALL CSWAP> THEN (NEXT RELS<
+: `NFND (J (XR (DROP 
+: `/SCAN THEN (DROP (POP (NOT (POP + ; 
+>, (PUSH 
+: `(WSCN (XR STR (POP 
+: SCAN A! (DUP (PUSH (FOR CALL BEGIN 
+ STR (A@ - (IF `/SCAN THEN (NEXT RELS< `NFND 
+;
+\ TO' (BSCN  VAL! ("SW  \ FIX
 
-: ("SW ("SKIP   (NOP 1+  \ TO (BSCN
+>,   NAME> 
+: `ALIGN 1+
+: EVEN  (@&; ,< -2 ,
+: ("SKIP (J (POP (POP  TO `ALIGN (2PUSH;
+
+: ("SW ("SKIP   TO `(BSCN 1+  \ TO (BSCN
 : (XARY 2* (POP + 
 : @EXEC @
 : EXECUTE (PUSH; ; UNW
@@ -153,32 +167,36 @@ $F800 CONST  TBUF
 : `LT! (DUP (SET2 : >LT< (CON (;  0  ,<
 0 VALUE  BLK  
 ' BYE VECTOR vBLK
-: `SOURCE BLK 0; ETIB 0<>; BLK vBLK 1K + TO ETIB ;
+: SOURCE BLK 0; ETIB 0<>; BLK vBLK 1K + TO ETIB ;
+
+1 CONST `1
+
+ZDO VALUE 6 TIMES `_FL `_AX `_BX `_CX `_DX _DX2
 
 \ HI LEVEL PRIMITIVES  --------------------- 
 
-: U2B 1+ 
+: `U2B 1+ 
 : 2/ 0 
-: AVR (+2/ 
+: `AVR (+2/ 
 : NIP (PUSH (DROP (POP; ; UNW
 
-: RNG| RANGE>S 
+: `RNG| `RANGE>S 
 : STR| (XR (POP 
-: .TIMES |DROP 
+: `.TIMES |DROP 
 : TIMES (PUSH (XR  
 : TIMES| (FOR CALL BEGIN (J EXECUTE THEN (NEXT RELS<
 : 2EXIT (2RDRP; ; UNW 
 
 : T. vTARG 
-: WID.  4+ 
+: `WID.  4+ 
 : ID. |SPC 
-: ". CSTR 
+: `". CSTR 
 : TYPE STR| CSTR EMIT 
 ;
-: ((." ("SKIP ". ;;  
+: ((." ("SKIP `". ;;  
 : |[] ."[" (EX ."]" ; 
-: [ID] CSTR 
-: [S] |SPC |DROP 
+: `[ID] CSTR 
+: `[S] |SPC |DROP 
 : [TYPE] |[] TIMES| CSTR (DUP |C. BL (U< 0; (DROP '. 
 ;; 
 : ((" ("SKIP ;; 
@@ -191,7 +209,7 @@ $F800 CONST  TBUF
 : vINI BYE ; 
 
 : `(?" 0     \ ALWAYS ERROR  \ NOT RETURN
-: (0" (0=   \ ONZERO ERROR
+: `(0" (0=   \ ONZERO ERROR
 : ((A" ("SKIP SWAP (IF DROP; COLD TARG,< `. QUIT ,<
 
 : |N?? (EX  
@@ -199,10 +217,10 @@ $F800 CONST  TBUF
 : ??  !"?" 
 ;;
 
-HERE >, (D#0 @2 
+HERE >, (D#0 `@2 
 : WITHIN OVER- (PUSH - (POP 
 : U< (U< ; 
-N: BREL? -128 , 128 , 
+N: `BREL? -128 , 128 , 
 =, PRNTBL 32 , 240 ,
 HERE >, (D#0 TO WITHIN : 0= (0= ;
 N: `RSTACK -$2C0 10 + , -$40 ,
@@ -222,36 +240,36 @@ N: `RSTACK -$2C0 10 + , -$40 ,
 : (, (@R+ `<RELS_ ; 
 
 HERE >, (D#0 
-: C@, C@                         
+: `C@, C@                         
 : C, |H                          
 : C!+ (PUSH W>B @I (DUP W>B - + (!R+ (POP 
 : 1- (@+; ,< -1 , 
-=, NOP, $90 , 
+=, `NOP, $90 , 
 
 : `|ALIGN (EX 
-: ALIGNED |LASTH HERE ODD 0; NOP, ; 
+: ALIGNED |LASTH HERE ODD 0; `NOP, ; 
 ' `|ALIGN VECTOR  v",
 
-: (@,  (D#0
+: `(@,  (D#0
 : @,   LASTH! @ , ;
 
-: (LIT, (@, (LIT 
+: (LIT, `(@, (LIT 
 
 : TARG; TARG,<  
-: :;   (@, ;; 
+: :;   `(@, ;; 
 
 >, (NOP
 : TOKEN?  |N??  
-: TOKEN  BL  CALL ?C@ ;THEN
+: TOKEN  BL  CALL `?C@ ;THEN
 : WORD  CALL    : `S>TB! TBUF    
 : S>"! (IO; ,<   ,"^W~-~^Q~-~5~^@^Cy~GF~^E`" =H `_@MAKESTR   
     ,"^V~Q^Cq~}~&~s~$~|~Y^H~^M^V~^W~C~^P~" >,  THEN    
-: PARSE  `SOURCE ETIB |LTIB `LT! (IO; ,<
+: PARSE  SOURCE ETIB |LTIB `LT! (IO; ,<
 ,"^Q~^K~{~c~^L+y~<_u^Fs~.~t^BOA^I~"
 ,"|^Bc~^Er~.~u^AO+|^B^I~<^Q~C~"
 
 : "STR, '" 
-: `", WORD ?C@ N?? 
+: `", WORD `?C@ N?? 
 : ", CSTR v", (DUP C, 
 : S, STR| CSTR C, ; 
 
@@ -263,9 +281,9 @@ HERE >, (D#0
 ,"Z3I~^CA~^K~x~^M~}^D^J~^Mc~^MA~R~^W~uo~"
 ,"1~^B^AM^B^I~<^K~A~C~"
 
-: SAME? TFND 0; 4+ [ID] TBUF 
+: SAME? TFND 0; 4+ `[ID] TBUF 
 (; |, \ ,' 
-: ' FND?? @2 
+: ' FND?? `@2 
 : UNDEF? ODD !"UNDEF?" ;;
 HERE >, (D#0 
 : @ADR+  `@|+
@@ -284,24 +302,24 @@ N: `TO' -2 , N: `VAL' 2 , =, AT' -4 ,
 : ">NUM CSTR ATOI ?? ;
  
 : `?:, (DUP                      
-: :, |,                          
+: `:, |,                          
 : TARG:! HERE `ODD?? LASTH!  
 : `=H  HERE                        
 : =: 0 TOKEN?   SAME?
-: (=:  ?C@ 1+ |T MPUSH TWICE
+: (=:  `?C@ 1+ |T MPUSH TWICE
 : !-    CALL  !+ THEN
 : 2- (@+; ,< -2 ,
 
 : `DXEP2-| 1- 
 : `DXEP-| 1- 
-: DXEP| (DUP 
+: `DXEP| (DUP 
 : XEP| (XR EXECUTE (POP;  ; UNW
 : DXEP+| (DUP 1+ XEP| ;
 : `A+L XEP| 
 : I+ (J + ; 
-: <RNG| RANGE>S `A+L STR| ;
+: <RNG| `RANGE>S `A+L STR| ;
 
-: C_ON 1 (SKIP 
+: `C_ON `1 (SKIP 
 : `C_OFF 0 
 : `SWAPC! SWAP 
 : C! C!+ (DROP;  ;  UNW
@@ -313,7 +331,7 @@ N: `TO' -2 , N: `VAL' 2 , =, AT' -4 ,
 \ : `STK (VAR 0 0
 : ROT `USWAP SWAP ;
 \ : `STK! (SP@ (RP@ `STK 
-: !2 `USWAP 
+: `!2 `USWAP 
 : 2! !+ ! ;  
 
 : FORGET FND?? (DUP TO UNDEF? EVEN TO H  TO NAME> TO T ; 
@@ -325,6 +343,16 @@ N: `TO' -2 , N: `VAL' 2 , =, AT' -4 ,
 : (RDROP (POP (XR (DROP; 
 : (code (POP vTARG @ ! ; 
 
-: `STACK  (RP@  2- 2- `RSTACK !"RSTACK?" 
-(SP@ 2- `DSTACK !"DSTACK?" ; 
- 
+: `STACK  (RP@  2- 2- `RSTACK !"RSTK?" 
+(SP@ 2- `DSTACK !"DSTK?" ; 
+
+\ DOS & VIDEO
+: `|REGS (EX TO `_FL TO `_AX TO `_BX TO `_CX TO `_DX ; 
+HERE >, (D#0 @ 
+: (DOS `|REGS (IO; ,< $21CD , 
+HERE =: `@INT  $89 C, $1C C, $89 C, $4C C, 2 C, $89 C, $54 C,
+4 C, $9C C, $4E C, $4E C, $89 C, 4 C, $58 C, $C3 C, 0 C, 
+N: `Fread $3F00 ,
+N: `Fwrite $4000 , 
+=, `Fseek $4200 ,
+: (VID `|REGS (IO; ,<  $10CD , ' `@INT  $EB C, HERE 1+ - C,

@@ -6,6 +6,7 @@ META `INTERP  LOCATE          \ TARGET FORTH INITIAL STATE
 ' (CON ' HI# T!               \ TARGET FORTH HI# OF >NUM
 
 THIDE (DEF      THIDE COLD    THIDE CALL`    
+THIDE (QARY     THIDE (LARY   THIDE (WARY        
 
 APT-  NOP;    =:  NOP        APT-  ((A"    =:  (!"
 APT2  TARG:!      :`         APT-  (LIT    =:  (# 
