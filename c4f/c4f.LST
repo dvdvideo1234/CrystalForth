@@ -1,13 +1,13 @@
-Turbo Assembler	 Version 3.2	    12/23/18 11:47:08	    Page 1
+Turbo Assembler	 Version 3.2	    12/06/19 17:02:02	    Page 1
 C4F.asm
 
 
 
       1				     ; COMMANDS	     OF	INTERPRETER
-      2				     ; JUMP EXIT IF NEXT   CONTROLS
+      2				     ; JUMP EXIT IF IFM	  CONTROLS
       3				     ; push pop	J DUP	   STACK
       4				     ; !R+ @R+ xR XA	   TRANSFER
-      5				     ; +2/ +* AND XOR	   MATH	& LOGIC
+      5				     ; +2/ +* AND -/	   MATH	& LOGIC
       6
       7				     locals  @@
       8
@@ -60,7 +60,7 @@ C4F.asm
      55
      56				     R2M_    macro   REG
      57				       DEC   REG
-Turbo Assembler	 Version 3.2	    12/23/18 11:47:08	    Page 2
+Turbo Assembler	 Version 3.2	    12/06/19 17:02:02	    Page 2
 C4F.asm
 
 
@@ -78,881 +78,512 @@ C4F.asm
      68					     endm
      69
      70				     DROP_   macro
-     71				       LODSW
-     72					     endm
-     73
-     74				     DUP_    macro  REG
-     75				       R2M_  DSP
-     76				       MOV   [DSP],REG
-     77					     endm
-     78
-     79				     SWAP_   macro
-     80				       XCHG  [DSP],T
-     81					     endm
-     82
-     83				     rchg_   macro   reg
-     84				       xchg  ax,reg
-     85				       endm
-     86
-     87				     Zero?_  MACRO   REG
-     88				       OR    REG,REG
-     89					     ENDM
-     90
-     91				     CLR_    MACRO   REG
-     92				       XOR    REG,REG
-     93					     ENDM
-     94
-     95				     ALiGN_  MACRO  FLAG
-     96					     IF	($-START+FLAG) AND 1
-     97					     NOP
-     98				       @NOPSCNT	= @NOPSCNT+1
-     99					     ENDIF
-    100					     ENDM
-    101
-    102	      =0000		     @NOPSCNT =	0
-    103
-    104				     L_	     MACRO NAM,L@
-    105				       ALIGN_  0
-    106				     L@:
-    107				       NAM   = (($-START+100H) SHR 1)+8000H
-    108					     ENDM
-    109
-    110				     P_	     MACRO NAM,L@
-    111				       ALIGN_  0
-    112				     L@:
-    113				       NAM   = ($-START+100H) SHR 1
-    114				       ENDM
-Turbo Assembler	 Version 3.2	    12/23/18 11:47:08	    Page 3
+     71				       MOV   T,[DSP]
+     72				       LEA   DSP,[DSP+2]
+     73					     endm
+     74
+     75				     DUP_    macro  REG
+     76				       LEA   DSP,[DSP-2]
+     77				       MOV   [DSP],REG
+     78					     endm
+     79
+     80				     SWAP_   macro
+     81				       XCHG  [DSP],T
+     82					     endm
+     83
+     84				     rchg_   macro   reg
+     85				       xchg  ax,reg
+     86				       endm
+     87
+     88				     Zero?_  MACRO   REG
+     89				       OR    REG,REG
+     90					     ENDM
+     91
+     92				     CLR_    MACRO   REG
+     93				       XOR    REG,REG
+     94					     ENDM
+     95
+     96				     ALiGN_  MACRO  FLAG
+     97					     IF	($-START+FLAG) AND 1
+     98					     NOP
+     99				       @NOPSCNT	= @NOPSCNT+1
+    100					     ENDIF
+    101					     ENDM
+    102
+    103	      =0000		     @NOPSCNT =	0
+    104
+    105				     L_	     MACRO NAM,L@
+    106				       ALIGN_  0
+    107				     L@:
+    108				       NAM   = (($-START+100H) SHR 1)+8000H
+    109					     ENDM
+    110
+    111				     P_	     MACRO NAM,L@
+    112				       ALIGN_  0
+    113				     L@:
+    114				       NAM   = ($-START+100H) SHR 1
+Turbo Assembler	 Version 3.2	    12/06/19 17:02:02	    Page 3
 C4F.asm
 
 
 
-    115
-    116				     N_	     MACRO
-    117				       JMP   NP
-    118				       ENDM
-    119
-    120				     ; REGISTERS     for interpretter
-    121	      =BX		     IP	 = BX  ; INSTRUCTION POINTER
-    122	      =SP		     RSP = SP  ; RETURN	STACK POINTER
-    123	      =SI		     DSP = SI  ; DATA STACK POINTER
-    124	      =DX		     NP	 = DX  ; TO NEXT POINTER
-    125	      =BP		     AR	 = BP  ; ARITHMETIC (ALTERNATIVE) REGISTER
-    126
-    127	      =AX		     T	 = AX  ; DATA STACK TOP	REGISTER
-    128	      =AL		     TL	 = AL  ; DATA STACK TOP	REGISTER
-    129	      =AH		     TH	 = AH  ; DATA STACK TOP	REGISTER
-    130	      =DI		     WA	 = DI  ; WORK ADDRESS REGISTER
-    131	      =CX		     W	 = CX  ; WORK REGISTER
-    132	      =CL		     WL	 = CL  ; WORK REGISTER
-    133	      =CH		     WH	 = CH  ; WORK REGISTER
-    134
-    135	0000			     MyCseg  segment para  use16
-    136
-    137					     assume cs:	MyCseg,	 ds: MyCseg, ss: MyCseg, es: MyCseg
-    138
-    139					     org 100h
-    140
-    141	      =-0100		     @TBUF   = -256	     ;	256
-    142	      =-0200		     @TIB    = @TBUF  *	2    ;	256
-    143							     ;	512 B FSTACK
-    144	      =-0400		     @R_TOP  = @TIB   *	2    ; 1024 B RSTACK
-    145	      =-0800		     @S_TOP  = @R_TOP *	2    ; 2048 B DSTACK
-    146	      =-1000		     @VOCTOP = @S_TOP *	2    ; 4096 B =	4 BUFFERS * 1024 B
-    147
-    148	0100			     Start   Label byte
-    149	0100			     _START:
-    150
-    151				      P_ _ABORT,@ABORT
-1   152				       ALIGN_  0
-2   153					     IF	($-START+0) AND	1
-2   154					     NOP
-2   155				       @NOPSCNT	= @NOPSCNT+1
-2   156					     ENDIF
-1   157	0100			     @ABORT:
-1   158	      =0080		       _ABORT	= ($-START+100H) SHR 1
-    159	0100  BB 1000		       mov   bX,1000h	  ; only 64k allocate
-    160	0103  B4 4A		       mov   ah,4ah
-    161	0105  CD 21		       int   21h
-    162	0107  E8 0010		       CALL  @NEXTS
-    163
-    164				      P_ _NOP,@NOP	     ; ( NOP
-1   165				       ALIGN_  0
-2   166					     IF	($-START+0) AND	1
-2   167					     NOP
-2   168				       @NOPSCNT	= @NOPSCNT+1
-2   169					     ENDIF
-1   170	010A			     @NOP:
-1   171	      =0085		       _NOP   =	($-START+100H) SHR 1
-Turbo Assembler	 Version 3.2	    12/23/18 11:47:08	    Page 4
+    115				       ENDM
+    116
+    117				     N_	     MACRO
+    118				       JMP SHORT   @NOP
+    119				       ENDM
+    120
+    121				     ; REGISTERS     for interpretter
+    122	      =BX		     T	 = BX  ; DATA STACK TOP	REGISTER
+    123	      =BL		     TL	 = BL  ; DATA STACK TOP	REGISTER
+    124	      =BH		     TH	 = BH  ; DATA STACK TOP	REGISTER
+    125	      =SI		     IP	 = SI  ; INSTRUCTION POINTER
+    126	      =SP		     RSP = SP  ; RETURN	STACK POINTER
+    127	      =BP		     DSP = BP  ; DATA STACK POINTER
+    128	      =CX		     NP	 = CX  ; TO NEXT POINTER
+    129	      =DX		     AR	 = DX  ; ARITHMETIC (ALTERNATIVE) REGISTER
+    130
+    131	      =DI		     WA	 = DI  ; WORK ADDRESS REGISTER
+    132	      =AX		     W	 = AX  ; WORK REGISTER
+    133	      =AL		     WL	 = AL  ; WORK REGISTER
+    134	      =AH		     WH	 = AH  ; WORK REGISTER
+    135
+    136	0000			     MyCseg  segment para  use16
+    137
+    138					     assume cs:	MyCseg,	 ds: MyCseg, ss: MyCseg, es: MyCseg
+    139
+    140					     org 100h
+    141
+    142	      =-0100		     @TBUF   = -256	     ;	256
+    143	      =-0200		     @TIB    = @TBUF  *	2    ;	256
+    144							     ;	512 B FSTACK
+    145	      =-0400		     @R_TOP  = @TIB   *	2    ; 1024 B RSTACK
+    146	      =-0800		     @S_TOP  = @R_TOP *	2    ; 2048 B DSTACK
+    147	      =-1000		     @VOCTOP = @S_TOP *	2    ; 4096 B =	4 BUFFERS * 1024 B
+    148
+    149	0100			     Start   Label byte
+    150	0100			     _START:
+    151
+    152				      P_ _ABORT,@ABORT
+1   153				       ALIGN_  0
+2   154					     IF	($-START+0) AND	1
+2   155					     NOP
+2   156				       @NOPSCNT	= @NOPSCNT+1
+2   157					     ENDIF
+1   158	0100			     @ABORT:
+1   159	      =0080		       _ABORT	= ($-START+100H) SHR 1
+    160	0100  BC FBFE		       MOV   RSP,@R_TOP-2
+    161	0103  BD F7FE		       MOV   DSP,@S_TOP-2
+    162	0106  E8 001C		       CALL  @DBG
+    163	0109  E8 0010		       CALL  @RETA
+    164	010C  0000		      _@INIT  DW 0
+    165				     ;AR      DW 0
+    166
+    167
+    168
+    169				      ;vvvvvv--------------   IO  ---------------
+    170
+    171				      P_ _IO,@IO	      ;	( IO
+Turbo Assembler	 Version 3.2	    12/06/19 17:02:02	    Page 4
 C4F.asm
 
 
 
-    172				       @IP_    WA
-1   173	010A  8B 3F		       MOV   WA,[IP]
-1   174				       R2P_  IP
-2   175	010C  43		       INC   IP
-2   176	010D  43		       INC   IP
-    177	010E  D1 E7		       SHL     WA,1
-    178	0110  72 03		       JC      @NEST
-    179	0112  FF E7		       JMP     WA
-    180
-    181				      P_ _EX,@EX	     ; ( EX
-1   182				       ALIGN_  0
-2   183					     IF	($-START+0) AND	1
-2   184					     NOP
-2   185				       @NOPSCNT	= @NOPSCNT+1
-2   186					     ENDIF
-1   187	0114			     @EX:
-1   188	      =008A		       _EX   = ($-START+100H) SHR 1
-    189	0114  5F		       POP     WA
-    190
-    191	0115			     @NEST:
-    192	0115  53		       PUSH    IP
-    193	0116  8B DF		       MOV     IP,WA
-    194				       JMPS_   @NOP
-1   195	0118  EB F0		       jmp   SHORT @NOP
-    196
-    197
-    198	011A			     @NEXTS:
-    199	011A  5A		       POP   NP
-    200	011B  BC FBFE		       MOV   RSP,@R_TOP-2
-    201	011E  BE F7FE		       MOV   DSP,@S_TOP-2
-    202	0121  E8 0020		       CALL  @RET
-    203
-    204	0124  0000		     _@INIT  DW	0
-    205				     ;AR      DW 0
-    206
-    207				     ;vvvvvv--------------   IO	 ---------------
-    208
-    209				      P_ _IODD,@IODD		  ; ( IO
-1   210				       ALIGN_  0
-2   211					     IF	($-START+0) AND	1
-2   212					     NOP
-2   213				       @NOPSCNT	= @NOPSCNT+1
-2   214					     ENDIF
-1   215	0126			     @IODD:
-1   216	      =0093		       _IODD   = ($-START+100H)	SHR 1
-    217				       DUP_    T
-1   218				       R2M_  DSP
-2   219	0126  4E		       DEC   DSP
-2   220	0127  4E		       DEC   DSP
-1   221	0128  89 04		       MOV   [DSP],T
-    222
-    223				      P_ _IOD,@IOD		; ( IO
-1   224				       ALIGN_  0
-2   225					     IF	($-START+0) AND	1
-2   226					     NOP
-2   227				       @NOPSCNT	= @NOPSCNT+1
-2   228					     ENDIF
-Turbo Assembler	 Version 3.2	    12/23/18 11:47:08	    Page 5
+1   172				       ALIGN_  0
+2   173					     IF	($-START+0) AND	1
+2   174					     NOP
+2   175				       @NOPSCNT	= @NOPSCNT+1
+2   176					     ENDIF
+1   177	010E			     @IO:
+1   178	      =0087		       _IO   = ($-START+100H) SHR 1
+    179	010E  52		       PUSH    AR
+    180	010F  93		       XCHG    AX,BX
+    181	0110  8B 5E 00		       MOV     BX,[DSP]
+    182	0113  8B 4E 02		       MOV     CX,[DSP+2]
+    183	0116  8B 56 04		       MOV     DX,[DSP+4]
+    184	0119  FF D6		       CALL    IP
+    185	011B  5A		       POP     AR
+    186
+    187				     ;^^^^^^--------------   IO	 ---------------
+    188
+    189
+    190				     ;-------------------------------------------
+    191				     ; CONTROL
+    192				     ;-------------------------------------------
+    193
+    194				      P_ _RET,@RETA	      ;	( (;
+1   195				       ALIGN_  0
+2   196					     IF	($-START+0) AND	1
+2   197					     NOP
+2   198				       @NOPSCNT	= @NOPSCNT+1
+2   199					     ENDIF
+1   200	011C			     @RETA:
+1   201	      =008E		       _RET   =	($-START+100H) SHR 1
+    202	011C  5E			     POP     IP
+    203					     N_
+1   204	011D  EB 4F		       JMP SHORT   @NOP
+    205	011F			     @DROP:  DROP_
+1   206	011F  8B 5E 00		       MOV   T,[DSP]
+1   207	0122  8D 6E 02		       LEA   DSP,[DSP+2]
+    208	0125  C3		     @DBG:   RET
+    209
+    210				      P_ _SKIP,@SKIP	      ;	( SKIP
+1   211				       ALIGN_  0
+2   212					     IF	($-START+0) AND	1
+2   213					     NOP
+2   214				       @NOPSCNT	= @NOPSCNT+1
+2   215					     ENDIF
+1   216	0126			     @SKIP:
+1   217	      =0093		       _SKIP   = ($-START+100H)	SHR 1
+    218	0126  EB 11			     JMP  SHORT	   @SKIP2
+    219				      P_ _IFM,@IFM
+1   220				       ALIGN_  0
+2   221					     IF	($-START+0) AND	1
+2   222					     NOP
+2   223				       @NOPSCNT	= @NOPSCNT+1
+2   224					     ENDIF
+1   225	0128			     @IFM:
+1   226	      =0094		       _IFM   =	($-START+100H) SHR 1
+    227	0128  EB 01			     JMP  SHORT	   @IFM2
+    228				      P_ _MIF,@MIF
+Turbo Assembler	 Version 3.2	    12/06/19 17:02:02	    Page 5
 C4F.asm
 
 
 
-1   229	012A			     @IOD:
-1   230	      =0095		       _IOD   =	($-START+100H) SHR 1
-    231				       DUP_    T
-1   232				       R2M_  DSP
-2   233	012A  4E		       DEC   DSP
-2   234	012B  4E		       DEC   DSP
-1   235	012C  89 04		       MOV   [DSP],T
-    236
-    237				      P_ _IO,@IO	      ;	( IO
-1   238				       ALIGN_  0
-2   239					     IF	($-START+0) AND	1
-2   240					     NOP
-2   241				       @NOPSCNT	= @NOPSCNT+1
-2   242					     ENDIF
-1   243	012E			     @IO:
-1   244	      =0097		       _IO   = ($-START+100H) SHR 1
-    245	012E  52 55		       PUSH    NP AR
-    246	0130  8B 3C		       MOV     DI,[DSP]
-    247	0132  8B 4C 02		       MOV     CX,[DSP+2]
-    248	0135  8B 54 04		       MOV     DX,[DSP+4]
-    249	0138  87 FB		       XCHG    DI,IP
-    250	013A  FF D7		       CALL    DI
-    251	013C  5D 5A		       POP     AR NP
+1   229				       ALIGN_  0
+2   230					     IF	($-START+0) AND	1
+2   231					     NOP
+2   232				       @NOPSCNT	= @NOPSCNT+1
+2   233					     ENDIF
+1   234	012A			     @MIF:
+1   235	      =0095		       _MIF   =	($-START+100H) SHR 1
+    236	012A  43			     INC     T
+    237	012B			     @IFM2:
+    238	012B  4B			     DEC     T
+    239	012C  78 0B			     JS	     @SKIP2
+    240
+    241				      P_ _JUMP,@JUMP		 ; ( (JUMP
+1   242				       ALIGN_  0
+2   243					     IF	($-START+0) AND	1
+2   244					     NOP
+2   245				       @NOPSCNT	= @NOPSCNT+1
+2   246					     ENDIF
+1   247	012E			     @JUMP:
+1   248	      =0097		       _JUMP   = ($-START+100H)	SHR 1
+    249	012E  8B 34			     MOV     IP,[IP]
+    250					     N_
+1   251	0130  EB 3C		       JMP SHORT   @NOP
     252
-    253				     ;^^^^^^--------------   IO	 ---------------
-    254
-    255
-    256				     ;-------------------------------------------
-    257				     ; CONTROL
-    258				     ;-------------------------------------------
-    259
-    260				      P_ _DROPX,@DROPX	     ; DROP;
-1   261				       ALIGN_  0
-2   262					     IF	($-START+0) AND	1
-2   263					     NOP
-2   264				       @NOPSCNT	= @NOPSCNT+1
-2   265					     ENDIF
-1   266	013E			     @DROPX:
-1   267	      =009F		       _DROPX	= ($-START+100H) SHR 1
-    268					     DROP_
-1   269	013E  AD		       LODSW
-    270					     SKIPB_
-1   271	013F  3C		       DB    03CH
-    272
-    273				      P_ _RDROPX,@RDROPX
-1   274				       ALIGN_  0
-2   275					     IF	($-START+0) AND	1
-2   276					     NOP
-2   277				       @NOPSCNT	= @NOPSCNT+1
-2   278					     ENDIF
-1   279	0140			     @RDROPX:
-1   280	      =00A0		       _RDROPX	 = ($-START+100H) SHR 1
-    281	0140  59			     POP     W
-    282
-    283	0141  5B		     @RETA:  POP     IP
-    284					     N_
-1   285	0142  FF E2		       JMP   NP
-Turbo Assembler	 Version 3.2	    12/23/18 11:47:08	    Page 6
+    253				      P_ _IF,@IF	      ;	( IF
+1   254				       ALIGN_  0
+2   255					     IF	($-START+0) AND	1
+2   256					     NOP
+2   257				       @NOPSCNT	= @NOPSCNT+1
+2   258					     ENDIF
+1   259	0132			     @IF:
+1   260	      =0099		       _IF   = ($-START+100H) SHR 1
+    261	0132  4B			     DEC     T
+    262	0133  43			     INC     T
+    263	0134  E8 FFE8			     CALL    @DROP
+    264	0137  74 F5			     JZ	     @JUMP
+    265	0139			     @SKIP2:
+    266	0139  AD			     LODSW
+    267					     N_
+1   268	013A  EB 32		       JMP SHORT   @NOP
+    269
+    270				      P_ _RDEC1,@RDEC1
+1   271				       ALIGN_  0
+2   272					     IF	($-START+0) AND	1
+2   273					     NOP
+2   274				       @NOPSCNT	= @NOPSCNT+1
+2   275					     ENDIF
+1   276	013C			     @RDEC1:
+1   277	      =009E		       _RDEC1	= ($-START+100H) SHR 1
+    278	013C  58			     POP     W
+    279					     SKIPA_
+1   280	013D  3D		       DB    03DH
+    281				      P_ _RDEC2,@RDEC2
+1   282				       ALIGN_  0
+2   283					     IF	($-START+0) AND	1
+2   284					     NOP
+2   285				       @NOPSCNT	= @NOPSCNT+1
+Turbo Assembler	 Version 3.2	    12/06/19 17:02:02	    Page 6
 C4F.asm
 
 
 
-    286
-    287				      P_ _RET,@RET	     ; ( (;
-1   288				       ALIGN_  0
-2   289					     IF	($-START+0) AND	1
-2   290					     NOP
-2   291				       @NOPSCNT	= @NOPSCNT+1
-2   292					     ENDIF
-1   293	0144			     @RET:
-1   294	      =00A2		       _RET   =	($-START+100H) SHR 1
-    295					     JMPS_   @RETA
-1   296	0144  EB FB		       jmp   SHORT @RETA
-    297
-    298				      P_ _NEXT,@NEXT
-1   299				       ALIGN_  0
-2   300					     IF	($-START+0) AND	1
-2   301					     NOP
-2   302				       @NOPSCNT	= @NOPSCNT+1
-2   303					     ENDIF
-1   304	0146			     @NEXT:
-1   305	      =00A3		       _NEXT   = ($-START+100H)	SHR 1
-    306	0146  59			     POP     W
-    307	0147  49			     DEC     W
-    308	0148  51			     PUSH    W
-    309					     SKIPC_  WL
-1   310	0149  B1 00		       mov   WL,0
-1   311				       org   $-1
-    312
-    313				      P_ _IFM,@IFM
-1   314				       ALIGN_  0
-2   315					     IF	($-START+0) AND	1
-2   316					     NOP
-2   317				       @NOPSCNT	= @NOPSCNT+1
-2   318					     ENDIF
-1   319	014A			     @IFM:
-1   320	      =00A5		       _IFM   =	($-START+100H) SHR 1
-    321	014A  48			     DEC     T
-    322	014B  78 13			     JS	     @SKIP
+2   286					     ENDIF
+1   287	013E			     @RDEC2:
+1   288	      =009F		       _RDEC2	= ($-START+100H) SHR 1
+    289	013E  58			     POP     W
+    290					     R2P_    W
+1   291	013F  40		       INC   W
+1   292	0140  40		       INC   W
+    293					     SKIPA_
+1   294	0141  3D		       DB    03DH
+    295
+    296				      P_ _XR,@XR	      ;	( XR  XCHG
+1   297				       ALIGN_  0
+2   298					     IF	($-START+0) AND	1
+2   299					     NOP
+2   300				       @NOPSCNT	= @NOPSCNT+1
+2   301					     ENDIF
+1   302	0142			     @XR:
+1   303	      =00A1		       _XR   = ($-START+100H) SHR 1
+    304	0142  58			     POP     W
+    305	0143  93			     XCHG    T,W
+    306	0144			     @_XA:
+    307	0144  50			     PUSH    W
+    308					     N_
+1   309	0145  EB 27		       JMP SHORT   @NOP
+    310
+    311				      P_ _XA,@XA	      ;	( XA
+1   312				       ALIGN_  0
+2   313					     IF	($-START+0) AND	1
+2   314	0147  90			     NOP
+2   315	      =0001		       @NOPSCNT	= @NOPSCNT+1
+2   316					     ENDIF
+1   317	0148			     @XA:
+1   318	      =00A4		       _XA   = ($-START+100H) SHR 1
+    319	0148  58			     POP     W
+    320	0149  92			     XCHG    W,AR
+    321					     JMPS_   @_XA
+1   322	014A  EB F8		       jmp   SHORT @_XA
     323
-    324				      P_ _JUMP,@JUMP		 ; ( (JUMP
+    324				      P_ _RSTP,@RSTP	     ; ( !R+
 1   325				       ALIGN_  0
 2   326					     IF	($-START+0) AND	1
-2   327	014D  90			     NOP
-2   328	      =0001		       @NOPSCNT	= @NOPSCNT+1
+2   327					     NOP
+2   328				       @NOPSCNT	= @NOPSCNT+1
 2   329					     ENDIF
-1   330	014E			     @JUMP:
-1   331	      =00A7		       _JUMP   = ($-START+100H)	SHR 1
-    332					     @IP_    IP
-1   333	014E  8B 1F		       MOV   IP,[IP]
-1   334				       R2P_  IP
-2   335	0150  43		       INC   IP
-2   336	0151  43		       INC   IP
-    337					     N_
-1   338	0152  FF E2		       JMP   NP
-    339
-    340				      P_ _?SKIP,@?SKIP
-1   341				       ALIGN_  0
-2   342					     IF	($-START+0) AND	1
-Turbo Assembler	 Version 3.2	    12/23/18 11:47:08	    Page 7
+1   330	014C			     @RSTP:
+1   331	      =00A6		       _RSTP   = ($-START+100H)	SHR 1
+    332	014C  5F			     POP     WA
+    333	014D  93			     XCHG    T,W
+    334	014E  AB			     STOSW
+    335	014F  57			     PUSH    WA
+    336				      P_ _DROP,@_DROP	       ; ( DROP
+1   337				       ALIGN_  0
+2   338					     IF	($-START+0) AND	1
+2   339					     NOP
+2   340				       @NOPSCNT	= @NOPSCNT+1
+2   341					     ENDIF
+1   342	0150			     @_DROP:
+Turbo Assembler	 Version 3.2	    12/06/19 17:02:02	    Page 7
 C4F.asm
 
 
 
-2   343					     NOP
-2   344				       @NOPSCNT	= @NOPSCNT+1
-2   345					     ENDIF
-1   346	0154			     @?SKIP:
-1   347	      =00AA		       _?SKIP	= ($-START+100H) SHR 1
-    348					     Zero?_  T
-1   349	0154  0B C0		       OR    T,T
-    350	0156  74 03			     JE	     @1M?
-    351					     N_
-1   352	0158  FF E2		       JMP   NP
-    353
-    354				      P_ _IF,@IF	      ;	( IF
-1   355				       ALIGN_  0
-2   356					     IF	($-START+0) AND	1
-2   357					     NOP
-2   358				       @NOPSCNT	= @NOPSCNT+1
-2   359					     ENDIF
-1   360	015A			     @IF:
-1   361	      =00AD		       _IF   = ($-START+100H) SHR 1
-    362	015A  48			     DEC     T
-    363	015B			     @1M?:
-    364	015B  40			     INC     T
-    365					     DROP_
-1   366	015C  AD		       LODSW
-    367	015D  74 EF			     JZ	     @JUMP
-    368
-    369				      P_ _SKIP,@SKIP	      ;	( SKIP
-1   370				       ALIGN_  0
-2   371					     IF	($-START+0) AND	1
-2   372	015F  90			     NOP
-2   373	      =0002		       @NOPSCNT	= @NOPSCNT+1
-2   374					     ENDIF
-1   375	0160			     @SKIP:
-1   376	      =00B0		       _SKIP   = ($-START+100H)	SHR 1
-    377					     R2P_    IP
-1   378	0160  43		       INC   IP
-1   379	0161  43		       INC   IP
-    380					     N_
-1   381	0162  FF E2		       JMP   NP
-    382
-    383				      P_ _RSKIP,@RSKIP
-1   384				       ALIGN_  0
-2   385					     IF	($-START+0) AND	1
-2   386					     NOP
-2   387				       @NOPSCNT	= @NOPSCNT+1
-2   388					     ENDIF
-1   389	0164			     @RSKIP:
-1   390	      =00B2		       _RSKIP	= ($-START+100H) SHR 1
-    391	0164  5F			     POP     WA
-    392					     R2P_    WA
-1   393	0165  47		       INC   WA
-1   394	0166  47		       INC   WA
-    395					     SKIPA_
-1   396	0167  3D		       DB    03DH
-    397
-    398				      P_ _XR,@XR	      ;	( XR  XCHG
-1   399				       ALIGN_  0
-Turbo Assembler	 Version 3.2	    12/23/18 11:47:08	    Page 8
+1   343	      =00A8		       _DROP   = ($-START+100H)	SHR 1
+    344					     JMPS_   @DROP1
+1   345	0150  EB 01		       jmp   SHORT @DROP1
+    346
+    347				      P_ _PUSH,@PUSH	      ;	( PUSH
+1   348				       ALIGN_  0
+2   349					     IF	($-START+0) AND	1
+2   350					     NOP
+2   351				       @NOPSCNT	= @NOPSCNT+1
+2   352					     ENDIF
+1   353	0152			     @PUSH:
+1   354	      =00A9		       _PUSH   = ($-START+100H)	SHR 1
+    355	0152  53			     PUSH    T
+    356	0153			     @DROP1:
+    357	0153  E8 FFC9			     CALL    @DROP
+    358					     N_
+1   359	0156  EB 16		       JMP SHORT   @NOP
+    360
+    361				      P_ _J,@J		      ;	( J
+1   362				       ALIGN_  0
+2   363					     IF	($-START+0) AND	1
+2   364					     NOP
+2   365				       @NOPSCNT	= @NOPSCNT+1
+2   366					     ENDIF
+1   367	0158			     @J:
+1   368	      =00AC		       _J   = ($-START+100H) SHR 1
+    369	0158  5F			     POP     WA
+    370	0159  58			     POP     W
+    371	015A  50			     PUSH    W
+    372					     JMPS_   @_J
+1   373	015B  EB 06		       jmp   SHORT @_J
+    374
+    375				      P_ _RLDP,@RLDP	      ;	( @R+
+1   376				       ALIGN_  0
+2   377					     IF	($-START+0) AND	1
+2   378	015D  90			     NOP
+2   379	      =0002		       @NOPSCNT	= @NOPSCNT+1
+2   380					     ENDIF
+1   381	015E			     @RLDP:
+1   382	      =00AF		       _RLDP   = ($-START+100H)	SHR 1
+    383	015E  5F			     POP     WA
+    384	015F  8B 05			     MOV     W,[WA]
+    385					     R2P_    WA
+1   386	0161  47		       INC   WA
+1   387	0162  47		       INC   WA
+    388	0163			     @_J:
+    389	0163  57			     PUSH    WA
+    390					     SKIPA_
+1   391	0164  3D		       DB    03DH
+    392
+    393	0165			     @_DUP_:
+    394	0165  53			     PUSH    T
+    395
+    396				      P_ _POP,@POP	      ;	( POP
+1   397				       ALIGN_  0
+2   398					     IF	($-START+0) AND	1
+2   399					     NOP
+Turbo Assembler	 Version 3.2	    12/06/19 17:02:02	    Page 8
 C4F.asm
 
 
 
-2   400					     IF	($-START+0) AND	1
-2   401					     NOP
-2   402				       @NOPSCNT	= @NOPSCNT+1
-2   403					     ENDIF
-1   404	0168			     @XR:
-1   405	      =00B4		       _XR   = ($-START+100H) SHR 1
-    406	0168  5F			     POP     WA
-    407	0169  97			     XCHG    T,WA
-    408					     JMPS_   @_XA
-1   409	016A  EB 03		       jmp   SHORT @_XA
-    410
-    411				      P_ _XA,@XA	      ;	( XA
-1   412				       ALIGN_  0
-2   413					     IF	($-START+0) AND	1
-2   414					     NOP
-2   415				       @NOPSCNT	= @NOPSCNT+1
-2   416					     ENDIF
-1   417	016C			     @XA:
-1   418	      =00B6		       _XA   = ($-START+100H) SHR 1
-    419	016C  5F			     POP     WA
-    420	016D  87 FD			     XCHG    WA,AR
-    421	016F			     @_XA:
-    422	016F  57			     PUSH    WA
-    423					     N_
-1   424	0170  FF E2		       JMP   NP
-    425
-    426	0172			     @_RSTP:
-    427	0172  57			     PUSH    WA
-    428					     SKIPB_
-1   429	0173  3C		       DB    03CH
-    430
-    431				      P_ _PUSH,@PUSH	      ;	( PUSH
-1   432				       ALIGN_  0
-2   433					     IF	($-START+0) AND	1
-2   434					     NOP
-2   435				       @NOPSCNT	= @NOPSCNT+1
-2   436					     ENDIF
-1   437	0174			     @PUSH:
-1   438	      =00BA		       _PUSH   = ($-START+100H)	SHR 1
-    439	0174  50			     PUSH    T
-    440	0175			     @DROP1:
-    441					     DROP_
-1   442	0175  AD		       LODSW
-    443					     N_
-1   444	0176  FF E2		       JMP   NP
-    445
-    446				      P_ _BE,@BE
-1   447				       ALIGN_  0
-2   448					     IF	($-START+0) AND	1
-2   449					     NOP
-2   450				       @NOPSCNT	= @NOPSCNT+1
-2   451					     ENDIF
-1   452	0178			     @BE:
-1   453	      =00BC		       _BE   = ($-START+100H) SHR 1
-    454	0178  B4 0E			     MOV     AH,0EH
-    455	017A  CD 10			     INT     10H
-    456					     JMPS_   @DROP1
-Turbo Assembler	 Version 3.2	    12/23/18 11:47:08	    Page 9
+2   400				       @NOPSCNT	= @NOPSCNT+1
+2   401					     ENDIF
+1   402	0166			     @POP:
+1   403	      =00B3		       _POP   =	($-START+100H) SHR 1
+    404	0166  58			     POP     W
+    405	0167			     @WPUSH:
+    406					     DUP_    T
+1   407	0167  8D 6E FE		       LEA   DSP,[DSP-2]
+1   408	016A  89 5E 00		       MOV   [DSP],T
+    409	016D  93			     XCHG    W,T
+    410				      P_ _NOP,@NOP	     ; ( NOP
+1   411				       ALIGN_  0
+2   412					     IF	($-START+0) AND	1
+2   413					     NOP
+2   414				       @NOPSCNT	= @NOPSCNT+1
+2   415					     ENDIF
+1   416	016E			     @NOP:
+1   417	      =00B7		       _NOP   =	($-START+100H) SHR 1
+    418	016E  AD			     LODSW
+    419	016F  D1 E0			     SHL     W,1
+    420	0171  72 02			     JC	     @NEST
+    421	0173  FF E0			     JMP     W
+    422	0175			     @NEST:
+    423	0175  56			     PUSH    IP
+    424	0176  8B F0			     MOV     IP,W
+    425					     JMPS_   @NOP
+1   426	0178  EB F4		       jmp   SHORT @NOP
+    427
+    428				      P_ _DUP,@DUP	      ;	( DUP
+1   429				       ALIGN_  0
+2   430					     IF	($-START+0) AND	1
+2   431					     NOP
+2   432				       @NOPSCNT	= @NOPSCNT+1
+2   433					     ENDIF
+1   434	017A			     @DUP:
+1   435	      =00BD		       _DUP   =	($-START+100H) SHR 1
+    436					     JMPS_   @_DUP_
+1   437	017A  EB E9		       jmp   SHORT @_DUP_
+    438
+    439				      P_ _PLAVG,@PLAVG	      ;	( +2/
+1   440				       ALIGN_  0
+2   441					     IF	($-START+0) AND	1
+2   442					     NOP
+2   443				       @NOPSCNT	= @NOPSCNT+1
+2   444					     ENDIF
+1   445	017C			     @PLAVG:
+1   446	      =00BE		       _PLAVG	= ($-START+100H) SHR 1
+    447	017C  03 5E 00			     ADD     T,[DSP]
+    448	017F  89 5E 00			     MOV     [DSP],T
+    449
+    450				      P_ _2DIV,@2DIV	      ;	( 2/
+1   451				       ALIGN_  0
+2   452					     IF	($-START+0) AND	1
+2   453					     NOP
+2   454				       @NOPSCNT	= @NOPSCNT+1
+2   455					     ENDIF
+1   456	0182			     @2DIV:
+Turbo Assembler	 Version 3.2	    12/06/19 17:02:02	    Page 9
 C4F.asm
 
 
 
-1   457	017C  EB F7		       jmp   SHORT @DROP1
-    458
-    459				      P_ _RSTM,@RSTM	     ; ( !R-
-1   460				       ALIGN_  0
-2   461					     IF	($-START+0) AND	1
-2   462					     NOP
-2   463				       @NOPSCNT	= @NOPSCNT+1
-2   464					     ENDIF
-1   465	017E			     @RSTM:
-1   466	      =00BF		       _RSTM   = ($-START+100H)	SHR 1
-    467	017E  5F			     POP     WA
-    468					     R2M_    WA
-1   469	017F  4F		       DEC   WA
-1   470	0180  4F		       DEC   WA
-    471					     SKIPB_
-1   472	0181  3C		       DB    03CH
-    473
-    474				      P_ _RST,@RST	   ; ( !R
-1   475				       ALIGN_  0
-2   476					     IF	($-START+0) AND	1
-2   477					     NOP
-2   478				       @NOPSCNT	= @NOPSCNT+1
-2   479					     ENDIF
-1   480	0182			     @RST:
-1   481	      =00C1		       _RST   =	($-START+100H) SHR 1
-    482	0182  5F			     POP     WA
-    483	0183			     @RST1:
-    484	0183  57			     PUSH    WA
-    485	0184  AB			     STOSW
-    486					     DROP_
-1   487	0185  AD		       LODSW
+1   457	      =00C1		       _2DIV   = ($-START+100H)	SHR 1
+    458	0182  D1 DB			     RCR     T,1
+    459					     N_
+1   460	0184  EB E8		       JMP SHORT   @NOP
+    461				      P_ _MSB1,@MSB1
+1   462				       ALIGN_  0
+2   463					     IF	($-START+0) AND	1
+2   464					     NOP
+2   465				       @NOPSCNT	= @NOPSCNT+1
+2   466					     ENDIF
+1   467	0186			     @MSB1:
+1   468	      =00C3		       _MSB1   = ($-START+100H)	SHR 1
+    469	0186  F9			     STC
+    470					     JMPS_   @2DIV
+1   471	0187  EB F9		       jmp   SHORT @2DIV
+    472
+    473				      P_ _SDIV,@SDIV	      ;	( -/
+1   474				       ALIGN_  0
+2   475					     IF	($-START+0) AND	1
+2   476	0189  90			     NOP
+2   477	      =0003		       @NOPSCNT	= @NOPSCNT+1
+2   478					     ENDIF
+1   479	018A			     @SDIV:
+1   480	      =00C5		       _SDIV   = ($-START+100H)	SHR 1
+    481	018A  D1 66 00			     SHL     PW	[DSP],1
+    482	018D  D1 D3			     RCL     T,1
+    483	018F  3B DA			     CMP     T,AR
+    484	0191  72 05			     JB	     @_NO_DIV
+    485	0193  2B DA			     SUB     T,AR
+    486	0195  FF 46 00			     INC     PW	[DSP]
+    487	0198			     @_NO_DIV:
     488					     N_
-1   489	0186  FF E2		       JMP   NP
+1   489	0198  EB D4		       JMP SHORT   @NOP
     490
-    491				      P_ _RSTP,@RSTP	     ; ( !R+
+    491				      P_ _PMUL,@PMUL	      ;	( +*
 1   492				       ALIGN_  0
 2   493					     IF	($-START+0) AND	1
 2   494					     NOP
 2   495				       @NOPSCNT	= @NOPSCNT+1
 2   496					     ENDIF
-1   497	0188			     @RSTP:
-1   498	      =00C4		       _RSTP   = ($-START+100H)	SHR 1
-    499	0188  5F			     POP     WA
-    500	0189  AB			     STOSW
-    501	018A  EB E6			     JMP     @_RSTP
-    502
-    503				      P_ _RSTBP,@RSTBP	       ; ( C!R+
-1   504				       ALIGN_  0
-2   505					     IF	($-START+0) AND	1
-2   506					     NOP
-2   507				       @NOPSCNT	= @NOPSCNT+1
-2   508					     ENDIF
-1   509	018C			     @RSTBP:
-1   510	      =00C6		       _RSTBP	= ($-START+100H) SHR 1
-    511	018C  5F			     POP     WA
-    512	018D  AA			     STOSB
-    513	018E  EB E2			     JMP     @_RSTP
-Turbo Assembler	 Version 3.2	    12/23/18 11:47:08	    Page 10
+1   497	019A			     @PMUL:
+1   498	      =00CD		       _PMUL   = ($-START+100H)	SHR 1
+    499	019A  8B 46 00			     MOV     W,[DSP]
+    500	019D  D1 E8			     SHR     W,1
+    501	019F  73 02			     JNC     @D2DIV
+    502	01A1  03 DA			     ADD     T,AR
+    503	01A3			     @D2DIV:
+    504	01A3  D1 DB			     RCR     T,1
+    505	01A5  D1 5E 00			     RCR     PW	[DSP],1
+    506					     N_
+1   507	01A8  EB C4		       JMP SHORT   @NOP
+    508
+    509				      P_ _nAND,@nAND	      ;	( AND
+1   510				       ALIGN_  0
+2   511					     IF	($-START+0) AND	1
+2   512					     NOP
+2   513				       @NOPSCNT	= @NOPSCNT+1
+Turbo Assembler	 Version 3.2	    12/06/19 17:02:02	    Page 10
 C4F.asm
 
 
 
-    514
-    515				      P_ _RLDP,@RLDP	      ;	( @R+
-1   516				       ALIGN_  0
-2   517					     IF	($-START+0) AND	1
-2   518					     NOP
-2   519				       @NOPSCNT	= @NOPSCNT+1
-2   520					     ENDIF
-1   521	0190			     @RLDP:
-1   522	      =00C8		       _RLDP   = ($-START+100H)	SHR 1
-    523	0190  5F			     POP     WA
-    524	0191  8B 0D			     MOV     W,[WA]
-    525					     R2P_    WA
-1   526	0193  47		       INC   WA
-1   527	0194  47		       INC   WA
-    528					     JMPS_   @_J
-1   529	0195  EB 0C		       jmp   SHORT @_J
-    530
-    531				      P_ _RLDBP,@RLDBP		; ( C@R+
-1   532				       ALIGN_  0
-2   533					     IF	($-START+0) AND	1
-2   534	0197  90			     NOP
-2   535	      =0003		       @NOPSCNT	= @NOPSCNT+1
-2   536					     ENDIF
-1   537	0198			     @RLDBP:
-1   538	      =00CC		       _RLDBP	= ($-START+100H) SHR 1
-    539	0198  5F			     POP     WA
-    540	0199  8A 0D			     MOV     WL,[WA]
-    541					     CLR_    WH
-1   542	019B  32 ED		       XOR    WH,WH
-    543	019D  47			     INC     WA
-    544					     JMPS_   @_J
-1   545	019E  EB 03		       jmp   SHORT @_J
-    546
-    547				      P_ _J,@J		      ;	( J
-1   548				       ALIGN_  0
-2   549					     IF	($-START+0) AND	1
-2   550					     NOP
-2   551				       @NOPSCNT	= @NOPSCNT+1
-2   552					     ENDIF
-1   553	01A0			     @J:
-1   554	      =00D0		       _J   = ($-START+100H) SHR 1
-    555	01A0  5F			     POP     WA
-    556	01A1  59			     POP     W
-    557	01A2  51			     PUSH    W
-    558	01A3			     @_J:
-    559	01A3  57			     PUSH    WA
-    560	01A4			     @WPUSH:
-    561					     DUP_    T
-1   562				       R2M_  DSP
-2   563	01A4  4E		       DEC   DSP
-2   564	01A5  4E		       DEC   DSP
-1   565	01A6  89 04		       MOV   [DSP],T
-    566	01A8  91			     XCHG    W,T
-    567					     N_
-1   568	01A9  FF E2		       JMP   NP
-    569
-    570				      P_ _POP,@POP	      ;	( POP
-Turbo Assembler	 Version 3.2	    12/23/18 11:47:08	    Page 11
-C4F.asm
-
-
-
-1   571				       ALIGN_  0
-2   572					     IF	($-START+0) AND	1
-2   573	01AB  90			     NOP
-2   574	      =0004		       @NOPSCNT	= @NOPSCNT+1
-2   575					     ENDIF
-1   576	01AC			     @POP:
-1   577	      =00D6		       _POP   =	($-START+100H) SHR 1
-    578	01AC  59			     POP     W
-    579					     SKIPA_
-1   580	01AD  3D		       DB    03DH
-    581
-    582				      P_ _DUP,@DUP	      ;	( DUP
-1   583				       ALIGN_  0
-2   584					     IF	($-START+0) AND	1
-2   585					     NOP
-2   586				       @NOPSCNT	= @NOPSCNT+1
-2   587					     ENDIF
-1   588	01AE			     @DUP:
-1   589	      =00D7		       _DUP   =	($-START+100H) SHR 1
-    590	01AE  8B C8			     MOV     W,T
-    591					     JMPS_   @WPUSH
-1   592	01B0  EB F2		       jmp   SHORT @WPUSH
-    593
-    594				      P_ _ALIGN,@ALIGN
-1   595				       ALIGN_  0
-2   596					     IF	($-START+0) AND	1
-2   597					     NOP
-2   598				       @NOPSCNT	= @NOPSCNT+1
-2   599					     ENDIF
-1   600	01B2			     @ALIGN:
-1   601	      =00D9		       _ALIGN	= ($-START+100H) SHR 1
-    602	01B2  48			     DEC     T
-    603	01B3  0C 01			     OR	     TL,1
-    604
-    605				      P_ _1P,@1P
-1   606				       ALIGN_  0
-2   607					     IF	($-START+0) AND	1
-2   608	01B5  90			     NOP
-2   609	      =0005		       @NOPSCNT	= @NOPSCNT+1
-2   610					     ENDIF
-1   611	01B6			     @1P:
-1   612	      =00DB		       _1P   = ($-START+100H) SHR 1
-    613	01B6  40			     INC     T
-    614					     N_
-1   615	01B7  FF E2		       JMP   NP
-    616
-    617				      P_ _PLAVG,@PLAVG	      ;	( +2/
-1   618				       ALIGN_  0
-2   619					     IF	($-START+0) AND	1
-2   620	01B9  90			     NOP
-2   621	      =0006		       @NOPSCNT	= @NOPSCNT+1
-2   622					     ENDIF
-1   623	01BA			     @PLAVG:
-1   624	      =00DD		       _PLAVG	= ($-START+100H) SHR 1
-    625	01BA  03 04			     ADD     T,[DSP]
-    626	01BC  89 04			     MOV     [DSP],T
-    627
-Turbo Assembler	 Version 3.2	    12/23/18 11:47:08	    Page 12
-C4F.asm
-
-
-
-    628				      P_ _2DIV,@2DIV	      ;	( 2/
-1   629				       ALIGN_  0
-2   630					     IF	($-START+0) AND	1
-2   631					     NOP
-2   632				       @NOPSCNT	= @NOPSCNT+1
-2   633					     ENDIF
-1   634	01BE			     @2DIV:
-1   635	      =00DF		       _2DIV   = ($-START+100H)	SHR 1
-    636	01BE  D1 D8			     RCR     T,1
-    637					     N_
-1   638	01C0  FF E2		       JMP   NP
-    639
-    640				      P_ _SDIV,@SDIV	      ;	( -/
-1   641				       ALIGN_  0
-2   642					     IF	($-START+0) AND	1
-2   643					     NOP
-2   644				       @NOPSCNT	= @NOPSCNT+1
-2   645					     ENDIF
-1   646	01C2			     @SDIV:
-1   647	      =00E1		       _SDIV   = ($-START+100H)	SHR 1
-    648	01C2  D1 24			     SHL     PW	[DSP],1
-    649	01C4  D1 D0			     RCL     T,1
-    650	01C6  3B C5			     CMP     T,AR
-    651	01C8  72 04			     JB	     @_NO_DIV
-    652	01CA  2B C5			     SUB     T,AR
-    653
-    654				      P_ _U1P,@U1P
-1   655				       ALIGN_  0
-2   656					     IF	($-START+0) AND	1
-2   657					     NOP
-2   658				       @NOPSCNT	= @NOPSCNT+1
-2   659					     ENDIF
-1   660	01CC			     @U1P:
-1   661	      =00E6		       _U1P   =	($-START+100H) SHR 1
-    662	01CC  FF 04			     INC     PW	[DSP]
-    663	01CE			     @_NO_DIV:
-    664					     N_
-1   665	01CE  FF E2		       JMP   NP
-    666
-    667				      P_ _PMUL,@PMUL	      ;	( +*
-1   668				       ALIGN_  0
-2   669					     IF	($-START+0) AND	1
-2   670					     NOP
-2   671				       @NOPSCNT	= @NOPSCNT+1
-2   672					     ENDIF
-1   673	01D0			     @PMUL:
-1   674	      =00E8		       _PMUL   = ($-START+100H)	SHR 1
-    675	01D0  8B 0C			     MOV     W,[DSP]
-    676	01D2  D1 E9			     SHR     W,1
-    677	01D4  73 02			     JNC     @D2DIV
-    678	01D6  03 C5			     ADD     T,AR
-    679
-    680				      P_ _D2DIV,@D2DIV
-1   681				       ALIGN_  0
-2   682					     IF	($-START+0) AND	1
-2   683					     NOP
-2   684				       @NOPSCNT	= @NOPSCNT+1
-Turbo Assembler	 Version 3.2	    12/23/18 11:47:08	    Page 13
-C4F.asm
-
-
-
-2   685					     ENDIF
-1   686	01D8			     @D2DIV:
-1   687	      =00EC		       _D2DIV	= ($-START+100H) SHR 1
-    688	01D8  D1 D8			     RCR     T,1
-    689
-    690				      P_ _U2DIV,@U2DIV
-1   691				       ALIGN_  0
-2   692					     IF	($-START+0) AND	1
-2   693					     NOP
-2   694				       @NOPSCNT	= @NOPSCNT+1
-2   695					     ENDIF
-1   696	01DA			     @U2DIV:
-1   697	      =00ED		       _U2DIV	= ($-START+100H) SHR 1
-    698	01DA  D1 1C			     RCR     PW	[DSP],1
-    699					     N_
-1   700	01DC  FF E2		       JMP   NP
-    701
-    702				      P_ _16MUL,@16MUL
-1   703				       ALIGN_  0
-2   704					     IF	($-START+0) AND	1
-2   705					     NOP
-2   706				       @NOPSCNT	= @NOPSCNT+1
-2   707					     ENDIF
-1   708	01DE			     @16MUL:
-1   709	      =00EF		       _16MUL	= ($-START+100H) SHR 1
-    710	01DE  D1 E0			     SHL     T,1
-    711
-    712				      P_ _8MUL,@8MUL
-1   713				       ALIGN_  0
-2   714					     IF	($-START+0) AND	1
-2   715					     NOP
-2   716				       @NOPSCNT	= @NOPSCNT+1
-2   717					     ENDIF
-1   718	01E0			     @8MUL:
-1   719	      =00F0		       _8MUL   = ($-START+100H)	SHR 1
-    720	01E0  D1 E0			     SHL     T,1
-    721
-    722				      P_ _4MUL,@4MUL
-1   723				       ALIGN_  0
-2   724					     IF	($-START+0) AND	1
-2   725					     NOP
-2   726				       @NOPSCNT	= @NOPSCNT+1
-2   727					     ENDIF
-1   728	01E2			     @4MUL:
-1   729	      =00F1		       _4MUL   = ($-START+100H)	SHR 1
-    730	01E2  D1 E0			     SHL     T,1
-    731
-    732				      P_ _2MUL,@2MUL
-1   733				       ALIGN_  0
-2   734					     IF	($-START+0) AND	1
-2   735					     NOP
-2   736				       @NOPSCNT	= @NOPSCNT+1
-2   737					     ENDIF
-1   738	01E4			     @2MUL:
-1   739	      =00F2		       _2MUL   = ($-START+100H)	SHR 1
-    740	01E4  D1 E0			     SHL     T,1
-    741					     N_
-Turbo Assembler	 Version 3.2	    12/23/18 11:47:08	    Page 14
-C4F.asm
-
-
-
-1   742	01E6  FF E2		       JMP   NP
-    743
-    744				      P_ _nAND,@nAND	      ;	( AND
-1   745				       ALIGN_  0
-2   746					     IF	($-START+0) AND	1
-2   747					     NOP
-2   748				       @NOPSCNT	= @NOPSCNT+1
-2   749					     ENDIF
-1   750	01E8			     @nAND:
-1   751	      =00F4		       _nAND   = ($-START+100H)	SHR 1
-    752					     POPR_   W
-1   753	01E8  91		       xchg  t,W
-1   754				       drop_
-2   755	01E9  AD		       LODSW
-    756	01EA  23 C1			     AND     T,W
-    757
-    758				      P_ _NOT,@NOT
-1   759				       ALIGN_  0
-2   760					     IF	($-START+0) AND	1
-2   761					     NOP
-2   762				       @NOPSCNT	= @NOPSCNT+1
-2   763					     ENDIF
-1   764	01EC			     @NOT:
-1   765	      =00F6		       _NOT   =	($-START+100H) SHR 1
-    766	01EC  40			     INC     T
-    767
-    768				      P_ _NEG,@NEG
-1   769				       ALIGN_  0
-2   770					     IF	($-START+0) AND	1
-2   771	01ED  90			     NOP
-2   772	      =0007		       @NOPSCNT	= @NOPSCNT+1
-2   773					     ENDIF
-1   774	01EE			     @NEG:
-1   775	      =00F7		       _NEG   =	($-START+100H) SHR 1
-    776	01EE  F7 D8			     NEG     T
-    777					     N_
-1   778	01F0  FF E2		       JMP   NP
-    779
-    780				      P_ _XOR,@XOR	      ;	( XOR
-1   781				       ALIGN_  0
-2   782					     IF	($-START+0) AND	1
-2   783					     NOP
-2   784				       @NOPSCNT	= @NOPSCNT+1
-2   785					     ENDIF
-1   786	01F2			     @XOR:
-1   787	      =00F9		       _XOR   =	($-START+100H) SHR 1
-    788					     POPR_   W
-1   789	01F2  91		       xchg  t,W
-1   790				       drop_
-2   791	01F3  AD		       LODSW
-    792	01F4  33 C1			     XOR     T,W
-    793					     N_
-1   794	01F6  FF E2		       JMP   NP
-    795
-    796				      P_ _ZEQ,@ZEQ
-1   797				       ALIGN_  0
-2   798					     IF	($-START+0) AND	1
-Turbo Assembler	 Version 3.2	    12/23/18 11:47:08	    Page 15
-C4F.asm
-
-
-
-2   799					     NOP
-2   800				       @NOPSCNT	= @NOPSCNT+1
-2   801					     ENDIF
-1   802	01F8			     @ZEQ:
-1   803	      =00FC		       _ZEQ   =	($-START+100H) SHR 1
-    804	01F8  2D 0001			     SUB     T,1
-    805					     SKIPR_  W
-1   806	01FB  B9 0000		       mov   W,0
-1   807				       org   $-2
-    808				      P_ _ZLESS,@LESS
-1   809				       ALIGN_  0
-2   810					     IF	($-START+0) AND	1
-2   811					     NOP
-2   812				       @NOPSCNT	= @NOPSCNT+1
-2   813					     ENDIF
-1   814	01FC			     @LESS:
-1   815	      =00FE		       _ZLESS	= ($-START+100H) SHR 1
-    816	01FC  D1 E0			     SHL     T,1
-    817					     CF_TO_  T
-1   818	01FE  1B C0		       sbb   T,T
-    819					     N_
-1   820	0200  FF E2		       JMP   NP
-    821
-    822				      L_ _CTX,@CTX	; ( c -- ) \ Send character c to output	device.
-1   823				       ALIGN_  0
-2   824					     IF	($-START+0) AND	1
-2   825					     NOP
-2   826				       @NOPSCNT	= @NOPSCNT+1
-2   827					     ENDIF
-1   828	0202			     @CTX:
-1   829	      =8101		       _CTX   =	(($-START+100H)	SHR 1)+8000H
-    830	0202  0097		       DW  _IO	    ; char in DL
-    831	0204  92		       XCHG  AX,DX
-    832	0205  80 FA FF		       CMP   DL,0FFH ; 0FFH is interpreted as input
-    833	0208  75 02		       JNZ   @TX1    ; do NOT allow input
-    834	020A  B2 20		       MOV   DL,32   ; change to blank
-    835	020C			     @TX1:
-    836	020C  B4 06		       MOV   AH,6    ; MS - DOS	Direct Console I/O
-    837	020E  CD 21		       INT   021H    ; display character
-    838	0210  C3		       RET
-    839
-    840				      L_ _?CRX,@?CRX	  ; (  -- c T |	F )
-1   841				       ALIGN_  0
-2   842					     IF	($-START+0) AND	1
-2   843	0211  90			     NOP
-2   844	      =0008		       @NOPSCNT	= @NOPSCNT+1
-2   845					     ENDIF
-1   846	0212			     @?CRX:
-1   847	      =8109		       _?CRX   = (($-START+100H) SHR 1)+8000H
-    848	0212  0093		       DW _IODD
-    849	0214  BA FFFF		       MOV   DX,0FFFFH ; input command & setup for TRUE	flag
-    850	0217  89 14		       MOV   [DSP],DX
-    851	0219  E8 FFF0		       CALL  @TX1      ; MS - DOS Direct Console I/O
-    852	021C  75 05		       JNZ   QRX0    ; ?key ready
-    853	021E  4A		       DEC   DX
-    854				       DROP_
-1   855	021F  AD		       LODSW
-Turbo Assembler	 Version 3.2	    12/23/18 11:47:08	    Page 16
-C4F.asm
-
-
-
-    856	0220  89 14		       MOV   [DSP],DX
-    857	0222  C3		       RET
-    858	0223			     QRX0:
-    859	0223  0A C0		       OR    AL,AL   ; AL=0 if extended	char
-    860	0225  75 03		       JNZ   QRX1    ; ?extended character code
-    861	0227  CD 21		       INT   021H    ;
-    862	0229  F9		       STC
-    863	022A			     QRX1:
-    864	022A  B4 00		       MOV   AH,0
-    865	022C  73 02		       JNC   QRX2
-    866	022E  86 E0		       XCHG  AH,AL   ; extended	code in	msb
-    867	0230			     QRX2:
-    868	0230  89 44 02		       MOV   [DSP+2],AX
-    869	0233  C3		       RET
-    870
-    871	0234			     _END:
-    872
-    873	0234			     MyCseg  ends
-    874					     end  Start
-Turbo Assembler	 Version 3.2	    12/23/18 11:47:08	    Page 17
+2   514					     ENDIF
+1   515	01AA			     @nAND:
+1   516	      =00D5		       _nAND   = ($-START+100H)	SHR 1
+    517	01AA  23 5E 00			     AND     T,[DSP]
+    518	01AD  45			     INC     DSP
+    519	01AE  45			     INC     DSP
+    520				      P_ _NOT,@NOT
+1   521				       ALIGN_  0
+2   522					     IF	($-START+0) AND	1
+2   523	01AF  90			     NOP
+2   524	      =0004		       @NOPSCNT	= @NOPSCNT+1
+2   525					     ENDIF
+1   526	01B0			     @NOT:
+1   527	      =00D8		       _NOT   =	($-START+100H) SHR 1
+    528	01B0  F7 D3			     NOT     T
+    529					     N_
+1   530	01B2  EB BA		       JMP SHORT   @NOP
+    531
+    532	01B4			     _END:
+    533
+    534	01B4			     MyCseg  ends
+    535					     end  Start
+Turbo Assembler	 Version 3.2	    12/06/19 17:02:02	    Page 11
 Symbol Table
 
 
@@ -960,182 +591,119 @@ Symbol Table
 
 Symbol Name		Type   Value			   Cref	(defined at #)
 
-??DATE			Text   "12/23/18"
+??DATE			Text   "12/06/19"
 ??FILENAME		Text   "C4F	"
-??TIME			Text   "11:47:08"
+??TIME			Text   "17:02:02"
 ??VERSION		Number 0314
-@16MUL			Near   MYCSEG:01DE		   #708
-@1M?			Near   MYCSEG:015B		   350	#363
-@1P			Near   MYCSEG:01B6		   #611
-@2DIV			Near   MYCSEG:01BE		   #634
-@2MUL			Near   MYCSEG:01E4		   #738
-@4MUL			Near   MYCSEG:01E2		   #728
-@8MUL			Near   MYCSEG:01E0		   #718
-@?CRX			Near   MYCSEG:0212		   #846
-@?SKIP			Near   MYCSEG:0154		   #346
-@ABORT			Near   MYCSEG:0100		   #157
-@ALIGN			Near   MYCSEG:01B2		   #600
-@BE			Near   MYCSEG:0178		   #452
+@2DIV			Near   MYCSEG:0182		   #456	 471
+@ABORT			Near   MYCSEG:0100		   #158
 @CPU			Text   0101H
-@CTX			Near   MYCSEG:0202		   #828
-@CURSEG			Text   MYCSEG			   #135
-@D2DIV			Near   MYCSEG:01D8		   677	#686
-@DROP1			Near   MYCSEG:0175		   #440	 457
-@DROPX			Near   MYCSEG:013E		   #266
-@DUP			Near   MYCSEG:01AE		   #588
-@EX			Near   MYCSEG:0114		   #187
+@CURSEG			Text   MYCSEG			   #136
+@D2DIV			Near   MYCSEG:01A3		   501	#503
+@DBG			Near   MYCSEG:0125		   162	#208
+@DROP			Near   MYCSEG:011F		   #205	 263  357
+@DROP1			Near   MYCSEG:0153		   345	#356
+@DUP			Near   MYCSEG:017A		   #434
 @FILENAME		Text   C4F
-@IF			Near   MYCSEG:015A		   #360
-@IFM			Near   MYCSEG:014A		   #319
-@IO			Near   MYCSEG:012E		   #243
-@IOD			Near   MYCSEG:012A		   #229
-@IODD			Near   MYCSEG:0126		   #215
-@J			Near   MYCSEG:01A0		   #553
-@JUMP			Near   MYCSEG:014E		   #330	 367
-@LESS			Near   MYCSEG:01FC		   #814
-@NAND			Near   MYCSEG:01E8		   #750
-@NEG			Near   MYCSEG:01EE		   #774
-@NEST			Near   MYCSEG:0115		   178	#191
-@NEXT			Near   MYCSEG:0146		   #304
-@NEXTS			Near   MYCSEG:011A		   162	#198
-@NOP			Near   MYCSEG:010A		   #170	 195
-@NOPSCNT		Number 0008			   #102	 328  #328  373	 #373  535  #535  574  #574  609  #609	621  #621 +
-							   772	#772  844  #844
-@NOT			Near   MYCSEG:01EC		   #764
-@PLAVG			Near   MYCSEG:01BA		   #623
-@PMUL			Near   MYCSEG:01D0		   #673
-@POP			Near   MYCSEG:01AC		   #576
-@PUSH			Near   MYCSEG:0174		   #437
-@RDROPX			Near   MYCSEG:0140		   #279
-@RET			Near   MYCSEG:0144		   202	#293
-@RETA			Near   MYCSEG:0141		   #283	 296
-@RLDBP			Near   MYCSEG:0198		   #537
-@RLDP			Near   MYCSEG:0190		   #521
-@RSKIP			Near   MYCSEG:0164		   #389
-@RST			Near   MYCSEG:0182		   #480
-@RST1			Near   MYCSEG:0183		   #483
-Turbo Assembler	 Version 3.2	    12/23/18 11:47:08	    Page 18
+@IF			Near   MYCSEG:0132		   #259
+@IFM			Near   MYCSEG:0128		   #225
+@IFM2			Near   MYCSEG:012B		   227	#237
+@IO			Near   MYCSEG:010E		   #177
+@J			Near   MYCSEG:0158		   #367
+@JUMP			Near   MYCSEG:012E		   #247	 264
+@MIF			Near   MYCSEG:012A		   #234
+@MSB1			Near   MYCSEG:0186		   #467
+@NAND			Near   MYCSEG:01AA		   #515
+@NEST			Near   MYCSEG:0175		   420	#422
+@NOP			Near   MYCSEG:016E		   204	251  268  309  359  #416  426  460  489	 507  530
+@NOPSCNT		Number 0004			   #103	 315  #315  379	 #379  477  #477  524  #524
+@NOT			Near   MYCSEG:01B0		   #526
+@PLAVG			Near   MYCSEG:017C		   #445
+@PMUL			Near   MYCSEG:019A		   #497
+@POP			Near   MYCSEG:0166		   #402
+@PUSH			Near   MYCSEG:0152		   #353
+@RDEC1			Near   MYCSEG:013C		   #276
+@RDEC2			Near   MYCSEG:013E		   #287
+@RETA			Near   MYCSEG:011C		   163	#200
+@RLDP			Near   MYCSEG:015E		   #381
+@RSTP			Near   MYCSEG:014C		   #330
+@R_TOP			Number -0400			   #145	 146  160
+@SDIV			Near   MYCSEG:018A		   #479
+@SKIP			Near   MYCSEG:0126		   #216
+@SKIP2			Near   MYCSEG:0139		   218	239  #265
+@S_TOP			Number -0800			   #146	 147  161
+@TBUF			Number -0100			   #142	 143
+@TIB			Number -0200			   #143	 145
+@VOCTOP			Number -1000			   #147
+@WORDSIZE		Text   2			   #136
+@WPUSH			Near   MYCSEG:0167		   #405
+@XA			Near   MYCSEG:0148		   #317
+@XR			Near   MYCSEG:0142		   #302
+@_DROP			Near   MYCSEG:0150		   #342
+@_DUP_			Near   MYCSEG:0165		   #393	 437
+@_J			Near   MYCSEG:0163		   373	#388
+@_NO_DIV		Near   MYCSEG:0198		   484	#487
+@_XA			Near   MYCSEG:0144		   #306	 322
+AR			Number DX			   #129	 179  185  320	483  485  502
+Turbo Assembler	 Version 3.2	    12/06/19 17:02:02	    Page 12
 Symbol Table
 
 
 
-@RSTBP			Near   MYCSEG:018C		   #509
-@RSTM			Near   MYCSEG:017E		   #465
-@RSTP			Near   MYCSEG:0188		   #497
-@R_TOP			Number -0400			   #144	 145  200
-@SDIV			Near   MYCSEG:01C2		   #646
-@SKIP			Near   MYCSEG:0160		   322	#375
-@S_TOP			Number -0800			   #145	 146  201
-@TBUF			Number -0100			   #141	 142
-@TIB			Number -0200			   #142	 144
-@TX1			Near   MYCSEG:020C		   833	#835  851
-@U1P			Near   MYCSEG:01CC		   #660
-@U2DIV			Near   MYCSEG:01DA		   #696
-@VOCTOP			Number -1000			   #146
-@WORDSIZE		Text   2			   #135
-@WPUSH			Near   MYCSEG:01A4		   #560	 592
-@XA			Near   MYCSEG:016C		   #417
-@XOR			Near   MYCSEG:01F2		   #786
-@XR			Near   MYCSEG:0168		   #404
-@ZEQ			Near   MYCSEG:01F8		   #802
-@_J			Near   MYCSEG:01A3		   529	545  #558
-@_NO_DIV		Near   MYCSEG:01CE		   651	#663
-@_RSTP			Near   MYCSEG:0172		   #426	 501  513
-@_XA			Near   MYCSEG:016F		   409	#421
-AR			Number BP			   #125	 245  251  420	650  652  678
 AT_			Number -0002			   #14
-DSP			Number SI			   #123	 201  219  220	221  233  234  235  246	 247  248  563	564  565  +
-							   625	626  648  662  675  698	 850  856  868
-IP			Number BX			   #121	 173  175  176	192  193  249  283  333	 333  335  336	378  379
-NP			Number DX			   #124	 199  245  251	285  338  352  381  424	 444  489  568	615  638  +
-							   665	700  742  778  794  820
+DSP			Number BP			   #127	 161  181  182	183  206  207  207  407	 407  408  447	448  481  +
+							   486	499  505  517  518  519
+IP			Number SI			   #125	 184  202  249	249  423  424
+NP			Number CX			   #128
 PB			Text   byte  ptr		   #11
 PD			Text   dword ptr		   #9
-PW			Text   word  ptr		   #10	648  662  698
-QRX0			Near   MYCSEG:0223		   852	#858
-QRX1			Near   MYCSEG:022A		   860	#863
-QRX2			Near   MYCSEG:0230		   865	#867
-RSP			Number SP			   #122	 200
-START			Byte   MYCSEG:0100		   #148	 153  158  166	171  183  188  211  216	 225  230  239	244  262  +
-							   267	275  280  289  294  300	 305  315  320	326  331  342  347  356	  +
-							   361	371  376  385  390  400	 405  413  418	433  438  448  453  461	  +
-							   466	476  481  493  498  505	 510  517  522	533  538  549  554  572	  +
-							   577	584  589  596  601  607	 612  619  624	630  635  642  647  656	  +
-							   661	669  674  682  687  692	 697  704  709	714  719  724  729  734	  +
-							   739	746  751  760  765  770	 775  782  787	798  803  810  815  824	  +
-							   829	842  847  874
-T			Number AX			   #127	 221  235  321	349  349  362  364  407	 439  565  566	590  602  +
-							   613	625  626  636  649  650	 652  678  688	710  720  730  740  753	  +
-							   756	766  776  789  792  804	 816  818  818
-TH			Number AH			   #129
-TL			Number AL			   #128	 603
+PW			Text   word  ptr		   #10	481  486  505
+RSP			Number SP			   #126	 160
+START			Byte   MYCSEG:0100		   #149	 154  159  173	178  196  201  212  217	 221  226  230	235  243  +
+							   248	255  260  272  277  283	 288  298  303	313  318  326  331  338	  +
+							   343	349  354  363  368  377	 382  398  403	412  417  430  435  441	  +
+							   446	452  457  463  468  475	 480  493  498	511  516  522  527  535
+T			Number BX			   #122	 206  236  238	261  262  305  333  355	 394  408  409	447  448  +
+							   458	482  483  485  502  504	 517  528
+TH			Number BH			   #124
+TL			Number BL			   #123
 TO_			Number -0001			   #13
-W			Number CX			   #131	 281  306  307	308  524  556  557  566	 578  590  675	676  753  +
-							   756	789  792  806
-WA			Number DI			   #130	 173  177  179	189  193  391  393  394	 406  407  419	420  422  +
-							   427	467  469  470  482  484	 499  511  523	524  526  527  539  540	  +
-							   543	555  559
-WH			Number CH			   #133	 542  542
-Turbo Assembler	 Version 3.2	    12/23/18 11:47:08	    Page 19
-Symbol Table
-
-
-
-WL			Number CL			   #132	 310  540
-_16MUL			Number 00EF			   #709
-_1P			Number 00DB			   #612
-_2DIV			Number 00DF			   #635
-_2MUL			Number 00F2			   #739
-_4MUL			Number 00F1			   #729
-_8MUL			Number 00F0			   #719
-_?CRX			Number 8109			   #847
-_?SKIP			Number 00AA			   #347
-_@INIT			Word   MYCSEG:0124		   #204
-_ABORT			Number 0080			   #158
-_ALIGN			Number 00D9			   #601
-_BE			Number 00BC			   #453
-_CTX			Number 8101			   #829
-_D2DIV			Number 00EC			   #687
-_DROPX			Number 009F			   #267
-_DUP			Number 00D7			   #589
-_END			Near   MYCSEG:0234		   #871
-_EX			Number 008A			   #188
-_IF			Number 00AD			   #361
-_IFM			Number 00A5			   #320
-_IO			Number 0097			   #244	 830
-_IOD			Number 0095			   #230
-_IODD			Number 0093			   #216	 848
-_J			Number 00D0			   #554
-_JUMP			Number 00A7			   #331
-_NAND			Number 00F4			   #751
-_NEG			Number 00F7			   #775
-_NEXT			Number 00A3			   #305
-_NOP			Number 0085			   #171
-_NOT			Number 00F6			   #765
-_PLAVG			Number 00DD			   #624
-_PMUL			Number 00E8			   #674
-_POP			Number 00D6			   #577
-_PUSH			Number 00BA			   #438
-_RDROPX			Number 00A0			   #280
-_RET			Number 00A2			   #294
-_RLDBP			Number 00CC			   #538
-_RLDP			Number 00C8			   #522
-_RSKIP			Number 00B2			   #390
-_RST			Number 00C1			   #481
-_RSTBP			Number 00C6			   #510
-_RSTM			Number 00BF			   #466
-_RSTP			Number 00C4			   #498
-_SDIV			Number 00E1			   #647
-_SKIP			Number 00B0			   #376
-_START			Near   MYCSEG:0100		   #149
-_U1P			Number 00E6			   #661
-_U2DIV			Number 00ED			   #697
-_XA			Number 00B6			   #418
-_XOR			Number 00F9			   #787
-_XR			Number 00B4			   #405
-_ZEQ			Number 00FC			   #803
-_ZLESS			Number 00FE			   #815
-Turbo Assembler	 Version 3.2	    12/23/18 11:47:08	    Page 20
+W			Number AX			   #132	 278  289  291	292  304  305  307  319	 320  333  370	371  384  +
+							   404	409  419  421  424  499	 500
+WA			Number DI			   #131	 332  335  369	383  384  386  387  389
+WH			Number AH			   #134
+WL			Number AL			   #133
+_2DIV			Number 00C1			   #457
+_@INIT			Word   MYCSEG:010C		   #164
+_ABORT			Number 0080			   #159
+_DROP			Number 00A8			   #343
+_DUP			Number 00BD			   #435
+_END			Near   MYCSEG:01B4		   #532
+_IF			Number 0099			   #260
+_IFM			Number 0094			   #226
+_IO			Number 0087			   #178
+_J			Number 00AC			   #368
+_JUMP			Number 0097			   #248
+_MIF			Number 0095			   #235
+_MSB1			Number 00C3			   #468
+_NAND			Number 00D5			   #516
+_NOP			Number 00B7			   #417
+_NOT			Number 00D8			   #527
+_PLAVG			Number 00BE			   #446
+_PMUL			Number 00CD			   #498
+_POP			Number 00B3			   #403
+_PUSH			Number 00A9			   #354
+_RDEC1			Number 009E			   #277
+_RDEC2			Number 009F			   #288
+_RET			Number 008E			   #201
+_RLDP			Number 00AF			   #382
+_RSTP			Number 00A6			   #331
+_SDIV			Number 00C5			   #480
+_SKIP			Number 0093			   #217
+_START			Near   MYCSEG:0100		   #150
+_XA			Number 00A4			   #318
+_XR			Number 00A1			   #303
+Turbo Assembler	 Version 3.2	    12/06/19 17:02:02	    Page 13
 Symbol Table
 
 
@@ -1143,37 +711,32 @@ Symbol Table
 
 Macro Name						   Cref	(defined at #)
 
-@IP_							   #61	172  332
-ALIGN_							   #95	152  165  182  210  224	 238  261  274	288  299  314  325  341	  +
-							   355	370  384  399  412  432	 447  460  475	492  504  516  532  548	  +
-							   571	583  595  606  618  629	 641  655  668	681  691  703  713  723	  +
-							   733	745  759  769  781  797	 809  823  841
-CF_TO_							   #66	817
-CLR_							   #91	541
-DROP_							   #70	268  365  441  486  754	 790  854
-DUP_							   #74	217  231  561
-JMPS_							   #16	194  295  408  456  528	 544  591
-L_							   #104	 822  840
-N_							   #116	 284  337  351	380  423  443  488  567	 614  637  664	699  741  +
-							   777	793  819
-POPR_							   #46	752  788
+@IP_							   #61
+ALIGN_							   #96	153  172  195  211  220	 229  242  254	271  282  297  312  325	  +
+							   337	348  362  376  397  411	 429  440  451	462  474  492  510  521
+CF_TO_							   #66
+CLR_							   #92
+DROP_							   #70	205
+DUP_							   #75	406
+JMPS_							   #16	321  344  372  425  436	 470
+L_							   #105
+N_							   #117	 203  250  267	308  358  459  488  506	 529
+POPR_							   #46
 PUSHR_							   #42
-P_							   #110	 151  164  181	209  223  237  260  273	 287  298  313	324  340  +
-							   354	369  383  398  411  431	 446  459  474	491  503  515  531  547	  +
-							   570	582  594  605  617  628	 640  654  667	680  690  702  712  722	  +
-							   732	744  758  768  780  796	 808
-R2M_							   #56	218  232  468  562
-R2P_							   #51	174  334  377  392  525
-RCHG_							   #83
-SKIPA_							   #20	395  579
-SKIPB_							   #24	270  428  471
-SKIPC_							   #33	309
-SKIPR_							   #28	805
-SWAP_							   #79
+P_							   #111	 152  171  194	210  219  228  241  253	 270  281  296	311  324  +
+							   336	347  361  375  396  410	 428  439  450	461  473  491  509  520
+R2M_							   #56
+R2P_							   #51	290  385
+RCHG_							   #84
+SKIPA_							   #20	279  293  390
+SKIPB_							   #24
+SKIPC_							   #33
+SKIPR_							   #28
+SWAP_							   #80
 X_							   #38
-ZERO?_							   #87	348
+ZERO?_							   #88
 
 Groups & Segments	Bit Size Align	Combine	Class	   Cref	(defined at #)
 
-MYCSEG			16  0234 Para	none		   #135	 137  137  137	137
+MYCSEG			16  01B4 Para	none		   #136	 138  138  138	138
 
