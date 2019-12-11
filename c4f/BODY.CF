@@ -1,0 +1,20 @@
+      \   INTERPRETTER 
+      
+: `,<? 0<>; : TARG,< `LOCATOR  : `INTERP T TO `_@FIND 
+: []OPER (XARY  ">NUM `">NUMC @EXEC @, ,< 
+ 
+      \   COMPILER
+      
+: TARG: CSP! TARG:!  : >, `LOCATOR   vTARG CFND []OPER ;
+
+      \ FUNCTION EVAL  & EXECUTE MACRO 
+                
+: (MAC (D#0 `!STATE >, : `SEVAL CSTR : EVAL `MEMTI| (SKIP
+ BEGIN LOXEC  : `@EVAL  `STACK  TOKEN 0= UNTIL (DROP; ; UNW
+
+      \ COMPILE  MACRO 
+	  
+: M: ';  : ?M: 0 `HOFS CALL TARG:! (, (MAC `", THEN : <M> MOBJ
+ |H TO MOBJ ;   : D# HERE >, CSP!       : |LASTH (EX LASTH! ; 
+ 
+

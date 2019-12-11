@@ -1,0 +1,189 @@
+2ALIGNED
+: WFIND (IO ,< ,"h~^D^@;]|~C~" ' `_@FIND? $E9 ,R
+
+2ALIGNED
+: (D#2 POP XR 
+: 4+ 2+ 2+; 
+; UNW
+
+: TRICE| PUSH J XR
+: IXEC J PUSH
+;
+
+: DXEP| DUP 
+: XEP| XR EXECUTE POP; 
+; UNW
+
+: -ROT SWAP 
+: USWAP XEP| SWAP 
+;
+: ROT USWAP SWAP ;
+
+: ,ER (D#0 STR , @EXEC ;   
+: AT' |2- 
+: TO' |2- 
+: ' TOKEN? T 
+: FIND WHERE? @ 
+; 
+: (R#, @R+ , ; 
+: (GO; @R+ XR PUSH ; 
+: UNW |DROP 
+: @H- |H 
+: @- 2- 
+: ?@ DXEP| @  
+; 
+
+: (VAR3  @R+ DROP 
+: (VAR2  @R+ DROP POP; 
+; UNW
+
+: QUAN (R#, (VAR3 
+: VALUE (R#, (SET2 
+: CONST =H ,ER (CON , ,<
+
+: VQUAN (R#, (VAR3 
+: VECTOR (R#, (SET2 
+: DEFER =H  ,ER (JUMP , ,<  \ FURTHER
+
+: _TWICE |,  : HP _HERE 2+; ; UNW
+: _IF   ,ER (IF   _MARKP ,<
+: _IF-  ,ER (IF-  _MARKP ,< 
+: ((" (?S ;;
+: SPACES TIMES| 
+: SPACE BL EMIT 
+;
+: |SPC EX SPACE ;
+: 0?SKIP DUP IF @R+ PUSH ;THEN 
+: .SKIP DROP @R+ DROP; ;  
+: (OF OVER- .SKIP ?; 
+: (GO XR DROP ;
+
+: ID. |SPC  
+: ". CSTR  
+: TYPE |DROP 
+: TYPE+ TIMES| CSTR EMIT 
+;
+: ((." (?S ". ;  
+: |CR EX 
+: CR ."^M^J" 0 TO CNTC 
+; 
+META CR vOK \ vOK FIXED
+
+\ : @DBG
+\  2DUP H. H. PUSH PUSH 2DUP H. H. POP POP SP@ H. 
+\  POP DUP PUSH H. @R H. H H. ;
+
+1024 CONST 1K
+: XY? 1K LTIB - ;
+: In1K   (@&; ,< 1K 1- ,
+: ZBLK      0 ,< 0 VALUE BLK
+: BLK>SCR BLK ,< 0 VALUE SCR
+
+' BEMIT VALUE StdEmit
+
+: WAITKEY |DROP 
+: BKEY [ DUP W>B 0; W>B ;; ] 0 (IO ,< ,"M~^VC~^P~"
+' BKEY  VALUE StdKey
+
+:VALUE KEY  ;
+' BKEY   ' KEY  T!
+
+: `(ERR StdEmit AT EMIT  StdKey AT KEY 
+  CR TBUF ID. MESSAGE ID. CR BLK 0; 
+  BLK>SCR ZBLK XY? 
+: >XY In1K ,< 0 VALUE XY
+
+META `(ERR vERR    \ vERR FIXED
+
+: I J ; 
+: A! PUSH XA EXIT ; 
+: A@ XA I XA ;
+: 0>A| 0 
+: >A| XR XA EXECUTE XA EXIT ;
+$10 CONST 1H
+$40 CONST 1L
+256 CONST 1B
+: U/ |DROP 
+: (/MD  >A| 0 TWICE TWICE -/ -/ -/ -/ ; 
+: U* |DROP 
+: UM* >A| 0 TWICE TWICE +* +* +* +* ;
+: UMOD |DROP 
+: U/MOD (/MD SWAP ; 
+
+: 9>? 9 OVER U< 
+: 7& (@&; ,< 7 ,
+: ALPHA 9>? + '0 + ;
+  
+: S6 PUSH PUSH PUSH CALL POP POP POP THEN
+: S3 |SPC TRICE| ROT DUP  
+: H. 1B U/MOD CALL 
+: B. |SPC W>B THEN 1H U/MOD TWICE  
+: DIG. ALPHA EMIT ;
+
+: ?ID. T WFIND IF 4+ ID. ;THEN '$ EMIT H. ;
+
+: A+L XEP| 
+: I+ J + 
+;
+: MEMTI| A+L 0 
+: TI| BLK XR LTIB PUSH ETIB PUSH PUSH CALL
+  EX POP POP POP THEN  TO BLK TO LTIB TO ETIB 
+: /BLK BLK 0; 0 TO ETIB 
+;
+
+: . DUP 0< IF '- EMIT NEG THEN 
+: U. |SPC 
+: ` 10 U/MOD 0?SKIP RECURSE DIG. ;
+
+8   CONST bs
+13  CONST cr
+-$700 CONST SBUF    
+-$600 CONST TIB     
+
+: WITHIN OVER- PUSH - POP U< ; 
+\ : C!+ PUSH C!R+ POP; ; UNW
+: = - 0= ; 
+: 2DUP OVER OVER ;
+\ : `SRC BLK 0; ETIB 0<>; BLK BLOCK 1K + TO ETIB ;
+: `RDLN TIB 1L
+: ACCEPT OVER + PUSH DUP BEGIN KEY \ CASE 
+  cr OF DUP XR DROP ENDOF
+  bs OF OVER OVER- IF 1- bs EMIT SPACE bs EMIT THEN  ENDOF
+  DUP BL 1B WITHIN  IF DUP EMIT OVER ! 1+ DUP THEN
+  DROP THEN THEN \ ;CASE 
+  DUP I = UNTIL  OVER- 
+EXIT ;
+
+META `RDLN READLN \ READLN FIXED
+
+
+: CSP! SP@ ,< 0 VALUE CSP
+: CSP? SP@ CSP - ;
+\ THIDE ;`
+   
+\ : ;`  ,;  CSP? TARG,< ?; ;;
+
+APT2  _IF     IF`
+APT2  _IF-    IF-`
+APT2  _TWICE  TWICE`
+
+
+\ DEBUGERR
+
+2ALIGNED
+=P 4TH>  ,"~c~"  \ FROMF
+
+: TROFF (IO1 ,< ,"9~^K~^O"  HERE =: `@X_TRACE  
+,"^G~^N"   ' NOP 1- ,  ,"C~"
+
+: TRON   (IO1 ,<  ,"9~k~E~k~" 
+' `@X_TRACE HERE 1+ - C, ,"^P~"
+
+: @DBG  ,< VAL' TROFF CALL, ' _@JSR4TH CALL, 
+: @DBG1   NOP 4TH> ,<   VAL' TRON  CALL,
+,"$"_~<S-~u^C"  VAL' TROFF CALL, ,"[^K~^O" ' NOP 1+ $E9 ,R
+,"^P~"
+
+' TROFF 2+ ' ABORT 8 + - 
+' ABORT 6 + T!
+
