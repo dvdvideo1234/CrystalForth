@@ -196,6 +196,7 @@ M: TWICE` CALL THEN;
 ;
 : TTO TO' , ; 
 : TAT AT' , ;
+: TVAL VAL' , ;
 : THACK ' @HACK ; 
 : TSEE  ' @SEE ;             
 : TDEF    ;<D> DEF ;

@@ -1,7 +1,7 @@
 APT- _ABORT  =: (ABORT  
 APT- _@INIT  =: @INIT 
 APT- _TOA    =: (R>A;    
-' (R>A;      =: (RDROP; 
+APT- _RDROPX =: (RDROP; 
 APT- _IO     =: (IO;     
 APT- _MIF    =: (-IF    
 APT- _NEXT   =: (NEXT
@@ -15,10 +15,8 @@ APT- _DROP   =: (DROP
 APT- _NIP    =: (NIP    
 APT- _FOR    =: (FOR    
 APT- _PUSH   =: (PUSH   
-APT- _RLD    =: (@R
-APT- _RST    =: (!R   
-APT- _ALDP   =: (@A+   
-APT- _ASTP   =: (!A+ 
+APT- _RLDP   =: (@R+
+APT- _RSTP   =: (!R+
 APT- _?C@    =: (?C@
 APT- _J      =: (J      
 APT- _ALD    =: (A@
@@ -34,10 +32,10 @@ APT- _1PX    =: (1+;
 APT- _4PX    =: (4+;
 APT- _2PX    =: (2+;
 APT- _RET    =: (;    
-APT- _5ARY   =: (5ARY;   
-APT- _LARY   =: (LARY;   
-APT- _WARY   =: (WARY;   
-APT- _BARY   =: (BARY;   
+APT- _5ARY   =: (5ARY   
+APT- _LARY   =: (LARY   
+APT- _WARY   =: (WARY   
+APT- _BARY   =: (BARY   
 APT- _PMUL   =: (+*   
 APT- _SDIV   =: (-/   
 APT- _U1P    =: (U1+
@@ -48,10 +46,8 @@ APT- _ZEQ    =: (0=
 APT- _0LESS  =: (0<
 APT- _NEG    =: (NEG
 APT- _NOT    =: (NOT  
-APT- _CALDP  =: (C@A+  
-APT- _CASTP  =: (C!A+  
-APT- _CRLD   =: (C@R
-APT- _CRST   =: (C!R  
+APT- _CRLDP  =: (C@R+  
+APT- _CRSTP  =: (C!R+  
 APT- _DROPX  =: (DROP;
 APT- _STR    =: (STR
 APT- _OVER   =: (OVER
@@ -66,9 +62,8 @@ APT- _DEA    =: (DEA?
 APT- _COD    =: (COD
 APT- _INT    =: (INT
 APT- _1M     =: (:1-
-APT- _BRK    =: (BRK
 APT- _2M     =: (2-
-
-
-  
-
+APT- _BRK    =: (BRK
+APT- _R2M    =: (R2-
+APT- _R1M    =: (R1-
+APT- _TARY   =: (TARY

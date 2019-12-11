@@ -27,6 +27,7 @@
 % FOR>`          
 % IF-` 
 % CSWAP>`
+%2 TVAL VAL`      
 %2 TAT AT`      
 %2 TTO TO`
 %2 :RECURSE RECURSE`   
