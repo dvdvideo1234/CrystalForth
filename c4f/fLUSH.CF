@@ -14,24 +14,6 @@ $E800 VALUE  FIRST
     4 BARY `FBUFS  
 : `@BUFS  `PREV ,< 
     4 WARY `BUFS 
-	
-
-: IO? _FL ODD !"IO?" ;;
-: `File| >ZSTR 
-: `|IO? (EX IO? _AX _DX TO _DX2 ;
-HERE >, (D#0 @ DROT (DOS ;
-\ >, >FTOP| 
-: FOPEN `File| ,< 
-N: `Fopen $3D02 ,
-\ >, >FTOP| 
-: FCREATE `File| ,< 
-N: `Fcreate $3C00 ,
-=, StdPut $200 , 
-HERE >, (D#0 @ XDROT (DOS ; 
-\ : CLSD NFILES AFILE - TIMES|
-\  FTOP> ,<
-=, Fclose $3E00 , 
-
 
 : `1KRW| DROP; 1K 
 : `AXDX| SCRH `|IO? ;
@@ -67,4 +49,5 @@ HERE >, (D#0 @ XDROT (DOS ;
 : LOAD 1K (OVER TI| VAL EVAL ; 
 \  ' BLOCK VAL! vBLK  \ FIX  
 \  USE/  USING PIF.COM 
+
 

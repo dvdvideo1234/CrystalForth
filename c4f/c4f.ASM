@@ -251,12 +251,6 @@ Start   Label byte
         INC     WA
         JMPS_   @BPUSH0
         
- P_ _STR,@STR
-        MOV     W,[T]
-        INC     T
-        INC     T
-        JMPS_   @WPUSH
-        
  P_ _DEA,@DEA
         MOV     WL,[T+4]
         SKIPA_
@@ -300,7 +294,7 @@ Start   Label byte
 @NOP:   LODSW
         TEST    WL,1
         JZ      @NEST
-        INC     W
+        DEC     W
         JMP     W
  P_ _EX,@EX              ; ( EX
         POP     W
@@ -318,14 +312,6 @@ Start   Label byte
         POP     W
         XCHG    W,AR
         JMPS_   @RPUSH
- P_ _R1M
-        POP     WA
- P_ _R2M
-        POP     WA
-        DEC     WA
-        DEC     WA
-        PUSH    WA
-        JMPS_   @NOP
  P_ _1M
         JMPS_   _2M
  P_ _2M
@@ -397,6 +383,10 @@ _DROPXX DW _DROPX
         POP     IP
 @NOP2:  JMP     @NOP
 
+ P_ _SWAPX
+		XCHG	T,[DSP]
+        JMPS_     @RET
+
  P_ _RDROPX         ; ( RDROP;
         POP     W
         POP     IP
@@ -441,6 +431,8 @@ _DROPXX DW _DROPX
         DUP_    T
         POP     T
         RET
+ L_ _AST                   ; A!
+		DW		_PUSH,_CODRET
  P_ _TOA,@TOA              ; (R>A;
         JMP SHORT @TOA1
  P_ _IO,@IO              ; ( IO

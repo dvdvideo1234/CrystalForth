@@ -2,6 +2,7 @@
 
 '  (JUMP   =:  (DEF
  
+=! H
 =! (MAC
 =! CMP|
 =! |LASTH
@@ -10,67 +11,78 @@
 
 \ PRIMITIVES & CONSTANTS --------------------- HLD
 
-: (@&; (@R+ (RDROP    
-: AND (NAND    
-: NOT (NOT ; 
-: ODD (@&; ,< 1 , 
-' ODD 2+ =: BYE 
-: EVEN (@&; ,< -2 , 
-: (D#2  (POP (XR     
-: 4+ (4+;  \ DOES PRIMITIVE'S METHODS
+\ : 2- (@+; ,< -2 ,  
+: (D#2  (POP (XR     \ DOES PRIMITIVE'S METHODS
+: 4+ (4+;  
 : (D#1  (POP (XR     
 : 2+ (2+;  
 : (D#0  (POP (XR     
 : NOP;  ;
+: |SWAP (EX  
+: SWAP SWAP;
+: (STR |SWAP
+: @+ (PUSH (@R+ (POP ; 
+: 2@ |SWAP
+: @2 @+    
+: @ (PUSH 
+: (CON (@R+ 
+: EXIT (RDROP; ; UNW 
+: (SET2 (D#1      
+: !  (PUSH 
+: POP! (!R+ (RDROP; ,<  
+: (LIT (@R+ ; 
+: (@&; (@R+ (RDROP    
+: AND (NAND    
+: NOT (NOT ; 
+: HODD H (DUP \ H TO FIX HERE 
+: ODD (@&; ,< 1 , 
+' ODD 2+ =: BYE 
+
+: (| (@R+ (XR
+: EXECUTE (PUSH ;
+: ?XEP-| (:1-  \ EQU TO ?XEP|
+: ?XEP| (DUP 
+: XEP| (XR EXECUTE 
+: (VAR (POP ; 
+: ?"LEN (?C@ 
+: 1+ (1+; 
+: ?XEP+| (DUP 1+ XEP| ;  
+: TUCK (DUP 
+: -ROT SWAP 
+: USWAP XEP| SWAP; 
+: |ROT (EX
+: ROT USWAP SWAP;
+: XDROT XEP| 
+: DROT |ROT  
+: D0 CALL THEN ,<
+    0 CONST 0
+$F800 CONST  TBUF
+    1 CONST `1
+   32 CONST BL  \   16 CONST 1H  
+: W>B (@&; ,< 255 ,
+: EVEN (@&; ,< -2 , 
 : |NIP (EX 
 : NIP (NIP ;   
 : C@A+ (XA (C@R+ (XA ;
 : C!I (J 
 : C! (PUSH (C!R+ (RDROP; ,<
-: |SWAP (EX  
-: SWAP (PUSH (XR 
-: (VAR (POP ; 
-: (LIT (@R+ ; 
 : (VAR3 (D#2 ;;      
-: (SET2 (D#1      
-: !  (PUSH 
-: POP! (!R+ (RDROP; ,<  
 : !I (J ! ; 
-: @2 (STR SWAP    
-: @ (PUSH 
-: (CON (@R+ 
-: EXIT (RDROP; ; UNW 
 : CSTR- (:1- (?C@ ;
-$F800 CONST  TBUF
-    0 CONST 0
-    1 CONST `1
-   32 CONST BL  \   16 CONST 1H  
-: A! (PUSH (R>A;  
 : C@ (?C@ (NIP ;   
 : CSTR (?C@ (U1+ ;
-: IEXECUTE (J
-: EXECUTE (PUSH (;
+: IXEC (J (PUSH ; 
 : `NAME TBUF (?C@ (EX C! ;
-: ?"LEN (?C@ 
-: 1+ (1+; 
 : `NAME+ `NAME (1+; 
 : `NAME- `NAME 
 : 1- (:1- ; 
-: ?XEP-| (:1-  \ EQU TO ?XEP|
-: ?XEP| (DUP 
-: XEP| (XR EXECUTE (POP ;
-: ?XEP+| (DUP 1+ XEP| ;  
 : A-L XEP|  
 : I- (J
 : - (NEG 
 : + (+2/ (DROP; 
+: (@+; (@R+ (RDROP + ;  
 : MEM= SWAP 
 : TRG= |NIP CMP| CSTR C@A+ - ;
-: TUCK (DUP 
-: -ROT SWAP 
-: USWAP XEP| SWAP ; 
-: |ROT (EX
-: ROT USWAP SWAP ;
 : I (J ;
 : >DEA 4+ 
 : NAME> CSTR + ; 
@@ -93,18 +105,16 @@ $F800 CONST  TBUF
 : (<RNG| RANGE>S A+L STR| ;
 : U* |DROP 
 : UM* A! 0 TWICE TWICE (+* (+* (+* (+* ;
-: U/ |DROP 
-: (U/ A! 0 : (UM/ TWICE TWICE (-/ (-/ (-/ (-/ ;
+: U/ |NIP 
+: U/MOD |SWAP
+: (U/ A! 0 
+: (UM/ TWICE TWICE (-/ (-/ (-/ (-/ ;
 : UMOD (U/ (NIP ;
 : UM/MOD \ ( UD U - U UD )
    (U/ SWAP XEP| (UM/ SWAP ;
 : C_ON `1 (SKIP      
 : C_OFF 0  
-: SWAPC! SWAP C! ;  
-: XDROT XEP| 
-: DROT |ROT  
-: D0 0 0 ;
-: C!+ (PUSH (C!R+ (POP ;
+: SWAPC! SWAP C! ;  \ TEST1 1032
 
 \ SEARCH PRIMITIVES  ------------------
 
@@ -126,41 +136,48 @@ $F800 CONST  TBUF
 : `;FND (DROP 0 (RDROP; 
 : `CFND| >DEA 
 : `FND| (DEA? (IF `;FND
- (OVER (OVER IEXECUTE IF `CFND| ;THEN (NIP `1 (RDROP; ,<
+ (OVER (OVER IXEC IF `CFND| ;THEN (NIP `1 (RDROP; ,<
+ 
+  \ TEST2 1206
 
 \ VARIABLES STAGE 1 ------------------
 
+: |H CALL (EX (SET2 THEN ,<       0 CONST H \ HEAP TOP
 0 VALUE ERRA  \ HOLDS ERROR MESSAGE ADDRESS
 : |LTIB CALL (EX (SET2 THEN ,<    
 30       1K U*  CONST LTIB 
 32 1K U* $100 + VALUE ETIB
-: |H CALL (EX (SET2 THEN ,<       0 CONST H \ HEAP TOP
 : |T CALL (EX (SET2 THEN ,<   $D800 CONST T \ VOCABULARY TOP
 : |STATE    CALL >, (XR EXECUTE  
 : LOC!  (POP  (SET2 THEN ,<
 0 CONST STATE@                      \ FORTH STATE 
 : LOXEC STATE@ (PUSH ;              \ LOCATE AND EXECUTE
-: |, (EX (SKIP 
 : @,  @  
 : , |H     
 : !+ (PUSH (!R+ (POP ;
+: |, (EX 
+: `<RELS_ , 
+: LASTH! H ,<
+0 VALUE LASTH
 : C@, C@ 
-: C, |H  C!+ ;   
-: `|ALIGN (EX    
+: C, |H  
+: C!+ (PUSH (C!R+ (POP ;
+: |ALIGN (EX    
 : ALIGNED (NOP \  |LASTH  FIX
- H \ HERE
- ODD 0; $90 C, ;
-' `|ALIGN VECTOR  v",
+ HODD NIP 0; $90 C, ;
+' |ALIGN VECTOR  v",
 0 VALUE BLK
 : MCLR $D800 ,<     0 VALUE MOBJ      
+
+\ HERE .  TEST3 1338
 
 \ MEMORY  PRIMITIVES  ------------------
 
 : S>"! XEP| (DUP (J A! CALL \ C!A+ 
-: (MEMTO STR| CSTR     THEN \ C!A+
+: `MEMTO STR| CSTR     THEN \ C!A+
 : C!A+ (XA (C!R+ (XA ;
 : CMOVE SWAP 
-: MEMTO A! (MEMTO ; 
+: MEMTO A! `MEMTO ; 
 : >ZSTR CSTR H ?XEP| MEMTO (A@ C_OFF ; 
 : CMOVE> A+L SWAP |DROP 
 : MPUSH S+L |NIP TIMES|
@@ -168,6 +185,8 @@ $F800 CONST  TBUF
 HERE >, (D#0 @ 
 : FILL A! STR| (A@ C!+ ;
 N: ERASE 0 ,  =, BLANK 32 ,
+  
+\ HERE .  TEST4 1428
   
 \ ERROR PRIMITIVES  --------------------- 
 
@@ -179,6 +198,9 @@ N: ERASE 0 ,  =, BLANK 32 ,
 : |N?? (EX  
 : N??  (0= 
 : ??  !"?" ;;
+: ODDH? !"ODDH?" ;;
+
+\ HERE .  TEST5 1452
 
 \ COMPILER BASIC PRIMITIVES  ------------ 
 
@@ -207,29 +229,34 @@ N: ERASE 0 ,  =, BLANK 32 ,
 : S, STR| CSTR C, ; 
 : H>T  H (STR |T  MPUSH ; 
 
+\ HERE .  TEST6 1654
+
 \ NUMBERS ---------------------------
 
-: `DIG? (BSCN ,< 10 C, ,"0123456789" 2ALIGNED
-: BASE! 1- 1- 255 AND 2+ ,< 10 VALUE `BASE 
-: DIG^ ETIB LTIB - ;
-' `DIG? VECTOR vDIG 
-: `GRAB# |LTIB 1- ; 
-: `DIG+ XEP| `BASE U* ;
+\ : BASE! (2- W>B 2+ ,< 10 VALUE `BASE 
+: ``DIG? (BSCN ,< 10 C, ,"0123456789" 2ALIGNED
+: `10* ``DIG? XEP| CALL (| - 0 THEN (TARY ,<
+: PCHAR^ ETIB LTIB - ;
+' `10* VECTOR vDIG 
+: PCHAR+ |LTIB 1- ; 
 
-: ATOI CSTR MEMTI| `1 (DUP LTIB 0; - BEGIN LTIB 0; DIG^ C@ vDIG
- (DUP 1+  0; `DIG+ `GRAB#  AGAIN ; UNW
+: ATOI CSTR MEMTI| 0 LTIB (IF `1  BEGIN PCHAR^ C@ vDIG
+  (DUP 1+  0; + PCHAR+ LTIB (0= UNTIL 0 ; UNW
 
 : ">NUMC |#,,    
 : ">NUM ATOI ?? ;
+
+\ HERE .  TEST7 1748
 
 \ MAKERS ---------------------------------- 
 
 : `?:, (DUP  
 : `:, |,  
-: TARG:! (NOP  H \ ERE FIX \ FIX (NOP = (HERE `ODD?? LASTH! )
+: TARG:! HODD  ODDH?
 : =: 0 TOKEN?  (NOP \ FIX SAME?  
 : (=:  ?"LEN |T MPUSH TWICE
 : !- (2- (PUSH !I (POP ;
+
 
       
       \   INTERPRETTER 
@@ -264,22 +291,19 @@ N: ERASE 0 ,  =, BLANK 32 ,
   
      \ MAIN LOOP 
 	 
-: FIX (@R+ (@R+ ! (;
+>,
  (NOP   \ INITIALIZATION  ON ABORT
  (NOP   \ ERROR PRINT
 : QUIT BEGIN
    (NOP  \ READLINE FROM KBD
    @EVAL \ EVAL INPUT
-   (NOP  \ OK!
+: vOK   (NOP  \ OK!
    AGAIN ;; UNW
-: `1ST  FIX AT QUIT @INIT QUIT ;
-' `1ST ' @INIT T!
 
+\ HERE .  TEST8 1912
 
 \ VARIABLES STAGE 2 \ COMPILE  MACRO ------------------
 
-: LASTH! H ,<
-0 VALUE LASTH
 : `HOFS  CALL (XR (PUSH CALL (EX (POP THEN  (SET2 THEN ,<
 0 CONST HOFS 
 : _BEGIN |LASTH  
@@ -308,6 +332,7 @@ N: ERASE 0 ,  =, BLANK 32 ,
 : D# HERE >, CSP!       
 : |LASTH (EX LASTH! ; 
  
+\ HERE .  TEST9 2084
 
 \ HI LEVEL FUNCTIONS  --------------------- 
 
@@ -328,11 +353,9 @@ N: ERASE 0 ,  =, BLANK 32 ,
 : |CR (EX 
 : CR ."^M^J" 0 TO CNTC ;
 : `OK ."_ok" CR .">>_"  ;;  
-: `. Emt! Key! CR TBUF ID. ID. CR 
-: vINI BYE ;; 
+: `. Emt! Key! CR TBUF ID. ERRA ID. CR ;; 
+
 ZDO VALUE 6 TIMES _FL _AX _BX _CX _DX _DX2
-
-
 
 : FND?? |N?? TOKEN? FND? ;
 : SAME? FND? 0; 4+ `[ID] TBUF ; 
@@ -340,8 +363,7 @@ ZDO VALUE 6 TIMES _FL _AX _BX _CX _DX _DX2
 : ' FND??
 : @DEF? @2 
 : UNDEF? ODD !"UNDEF?" ;;
-: ADR' ' (DUP    
-: ODD?? ODD !"ODDH?" ;; 
+: ADR' '  TO ODD ODDH? ; 
 HERE >, (D#0 @   
 : @ADR+ ' + ;
 N: `TO' -2 , 
@@ -362,19 +384,66 @@ N: `RSTACK -$2C0 10 + , -$40 ,
 =, `DSTACK -$2C0 $280 - , -$2C0 , 
 
 
-\ : (@+; (@R+ (RDROP + ;  
-\ : 2- (@+; ,< -2 ,  
 : `STACK  (RP@  (2- (2-
  `RSTACK !"RSTK?"     (SP@ (2- `DSTACK !"DSTK?" ; 
+: `RW IXEC ! IXEC `1 (RDROP; 
 : HIDE FND?? 5 +  '` SWAPC! ; 
 
-\ INTS DOS & VIDEO
+\ INTS DOS, FILES & VIDEO
 HERE >, (D#0 C@ (INT TO _FL TO _AX TO _BX TO _CX TO _DX ;  
 N: (DOS  $21 ,  =, (VID $10 , 
 HERE >, (D#0 @ (DOS ;
-N: Fread  $3F00 ,  N: Fwrite $4000 ,   =, Fseek  $4200 ,
-0 QUAN `Fbuf    \ TO USE ONLY BY FKEY
-: FKEY (PUSH 0  TO `Fbuf AT `Fbuf `1 (POP
- Fread [ ^Z ] _AX 0; `Fbuf EXIT ;
+>, `RW  (VAR3 ,< N: Fread  $3F00 , 0 ,
+>, `RW  (VAR3 ,< N: Fwrite $4000 , 0 ,  
+=, Fseek  $4200 ,
+: StdGet 0 
+: FKEY  -1 AT Fread ROT Fread TO Fread @ ;
+: ERRput 2  
+: FEMIT SWAP AT Fwrite ROT Fwrite ;
 
-INCLUDE fLUSH.CF
+: IO? _FL ODD !"IO?" ;;
+: `File| >ZSTR 
+: `|IO? (EX IO? _AX _DX TO _DX2 ;
+HERE >, (D#0 @ DROT (DOS ;
+\ >, >FTOP| 
+: FOPEN `File| ,< 
+N: Fopen $3D02 ,
+\ >, >FTOP| 
+: FCREATE `File| ,< 
+N: Fcreate $3C00 ,
+=, StdPut $200 , 
+HERE >, (D#0 @ XDROT (DOS ; 
+\ : CLSD NFILES AFILE - TIMES|
+\  FTOP> ,<
+N: Fsize $4202 , 
+N: Fpos $4201 , 
+N: Fcut $4000 , 
+=, Fclose $3E00 , 
+
+\ HERE .  TEST10 2616
+
+INCLUDE fLUSH.CF  \ HERE .  TEST10 2986
+
+INCLUDE NUMOUT.CF \ HERE .  TEST11 3292
+
+
+: FIX (@R+ (@R+ ! (;
+: `1ST 
+(BRK
+  H>T              \ LOADER OF INITIAL DICTIONARY
+(BRK
+  FIX  AT QUIT @INIT    \ NEW INIT SET
+(BRK
+  FIX `INTERP VAL LOXEC \ TARGET FORTH INITIAL STATE
+  FIX  `.  TO QUIT      \ FIX  ERROR.
+  FIX  `OK    vOK       \ FIX  vOK.
+  FIX  SOURCE  PARSE    \ FIX PARSE
+  FIX  SAME? TO  (=:    \ FIX PARSE
+  FIX  HERE  HODD       \ FIX PARSE
+  FIX  CSP!  TARG:      \ FIX PARSE
+  FIX  |LASTH ALIGNED   \ FIX PARSE
+  FIX  FIX VAL H        \ NEW H 
+ QUIT ;
+ 
+ 
+' `1ST ' @INIT T!
