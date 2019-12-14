@@ -10,9 +10,9 @@ THIDE CALL`
 APT-  NOP;    =:  NOP        
 APT-  ((A"    =:  (!"
 APT2  TARG:!      :`         
-APT-  (LIT    =:  (# 
+\ APT-  (LIT    =:  (# 
 APT-  TARG:   =:  :          
-APT-  DROP;   =:  DROP
+\ APT-  DROP;   =:  DROP
 APT2  TARG,<      ,<`        
 APT2  TARG;       ;`
 APT-  ((."    =:  (."        
@@ -30,4 +30,4 @@ STAT? H           \ STATISTICS & ALIGNING TO 1K
 TSAVE PIF.COM     \ SAVE RESULT
       \ PREPARE NEW WORDS TO BE ASSIGNED 
 	  
-REWERGERGWER---	  
+  

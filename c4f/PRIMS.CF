@@ -11,6 +11,7 @@
 
 \ PRIMITIVES & CONSTANTS --------------------- HLD
 
+: (LIT (@R+ ; 
 \ : 2- (@+; ,< -2 ,  
 : (D#2  (POP (XR     \ DOES PRIMITIVE'S METHODS
 : 4+ (4+;  
@@ -19,18 +20,19 @@
 : (D#0  (POP (XR     
 : NOP;  ;
 : |SWAP (EX  
-: SWAP SWAP;
-: (STR |SWAP
+: SWAP (SWAP;
+: STR
+\ 1 (BRK
+ |SWAP
 : @+ (PUSH (@R+ (POP ; 
 : 2@ |SWAP
 : @2 @+    
 : @ (PUSH 
 : (CON (@R+ 
-: EXIT (RDROP; ; UNW 
+: EXIT (RDROP ; 
 : (SET2 (D#1      
 : !  (PUSH 
-: POP! (!R+ (RDROP; ,<  
-: (LIT (@R+ ; 
+: POP! (!R+ (RDROP (; 
 : (@&; (@R+ (RDROP    
 : AND (NAND    
 : NOT (NOT ; 
@@ -49,9 +51,9 @@
 : ?XEP+| (DUP 1+ XEP| ;  
 : TUCK (DUP 
 : -ROT SWAP 
-: USWAP XEP| SWAP; 
+: USWAP XEP| SWAP ; 
 : |ROT (EX
-: ROT USWAP SWAP;
+: ROT USWAP SWAP ;
 : XDROT XEP| 
 : DROT |ROT  
 : D0 CALL THEN ,<
@@ -65,7 +67,7 @@ $F800 CONST  TBUF
 : NIP (NIP ;   
 : C@A+ (XA (C@R+ (XA ;
 : C!I (J 
-: C! (PUSH (C!R+ (RDROP; ,<
+: C! (PUSH (C!R+ (RDROP ; 
 : (VAR3 (D#2 ;;      
 : !I (J ! ; 
 : CSTR- (:1- (?C@ ;
@@ -79,7 +81,7 @@ $F800 CONST  TBUF
 : A-L XEP|  
 : I- (J
 : - (NEG 
-: + (+2/ (DROP; 
+: + (+2/ (DROP ; 
 : (@+; (@R+ (RDROP + ;  
 : MEM= SWAP 
 : TRG= |NIP CMP| CSTR C@A+ - ;
@@ -89,7 +91,7 @@ $F800 CONST  TBUF
 : <>; - 
 : 0<>;  (0=          
 : 0;  (IF EXIT ;; 
-: 2* (DUP (+2/ (DROP; 
+: 2* (DUP (+2/  (DROP ; 
 : NUP XEP| (DUP ;
 : RANGE>S 1+     
 : OVER- (OVER - ;  
@@ -98,7 +100,7 @@ $F800 CONST  TBUF
 : .TIMES |DROP   
 : TIMES (PUSH (XR  
 : TIMES| (FOR CALL BEGIN (J EXECUTE THEN (NEXT RELS<
-: 2EXIT (RDROP (RDROP; ,<  
+: 2EXIT (RDROP (RDROP ; 
 : S+L XEP| 
 : A+L XEP| 
 : I+ (J + ;   
@@ -126,17 +128,17 @@ $F800 CONST  TBUF
 : (BSCN (XR CSTR (POP |NIP 
 : CSCAN  SCN| 
 : =C+ CSTR (A@ - ; 
-: WSCAN |NIP SCN| (STR (A@ - ;
+: WSCAN |NIP SCN| STR (A@ - ;
 : CMP| A! (DUP (XR (PUSH (FOR CALL BEGIN (J EXECUTE
  IF `SCN ;THEN THEN (NEXT RELS<  `NOSCN ;  
 : CSKIP  |NIP CMP| =C+ ;
 : ("SW ("SKIP `(BS 1+ 
 : (XARY 2* (POP +  
 : @EXEC @ (PUSH ;
-: `;FND (DROP 0 (RDROP; 
+: `;FND (DROP 0 EXIT ; 
 : `CFND| >DEA 
 : `FND| (DEA? (IF `;FND
- (OVER (OVER IXEC IF `CFND| ;THEN (NIP `1 (RDROP; ,<
+ (OVER (OVER IXEC IF `CFND| ;THEN (NIP `1 EXIT ;
  
   \ TEST2 1206
 
@@ -144,9 +146,9 @@ $F800 CONST  TBUF
 
 : |H CALL (EX (SET2 THEN ,<       0 CONST H \ HEAP TOP
 0 VALUE ERRA  \ HOLDS ERROR MESSAGE ADDRESS
-: |LTIB CALL (EX (SET2 THEN ,<    
-30       1K U*  CONST LTIB 
-32 1K U* $100 + VALUE ETIB
+: |LTIB CALL (EX (SET2 THEN ,<   
+' `EVALCNT   CONST LTIB 
+' `EVALEND   VALUE ETIB
 : |T CALL (EX (SET2 THEN ,<   $D800 CONST T \ VOCABULARY TOP
 : |STATE    CALL >, (XR EXECUTE  
 : LOC!  (POP  (SET2 THEN ,<
@@ -180,7 +182,14 @@ $F800 CONST  TBUF
 : MEMTO A! `MEMTO ; 
 : >ZSTR CSTR H ?XEP| MEMTO (A@ C_OFF ; 
 : CMOVE> A+L SWAP |DROP 
-: MPUSH S+L |NIP TIMES|
+: MPUSH S+L 
+\  10 (BRK
+  |NIP 
+\  11 (BRK
+  SWAP
+  12 (BRK
+  
+  TIMES|
  (:1- (PUSH CSTR- C!I (POP ;
 HERE >, (D#0 @ 
 : FILL A! STR| (A@ C!+ ;
@@ -222,12 +231,20 @@ N: ERASE 0 ,  =, BLANK 32 ,
 : TOKEN BL CALL   (?C@   ;THEN   
 : WORD  CALL  TBUF  S>"! '` C!A+ ;THEN
 : PARSE (NOP \ ( SOURCE FIX )
- (PUSH `SKIPBL? `PARSE-RANGE NUP `CSCAN? OVER- (RDROP; ,<
+ (PUSH `SKIPBL? `PARSE-RANGE NUP `CSCAN? OVER- EXIT ; 
 : "STR, '" 
 : `", WORD (?C@ N?? 
 : ", CSTR v", (DUP C, 
 : S, STR| CSTR C, ; 
-: H>T  H (STR |T  MPUSH ; 
+: H>T 
+\ 2 (BRK
+ H
+\ 3 (BRK
+ STR
+\ 4 (BRK
+ |T 
+\ 5 (BRK
+ MPUSH ; 
 
 \ HERE .  TEST6 1654
 
@@ -286,7 +303,7 @@ N: ERASE 0 ,  =, BLANK 32 ,
 : EVAL (NOP \ `MEMTI|
  (SKIP BEGIN LOXEC  
 : @EVAL  (NOP \ `STACK
-  TOKEN (0= UNTIL (DROP; ; UNW
+  TOKEN (0= UNTIL (DROP ; 
   
   
      \ MAIN LOOP 
@@ -327,8 +344,7 @@ N: ERASE 0 ,  =, BLANK 32 ,
 : EOS! bs ,<    0 VALUE EOS 
 : M: ';  
 : ?M: 0 `HOFS CALL TARG:! `(MAC `", THEN 
-: <M> MOBJ
- |H TO MOBJ ;   
+: <M> MOBJ   |H TO MOBJ ;   
 : D# HERE >, CSP!       
 : |LASTH (EX LASTH! ; 
  
@@ -386,7 +402,7 @@ N: `RSTACK -$2C0 10 + , -$40 ,
 
 : `STACK  (RP@  (2- (2-
  `RSTACK !"RSTK?"     (SP@ (2- `DSTACK !"DSTK?" ; 
-: `RW IXEC ! IXEC `1 (RDROP; 
+: `RW IXEC ! IXEC `1 EXIT ; 
 : HIDE FND?? 5 +  '` SWAPC! ; 
 
 \ INTS DOS, FILES & VIDEO
@@ -429,11 +445,11 @@ INCLUDE NUMOUT.CF \ HERE .  TEST11 3292
 
 : FIX (@R+ (@R+ ! (;
 : `1ST 
-(BRK
+\ 6 (BRK
   H>T              \ LOADER OF INITIAL DICTIONARY
-(BRK
+7 (BRK
   FIX  AT QUIT @INIT    \ NEW INIT SET
-(BRK
+8 (BRK
   FIX `INTERP VAL LOXEC \ TARGET FORTH INITIAL STATE
   FIX  `.  TO QUIT      \ FIX  ERROR.
   FIX  `OK    vOK       \ FIX  vOK.
