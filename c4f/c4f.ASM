@@ -165,7 +165,7 @@ Start   Label byte
 
  
   
- L_ _SLSKIP,@SLSKIP            ; ("SKIP
+ P_ _SLSKIP,@SLSKIP            ; ("SKIP
         POP     WA
         MOV     WL,[WA]
         CLR_    WH
@@ -375,14 +375,14 @@ _DROPXX DW _DROPX
         POP     IP
 @NOP2:  JMP     @NOP
 
- P_ _SWAPX
+ P_ _SWAP
 		XCHG	T,[DSP]
-        JMPS_     @RET
+        JMPS_    @NOP
 
- P_ _RDROPX         ; ( RDROP;
-        POP     W
-        POP     IP
-        JMP     @NOP
+; P_ _RDROPX         ; ( RDROP;
+;        POP     W
+;        POP     IP
+;        JMP     @NOP
         
  P_ _4PX,@4PX
         INC     T
@@ -423,8 +423,15 @@ _DROPXX DW _DROPX
         DUP_    T
         POP     T
         RET
+		
+ L_ _LIT                   ; (LIT
+		DW		_RLDP,_RET
+ L_ _EXECUTE               ; EXECUTE
+		DW		_PUSH,_RET
+ L_ _@AST                  ; @A!
+		DW		_ALD,_XR,_EXECUTE,_SKIP
  L_ _AST                   ; A!
-		DW		_PUSH,_CODRET
+		DW		_PUSH,_COD
  P_ _TOA,@TOA              ; (R>A;
         JMP SHORT @TOA1
  P_ _IO,@IO              ; ( IO

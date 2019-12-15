@@ -1,0 +1,29 @@
+
+   -1 CONST TRUE
+: ON  TRUE 
+: SWAP! SWAP ! ;   
+: OFF 0    SWAP! ;   
+
+ 16 CONST 1H
+ 10 CONST lf
+: UNTIL| BEGIN IXEC 
+: WHILEZ| UNTIL RDROP ;
+: WHILE| (IF EXIT 
+: UNTILZ| IXEC  WHILE| ;
+: 2DUP OVER OVER ;
+: 2DROP DROP DROP ;
+\ : >LO 1B    \ DIVIDE U* U/MOD 
+\ : U/ |DROP 
+\ : D/M A! 0 
+\ : (D/M TWICE| TWICE| -/ -/ -/ 
+\ : -/ (-/ ; 
+: W>BB |SWAP
+: SPLIT 1B (U/ ;
+: UNITS? (U/  0; 1+ ; 
+: EOS| EOS XR PUSH 0 TO EOS EX POP TO EOS ; 
+: vague? DUP 2+ @ ODD ;
+\ : >HI 1B U* ;   \ MULTIPLY 
+\ : U* |DROP 
+\ : UM* A! 0 TWICE| TWICE| +* +* +* 
+\ : +* (+* ; 
+

@@ -1,11 +1,11 @@
 \ 34  \ % ;CASE` % CASE` 
 % ESC 
 % ,<` 
-%2 T? ?`  
+\ %2 T? ?`  
 %2 MARK> CALL`  
 %2 MARK> [`
 % TWICE` 
-% ?;` 
+\ % ?;` 
 % ;THEN`          
 % {`    \ }
 % \`
@@ -33,9 +33,9 @@
 %2 :RECURSE RECURSE`   
 %2 T:: :` 
 %2 :(IF IO`     
-%2 :(1- (1-`
+\ %2 :(1- (1-`
 % ;`    
-%2 TDOES DOES>`    
+\ %2 TDOES DOES>`    
 %2 T:;T :;`
 %2 <RELS RELS<`
 %2 TOF OF`    

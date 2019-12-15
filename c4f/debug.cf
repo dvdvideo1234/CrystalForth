@@ -1,11 +1,12 @@
 \ DEBUGERR  ------
-: UNITS? D/M  0; 1+ ; 
 : `BD |SPC STR| CSTR B. ; 
-: DUMP 1H 
-UNITS? STR| 
+: DUMP 1H UNITS? STR| 
 : DU CR DUP H. SPC 1H 2DUP `BD [TYPE] ; 
-: WFIND |A vTARG IO; $04E8 , $3B00 , $FC5D , $C3 C,
- ' @FIND? JMP#, ALIGNED
+: WFIND |A T `FND| @ - ;
+
+
+\ vTARG IO; $04E8 , $3B00 , $FC5D , $C3 C,
+\  ' @FIND? JMP#, ALIGNED
 : `WID. ID. WID. ; 
 : JID. J 
 : @ID. DUP H. STR DUP H. SWAP @ H. 
@@ -15,11 +16,12 @@ WFIND IF " TO" `WID. ;THEN 2+ WFIND IF " AT" `WID. ;THEN 4 -
 0 VALUE `ADR2 
 : `" (WSCN ,< 6 , >, (!" (." (MAC (0" (" ("SW ,< 
 0 |VALUE `|WW `WW 
-: `A:? WFIND IF ? DROP ." : " WID. ; 
+: `A:? WFIND (IF DROP; ." : " WID. ; 
 : SEE ' 
-: @SEE TO `WW : SL bs TIMES| 
-: WW `|WW CR DUP H. DUP 
-`A:? STR DUP H. DUP ?ID. `" 1+ 0; PUSH ("SKIP [ID] POP ;
+: @SEE TO `WW 
+: SL bs TIMES| 
+: WW `|WW CR DUP H. DUP `A:? STR DUP H. DUP ?ID. `" 1+ 0;
+  PUSH ("SKIP [ID] POP ;
 \ : DUTEST 1 2 3 " 1234" ;  
 
 \  BREAKPOINT  DEBUGERR 
