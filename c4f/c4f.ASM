@@ -59,15 +59,6 @@ R2M_    macro   REG
   DEC   REG
   endm
 
-@IP_    macro  REG
-  MOV   REG,[IP]
-  R2P_  IP
-  endm
-
-cf_to_  macro  reg
-  sbb   reg,reg
-        endm
-
 NIP_   macro
   R2P_  DSP
         endm
@@ -178,7 +169,7 @@ Start   Label byte
 ; CONTROL
 ;-------------------------------------------
 
- P_ _IFM,@IFM          ; (IF-
+ P_ _IFM	         ; (IF-
         JMP  SHORT    @IFM2
         
  P_ _NEXT,@NEXT        ; (NEXT
@@ -186,44 +177,47 @@ Start   Label byte
         DEC     W
         PUSH    W
         SKIPR_  W
- P_ _MIF,@MIF
+ P_ _MIF	
         INC     T        
 @IFM2:
         DEC     T        
-        JNS     @JUMP
- P_ _SKIP,@SKIP        ; (SKIP
-        LODSW
-        SKIPA_
+        JS      @SKIP
  P_ _JUMP              ; (JUMP
 @JUMP:
         MOV     IP,[IP]
         N_
+		
  P_ _IF,@IF            ; (IF
         DEC     T        
         INC     T
-        JZ      @JUMP         
- P_ _SKIPDR,@SKIPDR    ; (SKIPDR
+		PUSHF
+		DROP_
+		POPF
+        JZ      @JUMP
+		
+ P_ _SKIP		        ; (SKIP
+@SKIP:
         LODSW
-        SKIPA_
- P_ _JUMPDR,@JUMPDR    ; (JUMPDR
+        N_
+@DBG:   RET 
+		
+ P_ _FOR				; (FOR
         MOV     IP,[IP]
- P_ _DROP              ; (DROP
+ P_ _PUSH		       ; (PUSH
+        PUSH    T
 @DROP:          
         MOV   T,[DSP]       
- P_ _NIP,@NIP
+ P_ _NIP
         NIP_
         N_
- P_ _FOR,@FOR          ; (FOR
-        MOV     IP,[IP]
- P_ _PUSH,@PUSH        ; (PUSH
-        PUSH    T
+ P_ _DROP              ; (DROP
         JMPS_   @DROP
-@DBG:   RET 
 
  P_ _DROPX             ; (DROP;
         POP     IP
         JMPS_   @DROP
- P_ _CRSTP,@CRST       ; (C!R+
+		
+ P_ _CRSTP		       ; (C!R+
         POP     WA
         XCHG    T,W
         STOSB
@@ -235,7 +229,8 @@ Start   Label byte
         XCHG    T,W
         STOSW
         PUSH    WA
-        JMP     @DROP       
+        JMP     @DROP  
+		
  P_ _RLDP              ; (@R+
         POP     WA
         MOV     W,[WA]
@@ -251,10 +246,10 @@ Start   Label byte
         INC     WA
         JMPS_   @BPUSH0
         
- P_ _DEA,@DEA
+ P_ _DEA
         MOV     WL,[T+4]
         SKIPA_
- P_ _?C@,@?C@
+ P_ _?C@
         MOV     WL,[T]
         JMPS_   @BPUSH
         
@@ -265,19 +260,20 @@ Start   Label byte
 @_J:
         PUSH    WA
         JMPS_   @WPUSH
- P_ _OVER,@OVER
+		
+ P_ _OVER
         push    [DSP]
         SKIPB_
- P_ _SPLD,@SPLD
+ P_ _SPLD
         PUSH    DSP
         SKIPB_
- P_ _RPLD,@RPLD
+ P_ _RPLD
         PUSH    RSP
         SKIPB_
- P_ _ALD,@ALD
+ P_ _ALD
         PUSH    AR
         SKIPB_
- P_ _DUP,@DUP            ; ( DUP
+ P_ _DUP           ; ( DUP
         PUSH    T
 @RPOP:  POP     W
         JMPS_   @WPUSH
@@ -296,6 +292,7 @@ Start   Label byte
         JZ      @NEST
         DEC     W
         JMP     W
+		
  P_ _POP
         JMPS_   @RPOP    ; ( POP
  P_ _EX,@EX              ; ( EX
@@ -313,16 +310,17 @@ Start   Label byte
         JMPS_   _2M
  P_ _2M
         R2M_    T
- P_ _NOP,@NOOP           ; ( NOP
+ P_ _NOP          		; ( NOP
         JMPS_   @NOP
         
- P_ _PLAVG,@PLAVG        ; ( +2/
+ P_ _PLAVG				; ( +2/
         ADD     T,[DSP]
         MOV     [DSP],T       
- P_ _2DIV                ; ( 2/
+ P_ _2DIV               ; ( 2/
 @2DIV:
         RCR     T,1
         N_
+		
  P_ _SDIV,@SDIV          ; ( -/
         SHL     PW [DSP],1
         RCL     T,1
@@ -331,8 +329,10 @@ Start   Label byte
         SUB     T,AR        
 @U1MM:  INC     PW [DSP]
         N_
+		
  P_ _U1P,@U1P          ; ( U1-
         JMPS_   @U1MM 
+		
  P_ _PMUL,@PMUL          ; ( +*
         MOV     W,[DSP]
         SHR     W,1
@@ -341,25 +341,26 @@ Start   Label byte
 @D2DIV: RCR     T,1
         RCR     PW [DSP],1
         N_
- P_ _nAND,@nAND          ; ( AND
+		
+ P_ _nAND	          ; ( AND
         AND     T,[DSP]
         NIP_
 @NOT:   INC     T
  P_ _NEG,@NEG
         NEG     T
         N_
- P_ _0LESS,@0LESS
+ P_ _0LESS
         SHL     T,1
         SBB     T,T
         N_
   
- P_ _ZEQ,@ZEQ
+ P_ _ZEQ
         NEG     T
         SBB     T,T
- P_ _NOT,@@1
+ P_ _NOT
         JMPS_  @NOT
         
- L_ _XDROP,@XDROP
+ L_ _XDROP
         DW _EX
 _DROPXX DW _DROPX
         
@@ -367,7 +368,7 @@ _DROPXX DW _DROPX
         POP     W
         MOV     PB @INT,WL
         SKIPB_
- P_ _RDROP,@RDROP      ; RDROP
+ P_ _RDROP      ; RDROP
         POP     W
         SKIPB_
  P_ _RET               ; ( (;
@@ -379,11 +380,6 @@ _DROPXX DW _DROPX
 		XCHG	T,[DSP]
         JMPS_    @NOP
 
-; P_ _RDROPX         ; ( RDROP;
-;        POP     W
-;        POP     IP
-;        JMP     @NOP
-        
  P_ _4PX,@4PX
         INC     T
         INC     T
@@ -443,11 +439,13 @@ _DROPXX DW _DROPX
         CALL    IP
 @TOA1:  POP     AR 
         JMPS_   @RET
+		
  P_ _BE,@BE              ; (BE
         XCHG    W,T
         MOV     AH,0EH
         INT     10H
-        JMP     @DROP   
+        JMP     @DROP
+		
         DW      _XDROP
  L_ _BK,@BK
         DW _DUP,_IO

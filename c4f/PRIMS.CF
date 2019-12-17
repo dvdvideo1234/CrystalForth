@@ -2,6 +2,8 @@
 
 '  (JUMP   =:  (DEF
  
+=! ".  \ "
+=! ((."  \ "
 =! H
 =! (MAC
 =! CMP|
@@ -65,9 +67,6 @@ $F800 CONST  TBUF
 : C@ ?C@ NIP ;   
 : CSTR ?C@ U1+ ;
 : IXEC J PUSH ; 
-\ : `NAME TBUF ?C@ EX C! ;
-\ : `NAME+ `NAME 1+ ; 
-\ : `NAME- `NAME 1- ; 
 : A-L XEP|  
 : I- J
 : - NEG 
@@ -123,18 +122,32 @@ $F800 CONST  TBUF
 : =C+ CSTR A@ - ; 
 : WSCAN |NIP SCN| STR A@ - ;
 : CSKIP  |NIP SCN| =C+ 0= ;
-: `MEM=; RDROP 1+ 0= NEG ;
+: `MEM=; RDROP
+  ."_^M^J_MEM=;"
+ DUP (BRK
+ (1+;
 : ("SW ("SKIP `(BS 1+ 
 : (XARY 2* POP + @
 : `(XARY PUSH ; 
 : `SAVEX I ! ;
 : @EXEC @ VAL HODD (IF `(XARY  `SAVEX NOP ;
-: `;FND DROP 0 EXIT ; 
+: `;FND DROP 0
+  ."_^M^JFND-NOT-!"
+ DUP (BRK
+ EXIT ; 
 : `CFND| >DEA 
+  ."_^M^JFND-CFND"
+DUP (BRK
 : `FND| DEA? (IF `;FND
- OVER OVER IXEC IF `CFND| ;THEN NIP `1 EXIT ;
+  OVER OVER IXEC 
+  ."_^M^JFND-IXEC"
+DUP (BRK
+  IF `CFND| ;THEN NIP  `1
+  ."_^M^JFND-OK!"
+DUP (BRK
+  EXIT ;
  
-  \ TEST2 1206
+\ TEST2 1206
 
 \ VARIABLES STAGE 1 ------------------
 
@@ -262,11 +275,17 @@ N: ERASE 0 ,  =, BLANK 32 ,
 : TARG,< LOC!  
 : `INTERP `[]OPER
 : FND? T
-: FND `FND| 4+ 
+: FND `FND| 4+ ."^M^JFND-INTERP_" DUP ".
 : "- ?"LEN 
 : MEM= PUSH A! XR VAL HODD \ SRC DST LEN --> >R >A LEN FLGCHAR
+  ."_^M^J!MEM-ODD"
+DUP (BRK
    IF C@R+ XA C@R+ = (IF `MEM=; THEN
-   2/ AHEAD BEGIN @R+ XA @R+ = (IF `MEM=; THEN UNTIL-  `MEM=; ;
+  ."_^M^J!MEM=LEN"
+DUP (BRK
+   2/ AHEAD BEGIN @R+ XA @R+ = (IF `MEM=; THEN UNTIL- 
+  ."_^M^J!MEM-OK!"
+   `MEM=; ;
 
       
       \   COMPILER
@@ -438,10 +457,12 @@ INCLUDE WORDS1.CF
   FIX  CSP!  TARG:      \ FIX PARSE
   FIX  |LASTH ALIGNED   \ FIX PARSE
   FIX  FIX VAL H        \ NEW H 
-  15  (BRK CR  ."15" 4 5 + (BRK
-  "=:" DUP (BRK FND? (BRK (BRK
-  
+CR  
+  "=:" DUP ". DUP (BRK 
+  FND? \ !!!!!!!!!!!!!!!!!
+  (BRK
+  "^M^J12345678901234567890-=" DUP ". (BRK
  QUIT ;
  
- 
+\ DZWER
 ' `1ST ' @INIT T!
