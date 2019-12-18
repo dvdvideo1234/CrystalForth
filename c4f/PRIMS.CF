@@ -4,6 +4,7 @@
  
 =! ".  \ "
 =! ((."  \ "
+=! U<
 =! H
 =! (MAC
 =! CMP|
@@ -106,8 +107,8 @@ $F800 CONST  TBUF
 : C_OFF 0  
 : SWAPC! SWAP C! ;  \ TEST1 1032
 : |@! @+ 2- XR EXECUTE POP! ;
-: INC |@! 1+ ;
-: DEC |@! 1- ;
+: ++ |@! 1+ ;
+: -- |@! 1- ;
 : +!  |@! + ;
 
 \ SEARCH PRIMITIVES  ------------------
@@ -116,36 +117,23 @@ $F800 CONST  TBUF
 : `SCN POP NOT XR DROP POP POP + ; 
 : SCN|  A! DUP XR  PUSH (FOR CALL BEGIN J EXECUTE
  (IF `SCN  THEN (NEXT RELS<  `NOSCN ; 
-: `(BS PUSH          
+: B?" PUSH  \ BYTE IN STRING       
 : (BSCN XR CSTR POP |NIP 
 : CSCAN  SCN| 
-: =C+ CSTR A@ - ; 
+: C@+= CSTR A@ - ; 
 : WSCAN |NIP SCN| STR A@ - ;
-: CSKIP  |NIP SCN| =C+ 0= ;
-: `MEM=; RDROP
-  ."_^M^J_MEM=;"
- DUP (BRK
- (1+;
-: ("SW ("SKIP `(BS 1+ 
+: CSKIP  |NIP SCN| C@+= 0= ;
+\ : CSKIP |NIP SCN| C@+= 0= ;
+: `MEM=; RDROP (1+;
+: ("SW ("SKIP B?" 1+ 
 : (XARY 2* POP + @
 : `(XARY PUSH ; 
 : `SAVEX I ! ;
 : @EXEC @ VAL HODD (IF `(XARY  `SAVEX NOP ;
-: `;FND DROP 0
-  ."_^M^JFND-NOT-!"
- DUP (BRK
- EXIT ; 
+: `;FND DROP 0  EXIT ; 
 : `CFND| >DEA 
-  ."_^M^JFND-CFND"
-DUP (BRK
-: `FND| DEA? (IF `;FND
-  OVER OVER IXEC 
-  ."_^M^JFND-IXEC"
-DUP (BRK
-  IF `CFND| ;THEN NIP  `1
-  ."_^M^JFND-OK!"
-DUP (BRK
-  EXIT ;
+: `FND| DEA? (IF `;FND  OVER OVER IXEC 
+  IF `CFND| ;THEN NIP  `1   EXIT ;
  
 \ TEST2 1206
 
@@ -159,8 +147,8 @@ DUP (BRK
 : |T CALL EX (SET2 THEN ,<   $D800 CONST T \ VOCABULARY TOP
 : |STATE    CALL >, XR EXECUTE  
 : LOC!  POP  (SET2 THEN ,<
-0 CONST STATE@                      \ FORTH STATE 
-: LOXEC STATE@ PUSH ;              \ LOCATE AND EXECUTE
+0 CONST STATE@                \ FORTH STATE 
+: LOXEC STATE@ PUSH ;         \ LOCATE AND EXECUTE
 : @,  @  
 : , |H     
 : !+ PUSH !R+ POP ;
@@ -221,20 +209,21 @@ N: ERASE 0 ,  =, BLANK 32 ,
 : (;,   (MAC ,< 2 C, ,"(;"  2ALIGNED
 : `(MAC (MAC ,< 4 C, ,"(MAC"  2ALIGNED
 : |#,, EX (LIT, , ;
-: `PARSE-RANGE ETIB LTIB A-L  ;
-: `SKIPBL? LTIB 0; J BL <>; `PARSE-RANGE J CSKIP
-: `PARSE-LEN?  |LTIB SWAP (-IF CALL DROP LTIB THEN - ;
-: `CSCAN? LTIB 0; J CSCAN `PARSE-LEN? ;
->, NOP  \ FIX ???
+
+: IN-TIB ETIB LTIB A-L  ;
+: `SKIPBL? J BL <>; IN-TIB J CSKIP
+: `PARSE-LEN?  |LTIB  SWAP  (-IF CALL DROP LTIB THEN - ;
+: `CSCAN? J CSCAN `PARSE-LEN? ;
+\ >, NOP  \ FIX ???
 : TOKEN? |N?? 
-: TOKEN BL CALL   ?C@   ;THEN   
-: WORD  CALL  TBUF  S>"! '` C!A+ ;THEN
-: PARSE NOP \ ( SOURCE FIX )
- PUSH `SKIPBL? `PARSE-RANGE NUP `CSCAN? OVER- EXIT ; 
+: TOKEN BL  CALL   ?C@   ;THEN   
+: WORD  CALL  TBUF  S>"! '` C!A+ ;THEN \ ( PARSE: SOURCE FIX )
+: PARSE NOP  PUSH `SKIPBL?  IN-TIB NUP `CSCAN? OVER- EXIT ; 
 : "STR, '" 
 : `", WORD ?C@ N?? 
 : ", CSTR v", DUP C, 
 : S, STR| CSTR C, ; 
+
 : H>T H  STR  |T MPUSH ; 
 
 \ HERE .  TEST6 1654
@@ -244,15 +233,17 @@ N: ERASE 0 ,  =, BLANK 32 ,
 \ : BASE! (2- W>B 2+ ,< 10 VALUE `BASE 
 : ``DIG? (BSCN ,< 10 C, ,"0123456789" 2ALIGNED
 : `10* ``DIG? XEP| CALL (| - 0 THEN (TARY ,<
-: PCHAR^ ETIB LTIB - ;
+HERE >, (D#0 @ PUSH ETIB LTIB - ; 
+N: PCHAR@ ' C@ , N: PCHAR^ ' NOP; , =, PCHAR! ' C! ,
+: PCHAR+ |LTIB 1- ; : OPT; `1 LTIB U< 0<>; EXIT ;
+: `SIGN OPT; PCHAR@ '- <>; PCHAR+ EX XEP| NEG ;
 ' `10* VECTOR vDIG 
-: PCHAR+ |LTIB 1- ; 
 
-: ATOI CSTR MEMTI| 0 LTIB (IF `1  BEGIN PCHAR^ C@ vDIG
-  DUP 1+  0; + PCHAR+ LTIB 0= UNTIL 0 ; UNW
+: ATOI MEMTI| `SIGN 0 LTIB (IF `1  BEGIN PCHAR@
+ vDIG  DUP 1+   0; +  PCHAR+ LTIB 0= UNTIL  0  ; 
 
 : ">NUMC |#,,    
-: ">NUM ATOI ?? ;
+: ">NUM CSTR ATOI ?? ;
 
 \ HERE .  TEST7 1748
 
@@ -270,22 +261,15 @@ N: ERASE 0 ,  =, BLANK 32 ,
       \   INTERPRETTER 
 
 : `[]OPER EX (XARY  ">NUM @EXEC ">NUMC @,
- NOP NOP 0<>; 
 : TARG; (;,  
 : TARG,< LOC!  
 : `INTERP `[]OPER
 : FND? T
-: FND `FND| 4+ ."^M^JFND-INTERP_" DUP ".
+: FND `FND| 4+ 
 : "- ?"LEN 
 : MEM= PUSH A! XR VAL HODD \ SRC DST LEN --> >R >A LEN FLGCHAR
-  ."_^M^J!MEM-ODD"
-DUP (BRK
    IF C@R+ XA C@R+ = (IF `MEM=; THEN
-  ."_^M^J!MEM=LEN"
-DUP (BRK
-   2/ AHEAD BEGIN @R+ XA @R+ = (IF `MEM=; THEN UNTIL- 
-  ."_^M^J!MEM-OK!"
-   `MEM=; ;
+   2/ AHEAD BEGIN @R+ XA @R+ = (IF `MEM=; THEN UNTIL-  `MEM=; ;
 
       
       \   COMPILER
@@ -293,8 +277,7 @@ DUP (BRK
 : TFND T >DEA  FND ;
   ' TFND   VECTOR vFND    \ SEARCH ON COMPILING  
 : TARG: NOP  TARG:!  \ CSP!  \ MAKE COLON ENTRY
-: >, LOC! `[]OPER TBUF INC  vFND  TBUF DEC
-    IF `1 ;THEN  vFND (2+; ,<
+: >, LOC! `[]OPER TBUF ++ vFND TBUF -- IF `1 ;THEN vFND (2+; ,<
 
                 
       \ FUNCTION EVAL  & EXECUTE MACRO 
@@ -304,11 +287,15 @@ DUP (BRK
 : EVAL NOP \ `MEMTI|
  SKIP BEGIN LOXEC  
 : @EVAL  NOP \ `STACK
-  TOKEN 0= UNTIL DROP ; 
+  TOKEN
+ ."_^M^J_AFTER_TOKEN_" TBUF ".
+ DUP (BRK
+  0= UNTIL DROP ; 
   
-  
+: `HOFS  ,<  \ MARK WHERE TO RETURN HERE AFTER ,QUIT
      \ MAIN LOOP 
-	 
+
+' @INIT HERE!	 
 >,
  NOP   \ INITIALIZATION  ON ABORT
  NOP   \ ERROR PRINT
@@ -316,13 +303,17 @@ DUP (BRK
    NOP  \ READLINE FROM KBD
    @EVAL \ EVAL INPUT
 : vOK   NOP  \ OK!
-   AGAIN ;; UNW
+   AGAIN ,<
 
 \ HERE .  TEST8 1912
 
 \ VARIABLES STAGE 2 \ COMPILE  MACRO ------------------
+' `HOFS HERE!
 
-: `HOFS  CALL XR PUSH CALL EX POP THEN  (SET2 THEN ,<
+\ TETYERTYERTERTY
+
+\ : `HOFS
+>,  CALL XR PUSH CALL EX POP THEN  (SET2 THEN ,<
 0 CONST HOFS 
 : _BEGIN |LASTH  
 : HERE H  
@@ -446,23 +437,25 @@ INCLUDE WORDS1.CF
 
 
 : FIX @R+ @R+ ! ;
-: `1ST H>T              \ LOADER OF INITIAL DICTIONARY
-  FIX  AT QUIT @INIT    \ NEW INIT SET
-  FIX `INTERP VAL LOXEC \ TARGET FORTH INITIAL STATE
-  FIX  `.  TO QUIT      \ FIX  ERROR.
-  FIX  `OK    vOK       \ FIX  vOK.
-  FIX  SOURCE  PARSE    \ FIX PARSE
-  FIX  SAME? TO  (=:    \ FIX PARSE
-  FIX  HERE  HODD       \ FIX PARSE
-  FIX  CSP!  TARG:      \ FIX PARSE
-  FIX  |LASTH ALIGNED   \ FIX PARSE
-  FIX  FIX VAL H        \ NEW H 
-CR  
-  "=:" DUP ". DUP (BRK 
-  FND? \ !!!!!!!!!!!!!!!!!
-  (BRK
-  "^M^J12345678901234567890-=" DUP ". (BRK
+: `1ST H>T                \ LOADER OF INITIAL DICTIONARY
+  FIX  AT QUIT @INIT      \ NEW INIT SET
+ CR  
+   "-123_=:_GAGA_792_=:_BYE__BYE" DUP ". 
+CSTR A+L TO LTIB TO ETIB
+@EVAL
+ CR ."NOT-FOUND" -1
+   (BRK
+ CR ."FOUND" 1
+   (BRK
  QUIT ;
  
-\ DZWER
 ' `1ST ' @INIT T!
+' `INTERP VAL' STATE@ T! \ TARGET FORTH INITIAL STATE
+'  `.  TO' QUIT     T!   \ FIX  ERROR.
+'  `OK    ' vOK     T!   \ FIX  vOK.
+'  SOURCE ' PARSE   T!   \ FIX PARSE
+'  SAME? TO'  (=:   T!   \ FIX (=:
+'  HERE   ' HODD    T!   \ FIX HODD
+'  CSP!   ' TARG:   T!   \ FIX TARG:
+'  |LASTH ' ALIGNED T!   \ FIX ALIGNED
+\ '  FIX VAL' H       T!   \ NEW H 

@@ -151,10 +151,7 @@ Start   Label byte
         CALL    @DBG
         CALL    @RET
  L_ _@INIT,@INIT  
-        DW      0
-;AR      DW 0
-
- 
+        DW      7 DUP(0) ; RESEVE SPACE FOR MAIN LOOP
   
  P_ _SLSKIP,@SLSKIP            ; ("SKIP
         POP     WA
