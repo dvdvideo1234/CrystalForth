@@ -1,8 +1,8 @@
-; COMMANDS      OF INTERPRETER
-; JUMP EXIT IF IFM   CONTROLS
+; COMMANDS      OF INTERPRETER  (MINIMAL SET)
+; (JUMP (; (IF (IF-   CONTROLS
 ; push pop J DUP      STACK
 ; !R+ @R+ xR XA       TRANSFER
-; +2/ +* AND -/       MATH & LOGIC
+; NAND +2/ +* -/      MATH & LOGIC
 
 locals  @@
 
@@ -153,6 +153,10 @@ Start   Label byte
  L_ _@INIT,@INIT  
         DW      7 DUP(0) ; RESEVE SPACE FOR MAIN LOOP
   
+ P_ _AST                   ; A!
+		MOV		AR,T
+        JMPS_   @DROP
+		
  P_ _SLSKIP,@SLSKIP            ; ("SKIP
         POP     WA
         MOV     WL,[WA]
@@ -210,6 +214,8 @@ Start   Label byte
  P_ _DROP              ; (DROP
         JMPS_   @DROP
 
+ P_ _PUSHX             ; (PUSH;
+		PUSH	T
  P_ _DROPX             ; (DROP;
         POP     IP
         JMPS_   @DROP
@@ -417,16 +423,6 @@ _DROPXX DW _DROPX
         POP     T
         RET
 		
- L_ _LIT                   ; (LIT
-		DW		_RLDP,_RET
- L_ _EXECUTE               ; EXECUTE
-		DW		_PUSH,_RET
- L_ _@AST                  ; @A!
-		DW		_ALD,_XR,_EXECUTE,_SKIP
- L_ _AST                   ; A!
-		DW		_PUSH,_COD
- P_ _TOA,@TOA              ; (R>A;
-        JMP SHORT @TOA1
  P_ _IO,@IO              ; ( IO
         PUSH    AR
         XCHG    AX,BX
@@ -456,6 +452,9 @@ _DROPXX DW _DROPX
         
 ;^^^^^^--------------   IO  ---------------
 
+
+; vvvvvvvvvv----------- MINI DEBUGGER -------------vvvvvvvvvvv
+
 @PAX:
 		PUSH	AX
 		MOV		AL,AH
@@ -484,20 +483,20 @@ _DROPXX DW _DROPX
 		JMP		@PC
 
  P_ _BRK
-		MOV		AL,13
-		CALL	@PC
-		MOV		AL,10
-		CALL	@PC
-		MOV     AX,BX
+		MOV     AX,[DSP+2]
 		CALL	@PHEX
-		DROP_
-		MOV		AX,SI
-		CALL	@PHEX
-		MOV		AX,SP
-		CALL	@PHEX
-		MOV		AX,BP
+		MOV     AX,[DSP+0]
 		CALL	@PHEX
 		MOV		AX,BX
+		CALL	@PHEX
+		
+		CALL	@PSPC
+
+		MOV		AX,IP
+		CALL	@PHEX
+		MOV		AX,RSP
+		CALL	@PHEX
+		MOV		AX,DSP
 		CALL	@PHEX
         INT 3
         JMP     @NOP
