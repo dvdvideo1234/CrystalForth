@@ -1,0 +1,41 @@
+M: @EXEC` @ EXEC;
+: `(: =H CALL EX @EXEC ;  
+: `MKR 0 =, , EX ,' ; 
+: 2MKR `MKR , DOES> `(:  
+: W, THEN STR , 
+;
+: 1MKR `MKR DOES> `(: ;  
+: 3MKR `MKR , , DOES> `(: W, W, ;
+: `4ARY 2* 
+: `2ARY 2* 
+: `ARY =H  EX  CLARY 
+;
+: =H;, =H ;, ;
+
+: CREATE UNW :; 
+: VARIABLE 0  
+: VAR  =H;,   :(VAR ;
+: DEFER =H;,  :(DEF ; 
+: CONST =H;,  :(CON ;
+: BARY `ARY   :(BARY ; 
+: WARY `2ARY  :(WARY ;
+: LARY `4ARY  :(LARY ;
+: QUAN =H;,   :(CON3 
+: `Q :(SET2   :(VAR 
+; 
+: VQUAN =H;,  :(DEF3 `Q ;  
+: VALUE =H;,  :(CON2 
+: `S          :(SET 
+;  
+: VECTOR =H;, :(DEF2 `S ;
+
+0 VALUE XK                
+VARIABLE @HD Z, Z, 
+: MARK@ @HD 
+: MK@ PUSH @R+ TO HOFS @R+  TO H POP @ TO T ; 
+: MARK! @HD 
+: MK! PUSH HOFS !R+ H !R+ T POP ! ;
+
+
+=" ARCHIVE\C4F\"  AUTO!
+INCLUDE PB5FLUSH.CF

@@ -107,14 +107,14 @@ P_ _ABORT
   CALL  @RETURN
   
 L_ _INITA
-    DW 0
+    DW 7 DUP(0)
 	
 L_ _TASKPTR
   DW  0,0,0
       
 ; IO           COMMANDS  (IO  vvvvvvvvvv
 
-P_ _IO,$+2			; NOT IF => IO OPERATION
+P_ _IO				; NOT IF => IO OPERATION
   PUSH  AR BX BP DS ; PRESERVE REGISTERS
   MOV   BP,SP		; MAKE FRAME (PRESERVE SP)
   X					; SWITCH TO DATA STACK
@@ -134,6 +134,22 @@ P_ _IO,$+2			; NOT IF => IO OPERATION
   X	  ; SWITCH TO RETURN STACK
   MOV	SP,BP
   POP  	DS BP BX AR	; RESTORE REGISTERS
+  
+L_ _DOS
+  DW _IO
+  INT 21H
+  RET  
+  
+L_ _VID
+  DW _IO
+  INT 10H
+  RET  
+  
+L_ _KBD
+  DW _IO
+  INT 16H
+  RET    
+  
 ; IO           COMMANDS  (IO  ^^^^^^^
 
 ; CONTROL      COMMANDS  (IF (JUMP (RETURN (IF-
@@ -147,19 +163,19 @@ P_ _RET
 P_ _DROPX
   JMPS @DROPX 
   
- P_ _TARY,@LARY     
+ P_ _TARY	    
         SHL     TOP,1
- P_ _5ARY,@5ARY     
+ P_ _5ARY	     
         ADD     IP,TOP
- P_ _LARY,@LARY     
+ P_ _LARY	     
         SHL     TOP,1
- P_ _WARY,@WARY     
+ P_ _WARY	     
         SHL     TOP,1
- P_ _BARY,@BARY 
+ P_ _BARY	 
         ADD     TOP,IP
         JMPS    @RETURN
  
- P_ _4PX,@4PX
+ P_ _4PX	
         INC     TOP
         INC     TOP
  P_ _2PX
@@ -168,18 +184,18 @@ P_ _DROPX
         INC     TOP
         JMPS    @RETURN
 		
- P_ _1PX,@1PX
+ P_ _1PX	
         JMPS    @2PX+1
 		
  P_ _PUSHX
 		PUSH	TOP
 		JMPS 	@DROPX 		
 
-P_ _AST,$+2
+P_ _AST	
     MOV AR,TOP	
     JMPS  @DROP	
 	
-P_ _?EXIT,$+2		; (0;) EXEC NEXT WORD ON 0= ELSE SKIP
+P_ _?EXIT			; (0;) EXEC NEXT WORD ON 0= ELSE SKIP
   JCXZ  @DROPX
   JMPS  @DROP
   
@@ -188,15 +204,15 @@ P_ _EXEC
 	D_TO	TOP
     JMP @MAIN3  
     
-P_ _?EXEC,$+2		; EXEC NEXT WORD ON 0= ELSE SKIP
+P_ _?EXEC			; EXEC NEXT WORD ON 0= ELSE SKIP
   JCXZ  @DROP
   JMPS  @SKIP
   
-P_ _?SKIP,$+2		; EXEC NEXT WORD ON 0<> ELSE .SKIP
+P_ _?SKIP			; EXEC NEXT WORD ON 0<> ELSE .SKIP
   JCXZ  @SKIPDR
   JMPS  @MAIN
 
-P_ _PUSH,$+2		; PUSH
+P_ _PUSH			; PUSH
   TO_R	TOP
 @DROP:
   D_TO 	TOP
@@ -205,38 +221,38 @@ P_ _PUSH,$+2		; PUSH
 P_ _DROP
  JMPS @DROP				; DUPLICATE TOP
 
-P_ _IF,$+2   ; (IF
+P_ _IF	   ; (IF
   JCXZ  @JUMPDR
 @SKIPDR:
   INC	IP
   INC	IP
   JMPS  @DROP
   
-P_ _FOR,$+2  
+P_ _FOR	 
   PUSH	TOP
 @JUMPDR:  
   MOV   IP,[IP]		; JUST BRANCH
   JMPS  @DROP
   
-P_ _NEXT,$+2
+P_ _NEXT	
   POP	W
   DEC	W
   PUSH	W
   SKIPR W
   
-P_ _MIF,@MIF  			; (-IF
+P_ _MIF	  			; (-IF
 @MIF:  
   INC   TOP			; INCREMENT TOP 
 @IFM:
   DEC   TOP			; DECREMENT TOP 
   JS    @SKIP		; ON NEGATIVE - SKIP BRANCH
   
-P_ _JUMP,@JUMP    			; (JUMP
+P_ _JUMP	   			; (JUMP
 @JUMP:
   MOV   IP,[IP]		; JUST BRANCH
   JMPS  @MAIN
   
-P_ _SKIP,@SKIP
+P_ _SKIP	
 @SKIP:
   INC   ip
   INC   ip
@@ -254,7 +270,7 @@ P_ _IFM
 @DEBUG:  
 		RET
 
- P_ _SLSKIP,@SLSKIP            ; ("SKIP
+ P_ _SLSKIP		            ; ("SKIP
         POP     W
 		CALL	@GETLEN
         OR      TOPL,1        ; MAKE CNT ODD
@@ -262,12 +278,12 @@ P_ _IFM
         XCHG    TOP,W
         JMPS    @RINC1
 
-P_ _RSTBP,$+2		; C!R+
+P_ _RSTBP			; C!R+
   POP 	W   		; USE RETURN TOP AS DATA ADDRESS
   MOV   [W],TOPL		; STORE DATA TOP
   JMPS  @WINCW			; FETCH NEXT DATA TO TOP
 
-P_ _RSTP,$+2		; !R+
+P_ _RSTP			; !R+
   R_TO 	W			; USE RETURN TOP AS DATA ADDRESS
   MOV   [W],TOP		; STORE DATA TOP
   inc   W			; INCREMENT ADDRESS
@@ -276,12 +292,12 @@ P_ _RSTP,$+2		; !R+
   PUSH	W
   JMPS  @DROP		; FETCH NEXT DATA TO TOP
 
-P_ _RLDBP,$+2		; C@R+
+P_ _RLDBP			; C@R+
   R_TO 	W			; USE RETURN TOP AS DATA ADDRESS
 	CALL	@GETLEN
   JMPS  @RINC1
 
-P_ _RLDP,$+2		; @R+
+P_ _RLDP			; @R+
   R_TO 	W			; USE RETURN TOP AS DATA ADDRESS
   TO_D	TOP
   MOV   TOP,[W]		; USE RETURN TOP AS DATA ADDRESS
@@ -291,20 +307,20 @@ P_ _RLDP,$+2		; @R+
   inc   W			; INCREMENT ADDRESS
   JMPS  @RPUSH			; INCREMENT ADDRESS
 
-P_ _J,$+2			; J - DATA FROM SECOND ELEMENT OF RETURN STACK
+P_ _J				; J - DATA FROM SECOND ELEMENT OF RETURN STACK
   TO_D	TOP
   R_TO  W			; POP W FROM RETURN
   R_TO	TOP
   TO_R	TOP
   JMPS  @RPUSH			; INCREMENT ADDRESS
   
-P_ _XCHG,@XCHG		; XCHG
+P_ _XR				; XCHG
 @XCHG:
   R_TO	W			; EXCHANGE TOP ELEMENTS
   XCHG  TOP,W		; => DATA STACK AND RETURN STACK
   JMPS  @RPUSH 
   
-P_ _XA,$+2			; XA
+P_ _XA				; XA
   R_TO	W			; EXCHANGE RETURN TOP ELEMENT
   XCHG	ar,W		; WITH ADDED REGISTER
   JMPS  @RPUSH 
@@ -312,7 +328,7 @@ P_ _XA,$+2			; XA
 
 ; MAIN  LOOP -----------------------------
 
-P_ _EX,$+2
+P_ _EX	
   R_TO  W
 @NEST: 
   XCHG  IP,W		; PUSH NEW IP
@@ -355,14 +371,14 @@ P_ _ALD
 	TO_R	AR
 	SKIPB
 	
-P_ _DUP,$+2				; DUPLICATE TOP
+P_ _DUP					; DUPLICATE TOP
 	TO_R	TOP
 @POP:
 	TO_D	TOP
 	R_TO	TOP
     JMPS  @MAIN
    
-P_ _RDROP,$+2
+P_ _RDROP
 	POP		W
     JMPS  @MAIN	
 @NOT_CTO:	
@@ -371,7 +387,7 @@ P_ _RDROP,$+2
     SBB     TOP,TOP
     JMPS	@MAIN	
 	
-P_ _ZEQ,$+2  	    ;  - LOGICAL INVERT
+P_ _ZEQ		  	    ;  - LOGICAL INVERT
 	NEG   	TOP
     JMPS	@NOT_CTO	
 	
@@ -379,7 +395,7 @@ P_ _ZEQ,$+2  	    ;  - LOGICAL INVERT
     SHL		TOP,1
     JMPS	@C_TO_R	
 
-P_ _DIG_C,$+2
+P_ _DIG_C	
 	RCHG	TOP
 	CMP	  AL,10
 	JB	  @@2
@@ -390,7 +406,7 @@ P_ _DIG_C,$+2
 	
 ; MATH, LOGIC AND SHIFT COMMANDS   +2/ +* -/ NAND
 
-P_ _NAND,$+2	; NAND - LOGICAL PRIMITIVE
+P_ _NAND		; NAND - LOGICAL PRIMITIVE
 	D_TO W
 	AND   TOP,W	; AND 
 @NOT:
@@ -402,15 +418,7 @@ P_ _NEG,@NEG
 P_ _NOT
  JMPS @NOT  	
  
-P_ _P2DIV,$+2		; +2/ SUM AND SHIFT PRIMITIVE
-  D_TO 	W			; SECOND DATA ELEMENT - NEXT
-  ADD   W,TOP		; NEXT := NEXT + TOP;
-  MOV	  TOP,W		; PREPARE FOR SHIFT
-P_ _2DIV			; 2/
-  RCR   TOP,1		; SHIFT RIGHT TOP WITH CARRY
-  JMPS  @MAIN
-     
-P_ _MDIV,$+2		; -/ DIVIDE PRIMITIVE
+P_ _MDIV			; -/ DIVIDE PRIMITIVE
   X					; SWITCH DSP WITH RSP
   R_TO 	W			; BELOW TOP REGISTER OF DATA STACK
   SHL	W,1			; SHIFT LEFT NEXT TO CARRY
@@ -425,13 +433,7 @@ P_ _MDIV,$+2		; -/ DIVIDE PRIMITIVE
   X					; SWITCH DSP WITH RSP
   JMPS  @MAIN
    
-P_ _XOR			  	; XOR - LOGICAL PRIMITIVE
-	X				; SWITCH DSP WITH RSP
-	R_TO 	W		; BELOW TOP REGISTER OF DATA STACK
-	XOR   	TOP,W		
-	JMPS  	@MDIV2
-  
-P_ _PMUL,$+2				; +* MULTIPLY PRIMITIVE
+P_ _PMUL					; +* MULTIPLY PRIMITIVE
   X
   R_TO 	W			  ; FETCH SECOND DATA ELEMENT - NEXT
   TEST	W,1			; TEST LEAST SIGNIFICANT BIT
@@ -442,6 +444,27 @@ P_ _PMUL,$+2				; +* MULTIPLY PRIMITIVE
   RCR   W,1			; SHIFT RIGHT NEXT WITH CARRY
   JMPS  @MDIV
    
+P_ _P2DIV			; +2/ SUM AND SHIFT PRIMITIVE
+  X					; SWITCH DSP WITH RSP
+  R_TO 	W			; BELOW TOP REGISTER OF DATA STACK
+  ADD   W,TOP		; NEXT := NEXT + TOP;
+  MOV	  TOP,W		; PREPARE FOR SHIFT
+  RCR   TOP,1		; SHIFT RIGHT TOP WITH CARRY
+  JMPS  @MDIV
+       
+P_ _XOR			  	; XOR - LOGICAL PRIMITIVE
+	X				; SWITCH DSP WITH RSP
+	R_TO 	W		; BELOW TOP REGISTER OF DATA STACK
+	XOR   	TOP,W		
+	JMPS  	@MDIV2
+  
+P_ _SUB			  	; SUB - ARITH PRIMITIVE
+	NEG		TOP
+P_ _ADD			  	; ADD - ARITH PRIMITIVE
+	X				; SWITCH DSP WITH RSP
+	R_TO 	W		; BELOW TOP REGISTER OF DATA STACK
+	XOR   	TOP,W		
+	JMPS  	@MDIV2
   
 L_ EndMem
 
