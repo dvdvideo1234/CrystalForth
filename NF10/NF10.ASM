@@ -92,11 +92,11 @@ MyCseg  segment para  use16
 
         org 100h
 
-@TBUF   = -258          ; -256    TBUF = 256   
-@TIB    = @TBUF -256    ; -512    TIB  = 256  + 
-@R_TOP  = @TIB-64       ; -512  RSTACK = 768  +
-@S_TOP  = @TBUF+@TIB*2  ; -1280 DSTACK = 768  += TOTAL = 2048
-@VOCTOP = @TIB * 12     ; -6144 = 4 BUFFERS * 1024 + TOTAL
+@TIB    = -256          	; -256    TBUF = 256   
+@TBUF   = @TIB -256    		; -512    TIB  = 256  + 
+@R_TOP  = @TBUF-64       	; -512  RSTACK = 768  +
+@S_TOP  = @R_TOP - ((2048 + @R_TOP)/2)  
+@VOCTOP = @TBUF * 12     	; -6144 = 4 BUFFERS * 1024 + TOTAL
 
 Start   Label byte
 
@@ -108,61 +108,8 @@ P_ _ABORT
   
 L_ _INITA
     DW 7 DUP(0)
-	
-L_ _TASKPTR
-  DW  0,0,0
+;@TASKPTR = $-2
       
-; IO           COMMANDS  (IO  vvvvvvvvvv
-
-P_ _IO				; NOT IF => IO OPERATION
-  PUSH  AR BX BP DS ; PRESERVE REGISTERS
-  MOV   BP,SP		; MAKE FRAME (PRESERVE SP)
-  X					; SWITCH TO DATA STACK
-  RCHG  TOP			; LOAD AX
-  POP   BX CX DX	; LOAD REGISTERS
-  CALL  IP   		; CALL ADDRESS IN W 
-  PUSH  ds es BP DI SI CX BX CS
-  POP	ES
-  PUSHF				; FETCH FLAGS
-  PUSH	DX AX
-  CLD				; CLEAR DIRECTION FOR EVERYTHING CASE
-  MOV   DI,WORD PTR CS:_TASKPTR[4]
-  MOV   CX,10
-@@1: POP	AX
-  STOSW	
-  LOOP  @@1
-  X	  ; SWITCH TO RETURN STACK
-  MOV	SP,BP
-  POP  	DS BP BX AR	; RESTORE REGISTERS
-  
-L_ _DOS
-  DW _IO
-  INT 21H
-  RET  
-  
-L_ _VID
-  DW _IO
-  INT 10H
-  RET  
-  
-L_ _KBD
-  DW _IO
-  INT 16H
-  RET    
-  
-; IO           COMMANDS  (IO  ^^^^^^^
-
-; CONTROL      COMMANDS  (IF (JUMP (RETURN (IF-
-
-@DROPX:  
-  D_TO	TOP
-P_ _RET
-@RETURN:
-  r_to  IP			; POP IP FROM RETURN TOP ELEMENT
-  JMP   @MAIN		; LOAD IP FROM RETURN STACK
-P_ _DROPX
-  JMPS @DROPX 
-  
  P_ _TARY	    
         SHL     TOP,1
  P_ _5ARY	     
@@ -187,12 +134,102 @@ P_ _DROPX
  P_ _1PX	
         JMPS    @2PX+1
 		
+ P_ _RDROPX	
+		POP		W
+        JMPS    @RETURN
+		
+ P_ _BRK	
+		INT		3
+        JMPS    @TOMAIN
+		
+; IO           COMMANDS  (IO  vvvvvvvvvv
+
+L_ _BK
+  DW	_IO
+  CLR	AX
+  INT   16H
+  OR	AL,AL
+  JZ    @BK?
+  MOV	AH,0
+  JMPS  @BK?
+  
+L_ _BK?
+  DW	_IO
+  MOV	AH,1
+  INT   16H
+  MOV	AX,0
+  JZ    @BK?
+  DEC	AX
+@BK?:
+  PUSH  AX
+  JMPS	_IORET
+  
+L_ _BE
+  DW	_IO
+  POP	AX
+  MOV	AH,0EH
+  INT   10H
+_IORET:
+  RCHG	DSP,BP		; RESTORE DSP
+  X	  				; SWITCH TO RETURN STACK
+  POP  	AR 
+  JMPS  @DROPXBP
+
+P_ _INTIO				
+  PUSH  DS ES BX    ; PRESERVE SEGMENT REGISTERS
+P_ _IO				; NOT IF => IO OPERATION
+  PUSH  AR BP       ; PRESERVE REGISTERS
+  MOV   BP,SP		; MAKE FRAME (PRESERVE SP)
+  X					; SWITCH TO DATA STACK
+  PUSH  TOP			
+P_ _ASM  
+  JMP   IP   		; JUMP TO ADDRESS IN IP 
+  
+L_ _INT
+  DW _INTIO
+  POP	AX
+  MOV	BYTE PTR @INTNUM,AL
+  POP	AX BX CX DX
+  INT 21H
+@INTNUM = $-1
+  PUSH	DX CX BX AX
+  PUSHF
+_INTIORET:
+  MOV	DSP,BP		; RESTORE DSP
+  X	  				; SWITCH TO RETURN STACK
+  POP  	AR BX ES DS 
+@DROPXBP:  
+  POP   BP ; RESTORE REGISTERS
+  
+; IO           COMMANDS  (IO  ^^^^^^^
+
+; CONTROL      COMMANDS  (IF (JUMP (RETURN (IF-
+
+@DROPX:  
+  D_TO	TOP
+  
+P_ _RET
+@RETURN:
+  r_to  IP			; POP IP FROM RETURN TOP ELEMENT
+@TOMAIN:  
+  JMP   @MAIN		; LOAD IP FROM RETURN STACK
+P_ _DROPX
+  JMPS @DROPX 
+  
  P_ _PUSHX
 		PUSH	TOP
 		JMPS 	@DROPX 		
 
 P_ _AST	
     MOV AR,TOP	
+    JMPS  @DROP	
+	
+P_ _DSPST	
+    MOV DSP,TOP	
+    JMPS  @DROP	
+	
+P_ _RSPST	
+    MOV RSP,TOP	
     JMPS  @DROP	
 	
 P_ _?EXIT			; (0;) EXEC NEXT WORD ON 0= ELSE SKIP
@@ -204,6 +241,13 @@ P_ _EXEC
 	D_TO	TOP
     JMP @MAIN3  
     
+P_ _IF	   ; (IF
+  JCXZ  @JUMPDR
+@SKIPDR:
+  INC	IP
+  INC	IP
+  JMPS  @DROP
+
 P_ _?EXEC			; EXEC NEXT WORD ON 0= ELSE SKIP
   JCXZ  @DROP
   JMPS  @SKIP
@@ -220,13 +264,6 @@ P_ _PUSH			; PUSH
   
 P_ _DROP
  JMPS @DROP				; DUPLICATE TOP
-
-P_ _IF	   ; (IF
-  JCXZ  @JUMPDR
-@SKIPDR:
-  INC	IP
-  INC	IP
-  JMPS  @DROP
   
 P_ _FOR	 
   PUSH	TOP
@@ -283,19 +320,31 @@ P_ _RSTBP			; C!R+
   MOV   [W],TOPL		; STORE DATA TOP
   JMPS  @WINCW			; FETCH NEXT DATA TO TOP
 
+P_ _RST 			; !I
+  R_TO 	W			; USE RETURN TOP AS DATA ADDRESS
+  MOV   [W],TOP		; STORE DATA TOP
+  JMPS	@PUSHW
+
 P_ _RSTP			; !R+
   R_TO 	W			; USE RETURN TOP AS DATA ADDRESS
   MOV   [W],TOP		; STORE DATA TOP
   inc   W			; INCREMENT ADDRESS
 @WINCW:  
   inc   W			; INCREMENT ADDRESS
+@PUSHW:  
   PUSH	W
   JMPS  @DROP		; FETCH NEXT DATA TO TOP
 
 P_ _RLDBP			; C@R+
   R_TO 	W			; USE RETURN TOP AS DATA ADDRESS
 	CALL	@GETLEN
-  JMPS  @RINC1
+  JMPS  @RINC1		; INCREMENT ADDRESS & SAVE RETURN TOP
+
+P_ _RLD  			; @I
+  R_TO 	W			; USE RETURN TOP AS DATA ADDRESS
+  TO_D	TOP
+  MOV   TOP,[W]		; USE RETURN TOP AS DATA ADDRESS
+  JMPS  @RPUSH		; SAVE RETURN TOP	
 
 P_ _RLDP			; @R+
   R_TO 	W			; USE RETURN TOP AS DATA ADDRESS
@@ -305,7 +354,7 @@ P_ _RLDP			; @R+
   inc   W			; INCREMENT ADDRESS
 @RINC1:  
   inc   W			; INCREMENT ADDRESS
-  JMPS  @RPUSH			; INCREMENT ADDRESS
+  JMPS  @RPUSH		; SAVE RETURN TOP
 
 P_ _J				; J - DATA FROM SECOND ELEMENT OF RETURN STACK
   TO_D	TOP
@@ -390,6 +439,11 @@ P_ _RDROP
 P_ _ZEQ		  	    ;  - LOGICAL INVERT
 	NEG   	TOP
     JMPS	@NOT_CTO	
+	
+P_ _ULESS	  	    ;  UNSIGNED COMPARE
+	D_TO W
+	SUB   	W,TOP
+    SKIPR	W
 	
  P_ _0LESS
     SHL		TOP,1
