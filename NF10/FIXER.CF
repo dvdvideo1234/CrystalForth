@@ -8,13 +8,15 @@ THIDE (WARY
 THIDE CALL`      
 
 APT-  ((A"    =:  (!"
-APT2  TARG:!      :`         \ APT-  (LIT    =:  (# 
+APT2  TARG:!      :`         
+APT-  (LIT    =:  (# 
 APT-  TARG:   =:  :          
 APT2  TARG,<      ,<`        
 APT2  TARG;       ;`
 APT-  ((."    =:  (."        
 APT-  (("     =:  ("
 APT2  _BEGIN      BEGIN`     
+APT2  _THEN       THEN`
 APT2  _MARK       [`
 APT-  `<RELS_ =:  <RELS`     
 '    [`       =:  CALL`

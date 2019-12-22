@@ -5,8 +5,6 @@
   
 : `BS  |C. ,<   8 CONST  bs     1024 CONST  1K   
 : EOS! bs ,<    0 VALUE EOS 
-\ : M: ';  
-\ : ?M: 0 `HOFS CALL TARG:! `(MAC `", THEN 
  
 \ HERE .  TEST9 2084
 
