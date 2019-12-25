@@ -1,4 +1,6 @@
-
+CLS  0 0 GOTOXY
+: (VAR3 (D#2 ;
+BYE
 
 : (VAR3 (D#2 (; (EX 
 : `EL? BLK 0<>; 

@@ -1,0 +1,591 @@
+' (JUMP =: (DEF
+
+\ def abort (s)      !"
+\ def dpush (*items)
+\ def dpop(n=1)
+\ def rpush (*items)
+\ def rpop(n=1)
+\ def interpret(s)  ,<`
+\ def COMPILE(s)    >,
+\ def doCol()       NEST
+\ def dotList(lst,ending="") MAKELIST
+\ CODE "    dpush(str(word('"')))  ;CODE
+\ CODE .RS   dotList(_rstack)            ;CODE
+\ CODE COMPILER _context = _compiler   ;CODE
+\ CODE FORTH _context = _forth    ;CODE
+\ CODE WORDS for w in _context.keys(): print  ;CODE
+\ CODE :      doCol()                        ;CODE
+\ CODE BYE    raise ByeException             ;CODE
+\ CODE VARIABLE code (w, " dpush('%s')" % w) ;CODE
+\ CODE ."   dpush(str(word('"'))); COUNT(); TYPE()  ;CODE
+
+: 2- IF- THEN
+: 1- IF- THEN ;
+\ CODE 2DROP  dpop(2)                    ;CODE
+: 2DROP TWICE
+\ CODE DROP  dpop()                      ;CODE
+: DROP IF THEN ;
+: |DROP EX DROP ;
+: (@+; @R+ RDROP +2/ (DROP; 
+: (@&; @R+ RDROP    
+: AND NAND 
+: NOT DUP NAND ;
+: NEG NOT 
+: 1+ (@+; ,< 1 ,
+: |+ EX SKIP
+\ CODE -    a,b = dpop(2); dpush(a-b)  ;CODE
+: - NEG
+\ CODE +    a,b = dpop(2); dpush(a+b)  ;CODE
+: + +2/
+: DROP; DROP ;
+\ def lit(s)        LIT,,
+: (LIT @R+ ;
+\ CODE EXIT   assemble ("return()")   ;CODE
+: @+ PUSH @R+ POP ; 
+: @2 @+    
+: @ PUSH 
+: (CON @R+ 
+: EXIT RDROP; 
+: 2@ @2
+\ CODE SWAP  a,b = dpop(2); dpush(b,a)   ;CODE
+: SWAP PUSH
+: XPOP XR POP ;
+: (| @R+ XR PUSH; 
+: IXEC J 
+: EXECUTE PUSH;
+: (D#2  POP XR     \ DOES PRIMITIVE'S METHODS
+: 4+ (4+;  
+: (VAR3 (D#2 ;;      
+: (D#1  POP XR     
+: 2+ (2+;  
+: (D#0  POP XR     
+: NOP;  ;
+: ?XEP| DUP 
+: XEP| XR EXECUTE 
+: (VAR POP ;
+: (SET2 (D#1      
+: !  PUSH 
+: POP! !R+ RDROP;
+: ?U2/ ?XEP|
+: 2/ 0 +2/
+: NIP PUSH DROP POP ; 
+: |NIP EX NIP ;  
+: |H CALL EX (SET2 THEN ,<       0 CONST H \ HEAP TOP
+: |T CALL EX (SET2 THEN ,<   $D800 CONST T \ VOCABULARY TOP
+: |LTIB CALL EX (SET2 THEN ,<    0 CONST LTIB \ 
+: CSTR- 1-
+: ?C@ DUP
+: C@ @ 
+: W>B (@&; ,< 255 ,
+: C@I J C@ ;
+0 QUAN BLK 
+0 QUAN ETIB 
+0 QUAN HOFS 
+HERE >, (D#0 @
+: BASE! 2- W>B 2+ ,< 10 VALUE `BASE \ SET BASE 
+N: DEC 10 , N: HEX 16 , =, BIN 2 ,
+: HERE H  
+: R>T HOFS + ; 
+: (@, (D#0
+: @, @
+: , |H
+: !+ PUSH !R+ POP ;
+
+
+\ CODE EMIT        print(chr(x), end='')  ;CODE
+' BE QUAN @EMIT >, CALL 1+ (SET2 THEN ,<
+0 CONST CNTC
+VAL' @EMIT =: EMIT
+' BE QUAN @KEY  >, (; ,<
+VAL' @KEY =: KEY
+\ CODE PUSH  rpush(dpop())               ;CODE
+\ CODE POP   dpush(rpop())               ;CODE
+\ CODE DUP   dpush(tos())                ;CODE
+\ CODE @ dpush(variables[dpop()]) ;CODE
+: @I J @ ;
+\ CODE ! val,varname = dpop(2) variables[varname] = val ;CODE
+: C!I W>B J @ DUP W>B - + 
+: !I J ! ;
+: !- 2- PUSH !I POP ; 
+: C! PUSH C!I RDROP ;
+\ CODE COUNT  dpush(len (tos()))              ;CODE
+: COUNT PUSH C@R+ XPOP ;
+: STR PUSH @R+ XPOP ;
+\ CODE 2DUP   OVER OVER  ;CODE
+: 2DUP TWICE
+\ CODE OVER  a,b = dpop(2); dpush(a,b,a) ;CODE
+: OVER PUSH DUP XPOP ;
+: STR| XR POP    
+: .TIMES |DROP   
+: TIMES PUSH XR  
+: TIMES| (FOR CALL BEGIN J EXECUTE THEN (NEXT RELS<
+: 2EXIT RDROP RDROP; 
+\ CODE ;;     assemble ("return()")   ;CODE
+: ;; (@, (; ,< 
+\ CODE ." slit(word('"')); assemble ("COUNT(); TYPE()")  ;CODE
+: ((." ("SKIP 
+\ CODE TYPE  s,n = dpop(2); print(s[:n],end=' ') ;CODE
+: ". COUNT
+: TYPE STR| COUNT EMIT ;
+\ CODE CR   print()                ;CODE
+: CR ."^M^J" 0 TO CNTC ;
+\ CODE ABORT  abort (dpop()) ;CODE
+\ CODE QUIT global _rstack ;CODE
+: -ROT SWAP 
+: USWAP XEP| SWAP ; 
+: |ROT EX
+: ROT USWAP SWAP ;
+    1 CONST 1
+\ CODE <   a,b = dpop(2); dpush(a < b)   ;CODE
+: SIGN (@&; ,< $8000 , 
+: < - 
+: 0< SIGN
+: 0<> TWICE \ def word (delim=" ")  BL WORD
+\ : 0= ( n - f)  0 = ;
+: 0= IF ,<  0 CONST 0  >, THEN ,< -1 CONST -1 
+VAL' 1 =: BYE  
+0 VALUE ERRA
+
+' BYE DEFER vINIT
+' BYE DEFER vERR
+: ((A" ("SKIP TO ERRA 0; vINIT vERR ABORT ;
+\ CODE "     slit(word('"'))   ;CODE
+: ((" ("SKIP ;
+\ CODE BL     dpush(' ')                     ;CODE
+32 CONST BL
+\ : (@&; @R+ POP DROP
+\ CODE AND a,b=dpop(2) dpush(not( not(a and b))) ;CODE
+\ : AND NAND
+\ CODE NOT    a=dpop();    dpush(not a)    ;CODE
+\ : NOT DUP NAND ;
+\ CODE 1+     a = dpop();  dpush(a+1)  ;CODE
+\ : 1+ NOT
+\ : NEG IF- THEN NOT ;
+\ CODE R@    dpush(_rstack[-1])          ;CODE
+: I@ J @ ;
+\ CODE I  assemble ("dpush(I)") ;CODE
+: I J ;
+\ CODE =   a,b = dpop(2); dpush(a == b)  ;CODE
+: = - 0= ;
+\ CODE <=  a,b = dpop(2); dpush(a <= b)  ;CODE
+: <= - DUP 0= SWAP 0< 
+\ CODE OR a,b=dpop(2) dpush(not( not(a or b))) ;CODE
+: UOR XEP|
+: OR NOT SWAP NOT NAND ;
+\ CODE >   a,b = dpop(2); dpush(a > b)   ;CODE
+: > <= 0= ;
+\ CODE XOR dpush (not (not or (b and not a) ))) ;CODE
+: XOR 2DUP AND UOR - ;
+: `?|SIGN 2DUP XOR 0< 0; EX NEG ;
+: * `?|SIGN
+: U* |DROP
+: UM* A! 0 TWICE TWICE +* +* +* +* ;
+\ CODE /    a,b = dpop(2); dpush(a/b)  ;CODE
+: / `?|SIGN
+: U/ |DROP
+: (U/MOD A! 0
+: (U/ TWICE TWICE -/ -/ -/ -/ ;
+\ CODE .    print(dpop(),end=' ')  ;CODE
+: `BASE/
+: U/MOD (U/MOD SWAP ;
+: |SPC EX
+: SPC BL EMIT ;
+\ : ?   @ .  ;
+: ? @
+: . 10 
+: (. |SPC BASE! : `UDIV : ``` `BASE/ ?EXEC `UDIV 
+: DIG. ALPHA EMIT ;
+\ CODE .H   print("%x" % dpop(),end=' ')  ;CODE
+: .H 16 (. ;
+\ CODE IF global _tab assemble ("if dpop():") _tab += 1 ;CODE
+\ M: IF` (IF MARK>;
+\ CODE THEN  global _tab  _tab -= 1 ;CODE
+\ M: THEN` RELS>;
+\ CODE AGAIN  assemble ("rpush(0)")  _tab -= 1 ;CODE
+\ : AGAIN` (JUMP <RELS;
+\ CODE UNTIL assemble ("rpush(dpop())")  _tab -= 1 ;CODE
+\ Ì: UNTIL` (IF <RELS;
+\ CODE BEGIN  assemble ("rpush (0)")  _tab += 1 ;CODE
+\ M: BEGIN` <MARK;
+\ CODE REPEAT  global _tab  _tab -= 1 ;CODE
+\ : REPEAT (| THEN` AGAIN` ;
+\ M: AHEAD` (JUMP MARK>;
+\ CODE ELSE _tab -= 1  assemble ("else:")  _tab += 1 ;CODE
+\ : ELSE` (| THEN` AHEAD`
+: STK! DUP 2+ @
+: SWAP! SWAP ! ;  \ NO ELEMENTS == EMPTY STK
+: STK? 2@ - 2/ ;         \ COUNT OF ELEMENTS
+: STK@ @ @ ;             \ TOP ELEMENT  ==  LAST ELEMENT
+HERE >, (D#0 DUP PUSH @2 U< 0= !"STK>" @I @+ POP! ;  \ STK-
+HERE >, (D#1 DUP PUSH @+ 2+ SWAP U< 0= !">STK" @I !- POP! ; \ +
+' (VAR3 , , =, CSTK>  \ STACKS INITIALIZED
+H 100 ERASE  MARK> MARK> 40  ALLOT THEN`  THEN`
+AT' CSTK> T>R STR , STR , @ =, <CSTK
+H 100 ERASE  MARK> MARK> 40  ALLOT THEN`  THEN`
+AT' CSTK> T>R STR , STR , @ =, HANDLE
+H 100 ERASE  MARK> MARK> 40  ALLOT THEN`  THEN`
+: CSWAP` CSTK> CSTK> SWAP TO CSTK> TO CSTK> ;
+\ CODE WHILE   assemble ("else:")   _tab += 1 ;CODE
+\ ' IF` =: WHILE
+\ CODE FOR    _tab += 1 ;CODE
+\ : BEGIN-` AHEAD` BEGIN` ;
+\ : FOR` :"PUSH" BEGIN-` :"PUSH" ;
+\ CODE NEXT  global _tab  _tab -= 1 ;CODE
+\ : NEXT` THEN` :"POP"  [ :"RDROP" ]
+\ : UNTIL-` :"(IF-" :"<RELS" ;
+\ : 1-` :"(IF-" TWICE` ;
+\ MPUSH
+: A+L XEP| 
+: I+ J + ;   
+: MOVTOA TIMES| COUNT 
+: C!A+ XA C!R+ XA ;
+: ODD (@&; ,< 1 ,
+: S>"! XEP| DUP J A! C!A+ 
+: `MEMTO ?U2/ ODD MOVTOA
+     PUSH XR AHEAD BEGIN  @R+ XA !R+ XA THEN UNTIL-
+: .EXIT DROP RDROP;
+: CMOVE SWAP 
+: MEMTO A! `MEMTO ; 
+: >ZSTR COUNT H ?XEP| MEMTO 0 C!A+  ; 
+: CMOVE> |DROP  A+L SWAP 
+: MPUSH A! A+L A@ |NIP SWAP TIMES| 1- PUSH CSTR- C!I POP ;
+: MEMTI| A+L 0   
+: TI| BLK XR LTIB PUSH
+ ETIB PUSH PUSH CALL EX POP POP POP THEN TO BLK TO LTIB
+ TO ETIB 
+: /BLK BLK 0; 0 TO ETIB ; 
+
+\ : MPUSH PUSH A! I+ XR 2/MOD
+\  IF POP 1- PUSH C@I XA POP 1- PUSH C!I XA  THEN BEGIN-
+\ POP 1- 1- PUSH @I XA POP 1- 1- PUSH !I XA THEN UNTIL- EXIT ;
+\ def code (name, s) M:
+' NOP; VECTOR v",
+\ : (=: ?C@ 1+ |T MPUSH !- !- ;  \ MAKE ENTRY
+\ def slit(s)       ",
+: ", COUNT DUP  CALL
+: S, v", STR| COUNT THEN
+: C, |H 
+: C!+ PUSH C!R+ POP ;
+HERE >, (D#0 @ 
+: FILL A! STR| A@ C!+ ;
+N: ERASE 0 ,  N: ONES -1 ,  =, BLANK $2020 ,
+
+\ CODE .S    dotList(_stack)             ;CODE
+: .S |DROP DUP SP@ 10 
+: `.LIST STR| STR . ;
+: .R RP@ 2+ 10 ROT `.LIST ;
+
+\ SEARCH PRIMITIVES  ------------------
+
+: >DEA 4+ 
+: NAME> COUNT + ; 
+: DEA? DUP 4+ C@ ;
+: 2* DUP + ;
+: `NOSCN RDROP J SKIP
+: `SCN POP NOT XR DROP POP POP + ; 
+: SCN|  A! DUP XR  PUSH (FOR CALL BEGIN J EXECUTE
+ (IF `SCN  THEN (NEXT RELS<  `NOSCN ; 
+: B?" PUSH  \ BYTE "STRING" B?" -- INDEX
+: (BSCN XR COUNT POP  \ BYTE :"PROC" -- INDEX
+: CSCAN |NIP SCN|    \ ADR LEN BYTE -- INDEX
+: C@+= COUNT A@ - ; 
+: WSCAN |NIP SCN| STR A@ - ;
+: CSKIP  |NIP SCN| C@+= 0= ;
+: ("SW ("SKIP B?" 1+ 
+: (XARY 2* POP +
+: @EXEC @  EXEC ; 
+: `;FND DROP 0  EXIT ; 
+: `CFND| >DEA 
+: `FND| DEA? (IF `;FND  OVER OVER IXEC 
+  IF `CFND| ;THEN NIP  1   EXIT ;
+: `MEM=; RDROP (1+;  
+: FND? T  \ "FND?" |BEFTOR 
+: FND `FND| 4+ 
+: "-  \ """-" |BEFTOR 
+ ?C@ 1+ 
+: MEM= PUSH A! XR ?U2/ \ SRC DST LEN --> >R >A LEN FLGCHAR
+  ODD IF C@R+ XA C@R+ XOR 0= (IF `MEM=; THEN
+  AHEAD BEGIN @R+ XA @R+ XOR 0= (IF `MEM=; THEN UNTIL- `MEM=; ;
+: WFIND T  `FND| @ XOR ;
+
+\ def isNumber(s)   ITOA
+\ INPUT NUMBERS ---------------------------
+HERE >, (D#0 @ PUSH ETIB LTIB - ; 
+N: TIBC@ ' C@ , 
+N: TIB^  ' NOP; , 
+N: TIB   ' LTIB ,
+=, TIBC! ' C! ,
+: TIB- |LTIB 1- ; 
+: TIB+ |LTIB 1+ ; 
+=! `'CHAR 
+=! `^CHAR
+: `OPT? 1 LTIB U< ;
+: `IN-OPT (BSCN ,< 5 C, ,"$%#'^" 2ALIGNED
+: `SIGN `OPT? 0;  TIBC@ '- = 0; TIB- EX XEP| NEG ;
+: `TO-BASE BASE! 0 ;
+: `OP-TBL (XARY HEX BIN `TO-BASE `'CHAR `^CHAR
+: DIGIT? \ CHAR ==> DIGIT   IN CURRENT BASE
+ A! -1 `BASE |NIP VAL SCN| 1+ DUP ALPHA A@ - ;
+: `DIG? \ "`DIG?" TIB [S] |BEFTOR
+  DIGIT? -IF `OPT? 0;  \ CAN BE AN OPTION ?
+  A@ `IN-OPT -IF ?XEP| \ ON EXIT OPTION WILL BE A OK-FLAG
+  TIB-                \ SKIP USED OPTION
+  `OP-TBL               \ EXECUTE OPTION
+ THEN ;THEN  ?XEP| \ ON EXIT OPTION WILL BE A OK-FLAG
+: `BASE*+  TIB- |+ XEP|
+: `BASE* `BASE U* ;
+: `^CHAR TIBC@ 31 AND `BASE*+ ; \ CONTROL CHAR
+: `'CHAR TIBC@ `BASE*+ ;        \ REGULAR CHAR
+: ATOI \ "ATOI" TIB [S] |BEFTOR
+MEMTI| DEC `SIGN 0 LTIB (IF 1 
+ BEGIN TIBC@ `DIG? 1+ 0; LTIB 0= UNTIL 0 ; 
+
+\ INTS DOS, FILES & VIDEO ----------------------------
+
+ 256 CONST 1B
+1024 CONST 1K
+: BB>W |+ 1B U* XEP| W>B ;
+: XDROT XEP| 
+: DROT |ROT  
+: D0 0 0 ;
+
+ZDO VALUE 6 TIMES _FL _AX _BX _CX _DX _DX2
+HERE >, (D#0 @ (INT; TO _FL TO _AX TO _BX TO _CX TO _DX ;
+N: (VID $10 ,  =, (DOS $21 , 
+: `RW IXEC ! IXEC 1 ROT RDROP; ,<
+$200 VALUE ATTR
+>, `RW ,< 0 VAR `@FKEY
+>, `RW ,< 0 VAR `@FEMIT
+HERE >, (D#0 @ (VID ;
+: CLS $184F 0 ATTR ,< N: `CLS $600 , \ 79 24 0 0 
+: GOTOXY BB>W ,<      =, `XY  $200 ,
+HERE >, (D#0 @ (DOS ;
+: StdGet 0 
+: FKEY  [ `@FKEY @ ] -1 TO `@FKEY ,<
+ N: Fread  $3F00 , 
+: ERRput 2  
+: FEMIT SWAP TO `@FEMIT ,<
+ N: Fwrite $4000 ,  
+=, Fseek  $4200 ,
+: IO? _FL ODD !"IO?" ;;
+: `File| >ZSTR 
+: `|IO? EX IO? _AX _DX TO _DX2 ;
+HERE >, (D#0 @ DROT (DOS ;
+>, NOP \ >FTOP| 
+: FOPEN `File| ,< 
+N: Fopen $3D02 ,
+>, NOP \ >FTOP| 
+: FCREATE `File| ,< 
+N: Fcreate $3C00 ,
+=, StdPut $200 , 
+HERE >, (D#0 @ XDROT (DOS ; 
+N: Fsize $4202 , 
+N: Fpos $4201 , 
+N: Fcut $4000 , 
+: CLSFILES AT HANDLE STK? TIMES| HANDLE  ,<
+=, Fclose $3E00 , 
+
+
+\ def assemble (s)  MACRO,
+: (LIT,, (| , (@, (LIT ,<
+0 VALUE SCRH
+0 VALUE BUF>
+0 VALUE BUF^
+0 VALUE <BUF
+0 VALUE BUFP
+: OVER- OVER - ;
+: 2! !+ ! ;
+: `SCRSEEK 1K UM* SCRH Fseek  IO? 1K SCRH ;
+
+: USE/  -1 TO SCRH <BUF DUP TO BUF^ BUF> OVER- ERASE ;
+: |BUFP EX DUP TO BUFP 4+ ;
+: BUF+ 1028 + DUP BUF> = 0; DROP <BUF ; : BUF?
+ A! BUF^ BEGIN DUP @ A@ - 0; BUF+ DUP BUF^ = UNTIL DUP - ;
+: FLUSH BUF> <BUF - 1028 U/ TIMES| -1
+: `BUFFER PUSH BUF^ BUF+ DUP TO BUF^ @2 0 POP BUF^ 2! (IF DROP;
+BUF^ 4+ SWAP     `SCRSEEK Fread ;
+\ CODE BLOCK  n=dpop(); dpush(getblock(n))   ;CODE
+: BLOCK |BUFP BUF? DUP IF ; THEN DROP A@ `BUFFER 
+BUF^ 4+ BUF^ @  `SCRSEEK Fwrite ;
+: UPDATE BUFP 2+
+: ON -1 SWAP! ; 
+: DISCARD BUFP 2+
+: OFF 0 SWAP! ;
+
+\ CODE LOAD   x=dpop(); load(x)              ;CODE
+: LOAD 1K OVER TI| 
+: vEVAL NOP; ; 
+: THRU OVER - 1+ FOR PUSH J I+ LOAD POP NEXT  DROP  ;
+: `-USE SCRH 1+ 0; SCRH Fclose -1 TO SCRH  ;
+: `SOURCE BLK 0; ETIB 0= 0; BLK BLOCK 1K + TO ETIB ;
+
+\ : FCUT FLUSH `SCRSEEK 0 SCRH Fwrite ;
+: |N?? EX  
+: N??  0= 
+: ??  !"?" ;;
+: ODDH? !"ODDH?" ;;
+
+$FE00 CONST  TBUF
+\ CODE WORD   w = word (dpop()); dpush(w)    ;CODE
+: `SKIPBL? J BL = 0; TIB J CSKIP 
+: `PARSE-LEN?  |LTIB  SWAP (| - 
+: `LASTSCAN (-IF CALL  DROP  LTIB THEN ;
+: `CSCAN? TIB J CSCAN (-IF CALL `LASTSCAN DUP ;THEN DUP 1+ ;
+: TOKEN? |N?? \ CR "TOKEN?" TIB [S] |BEFTOR 
+: TOKEN       \ "TOKEN" CR TIB [S] |BEFTOR 
+   BL CALL ?C@ ;THEN   
+: WORD  CALL  TBUF  S>"! '` C!A+ ;THEN 
+: PARSE `SOURCE PUSH `SKIPBL?  TIB^ `CSCAN? `PARSE-LEN? EXIT ;
+\ CODE (     word(')')         ;CODE
+: (` ') WORD DROP ;
+\ CODE OPEN openblocks (dpop()) ;CODE
+: USING TOKEN? FLUSH `-USE FOPEN TO SCRH ; 
+
+: T. T   
+: WID.  4+ 
+: ID. |SPC ". ;
+: |[] ."[" EX ."]" ;;
+: <BL? DUP BL U< 0; DROP '. ;; 
+: [ID] COUNT      
+: [S] |SPC |DROP     
+: [TYPE] |[] TIMES| COUNT <BL? EMIT ; 
+: ?|CR 0; 
+: |CR EX CR ;
+: `OK ."_ok" CR .">>_"  ;;  
+: `. CR TBUF ID. ERRA ID. CR ;
+
+' `. VAL' vERR T! 
+
+\ ADDITIONALS ---------------------------------- 
+
+: H>T H  STR  |T MPUSH ; 
+: CSP! SP@ (SET2   
+: CSP (CON ;; 
+: |, EX , ;
+: (PNT2 (D#1 POP  SWAP! ; \ SETPOINT
+: CLEAR, CSP! AT <CSTK STK!  AT CSTK> STK! ; \ CLEAR COMPILER 
+: |@! XR @I PUSH XR EX POP! ;
+: SAFE! XR @I PUSH SWAP J ! EXECUTE POP POP! ;
+: ++ |@! 1+ ;
+: -- |@! 1- ;
+: +! |@! + ;
+: `<RELS_ <CSTK , 
+: LASTH! H ,<
+0 VALUE LASTH
+: |LASTH EX LASTH! ; 
+: MCLR $D800 ,<     
+0 VALUE MOBJ
+: |2ALIGN EX    
+: ALIGNED |LASTH  HERE ODD 0; $90 C, ; \ CODE OF NOP 
+' |2ALIGN VAL'  v", T!
+: COMP;? AT <CSTK STK?  AT CSTK> STK? OR  ;
+: _BEGIN |LASTH HERE TO <CSTK ;
+: _MARK H TO CSTK> |LASTH
+: Z, 0 , ;      
+: _THEN LASTH! HERE CSTK> ! ;
+ 
+\ INPUT LINE ---------------------------------- 
+
+: EMT! (LIT BE TO @EMIT ;
+: KEY! (LIT BK TO @KEY  ;
+: `SZ BLK LTIB - ;
+: `CHAR A@ BL U< IF BL A! THEN A@ DUP EMIT TIBC! TIB- ;
+: `BS `SZ 0; ."^H_^H" TIB+ ;
+: `CR `SZ TO BLK
+: !LTIB 0 TO LTIB ;
+: `DO-KEY ("SW ,< 3 C, ,"^M^H" 127 C, 2ALIGNED
+  >, `CHAR `CR `BS `BS ,<
+64   CONST RdLen
+-256 CONST TIBUF
+: STDRDLN TIBUF RdLen \ CR "STDRDLN" |BEFTOR
+: READLN MEMTI| TIB^ LTIB TO BLK 
+  BEGIN KEY `DO-KEY LTIB 0= UNTIL BLK ;
+
+\ MAKERS ---------------------------------- 
+
+: SAME? FND? 0; 4+ [ID] TBUF ; 
+: `?:, DUP  
+: `:, |,  
+: TARG:! HERE ODD  ODDH?
+: =: 0 TOKEN?  SAME? \ FIX SAME?  
+: (=:  ?C@ 1+ |T MPUSH TWICE !- ;
+      
+: ">NUM COUNT ATOI ?? ;
+\ : (LIT, (@, (LIT ,< 
+: ">NUMC ">NUM (LIT,, ;
+	  
+\ ------------ \   INTERPRETTER  \ ------------------
+ 
+>, (VAR3 (PNT2 ,<  
+0 DEFER LOXEC  \ FORTH STATE \ LOCATE AND EXECUTE
+>, (PNT2 ,<  0 DEFER REINIT \ FORTH INIT STATE ON ERROR
+
+: `[]OPER EX (XARY  ">NUM @EXEC ">NUMC @,
+: TARG;  ;;  
+: TARG,< TO LOXEC \ "TARG,<" |BEFTOR 
+: `INTERP `[]OPER FND? ;
+: FND?? |N?? TOKEN? FND? ;
+: ,' |, 
+: ' FND??
+: @DEF? @2 
+: UNDEF? ODD !"UNDEF?" ;;
+      
+\ ------------\   COMPILER  \----------------------
+
+: TFND T >DEA  FND ;
+  ' TFND   VECTOR vFND    \ SEARCH ON COMPILING  
+: TARG: CLEAR,   TARG:!  \ MAKE COLON ENTRY
+: >, TO LOXEC   `[]OPER TBUF ++ vFND TBUF --
+   IF 1 ;THEN  vFND (2+; ,<
+: D# HERE >,  CLEAR, |LASTH ;   
+
+                
+      \ FUNCTION EVAL  & EXECUTE MACRO 
+
+: (MAC (D#0 VAL  >, AT LOXEC SAFE!  
+: SEVAL COUNT  \ ' `MEMTI| ' EVAL ! 
+: EVAL NOP  SKIP BEGIN LOXEC 
+: @EVAL  NOP  TOKEN   0= UNTIL DROP  ; \ `STACK
+: `(MAC ."(MAC"
+: M: ';  
+: ?M: 0 AT HOFS SAFE! CALL TARG:! `(MAC ", THEN 
+: <M> MOBJ   |H TO MOBJ ;         
+' (MAC ' `(MAC  T!
+
+: ``HOFS  ,<  \ MARK WHERE TO RETURN AFTER ,QUIT --> `HOFS
+' @INIT HERE!     \ ONLY THIS TYPE OF REMARKS FROM HERE \
+
+>,      \ MAIN LOOP 
+  TARG,< \ TO INTERPRETTER MODE 
+  REINIT \ INITIALIZATION  ON ABORT
+: QUIT BEGIN
+   @EVAL   \ EVAL INPUT
+: vOK   `OK  \ OK!
+   STDRDLN \ READLINE FROM KBD
+   AGAIN ,<     \ TO HERE 
+\ 0 VALUE TASKPTR  \ POINTER TO REGS AND MORE
+   
+' ``HOFS HERE!  \ STEP BACK TO HOFS
+\ ' H>T VAL' REINIT T!
+
+\ HERE .  TEST11 3292
+\ LOADER OF INITIAL DICTIONARY == TEST-0
+: INIT2
+  TO REINIT
+  EMT! KEY!      \ INIT KEY & EMIT TO BIOS
+  
+  CLEAR,                \ CLEAR COMPILER STACKS
+  CLSFILES
+  `.                    \ ERROR PRINT
+ VAL vOK ;
+  
+INCLUDE INITER.CF
+' `1ST VAL' REINIT T!
+
+\ STSTERTRT----
+
+\ VARIABLES STAGE 2 \ COMPILE  MACRO ------------------
+
+\ ' `1ST AT' QUIT T!
+' `INTERP VAL' LOXEC T! \ TARGET FORTH INITIAL STATE
+

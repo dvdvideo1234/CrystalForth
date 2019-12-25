@@ -5,28 +5,19 @@
 \      "DO-REINIT"  |BEFTOR REINIT ; 
 
 : `1ST 
+H>T       \ LOADER OF INITIAL DICTIONARY == TEST-0 
 
-\ 1  ALPHA (BRK    \ TEST ALPHA, LITERAL & (BRK
-\ '5  DIGIT? (BRK  \ TEST DIGIT? 
-\ 1 2 3 4 '5   (BRK  BE  \ TEST _IO
-\ $1234 H. (BRK  \ TEST  H.
-  \ USEH>T  \  DO-REINIT
-
+\  1  ALPHA (BRK    \ TEST ALPHA, LITERAL & (BRK
+\  '5  DIGIT? (BRK  \ TEST DIGIT? 
+\  1 2 3 4 '5   (BRK \ MANY LITERALS
+\ '$ BE  \ TEST _IO
+\  $1234 H. (BRK  \ TEST  H.
+\   \ USEH>T  \  DO-REINIT
+\ 
   \ TESTS
 \  CR CR CR T. ."RESTART_!"
-CR  "H>T" |BEFTOR 
-H>T       \ LOADER OF INITIAL DICTIONARY == TEST-0 
-CALL
-  (BRK
-  (;
-THEN 
-  TO REINIT
-  (LIT BK TO @KEY 		\ INIT KEY & EMIT TO BIOS
-  (LIT BE TO @EMIT 
-  CLEAR,  				\ CLEAR COMPILER STACKS
-  CLSFILES
-  `.     				\ ERROR PRINT
-  
+\ CR  "H>T" |BEFTOR 
+\ INIT2 ; 
   
 \ 01. TEST [ID]
 \  CR "123456" [ID]  "BYE" [ID] "_BYE_" [ID]  (BRK
@@ -40,12 +31,12 @@ THEN
 
   
 \ 1.  "=:" TO FIND  -- THE ONLY WORD
-\ CR   "=:" DUP ID. FND? (BRK 
-\ DROP WID. (BRK
+ CR   "=:" DUP ID. FND? (BRK 
+ DROP WID. (BRK
 
 \ 2.  "1=:" NOT TO FIND  -- 
-\ CR   "1=:" DUP ID. FND? (BRK 
-\ DROP ID. (BRK
+ CR   "1=:" DUP ID. FND? (BRK 
+ DROP ID. (BRK
  
 \ 3.  CONVERT "STR" TO NUM
 \ CR  "123"  DUP ID. CSTR ATOI (BRK 
@@ -88,6 +79,6 @@ THEN
 \    "_-123_=:_GAGA_792_=:_BYE__BYE_" DUP ". 
 \    CSTR A+L TO LTIB TO ETIB  @EVAL
 \    
-\  CR ."FOUND" 1
-\    (BRK
- VAL vOK ;
+  CR ."FOUND" 1
+    (BRK
+ QUIT ;

@@ -29,17 +29,17 @@ APT- _IO     =: (IO;
 APT- _PMUL   =: +*      \ MATH & LOGIC
 APT- _P2DIV  =: +2/  
 APT- _MDIV   =: -/   
-APT- _NEG    =: NEG
-APT- _0LESS  =: 0<
-APT- _ZEQ    =: 0=
+\ APT- _NEG    =: NEG
+\ APT- _0LESS  =: 0<
+\ APT- _ZEQ    =: 0=
 APT- _ULESS  =: U<
 APT- _NAND   =: NAND   
 APT- _NOP    =: NOP    
-APT- _NOT    =: NOT  
-APT- _XOR    =: XOR         
+\ APT- _NOT    =: NOT  
+\ APT- _XOR    =: XOR         
 APT- _DIG_C  =: ALPHA
-APT- _OVER   =: OVER    \ STACK
-APT- _DROP   =: DROP  
+\ APT- _OVER   =: OVER    \ STACK
+\ APT- _DROP   =: DROP  
 APT- _DUP    =: DUP    
 APT- _J      =: J      
 APT- _POP    =: POP    
