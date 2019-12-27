@@ -9,9 +9,10 @@ H>T       \ LOADER OF INITIAL DICTIONARY == TEST-0
 
 \  1  ALPHA (BRK    \ TEST ALPHA, LITERAL & (BRK
 \  '5  DIGIT? (BRK  \ TEST DIGIT? 
-\  1 2 3 4 '5   (BRK \ MANY LITERALS
-\ '$ BE  \ TEST _IO
-\  $1234 H. (BRK  \ TEST  H.
+\  1 2 3 4 '5  EMIT 32 EMIT (BRK \ MANY LITERALS
+  \ TEST _IO
+\ '$ BE  $1234 .H (BRK -12345 . (BRK  \ TEST  H.
+\ '$ BE  $123 H. (BRK 
 \   \ USEH>T  \  DO-REINIT
 \ 
   \ TESTS
@@ -23,7 +24,10 @@ H>T       \ LOADER OF INITIAL DICTIONARY == TEST-0
 \  CR "123456" [ID]  "BYE" [ID] "_BYE_" [ID]  (BRK
   
 \ 02. TEST H.
-\  CR "123456"  "BYE"  "_BYE_" (BRK
+
+
+
+
 \  H.  H.  H.  CR (BRK
 
 \ 03. TEST BYE
@@ -31,15 +35,13 @@ H>T       \ LOADER OF INITIAL DICTIONARY == TEST-0
 
   
 \ 1.  "=:" TO FIND  -- THE ONLY WORD
- CR   "=:" DUP ID. FND? (BRK 
- DROP WID. (BRK
+\ CR   "=:" DUP ID. FND? (BRK  DROP WID. (BRK
 
 \ 2.  "1=:" NOT TO FIND  -- 
- CR   "1=:" DUP ID. FND? (BRK 
- DROP ID. (BRK
+\ CR   "1=:" DUP ID. FND? (BRK  DROP ID. (BRK
  
 \ 3.  CONVERT "STR" TO NUM
-\ CR  "123"  DUP ID. CSTR ATOI (BRK 
+ CR  "123"  DUP ID. CSTR ATOI (BRK 
  
 \ 4.  CONVERT "-STR" TO NUM
 \ CR  "-123"  DUP ID. CSTR ATOI (BRK 

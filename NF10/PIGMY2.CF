@@ -33,11 +33,6 @@
 : NEG NOT 
 : 1+ (@+; ,< 1 ,
 : |+ EX SKIP
-\ CODE -    a,b = dpop(2); dpush(a-b)  ;CODE
-: - NEG
-\ CODE +    a,b = dpop(2); dpush(a+b)  ;CODE
-: + +2/
-: DROP; DROP ;
 \ def lit(s)        LIT,,
 : (LIT @R+ ;
 \ CODE EXIT   assemble ("return()")   ;CODE
@@ -50,6 +45,16 @@
 \ CODE SWAP  a,b = dpop(2); dpush(b,a)   ;CODE
 : SWAP PUSH
 : XPOP XR POP ;
+\ CODE 2DUP   OVER OVER  ;CODE
+: 2DUP TWICE
+\ CODE OVER  a,b = dpop(2); dpush(a,b,a) ;CODE
+: OVER PUSH DUP XPOP ;
+: OVER- OVER 
+\ CODE -    a,b = dpop(2); dpush(a-b)  ;CODE
+: - NEG
+\ CODE +    a,b = dpop(2); dpush(a+b)  ;CODE
+: + +2/
+: DROP; DROP ;
 : (| @R+ XR PUSH; 
 : IXEC J 
 : EXECUTE PUSH;
@@ -67,7 +72,8 @@
 : !  PUSH 
 : POP! !R+ RDROP;
 : ?U2/ ?XEP|
-: 2/ 0 +2/
+: 2/ 0
+: AVG +2/
 : NIP PUSH DROP POP ; 
 : |NIP EX NIP ;  
 : |H CALL EX (SET2 THEN ,<       0 CONST H \ HEAP TOP
@@ -108,13 +114,9 @@ VAL' @KEY =: KEY
 : !I J ! ;
 : !- 2- PUSH !I POP ; 
 : C! PUSH C!I RDROP ;
-\ CODE COUNT  dpush(len (tos()))              ;CODE
-: COUNT PUSH C@R+ XPOP ;
+\ CODE CSTR  dpush(len (tos()))              ;CODE
+: CSTR PUSH C@R+ XPOP ;
 : STR PUSH @R+ XPOP ;
-\ CODE 2DUP   OVER OVER  ;CODE
-: 2DUP TWICE
-\ CODE OVER  a,b = dpop(2); dpush(a,b,a) ;CODE
-: OVER PUSH DUP XPOP ;
 : STR| XR POP    
 : .TIMES |DROP   
 : TIMES PUSH XR  
@@ -125,8 +127,8 @@ VAL' @KEY =: KEY
 \ CODE ." slit(word('"')); assemble ("COUNT(); TYPE()")  ;CODE
 : ((." ("SKIP 
 \ CODE TYPE  s,n = dpop(2); print(s[:n],end=' ') ;CODE
-: ". COUNT
-: TYPE STR| COUNT EMIT ;
+: ".  CSTR 
+: TYPE STR| CSTR EMIT ;
 \ CODE CR   print()                ;CODE
 : CR ."^M^J" 0 TO CNTC ;
 \ CODE ABORT  abort (dpop()) ;CODE
@@ -137,11 +139,12 @@ VAL' @KEY =: KEY
 : ROT USWAP SWAP ;
     1 CONST 1
 \ CODE <   a,b = dpop(2); dpush(a < b)   ;CODE
+\ : 0= ( n - f)  0 = ;
 : SIGN (@&; ,< $8000 , 
-: < - 
+: WITHIN OVER- PUSH - POP 
+: U< SWAP NOT AVG 
 : 0< SIGN
 : 0<> TWICE \ def word (delim=" ")  BL WORD
-\ : 0= ( n - f)  0 = ;
 : 0= IF ,<  0 CONST 0  >, THEN ,< -1 CONST -1 
 VAL' 1 =: BYE  
 0 VALUE ERRA
@@ -167,6 +170,8 @@ VAL' 1 =: BYE
 : I J ;
 \ CODE =   a,b = dpop(2); dpush(a == b)  ;CODE
 : = - 0= ;
+\ : 0= ( n - f)  0 = ;
+: < - 0< ;
 \ CODE <=  a,b = dpop(2); dpush(a <= b)  ;CODE
 : <= - DUP 0= SWAP 0< 
 \ CODE OR a,b=dpop(2) dpush(not( not(a or b))) ;CODE
@@ -180,23 +185,29 @@ VAL' 1 =: BYE
 : * `?|SIGN
 : U* |DROP
 : UM* A! 0 TWICE TWICE +* +* +* +* ;
+: ODD (@&; ,< 1 ,
 \ CODE /    a,b = dpop(2); dpush(a/b)  ;CODE
 : / `?|SIGN
 : U/ |DROP
 : (U/MOD A! 0
 : (U/ TWICE TWICE -/ -/ -/ -/ ;
 \ CODE .    print(dpop(),end=' ')  ;CODE
-: `BASE/
+: `BASE/ `BASE
 : U/MOD (U/MOD SWAP ;
 : |SPC EX
 : SPC BL EMIT ;
 \ : ?   @ .  ;
 : ? @
-: . 10 
-: (. |SPC BASE! : `UDIV : ``` `BASE/ ?EXEC `UDIV 
+: . -IF '- EMIT NEG THEN 
+: U. DEC
+: (. |SPC : `UDIV : ``` `BASE/  ?SKIP `UDIV 
 : DIG. ALPHA EMIT ;
 \ CODE .H   print("%x" % dpop(),end=' ')  ;CODE
-: .H 16 (. ;
+: .H HEX (. ;
+: ROR 0 +2/ SWAP ODD 0<> SIGN + ;
+: ROL4 TWICE TWICE
+: ROL DUP +2/ 0< 0; 1+ ;
+: H. |DROP TWICE TWICE ROL4 DUP 15 AND DIG. ;
 \ CODE IF global _tab assemble ("if dpop():") _tab += 1 ;CODE
 \ M: IF` (IF MARK>;
 \ CODE THEN  global _tab  _tab -= 1 ;CODE
@@ -214,7 +225,7 @@ VAL' 1 =: BYE
 \ : ELSE` (| THEN` AHEAD`
 : STK! DUP 2+ @
 : SWAP! SWAP ! ;  \ NO ELEMENTS == EMPTY STK
-: STK? 2@ - 2/ ;         \ COUNT OF ELEMENTS
+: STK? 2@ - 2/ ;         \ CSTR OF ELEMENTS
 : STK@ @ @ ;             \ TOP ELEMENT  ==  LAST ELEMENT
 HERE >, (D#0 DUP PUSH @2 U< 0= !"STK>" @I @+ POP! ;  \ STK-
 HERE >, (D#1 DUP PUSH @+ 2+ SWAP U< 0= !">STK" @I !- POP! ; \ +
@@ -237,16 +248,15 @@ H 100 ERASE  MARK> MARK> 40  ALLOT THEN`  THEN`
 \ MPUSH
 : A+L XEP| 
 : I+ J + ;   
-: MOVTOA TIMES| COUNT 
+: MOVTOA TIMES| CSTR 
 : C!A+ XA C!R+ XA ;
-: ODD (@&; ,< 1 ,
 : S>"! XEP| DUP J A! C!A+ 
 : `MEMTO ?U2/ ODD MOVTOA
      PUSH XR AHEAD BEGIN  @R+ XA !R+ XA THEN UNTIL-
 : .EXIT DROP RDROP;
 : CMOVE SWAP 
 : MEMTO A! `MEMTO ; 
-: >ZSTR COUNT H ?XEP| MEMTO 0 C!A+  ; 
+: >ZSTR CSTR H ?XEP| MEMTO 0 C!A+  ; 
 : CMOVE> |DROP  A+L SWAP 
 : MPUSH A! A+L A@ |NIP SWAP TIMES| 1- PUSH CSTR- C!I POP ;
 : MEMTI| A+L 0   
@@ -262,8 +272,8 @@ H 100 ERASE  MARK> MARK> 40  ALLOT THEN`  THEN`
 ' NOP; VECTOR v",
 \ : (=: ?C@ 1+ |T MPUSH !- !- ;  \ MAKE ENTRY
 \ def slit(s)       ",
-: ", COUNT DUP  CALL
-: S, v", STR| COUNT THEN
+: ", CSTR DUP  CALL
+: S, v", STR| CSTR THEN
 : C, |H 
 : C!+ PUSH C!R+ POP ;
 HERE >, (D#0 @ 
@@ -278,7 +288,7 @@ N: ERASE 0 ,  N: ONES -1 ,  =, BLANK $2020 ,
 \ SEARCH PRIMITIVES  ------------------
 
 : >DEA 4+ 
-: NAME> COUNT + ; 
+: NAME> CSTR + ; 
 : DEA? DUP 4+ C@ ;
 : 2* DUP + ;
 : `NOSCN RDROP J SKIP
@@ -286,9 +296,9 @@ N: ERASE 0 ,  N: ONES -1 ,  =, BLANK $2020 ,
 : SCN|  A! DUP XR  PUSH (FOR CALL BEGIN J EXECUTE
  (IF `SCN  THEN (NEXT RELS<  `NOSCN ; 
 : B?" PUSH  \ BYTE "STRING" B?" -- INDEX
-: (BSCN XR COUNT POP  \ BYTE :"PROC" -- INDEX
+: (BSCN XR CSTR POP  \ BYTE :"PROC" -- INDEX
 : CSCAN |NIP SCN|    \ ADR LEN BYTE -- INDEX
-: C@+= COUNT A@ - ; 
+: C@+= CSTR A@ - ; 
 : WSCAN |NIP SCN| STR A@ - ;
 : CSKIP  |NIP SCN| C@+= 0= ;
 : ("SW ("SKIP B?" 1+ 
@@ -336,7 +346,7 @@ N: TIB   ' LTIB ,
 : `BASE* `BASE U* ;
 : `^CHAR TIBC@ 31 AND `BASE*+ ; \ CONTROL CHAR
 : `'CHAR TIBC@ `BASE*+ ;        \ REGULAR CHAR
-: ATOI \ "ATOI" TIB [S] |BEFTOR
+: ATOI  "ATOI" TIB [S] |BEFTOR
 MEMTI| DEC `SIGN 0 LTIB (IF 1 
  BEGIN TIBC@ `DIG? 1+ 0; LTIB 0= UNTIL 0 ; 
 
@@ -393,7 +403,6 @@ N: Fcut $4000 ,
 0 VALUE BUF^
 0 VALUE <BUF
 0 VALUE BUFP
-: OVER- OVER - ;
 : 2! !+ ! ;
 : `SCRSEEK 1K UM* SCRH Fseek  IO? 1K SCRH ;
 
@@ -446,9 +455,9 @@ $FE00 CONST  TBUF
 : ID. |SPC ". ;
 : |[] ."[" EX ."]" ;;
 : <BL? DUP BL U< 0; DROP '. ;; 
-: [ID] COUNT      
+: [ID] CSTR      
 : [S] |SPC |DROP     
-: [TYPE] |[] TIMES| COUNT <BL? EMIT ; 
+: [TYPE] |[] TIMES| CSTR <BL? EMIT ; 
 : ?|CR 0; 
 : |CR EX CR ;
 : `OK ."_ok" CR .">>_"  ;;  
@@ -510,7 +519,7 @@ $FE00 CONST  TBUF
 : =: 0 TOKEN?  SAME? \ FIX SAME?  
 : (=:  ?C@ 1+ |T MPUSH TWICE !- ;
       
-: ">NUM COUNT ATOI ?? ;
+: ">NUM CSTR ATOI ?? ;
 \ : (LIT, (@, (LIT ,< 
 : ">NUMC ">NUM (LIT,, ;
 	  
@@ -543,7 +552,7 @@ $FE00 CONST  TBUF
       \ FUNCTION EVAL  & EXECUTE MACRO 
 
 : (MAC (D#0 VAL  >, AT LOXEC SAFE!  
-: SEVAL COUNT  \ ' `MEMTI| ' EVAL ! 
+: SEVAL CSTR  \ ' `MEMTI| ' EVAL ! 
 : EVAL NOP  SKIP BEGIN LOXEC 
 : @EVAL  NOP  TOKEN   0= UNTIL DROP  ; \ `STACK
 : `(MAC ."(MAC"
