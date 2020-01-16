@@ -1,8 +1,8 @@
 HERE    VAL' H T!             \ TARGET FORTH HEAP
 
 THIDE (DEF      
-THIDE (TARY     
-THIDE (5ARY     
+\ THIDE (TARY     
+THIDE (QARY     
 THIDE (LARY   
 THIDE (WARY        
 THIDE CALL`      

@@ -1,6 +1,7 @@
 \ : FIX @R+ @R+ ! ;
 : `1ST H>T       \ LOADER OF INITIAL DICTIONARY == TEST-0
   \ REINIT ;;
+  CR CR (BRK
   
   \ TESTS
   CR CR CR T. ."RESTART_!"

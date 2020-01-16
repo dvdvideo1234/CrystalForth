@@ -31,8 +31,6 @@
 : 2+ (2+;  
 : (D#0  POP XR     
 : NOP;  ;
-: ?"LEN ?C@ 
-: 1+ (1+; 
 : |SWAP EX SWAP ;
 : STR  |SWAP
 : @+ PUSH @R+ POP ; 
@@ -41,12 +39,20 @@
 : @ PUSH 
 : (CON @R+ 
 : EXIT RDROP ; 
+: (@&; @R+ RDROP    
+: AND NAND NOT ; 
+: CSTR PUSH C@R+ XR POP ;
+: CSTR- 1- 
+: ?C@ DUP
+: C@ @
+: W>B (@&; ,< 255 ,
+: DEA? DUP 4+ C@ ;
+: ?"LEN ?C@ 
+: 1+ (1+; 
 : (SET2 (D#1      
 : !  PUSH 
 : POP! !R+ RDROP (; 
 : (PNT2 (D#1 XR POP! ; \ SETPOINT
-: (@&; @R+ RDROP    
-: AND NAND NOT ; 
 : HODD H DUP \ H TO FIX HERE 
 : ODD (@&; ,< 1 , 
 ' ODD 2+ =: BYE 
@@ -67,7 +73,6 @@
 $F800 CONST  TBUF
     1 CONST `1
    32 CONST BL  \   16 CONST 1H  
-: W>B (@&; ,< 255 ,
 : EVEN (@&; ,< -2 , 
 : |NIP EX NIP ;   
 : C@A+ XA C@R+ XA ;
@@ -75,13 +80,12 @@ $F800 CONST  TBUF
 : C! PUSH C!R+ RDROP ; 
 : (VAR3 (D#2 ;;      
 : !I J ! ; 
-: CSTR- 1- ?C@ ;
-: C@ ?C@ NIP ;   
-: CSTR ?C@ U1+ ;
 : A-L XEP|  
 : I- J
 : - NEG 
-: + +2/ DROP ; 
+: + +2/
+: DROP DROP; 
+: |DROP EX DROP;
 : = - 0= ;
 : (@+; @R+ RDROP + ;  
 : I J ;
@@ -90,7 +94,7 @@ $F800 CONST  TBUF
 : <>; - 
 : 0<>;  0=          
 : 0;  (IF EXIT ;; 
-: 2* DUP +2/  DROP ; 
+: 2* DUP +2/  DROP; 
 : NUP XEP| DUP ;
 : RANGE>S 1+     
 : OVER- OVER - ;  
@@ -104,8 +108,6 @@ $F800 CONST  TBUF
 : A+L XEP| 
 : I+ J + ;   
 : (<RNG| RANGE>S A+L STR| ;
-: U* |DROP 
-: UM* A! 0 TWICE TWICE +* +* +* +* ;
 : U/ |NIP 
 : U/MOD |SWAP
 : (U/ A! 0 
@@ -124,16 +126,15 @@ $F800 CONST  TBUF
 \ SEARCH PRIMITIVES  ------------------
 
 : `NOSCN RDROP J SKIP
-: `SCN POP NOT XR DROP POP POP + ; 
+: `SCN POP NOT XR DROP DROP POP POP + ; 
 : SCN|  A! DUP XR  PUSH (FOR CALL BEGIN J EXECUTE
  (IF `SCN  THEN (NEXT RELS<  `NOSCN ; 
 : B?" PUSH  \ BYTE "STRING" B?" -- INDEX
 : (BSCN XR CSTR POP  \ BYTE :"PROC" -- INDEX
-: CSCAN |NIP SCN|    \ ADR LEN BYTE -- INDEX
+: CSCAN SCN|    \ ADR LEN BYTE -- INDEX
 : C@+= CSTR A@ - ; 
-: WSCAN |NIP SCN| STR A@ - ;
-: CSKIP  |NIP SCN| C@+= 0= ;
-\ : CSKIP |NIP SCN| C@+= 0= ;
+: CSKIP SCN| C@+= 0= ;
+: WSCAN SCN| STR A@ - ;
 : ("SW ("SKIP B?" 1+ 
 : (XARY 2* POP + @
 : `(XARY PUSH; 
@@ -154,11 +155,7 @@ $F800 CONST  TBUF
 ' `EVALCNT   CONST LTIB 
 ' `EVALEND   VALUE ETIB
 : |T CALL EX (SET2 THEN ,<   $D800 CONST T \ VOCABULARY TOP
-\ : |STATE    CALL >, XR EXECUTE  
-\ : LOC!  POP  (SET2 THEN ,<
-\ 0 CONST STATE@                \ FORTH STATE 
-\ : LOXEC STATE@ PUSH ;         \ LOCATE AND EXECUTE
->, (PNT2 ,<  0 DEFER LOXEC 
+>, (PNT2 ,<  0 DEFER LOXEC \ LOCATE AND EXECUTE \ FORTH STATE 
 >, (PNT2 ,<  0 DEFER REINIT 
 : (@,
 : @,  @  
@@ -182,17 +179,12 @@ N: TIBC@ ' C@ ,
 N: TIB^ ' NOP; , 
 N: TIB    ' LTIB ,
 =, TIBC! ' C! ,
-: TIB- |LTIB 1- ; \ : TIB+ |LTIB 1+ ; 
+: TIB- |LTIB 1- ; 
+: TIB+ |LTIB 1+ ; 
 
 \ HERE .  TEST3 1338
 
 \ MEMORY  PRIMITIVES  ------------------
-
-: "-  """-" |BEFTOR  ?"LEN 
-: MEM=   PUSH A! XR VAL HODD \ SRC DST LEN --> >R >A LEN FLGCHAR
-   IF C@R+ XA C@R+ = (IF `MEM=; THEN
-   2/ AHEAD BEGIN @R+ XA @R+ = (IF `MEM=; THEN UNTIL-  
-: `MEM=; RDROP (1+;
 
 : S>"! XEP| DUP J A! CALL \ C!A+ 
 : `MEMTO STR| CSTR     THEN \ C!A+
@@ -234,7 +226,8 @@ N: ERASE 0 ,  =, BLANK 32 ,
 : `(MAC (MAC ,< 4 C, ,"(MAC"  2ALIGNED
 : |#,, EX (LIT, , ;
 
-: |BEFTOR ."_<BEFORE_" ID. CR (BRK EX CR (BRK ."_AFTER>_" ;
+: |BEFTOR ."_<BEFORE_" ID. CR (BRK EX ."_AFTER>_" CR (BRK ;
+
 : `CSCAN? TIB J CSCAN
 : `LASTSCAN (-IF CALL  DROP  LTIB THEN ;
 : `SKIPBL? J BL <>; TIB J CSKIP 
@@ -255,15 +248,26 @@ N: ERASE 0 ,  =, BLANK 32 ,
 
 \ NUMBERS ---------------------------
 
-\ : BASE! (2- W>B 2+ ,< 10 VALUE `BASE 
-: ``DIG? (BSCN ,< 10 C, ,"0123456789" 2ALIGNED
-: `10* ``DIG? XEP| CALL (| - 0 THEN (TARY ,<
 : OPT; `1 LTIB U< 0<>; EXIT ;
+: `OPT? (BSCN ,< 5 C, ,"'^#$%" 2ALIGNED
 : `SIGN OPT; TIBC@ '- <>; TIB- EX XEP| NEG ;
-' `10* VECTOR vDIG 
+HERE >, (D#0 @
+: BASE! 2- W>B 2+ ,< 10 VALUE BASE 
+N: DEC 10 , N: BIN 2 , N: HEX 16 ,  DROP
+: `DIG# BASE! 0 ;
+: `DIG? -1 BASE TIBC@ SCN| 1+ DUP ALPHA A@ - ;
+: `DIG `DIG? -IF ?XEP|
+: `BASEZ TIB- 
+: `BASE*+ (| + XEP| BASE
+: U* |DROP 
+: UM* A! 0 TWICE TWICE +* +* +* +* ;
+: `DIG' TIBC@ `BASEZ ;
+: `DIG^ TIBC@ 31 AND `BASEZ
+: `G1 ;THEN OPT;  DROP A@ `OPT? (-IF NOP;
+ TIB-  ?XEP| (XARY `DIG' `DIG^ `DIG# HEX BIN ,<
 
-: ATOI MEMTI| `SIGN 0 LTIB (IF `1  BEGIN TIBC@
- vDIG  DUP 1+   0; +  TIB- LTIB 0= UNTIL  0  ; 
+: ATOI MEMTI| DEC 0 `SIGN BEGIN LTIB WHILE 
+ `DIG 1+   0; REPEAT  LTIB  ; 
 
 : ">NUMC |#,,    
 : ">NUM CSTR ATOI ?? ;
@@ -288,9 +292,14 @@ N: ERASE 0 ,  =, BLANK 32 ,
 : TARG,< TO LOXEC  "TARG,<" |BEFTOR 
 : `INTERP `[]OPER
 : FND? T  "FND?" |BEFTOR 
-: FND `FND| 4+ CR OVER ID. DUP ID. "- 
-CR (BRK ."END-FND"
-;;
+: FND `FND| 4+ CR OVER ID. DUP ID. 
+: "-  ?"LEN 
+: MEM=   PUSH A! XR VAL HODD \ SRC DST LEN --> >R >A LEN FLGCHAR
+   IF C@R+ XA C@R+ = (IF `MEM=; THEN
+   2/ AHEAD BEGIN @R+ XA @R+ = (IF `MEM=; THEN UNTIL-  
+: `MEM=; RDROP (1+;
+
+
 
       
       \   COMPILER
