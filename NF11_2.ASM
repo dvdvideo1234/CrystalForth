@@ -8,18 +8,9 @@ TO_     =  -2
 AT_     =  -4
 VL_     =  2
 
-JMPS    MACRO LBL
-          jmp  SHORT LBL
-        ENDM
-
-DROP	 MACRO REG
-		  LODSW
-        ENDM
-		
-DROPREG MACRO REG
-		  DROP
-          RCHG REG
-        ENDM
+JMPS   MACRO LBL
+  jmp SHORT LBL
+ENDM
 
 SKIPA   MACRO
         DB    03DH
@@ -29,45 +20,68 @@ SKIPB   MACRO
         DB    03CH
         ENDM
 
-SKIPr   MACRO reg
-        mov   reg,0
-        org   $-2
-        ENDM
+SKIPR   MACRO reg
+  mov   reg,0
+  org   $-2
+ENDM
+
+SKIPC   MACRO reg
+  mov   reg,0
+  org   $-1
+ENDM
 
 TO_R    MACRO  REG
   PUSH   REG
-        ENDM
+ENDM
 		
 R_TO    MACRO  REG
   POP    REG
-        ENDM
+ENDM
 
-rchg    macro   reg
-  xchg  ax,reg
-        endm
-
-__ALIGN  MACRO  FLAG
-        IF ($-@_START+FLAG) AND 1
-        NOP
-        ENDIF
-        ENDM
+_ALIGN1  MACRO 
+  IF ($-@_START+1) AND 1
+  NOP
+  ENDIF
+ENDM
 
 _ALIGN  MACRO
-        __ALIGN 0
-        ENDM
+  IF (($-@_START) AND 1
+  NOP
+  ENDIF
+ENDM
+
+P_ MACRO LBL
+  ALIGN_ 
+LBL = ($ / 2) 
+  ENDM
+        
+L_  MACRO LBL
+  ALIGN_ 
+LBL = ($ / 2) + 08000H
+  ENDM
 
 ;  ASSIGNMENT OF THE REGISTERS
 
-ip  = DI        ; ip INSTRUCTION POINTER for THE interpretter
-top = AX		; DATA STACK TOP  REGISTER
-NXT = [SI] ; DATA STACK NEXT REGISTER
-dsp = SI		; dsp DATA STACK POINTER
-rsp = SP		; rsp RETURN STACK POINTER
-ar  = DX        ; address  register
-W   = BX		; WORK REGISTER
-WL	= BL		; LOWER HALF OF THE WORK REGISTER
-TMP = CX
-TL  = CL
+ip  = SI        ; ip INSTRUCTION POINTER for THE interpretter
+top = BX		; DATA STACK TOP  REGISTER
+dsp = SP		; dsp DATA STACK POINTER
+rsp = BP		; rsp RETURN STACK POINTER
+ar  = DX    ; ARITHMETIC  register
+W   = AX		; WORK REGISTER
+RA  = DI		; RETURN REGISTER
+
+; CX DI SCRATCH
+; MAIN  LOOP
+@NEST:				; (NEST
+  XCHG  IP,W
+@PUSH:
+  TO_R  W
+_MAIN:
+  LODSW
+  SHL W,1
+  jC	@NEST
+  JMP   W
+
 
 ;
 ; MINIMAL SET INTERPRETTER COMMANDS
@@ -91,7 +105,20 @@ MyCseg  segment para  use16
 @VOCTOP= @TIB * 12    	; -6144 = 4 BUFFERS * 1024 + TOTAL
 
 @_Start   Label byte
-  jmpS   _start
+  mov   bx,1000h     ; only 64k allocate
+  mov   ah,4ah
+  int   21h
+  MOV   AX,3
+  INT   010H
+
+P_ _ABORT:
+  MOV   RSP,@RTOP
+  MOV   DSP,@STOP
+  CLD
+  CALL  @_RET
+@_INIT:    
+  DW	0  
+
 ;--------------------------------------------------------
 ; VARIABLES
 ;--------------------------------------------------------
@@ -113,21 +140,6 @@ _DX DW 0
 @_FL:    
   DW	0
 _FL DW 0
-
-_start:  
-  mov   bx,1000h     ; only 64k allocate
-  mov   ah,4ah
-  int   21h
-  _ALIGN
-@_ABORT:
-  CLD
-  MOV   RSP,@RTOP
-  MOV   DSP,@STOP
-  __ALIGN 1
-  CALL  @_RET
-@_INIT:    
-  DW	0  
-
   
 @INIREG:
   POP	DI
@@ -300,16 +312,15 @@ _DROP:
 @NEST:				; (NEST
   PUSH	ip
   mov	IP,W
+  CMPSW
 _MAIN:
-  MOV	w,[IP]
-  SCASW ; LEA	IP,[IP+2]
-  TEST	WL,1
-  jE	@NEST
-  DEC	W
+  LODSW
+  SHL W,1
+  jC	@NEST
+  CMPSW
   JMP   W
 
 ;  STACK COMMANDS   PUSH DUP J POP
- _ALIGN
 @_PUSH:				; PUSH,
   TO_R	TOP
   JMPS   _DROP  

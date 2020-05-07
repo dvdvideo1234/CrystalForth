@@ -1,4 +1,4 @@
-Turbo Assembler	 Version 3.2	    12/11/18 17:20:52	    Page 1
+Turbo Assembler	 Version 3.2	    12/14/19 15:46:41	    Page 1
 VMF2.asm
 
 
@@ -60,7 +60,7 @@ VMF2.asm
      55
      56				     WPUSH MACRO
      57					    SJMP XCX_PUSH
-Turbo Assembler	 Version 3.2	    12/11/18 17:20:52	    Page 2
+Turbo Assembler	 Version 3.2	    12/14/19 15:46:41	    Page 2
 VMF2.asm
 
 
@@ -122,7 +122,7 @@ VMF2.asm
     112	      =0004		     T_JUMP  =	  ($-T)/2
     113	0108  030Ar			     DW	  _JUMP
     114	      =0005		     T_SCALL =	  ($-T)/2
-Turbo Assembler	 Version 3.2	    12/11/18 17:20:52	    Page 3
+Turbo Assembler	 Version 3.2	    12/14/19 15:46:41	    Page 3
 VMF2.asm
 
 
@@ -184,7 +184,7 @@ VMF2.asm
     169	      =001F		     T_SWAP  =	  ($-T)/2
     170	013E  03BDr			     DW	  _SWAP
     171
-Turbo Assembler	 Version 3.2	    12/11/18 17:20:52	    Page 4
+Turbo Assembler	 Version 3.2	    12/14/19 15:46:41	    Page 4
 VMF2.asm
 
 
@@ -246,7 +246,7 @@ VMF2.asm
     226	0172  039Fr			     DW	   _ZLESS?
     227	      =003A		     T_ZERO?  =	   ($-T)/2
     228	0174  0393r			     DW	   _ZERO?
-Turbo Assembler	 Version 3.2	    12/11/18 17:20:52	    Page 5
+Turbo Assembler	 Version 3.2	    12/14/19 15:46:41	    Page 5
 VMF2.asm
 
 
@@ -308,7 +308,7 @@ VMF2.asm
 1   283	022E  5A			     POP DX
 1   284					     X
 2   285	022F  94			     XCHG  AX,SP
-Turbo Assembler	 Version 3.2	    12/11/18 17:20:52	    Page 6
+Turbo Assembler	 Version 3.2	    12/14/19 15:46:41	    Page 6
 VMF2.asm
 
 
@@ -370,7 +370,7 @@ VMF2.asm
     340
     341	0280			     LCLS_DP:XDUP
 1   342					     X
-Turbo Assembler	 Version 3.2	    12/11/18 17:20:52	    Page 7
+Turbo Assembler	 Version 3.2	    12/14/19 15:46:41	    Page 7
 VMF2.asm
 
 
@@ -432,7 +432,7 @@ VMF2.asm
     397					     SJMP  X_XNEXT
 1   398	02BA  EB 3A			     jmp  SHORT	X_XNEXT
     399
-Turbo Assembler	 Version 3.2	    12/11/18 17:20:52	    Page 8
+Turbo Assembler	 Version 3.2	    12/14/19 15:46:41	    Page 8
 VMF2.asm
 
 
@@ -494,7 +494,7 @@ VMF2.asm
     454	02EE  47			     INC  DI
     455	02EF  57			     PUSH DI
     456
-Turbo Assembler	 Version 3.2	    12/11/18 17:20:52	    Page 9
+Turbo Assembler	 Version 3.2	    12/14/19 15:46:41	    Page 9
 VMF2.asm
 
 
@@ -556,7 +556,7 @@ VMF2.asm
     511	031F  51			     PUSH CX
     512	0320  57			     PUSH DI
     513					     XSKIPDI
-Turbo Assembler	 Version 3.2	    12/11/18 17:20:52	    Page 10
+Turbo Assembler	 Version 3.2	    12/14/19 15:46:41	    Page 10
 VMF2.asm
 
 
@@ -618,7 +618,7 @@ VMF2.asm
 1   568	0353  EB 07			     jmp  SHORT	_DROP
     569	0355  89 14		     _TOP:   MOV   [SI],DX    ;	!A+
     570	0357  46			     INC   SI
-Turbo Assembler	 Version 3.2	    12/11/18 17:20:52	    Page 11
+Turbo Assembler	 Version 3.2	    12/14/19 15:46:41	    Page 11
 VMF2.asm
 
 
@@ -680,7 +680,7 @@ VMF2.asm
     625					     SJMP _CARRY
 1   626	0396  EB 09			     jmp  SHORT	_CARRY
     627	0398			     _ULESS?:X		     ; U<
-Turbo Assembler	 Version 3.2	    12/11/18 17:20:52	    Page 12
+Turbo Assembler	 Version 3.2	    12/14/19 15:46:41	    Page 12
 VMF2.asm
 
 
@@ -740,7 +740,7 @@ VMF2.asm
     680				     ;	     db	  tbp	   ;brkpt
     681	03BD			     MyCseg  ends
     682					     end  T
-Turbo Assembler	 Version 3.2	    12/11/18 17:20:52	    Page 13
+Turbo Assembler	 Version 3.2	    12/14/19 15:46:41	    Page 13
 Symbol Table
 
 
@@ -748,9 +748,9 @@ Symbol Table
 
 Symbol Name		Type   Value			   Cref	(defined at #)
 
-??DATE			Text   "12/11/18"
+??DATE			Text   "12/14/19"
 ??FILENAME		Text   "VMF2	"
-??TIME			Text   "17:20:52"
+??TIME			Text   "15:46:41"
 ??VERSION		Number 0314
 @@1			Near   MYCSEG:02B0		   383	#385
 @@2			Near   MYCSEG:026F		   319	#328
@@ -802,7 +802,7 @@ T_GETV2			Number 003D			   #233
 T_HLIT			Number 0012			   #142
 T_IFM			Number 0024			   #180
 T_IFND			Number 0025			   #182
-Turbo Assembler	 Version 3.2	    12/11/18 17:20:52	    Page 14
+Turbo Assembler	 Version 3.2	    12/14/19 15:46:41	    Page 14
 Symbol Table
 
 
@@ -864,7 +864,7 @@ XD_PUSH			Near   MYCSEG:02F3		   #461
 XGOTO			Near   MYCSEG:03B3		   #654
 XLIT			Near   MYCSEG:0247		   #300	 312
 XQARY			Near   MYCSEG:02BC		   #400
-Turbo Assembler	 Version 3.2	    12/11/18 17:20:52	    Page 15
+Turbo Assembler	 Version 3.2	    12/14/19 15:46:41	    Page 15
 Symbol Table
 
 
@@ -926,7 +926,7 @@ _NEG			Near   MYCSEG:02C6		   #409
 _NEXT			Near   MYCSEG:0383		   185	#609
 _NOP			Near   MYCSEG:02F7		   105	267  354  407  412  423	 #468  481  485	 492  502  526	558  622
 _NOT			Near   MYCSEG:02C7		   190	#410
-Turbo Assembler	 Version 3.2	    12/11/18 17:20:52	    Page 16
+Turbo Assembler	 Version 3.2	    12/14/19 15:46:41	    Page 16
 Symbol Table
 
 

@@ -16,6 +16,23 @@ SJMP  MACRO  ADDRS
 next  MACRO
         jmp  _next
       ENDM
+PUSHREG   MACRO
+        jmp  _next
+      ENDM
+DROPREG   MACRO
+        jmp  _next
+      ENDM
+     
+swapREG   MACRO
+        jmp  _next
+      ENDM
+TRACE_On   MACRO
+        jmp  _next
+      ENDM
+TRACE_OFF   MACRO
+        jmp  _next
+      ENDM
+    
 num   MACRO n
           dw n + n + 80h
       ENDM
@@ -48,6 +65,9 @@ ppppp = $
   dw    qqqqq
 qqqqq = ppppp
   endm
+  
+  
+FNPAGE = 100h  
 
 MyCseg  segment para  use16
         assume cs: MyCseg,  ds: MyCseg, ss: MyCseg
@@ -56,6 +76,11 @@ MyCseg  segment para  use16
 
 Start   Label byte
 
+SUB4TH:POP   CX
+        PUSH  BX
+        MOV   BX,CX
+        next
+        
 XRET4TH:POP   CX
         PUSH  BX
         MOV   BX,CX
@@ -68,7 +93,7 @@ XEXIT:  POP  BX
         NEXT
 _DO_next:
         POP   CX
-        JCXZ  _SKIP1
+        JCXZ  _SKIP
         DEC   CX
         PUSH  CX
 _SJUMP: MOV   CL,[BX]
@@ -79,15 +104,15 @@ _SJUMP: MOV   CL,[BX]
 @@1:    ADD   BX,CX
         next
 
-@@3:    DEC  CX
+@3:     DEC  CX
         MOV  CH,FNPAGE/256
         SJMP _EX
 
-_SKIP:  INC  BX
+_SKIP: INC  BX
 _next:  MOV  CX,[BX]
-        INC  BX
+_ex2:   INC  BX
         TEST CL,1
-        JNE  @@3
+        JNE  @3
         INC  BX
 _EX:    XCHG CX,DI
         jmp  pw [di]
@@ -97,12 +122,12 @@ _IF:    MOV  CX,AX
         SJMP _SKIP
 
 _IFM:   OR   AX,AX
-        JM   _SKIP
+        Jns   _SKIP
         SJMP _SJUMP
 
 _FOR?:  POP  CX
         DEC  CX
-        JM   _SJUMP
+        Jns   _SJUMP
         PUSH CX
         SJMP _SKIP
 
@@ -177,7 +202,7 @@ ExecAt: scasw
 ExecAt0:MOV  cx,[DI]   ;@addr
         jcxz _psh2
         xchg ax,cx
-        JMP  short _ex2
+        JMP   _ex2
 
 XVBLK:  INC   BX            ; : VBLK  DUP
         JZ    @@1           ;     -1 = IF DROP EXECAT EXIT ELSE DUP
@@ -186,6 +211,9 @@ XVBLK:  INC   BX            ; : VBLK  DUP
         JNZ   execAt1       ;          THEN THEN ;
 @@1:    POP   BX            ;
         jmp   short execAt  ;
+
+xEXEC:
+
 
 xqcomm: inc  bx
         pop  bx
@@ -254,6 +282,7 @@ X_FIND:
 @@8:
   MOV   SI,DX
   SWAPREG       ; _FIND_
+  
 _strequ:
   mov   cx,255
 _strequ1:
@@ -267,8 +296,11 @@ _strcmp:
   jz      _l6
 _l5:
   add     si,cx
-_l6:  ret
-X_W:  mov   di,bx ; _WORD ;X_W:            ; _WORD  ;
+_l6:  
+  ret
+  
+X_W:  
+  mov   di,bx ; _WORD ;X_W:            ; _WORD  ;
       pop   bx            ;  mov   di,bx            ;
       pop   ax            ;  pop   bx               ;
       pop   dx            ;  pop   ax               ;
@@ -361,6 +393,7 @@ okdig:  sub   al,'0'
         cmp   ax,di
         cmc
 notdig: ret
+
 convn:  lodsb
         call  digit?
         jc    notdig
@@ -381,6 +414,7 @@ _mul:   xchg  ax,cx
         mul   di
         add   bx,ax
 @@1:    ret
+
 setvar2:scasw
 setvar1:scasw
 setvar: scasw
@@ -433,11 +467,13 @@ cnt_GT0:mov  cx,di
         add  di,cx
         mov  Ax,[DI]
         RET
+        
 _HND_AT:scasw
         CALL cnt_GT0
         xchg cx,di
         DEC  pw [di]
         PUSHREG
+        
 _HND_TO:add  di,4
         inc  pw [di]
         CALL cnt_GT0
@@ -452,6 +488,7 @@ XDOS1:  INT 21H
         JNC @@1
         NOT AX
 @@1:    SWAPREG
+
 XQKEY:  MOV  AH,01h
         INT  016h
         MOV  AL,0FFH
@@ -553,7 +590,7 @@ XRBLK:  MOV   CH,3FH
         rep   stosb
         db    0b9h
 @@3:    MOV   Al,253
-@@1:    MOV   DERR,AX
+@@1:    MOV   word ptr DERR,AX
 @@2:    DROPREG
         ; -----------  IO  PRIMITIVES  ^^^^^^^^^^^^^^^
 
@@ -1402,6 +1439,141 @@ V_id:   dw    jsr,cfname,TQDUP,EXIT0
   DW tonemi,TQdup,tZbran,@@3
   dw tLIT,@@3+2,TPLUS,TFETCH,N_ID
 @@3: dw N_ID,TEXIT,ADRTO,ADRAT
+
+
+_CALL:
+_DOES:
+CALL_D2:
+DECIM:
+DERR:
+DOVAR:
+DOVAR2:
+FCH_P2:
+HERE:
+JSR:
+JSR1:
+SKOBAL:
+T_SDOT:
+TC2I:
+TCAT:
+TCOUNT:
+TCSTORE:
+TFETCH:
+TTWOAT:
+TWCOUNT:
+TZSTOR:
+UV0:
+UVR0:
+UVS0:
+X?EMIT:
+X0EXIT:
+X2PWR:
+X2SLS:
+X2STAR:
+XABS:
+XADRSP2:
+XALPHA:
+XAND:
+XBLANK:
+XBRAN:
+XCNTDO:
+XDABS:
+XDIV:
+XDIVMOD:
+XDMINUS:
+XDNEGAT:
+XDO:
+XDOP:
+; XEXEC:
+XFNAME:
+XFOR:
+XJMP:
+XLEAVE:
+XLO:
+XLOOP:
+XMOD:
+XNEGATE:
+XNEXT:
+XNOT:
+XOF:
+XONEMI:
+XORE:
+XPACK:
+XPERF:
+XPLOOP:
+XPLUS:
+XQEXEC:
+XSHIFT:
+XSUBT:
+XTWOMI:
+XUMSTAR:
+XUNPACK:
+XXORX:
+XZBRAN:
+TOHERE: 
+TSTORE2: 
+T@SWP2: 
+IMM: 
+TSTRCOM: 
+TSDOT: 
+BCOMMA: 
+IMM: 
+TSTR: 
+TPSTORE: 
+DOLIT: 
+TSTORE1: 
+TCOMMAB: 
+SKOBAR: 
+AHEADER: 
+AHEADER: 
+ASMUDGE: 
+T@SWP2: 
+TSTRCOM: 
+XNAMCF: 
+FRST: 
+UVBASE: 
+_M1: 
+_ZERO: 
+XRFR: 
+XTOR: 
+XRATPW: 
+XRATPB: 
+XRPGT: 
+XRPST: 
+XDROP: 
+XDROP2: 
+XRDROP: 
+XDUP: 
+XDUP2: 
+XTUCK: 
+XNIP: 
+XCHK: 
+XCHK: 
+XUCHK: 
+X0LESS: 
+XZCHK: 
+XZCHK: 
+XZCHK: 
+XI: 
+XOVER: 
+XOVER2: 
+XQDUP: 
+XROT: 
+XMROT: 
+XSPGT: 
+XSPST: 
+XSWAP: 
+XSWAP2: 
+XSKPS: 
+XSKPSW: 
+@MYARY: 
+POPR: 
+XRDROP: 
+J4TH: 
+ADRTO: 
+DOCOLON:
+DOSEMI:
+ADRAT:
 
 ; ---------------    DEBUGER  ------------------^^^^^^^^^^^
 

@@ -7,6 +7,7 @@
 =! `MEM=;
 =! SPC
 =! CR
+=! 1-
 =! [ID]
 =! ID.
 =! [S]  \ "
@@ -26,9 +27,10 @@
 : EXECUTE PUSH;
 : IXEC J PUSH; 
 : (D#2  POP XR     \ DOES PRIMITIVE'S METHODS
-: 4+ (4+;  
+: 4+ (@+;  ,< 4 ,
 : (D#1  POP XR     
-: 2+ (2+;  
+: 2+ (@+;  ,< 2 ,
+: 2- (@+;  ,< -2 ,
 : (D#0  POP XR     
 : NOP;  ;
 : |SWAP EX SWAP ;
@@ -39,8 +41,10 @@
 : @ PUSH 
 : (CON @R+ 
 : EXIT RDROP ; 
-: (@&; @R+ RDROP    
-: AND NAND NOT ; 
+: AND NAND NOT ;
+-84 CONST INBUF
+64  CONST 1L
+\ : ACCZ INBUF 1L (ACC 
 : CSTR PUSH C@R+ XR POP ;
 : CSTR- 1- 
 : ?C@ DUP
@@ -48,7 +52,7 @@
 : W>B (@&; ,< 255 ,
 : DEA? DUP 4+ C@ ;
 : ?"LEN ?C@ 
-: 1+ (1+; 
+: 1+ (@+; ,< 1 , 
 : (SET2 (D#1      
 : !  PUSH 
 : POP! !R+ RDROP (; 
@@ -87,7 +91,7 @@ $F800 CONST  TBUF
 : DROP DROP; 
 : |DROP EX DROP;
 : = - 0= ;
-: (@+; @R+ RDROP + ;  
+\ : (@+; @R+ RDROP + ;  
 : I J ;
 : >DEA 4+ 
 : NAME> CSTR + ; 
@@ -120,7 +124,8 @@ $F800 CONST  TBUF
 : SWAPC! SWAP C! ;  \ TEST1 1032
 : |@! @+ 2- XR EXECUTE POP! ;
 : ++ |@! 1+ ;
-: -- |@! 1- ;
+: -- |@! 
+: 1- (@+; ,< -1 ,
 : +!  |@! + ;
 
 \ SEARCH PRIMITIVES  ------------------
@@ -228,15 +233,15 @@ N: ERASE 0 ,  =, BLANK 32 ,
 
 : |BEFTOR ."_<BEFORE_" ID. CR (BRK EX ."_AFTER>_" CR (BRK ;
 
-: `CSCAN? TIB J CSCAN
+: `SCAN? TIB J CSCAN
 : `LASTSCAN (-IF CALL  DROP  LTIB THEN ;
-: `SKIPBL? J BL <>; TIB J CSKIP 
+: `SKIP? J BL <>; TIB J CSKIP 
 : `PARSE-LEN?  |LTIB  SWAP `LASTSCAN - ;
 : TOKEN? |N?? 
 : TOKEN "TOKEN" CR TIB [S] |BEFTOR 
    BL CALL   ?C@   ;THEN   
 : WORD  CALL  TBUF  S>"! '` C!A+ ;THEN \ ( PARSE: SOURCE FIX )
-: PARSE NOP  PUSH `SKIPBL?  TIB^ `CSCAN? DUP `PARSE-LEN? EXIT ;
+: PARSE NOP  PUSH `SKIP?  TIB^ `SCAN? DUP `PARSE-LEN? EXIT ;
 : "STR, '" 
 : `", WORD ?C@ N?? 
 : ", CSTR v", DUP C, 
@@ -292,12 +297,12 @@ N: DEC 10 , N: BIN 2 , N: HEX 16 ,  DROP
 : TARG,< TO LOXEC  "TARG,<" |BEFTOR 
 : `INTERP `[]OPER
 : FND? T  "FND?" |BEFTOR 
-: FND `FND| 4+ CR OVER ID. DUP ID. 
+: FND `FND| 4+ CR OVER ID. DUP ID. ."HAHA"
 : "-  ?"LEN 
 : MEM=   PUSH A! XR VAL HODD \ SRC DST LEN --> >R >A LEN FLGCHAR
    IF C@R+ XA C@R+ = (IF `MEM=; THEN
    2/ AHEAD BEGIN @R+ XA @R+ = (IF `MEM=; THEN UNTIL-  
-: `MEM=; RDROP (1+;
+: `MEM=; RDROP 1+ ;
 
 
 
@@ -308,7 +313,7 @@ N: DEC 10 , N: BIN 2 , N: HEX 16 ,  DROP
   ' TFND   VECTOR vFND    \ SEARCH ON COMPILING  
 : TARG: NOP  TARG:!  \ CSP!  \ MAKE COLON ENTRY
 : >, TO LOXEC   `[]OPER TBUF ++ vFND TBUF -- IF `1 ;THEN
- vFND (2+; ,<
+ vFND 2+ ; 
 
                 
       \ FUNCTION EVAL  & EXECUTE MACRO 
@@ -324,8 +329,9 @@ N: DEC 10 , N: BIN 2 , N: HEX 16 ,  DROP
 >,     \ MAIN LOOP 
  NOP   \ INITIALIZATION  ON ABORT
  NOP   \ ERROR PRINT
-: QUIT BEGIN
-   NOP  \ READLINE FROM KBD
+: QUIT
+ BEGIN
+   NOP \ ACCZ  \ READLINE FROM KBD
    @EVAL \ EVAL INPUT
 : vOK   NOP  \ OK!
    AGAIN ,<     \ TO HERE 

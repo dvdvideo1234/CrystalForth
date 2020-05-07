@@ -70,7 +70,7 @@ CREATE `SPEC? ,T ",!.
 : ADDBLK BLOCK 1K TWRITE3 ;
 : TSAVE  TPRUNE  
     `TOTAL OFF 
-    TOKEN? FOPEN {  FCREATE} 
+    TOKEN? FOPEN \ {  FCREATE} 
     TO `T_HND   
     TD 2+ H OVER- TWRITE3
     2 TD @  " --END--" TFND ??# DROP 
@@ -114,7 +114,7 @@ M: TWICE` CALL THEN;
 
 
 \ 31
-{ DEFINITIONS } \ : VARCON :(VAR2 CONST ;
+\ { DEFINITIONS } \ : VARCON :(VAR2 CONST ;
 : =H;, =H ;, ;
 : QUAN    :(VAR3  
 : VALUE   :(SET2  
@@ -158,17 +158,15 @@ M: TWICE` CALL THEN;
     FX TvIS:? AT vISW?   
     FX NOP AT vADJ
  
-   CALL `NUM `EXE `NUM, `COM THEN OP[]! 
-; { TINIT}
+   CALL `NUM `EXE `NUM, `COM THEN OP[]!  ;  \ { TINIT}
 
 : T: (ZST =H >, ;
 
 : .BLK #. /DBG ;
 : STOP (LIT TO ESC  @  (LIT (; - 0; MARK@ HIDROP INITO ;;
 : START STOP 
-: EGG CR CR ." EGG " 
-  23000 HIPUSH MARK!  
-  FX NOP TO ESC
+\ : EGG
+ CR CR ." EGG "    23000 HIPUSH MARK!    FX NOP TO ESC
   " TARAMPOL.CF" INCLUDED \ 34 LOAD      
    <H> TINIT  
   " F_KRNL.CF" INCLUDED \ 36 62 THRU 

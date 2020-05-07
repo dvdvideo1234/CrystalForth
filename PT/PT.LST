@@ -1,4 +1,4 @@
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 1
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 1
 PT.asm
 
 
@@ -60,7 +60,7 @@ PT.asm
      55				     ;	_OVER:	_DUP ;	MOV  AX,[SI+WS]	;
      56				     ;	_NIP:	LEA  SI,[SI+WS]	;
      57				     ;	_B:	_DUP ; MOV AX,DX ;
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 2
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 2
 PT.asm
 
 
@@ -122,7 +122,7 @@ PT.asm
     112
     113				     locals  @@
     114	      =	dword ptr	     pd	 equ dword ptr
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 3
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 3
 PT.asm
 
 
@@ -184,7 +184,7 @@ PT.asm
     169				       endm
     170
     171				     nfi     macro   token
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 4
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 4
 PT.asm
 
 
@@ -246,7 +246,7 @@ PT.asm
     226
     227				     ;	     TRACE_ON		     ; !!! START TRACE
     228	0177  5B			     POP  BX
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 5
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 5
 PT.asm
 
 
@@ -308,7 +308,7 @@ PT.asm
     283	01BD  89 4E 02		     _2TOR:  MOV   [BP+2],CX ;	PUSH  SI
     284	01C0  B9			     DB	   0B9H
     285	01C1  4D		     XTOR:   DEC   BP
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 6
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 6
 PT.asm
 
 
@@ -370,7 +370,7 @@ PT.asm
     340	021B  89 76 00			     MOV  [BP],SI
     341	021E  8B F7		     XJMP:   mov  si,di
     342	0220  46		     XPC2PLS:INC  SI
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 7
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 7
 PT.asm
 
 
@@ -432,7 +432,7 @@ PT.asm
     397	0275  5B		     xdrop:  pop  bx
     398	0276  EB 0D			     JMP  SHORT	_NEXT
     399	0278  AF			     scasw
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 8
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 8
 PT.asm
 
 
@@ -494,7 +494,7 @@ PT.asm
     454	02C3  51			     PUSH CX	     ; cx bx ax
     455					     PushReg
 1   456	02C4  EB BD			     jmp  _PushAx
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 9
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 9
 PT.asm
 
 
@@ -556,7 +556,7 @@ PT.asm
     511	030F  4B			     DEC  BX
     512	0310  8A 3F		     XCAT:   MOV  BH,[BX]
     513	0312  86 FB		     xhi:    xchg bh,bl
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 10
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 10
 PT.asm
 
 
@@ -618,7 +618,7 @@ PT.asm
     568					     NEXT
 1   569	0364  E9 FF1E			     jmp  _next
     570	0367  D1 EB		     X2SLS:  SHR  BX,1
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 11
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 11
 PT.asm
 
 
@@ -680,7 +680,7 @@ PT.asm
     625	03C3  5A			     POP  DX
     626	03C4  59			     POP  CX
     627	03C5  03 C8			     add Cx,Ax
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 12
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 12
 PT.asm
 
 
@@ -742,7 +742,7 @@ PT.asm
     682	0419  8D 79 02			     LEA  DI,[BX+DI+2]
     683	041C  EB 04			     JMP  SHORT	_XSTRST
     684	041E  58		     XSTRSTO:POP  AX
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 13
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 13
 PT.asm
 
 
@@ -804,7 +804,7 @@ PT.asm
     739	046A  C3			     RET
     740	046B  E8 FFE2		     XSCANB: CALL _SCANER
     741	046E  F2> AE			     REPNE SCASB
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 14
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 14
 PT.asm
 
 
@@ -866,7 +866,7 @@ PT.asm
 1   796	04C0  E9 FDC1			      JMP _SWAPAX
     797
     798	04C3  8B 45 02		     X@PLUS: mov  AX,[di+2]
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 15
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 15
 PT.asm
 
 
@@ -928,7 +928,7 @@ PT.asm
     853
     854	0519  AC		     XBlit:  lodsb
     855	051A  32 E4		     push_al:xor  AH,ah
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 16
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 16
 PT.asm
 
 
@@ -990,7 +990,7 @@ PT.asm
     910	056B  8B D6		       MOV   DX,SI
     911	056D			     @@1:
     912	056D  5E		       pop   si
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 17
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 17
 PT.asm
 
 
@@ -1052,7 +1052,7 @@ PT.asm
     967	05B7  C3		     _l6:  ret
     968
     969	05B8  8B FB		     X_W:  mov	 di,bx ; _WORD ;
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 18
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 18
 PT.asm
 
 
@@ -1114,7 +1114,7 @@ PT.asm
    1024	0607  3C 2F		       cmp   al,'/'
    1025	0609  77 12		       ja    outitoc
    1026	060B  3C 2C		       cmp   al,','
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 19
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 19
 PT.asm
 
 
@@ -1176,7 +1176,7 @@ PT.asm
    1081					     DROPREG
 1  1082	0663  E9 FC0F			      JMP XDROP
    1083	0666  AF		     DOCON2: SCASW
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 20
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 20
 PT.asm
 
 
@@ -1238,7 +1238,7 @@ PT.asm
    1138	06BF  E8 FFD0		       CALL  TONAME
    1139	06C2  74 04		       JE    TONAME2
    1140	06C4  5F		       POP  DI
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 21
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 21
 PT.asm
 
 
@@ -1300,7 +1300,7 @@ PT.asm
 1  1195				       dstr2 '''EMIT',0
 2  1196	0703  05		       db    ??0000-$-1+0
 2  1197	0704  27 45 4D 49 54	       db    '''EMIT'
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 22
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 22
 PT.asm
 
 
@@ -1362,7 +1362,7 @@ PT.asm
    1252	0762  93			     XCHG AX,BX
    1253	0763  B9 0001		     @@4:    mov  cx,1
    1254	0766  8B 3E 0D77r		     mov  DI,LASTCH
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 23
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 23
 PT.asm
 
 
@@ -1424,7 +1424,7 @@ PT.asm
 1  1309	      =MYCSEG:07B8	     qqqqq = ppppp
    1310	07BE  07ADr 0817r 07F3r	     STDIO:  DW	   _gs_ke,_key1,_emit1
    1311
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 24
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 24
 PT.asm
 
 
@@ -1486,7 +1486,7 @@ PT.asm
 2  1366	0813			     ??0006  label   byte
 1  1367	0813  07D0r		       dw    qqqqq
 1  1368	      =MYCSEG:080A	     qqqqq = ppppp
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 25
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 25
 PT.asm
 
 
@@ -1548,7 +1548,7 @@ PT.asm
    1423	086B  8C C8		     X?CS:   MOV     AX,cs
    1424					     PUSHREG
 1  1425	086D  E9 FA13			     jmp  _PushAx
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 26
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 26
 PT.asm
 
 
@@ -1610,7 +1610,7 @@ PT.asm
 1  1480	      =MYCSEG:08B5	     ppppp = $
 1  1481				       dstr2 '0;',0
 2  1482	08B5  02		       db    ??0007-$-1+0
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 27
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 27
 PT.asm
 
 
@@ -1672,7 +1672,7 @@ PT.asm
    1537	08E5  01EBr		     tzbran  DW	  XZBRAN     ; 0BRANCH
    1538
    1539				      NF '(OF'
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 28
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 28
 PT.asm
 
 
@@ -1734,7 +1734,7 @@ PT.asm
 2  1594	0916  03		       db    ??0012-$-1+0
 2  1595	0917  28 44 4F		       db    '(DO'
 2  1596	091A			     ??0012  label   byte
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 29
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 29
 PT.asm
 
 
@@ -1796,7 +1796,7 @@ PT.asm
    1651				      NF 'LEAVE'
 1  1652	      =MYCSEG:094C	     ppppp = $
 1  1653				       dstr2 'LEAVE',0
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 30
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 30
 PT.asm
 
 
@@ -1858,7 +1858,7 @@ PT.asm
 2  1708	097C  04		       db    ??001D-$-1+0
 2  1709	097D  43 53 54 52	       db    'CSTR'
 2  1710	0981			     ??001D  label   byte
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 31
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 31
 PT.asm
 
 
@@ -1920,7 +1920,7 @@ PT.asm
    1765
    1766				       NF 'OFF'
 1  1767	      =MYCSEG:09B0	     ppppp = $
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 32
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 32
 PT.asm
 
 
@@ -1982,7 +1982,7 @@ PT.asm
    1822				     ;	      DW   XTWOATA    ;	FA
    1823				     ; NF 'FA!'
    1824				     ;	      DW   XSTOREA    ;	TO FA
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 33
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 33
 PT.asm
 
 
@@ -2044,7 +2044,7 @@ PT.asm
 1  1879	      =MYCSEG:0A05	     qqqqq = ppppp
    1880	0A0C  04B5r 0002	     tM2at   DW	  XMINS@,2  ; 2-!@
    1881				      NF '1+!'
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 34
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 34
 PT.asm
 
 
@@ -2106,7 +2106,7 @@ PT.asm
 1  1936	      =MYCSEG:0A46	     ppppp = $
 1  1937				       dstr2 'XOR!',0
 2  1938	0A46  04		       db    ??0035-$-1+0
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 35
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 35
 PT.asm
 
 
@@ -2168,7 +2168,7 @@ PT.asm
 2  1993	0A7C  04		       db    ??003B-$-1+0
 2  1994	0A7D  4D 4F 56 45	       db    'MOVE'
 2  1995	0A81			     ??003B  label   byte
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 36
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 36
 PT.asm
 
 
@@ -2230,7 +2230,7 @@ PT.asm
 1  2050	      =MYCSEG:0AB8	     ppppp = $
 1  2051				       dstr2 'SCAN',0
 2  2052	0AB8  04		       db    ??0041-$-1+0
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 37
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 37
 PT.asm
 
 
@@ -2292,7 +2292,7 @@ PT.asm
 1  2107	0AF1  0AE3r		       dw    qqqqq
 1  2108	      =MYCSEG:0AED	     qqqqq = ppppp
    2109	0AF3  088Cr		     TADRP1  DW	CFCH_P1
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 38
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 38
 PT.asm
 
 
@@ -2354,7 +2354,7 @@ PT.asm
    2164				       NF 'SHIFT'
 1  2165	      =MYCSEG:0B22	     ppppp = $
 1  2166				       dstr2 'SHIFT',0
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 39
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 39
 PT.asm
 
 
@@ -2416,7 +2416,7 @@ PT.asm
 1  2221	      =MYCSEG:0B4A	     qqqqq = ppppp
    2222	0B4F  06E2r		     TMUL DW XMULT2
    2223
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 40
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 40
 PT.asm
 
 
@@ -2478,7 +2478,7 @@ PT.asm
 2  2278	0B82  02		       db    ??0057-$-1+0
 2  2279	0B83  32 2F		       db    '2/'
 2  2280	0B85			     ??0057  label   byte
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 41
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 41
 PT.asm
 
 
@@ -2540,7 +2540,7 @@ PT.asm
    2335				      NF 'COM'
 1  2336	      =MYCSEG:0BB3	     ppppp = $
 1  2337				       dstr2 'COM',0
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 42
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 42
 PT.asm
 
 
@@ -2602,7 +2602,7 @@ PT.asm
 1  2392				       dstr2 'D+',0
 2  2393	0BE4  02		       db    ??0063-$-1+0
 2  2394	0BE5  44 2B		       db    'D+'
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 43
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 43
 PT.asm
 
 
@@ -2664,7 +2664,7 @@ PT.asm
 2  2449	0C10			     ??0069  label   byte
 1  2450	0C10  0C06r		       dw    qqqqq
 1  2451	      =MYCSEG:0C0D	     qqqqq = ppppp
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 44
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 44
 PT.asm
 
 
@@ -2726,7 +2726,7 @@ PT.asm
 2  2506	0C52  06		       db    ??006E-$-1+0
 2  2507	0C53  4F 52 44 45 52 23	       db    'ORDER#'
 2  2508	0C59			     ??006E  label   byte
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 45
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 45
 PT.asm
 
 
@@ -2788,7 +2788,7 @@ PT.asm
 2  2563	0CC9			     ??0073  label   byte
 1  2564	0CC9  0C9Er		       dw    qqqqq
 1  2565	      =MYCSEG:0CC3	     qqqqq = ppppp
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 46
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 46
 PT.asm
 
 
@@ -2850,7 +2850,7 @@ PT.asm
    2620	0D5E  1982r 1924r	     @@20:   dw	  tdrop,zr
    2621	0D62  094Ar 0D0Cr	     @@21:   Dw	  TpLOOP,@@1
    2622	0D66  1894r 1982r 08F6r	     @@22:   Dw	  ToSpan,tdrop,tex_tr
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 47
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 47
 PT.asm
 
 
@@ -2912,7 +2912,7 @@ PT.asm
 1  2677	      =MYCSEG:0D9E	     ppppp = $
 1  2678				       dstr2 'EMIT',0
 2  2679	0D9E  04		       db    ??007C-$-1+0
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 48
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 48
 PT.asm
 
 
@@ -2974,7 +2974,7 @@ PT.asm
 2  2734	0DE7			     ??0080  label   byte
 1  2735	0DE7  0DCDr		       dw    qqqqq
 1  2736	      =MYCSEG:0DDF	     qqqqq = ppppp
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 49
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 49
 PT.asm
 
 
@@ -3036,7 +3036,7 @@ PT.asm
 1  2791	      =MYCSEG:0E3E	     qqqqq = ppppp
    2792	0E47  1ACAr 185Fr 1358r	  +  REFILL  dw	jsr_TR,tib@,Tlit,80,texpect
    2793	      0050 0D02r
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 50
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 50
 PT.asm
 
 
@@ -3098,7 +3098,7 @@ PT.asm
 1  2848	0ECC  0E9Cr		       dw    qqqqq
 1  2849	      =MYCSEG:0EC8	     qqqqq = ppppp
    2850	0ECE  0218r		     XINTER: DW	JSR
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 51
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 51
 PT.asm
 
 
@@ -3160,7 +3160,7 @@ PT.asm
    2905	      1A7Br
    2906
    2907				      nf  '?,'
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 52
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 52
 PT.asm
 
 
@@ -3222,7 +3222,7 @@ PT.asm
 2  2962	0F90  07		       db    ??0093-$-1+0
 2  2963	0F91  3E 53 54 52 45 41	4D     db    '>STREAM'
 2  2964	0F98			     ??0093  label   byte
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 53
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 53
 PT.asm
 
 
@@ -3284,7 +3284,7 @@ PT.asm
    3019
    3020				      NF '(find'
 1  3021	      =MYCSEG:0FFD	     ppppp = $
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 54
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 54
 PT.asm
 
 
@@ -3346,7 +3346,7 @@ PT.asm
    3076	105D  05B8r		     T_W DW X_W
    3077
    3078				      NF 'BLWORD'
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 55
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 55
 PT.asm
 
 
@@ -3408,7 +3408,7 @@ PT.asm
 1  3133	      =MYCSEG:10B4	     qqqqq = ppppp
    3134	10BE  0218r		     ZCLOSE: DW	JSR
    3135	10C0  0EA6r 08E5r 10CCr	  +  @@1    dw	HND,TZBRAN,@@2,TCLOSEF,TBRAN,@@1
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 56
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 56
 PT.asm
 
 
@@ -3470,7 +3470,7 @@ PT.asm
    3190	      53 20
 2  3191	1134			     ??00A6  label   byte
    3192	1134  0CA6r 0EA8r 191Er	  +    DW  OPENF,HND+2,MO,SEVAL,IO?,texIt
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 57
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 57
 PT.asm
 
 
@@ -3532,7 +3532,7 @@ PT.asm
 1  3247	      =MYCSEG:1195	     qqqqq = ppppp
    3248	119F  178Br		     decim dw xbase
    3249	11A1  0A 00			   db  10,0
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 58
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 58
 PT.asm
 
 
@@ -3594,7 +3594,7 @@ PT.asm
 1  3304	11DC  11C5r		       dw    qqqqq
 1  3305	      =MYCSEG:11D6	     qqqqq = ppppp
    3306	11DE  0218r 16E7r 09C0r	  +    DW JSR,HERE,T@SWP2,TCOMMA,TEXIT
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 59
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 59
 PT.asm
 
 
@@ -3656,7 +3656,7 @@ PT.asm
 2  3361	123A  28 22		       db    '("'
 2  3362	123C			     ??00B5  label   byte
 1  3363	123C  122Fr		       dw    qqqqq
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 60
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 60
 PT.asm
 
 
@@ -3718,7 +3718,7 @@ PT.asm
 2  3418	128F  57 2C		       db    'W,'
 2  3419	1291			     ??00BA  label   byte
 1  3420	1291  1272r		       dw    qqqqq
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 61
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 61
 PT.asm
 
 
@@ -3780,7 +3780,7 @@ PT.asm
    3475	      08C3r
    3476
    3477				       NF 'ALIAS'
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 62
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 62
 PT.asm
 
 
@@ -3842,7 +3842,7 @@ PT.asm
 2  3532	1356			     ??00C3  label   byte
 1  3533	1356  1343r		       dw    qqqqq
 1  3534	      =MYCSEG:1352	     qqqqq = ppppp
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 63
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 63
 PT.asm
 
 
@@ -3904,7 +3904,7 @@ PT.asm
    3589	      08C3r
    3590
    3591				       NFI '['']'   ; :	['] ' ?C TO , AT , , ; IMMEDIATE
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 64
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 64
 PT.asm
 
 
@@ -3966,7 +3966,7 @@ PT.asm
    3646				     ;
    3647				     ; NFI 'LOOP'
    3648				     ; DW DOIMMD,TLOOP,LPEND
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 65
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 65
 PT.asm
 
 
@@ -4028,7 +4028,7 @@ PT.asm
 2  3703	141B  82		       db    ??00D2-$-1+080h
 2  3704	141C  4F 46		       db    'OF'
 2  3705	141E			     ??00D2  label   byte
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 66
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 66
 PT.asm
 
 
@@ -4090,7 +4090,7 @@ PT.asm
    3760				       NFI ''','
 1  3761	      =MYCSEG:1467	     ppppp = $
 1  3762				       dstr2 ''',',080h
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 67
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 67
 PT.asm
 
 
@@ -4152,7 +4152,7 @@ PT.asm
    3817
    3818				       nfI    'LITERAL'
 1  3819	      =MYCSEG:14BC	     ppppp = $
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 68
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 68
 PT.asm
 
 
@@ -4214,7 +4214,7 @@ PT.asm
    3874	1520  E8 ED57		     RCOMMA: CALL _DOES
    3875	1523  09E8r 1348r 16E7r	  +    DW TCAT,TCOMMAB,HERE,TTWOPL,TSUBT,TCOMMA,TEXIT
    3876	      0C12r 0BEFr 1339r	  +
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 69
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 69
 PT.asm
 
 
@@ -4276,7 +4276,7 @@ PT.asm
    3931	1572  0218r 0B14r 193Er	  +    DW JSR,TNEGATE,CDOES,TPLUS,CODE?,TEXIT
    3932	      0BE2r 1551r 08C3r
    3933
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 70
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 70
 PT.asm
 
 
@@ -4338,7 +4338,7 @@ PT.asm
    3988
    3989				       NFI 'DO:'
 1  3990	      =MYCSEG:15D1	     ppppp = $
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 71
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 71
 PT.asm
 
 
@@ -4400,7 +4400,7 @@ PT.asm
 2  4045	1612  06		       db    ??00F1-$-1+0
 2  4046	1613  53 4D 55 44 47 45	       db    'SMUDGE'
 2  4047	1619			     ??00F1  label   byte
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 72
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 72
 PT.asm
 
 
@@ -4462,7 +4462,7 @@ PT.asm
 1  4102	      =MYCSEG:1655	     ppppp = $
 1  4103				       dstr2 '(COMPIL',0
 2  4104	1655  07		       db    ??00F6-$-1+0
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 73
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 73
 PT.asm
 
 
@@ -4524,7 +4524,7 @@ PT.asm
 1  4159	      =MYCSEG:16A0	     ppppp = $
 1  4160				       dstr2 '''SAME',0
 2  4161	16A0  05		       db    ??00FB-$-1+0
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 74
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 74
 PT.asm
 
 
@@ -4586,7 +4586,7 @@ PT.asm
 1  4216	      =MYCSEG:16E0	     qqqqq = ppppp
    4217	16E7  0666r		     Here   dw DOCON2
    4218	16E9  065Fr		     TOHERE DW SETVAR1
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 75
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 75
 PT.asm
 
 
@@ -4648,7 +4648,7 @@ PT.asm
 1  4273	      =MYCSEG:174E	     ppppp = $
 1  4274				       dstr2 'HEADERS',0
 2  4275	174E  07		       db    ??0105-$-1+0
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 76
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 76
 PT.asm
 
 
@@ -4710,7 +4710,7 @@ PT.asm
    4330				       nf ']'
 1  4331	      =MYCSEG:17AA	     ppppp = $
 1  4332				       dstr2 ']',0
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 77
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 77
 PT.asm
 
 
@@ -4772,7 +4772,7 @@ PT.asm
    4387				       NF 'FIRST'
 1  4388	      =MYCSEG:17E1	     ppppp = $
 1  4389				       dstr2 'FIRST',0
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 78
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 78
 PT.asm
 
 
@@ -4834,7 +4834,7 @@ PT.asm
 2  4444	182B  53 50 54 52	       db    'SPTR'
 2  4445	182F			     ??0114  label   byte
 1  4446	182F  181Br		       dw    qqqqq
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 79
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 79
 PT.asm
 
 
@@ -4896,7 +4896,7 @@ PT.asm
 1  4501	1875  1865r		       dw    qqqqq
 1  4502	      =MYCSEG:1871	     qqqqq = ppppp
    4503	1877  0667r		     TOIN@  dw DOCON1
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 80
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 80
 PT.asm
 
 
@@ -4958,7 +4958,7 @@ PT.asm
 1  4558	      =MYCSEG:18B1	     qqqqq = ppppp
    4559	18B7  0667r		     CSP@   dw DOCON1
    4560	18B9  0660r 0000	     toCSP  dw SETVAR,0
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 81
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 81
 PT.asm
 
 
@@ -5020,7 +5020,7 @@ PT.asm
 2  4615	18EC  02		       db    ??0123-$-1+0
 2  4616	18ED  55 30		       db    'U0'
 2  4617	18EF			     ??0123  label   byte
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 82
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 82
 PT.asm
 
 
@@ -5082,7 +5082,7 @@ PT.asm
 2  4672	191C			     ??0128  label   byte
 1  4673	191C  1910r		       dw    qqqqq
 1  4674	      =MYCSEG:1919	     qqqqq = ppppp
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 83
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 83
 PT.asm
 
 
@@ -5144,7 +5144,7 @@ PT.asm
    4729	1948  02D7r		     trfr    DW	  XRFR	     ; R>
    4730
    4731				      NF 'PUSH'
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 84
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 84
 PT.asm
 
 
@@ -5206,7 +5206,7 @@ PT.asm
 2  4786	1977			     ??0133  label   byte
 1  4787	1977  196Br		       dw    qqqqq
 1  4788	      =MYCSEG:1973	     qqqqq = ppppp
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 85
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 85
 PT.asm
 
 
@@ -5268,7 +5268,7 @@ PT.asm
 1  4843	      =MYCSEG:19A9	     qqqqq = ppppp
    4844	19B0  02D2r			     DW	  XTUCK	     ; TUCK
    4845				       nf 'NIP'
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 86
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 86
 PT.asm
 
 
@@ -5330,7 +5330,7 @@ PT.asm
 1  4900	      =MYCSEG:19DD	     ppppp = $
 1  4901				       dstr2 '0=',0
 2  4902	19DD  02		       db    ??013F-$-1+0
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 87
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 87
 PT.asm
 
 
@@ -5392,7 +5392,7 @@ PT.asm
 1  4957	      =MYCSEG:1A16	     ppppp = $
 1  4958				       dstr2 '?DUP',0
 2  4959	1A16  04		       db    ??0145-$-1+0
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 88
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 88
 PT.asm
 
 
@@ -5454,7 +5454,7 @@ PT.asm
 2  5014	1A4A  53 57 41 50	       db    'SWAP'
 2  5015	1A4E			     ??014B  label   byte
 1  5016	1A4E  1A40r		       dw    qqqqq
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 89
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 89
 PT.asm
 
 
@@ -5516,7 +5516,7 @@ PT.asm
    5071
    5072				     ; ---------------	  DEBUGER  ------------------vvvvvvvvv
    5073
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 90
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 90
 PT.asm
 
 
@@ -5578,7 +5578,7 @@ PT.asm
    5128				       dropreg
 1  5129	1AE6  E9 E78C			      JMP XDROP
    5130
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 91
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 91
 PT.asm
 
 
@@ -5640,7 +5640,7 @@ PT.asm
    5185	      1AE0r
    5186	1B47  1B9Fr 199Er		     dw	  sav_Si,tdup
    5187	1B4B  0C04r 199Er 1AE0r		     dw	  ttwomi,tdup,hdot
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 92
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 92
 PT.asm
 
 
@@ -5702,7 +5702,7 @@ PT.asm
 1  5242	1BBE  1BA3r		       dw    qqqqq
 1  5243	      =MYCSEG:1BB9	     qqqqq = ppppp
    5244	1BC0  0218r 0DADr 1A1Dr	  +  V_id:   dw	   jsr,cfname,TQDUP,EXIT0
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 93
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 93
 PT.asm
 
 
@@ -5758,7 +5758,7 @@ PT.asm
    5293				     ;	     db	  tbp	   ;brkpt
    5294	1C21			     MyCseg  ends
    5295					     end  Start
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 94
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 94
 Symbol Table
 
 
@@ -5820,7 +5820,7 @@ Symbol Name		Type   Value			   Cref	(defined at #)
 ??0033			Byte   MYCSEG:0A3A		   1920	 #1922
 ??0034			Byte   MYCSEG:0A42		   1929	 #1931
 ??0035			Byte   MYCSEG:0A4B		   1938	 #1940
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 95
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 95
 Symbol Table
 
 
@@ -5882,7 +5882,7 @@ Symbol Table
 ??006C			Byte   MYCSEG:0C33		   2483	 #2485
 ??006D			Byte   MYCSEG:0C4A		   2495	 #2497
 ??006E			Byte   MYCSEG:0C59		   2506	 #2508
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 96
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 96
 Symbol Table
 
 
@@ -5944,7 +5944,7 @@ Symbol Table
 ??00A5			Byte   MYCSEG:1115		   3178	 #3180
 ??00A6			Byte   MYCSEG:1134		   3187	 #3191
 ??00A7			Byte   MYCSEG:1144		   3198	 #3200
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 97
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 97
 Symbol Table
 
 
@@ -6006,7 +6006,7 @@ Symbol Table
 ??00DE			Byte   MYCSEG:14D9		   3832	 #3835
 ??00DF			Byte   MYCSEG:14E7		   3843	 #3845
 ??00E0			Byte   MYCSEG:1509		   3857	 #3859
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 98
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 98
 Symbol Table
 
 
@@ -6068,7 +6068,7 @@ Symbol Table
 ??0117			Byte   MYCSEG:185D		   4476	 #4478
 ??0118			Byte   MYCSEG:1869		   4487	 #4489
 ??0119			Byte   MYCSEG:1875		   4498	 #4500
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 99
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 99
 Symbol Table
 
 
@@ -6130,7 +6130,7 @@ Symbol Table
 ??0150			Byte   MYCSEG:1A82		   5062	 #5064
 ??0151			Byte   MYCSEG:1ADE		   5120	 #5122
 ??0152			Byte   MYCSEG:1AEF		   5134	 #5136
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 100
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 100
 Symbol Table
 
 
@@ -6143,9 +6143,9 @@ Symbol Table
 ??0158			Byte   MYCSEG:1BE8		   5259	 #5261
 ??0159			Byte   MYCSEG:1BF6		   5269	 #5271
 ??015A			Byte   MYCSEG:1C0F		   5281	 #5283
-??DATE			Text   "12/11/18"
+??DATE			Text   "12/14/19"
 ??FILENAME		Text   "PT	"
-??TIME			Text   "16:04:37"
+??TIME			Text   "15:48:34"
 ??VERSION		Number 0314
 ?NONAM1			Near   MYCSEG:0521		   #861	 893
 @@1			Near   MYCSEG:0192		   243	#245
@@ -6192,7 +6192,7 @@ Symbol Table
 @@3			Near   MYCSEG:0485		   749	#755
 @@3			Near   MYCSEG:0578		   #921	 924
 @@3			Near   MYCSEG:05E0		   982	#995
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 101
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 101
 Symbol Table
 
 
@@ -6254,7 +6254,7 @@ COMPIL			Near   MYCSEG:1663		   #4110  4122	4133  4144
 COMPWV			Word   MYCSEG:0108		   #190	 901
 CONT@			Word   MYCSEG:1853		   3043	 #4470
 CONVN			Near   MYCSEG:063D		   1019	 1030  #1057  1064  1066
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 102
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 102
 Symbol Table
 
 
@@ -6316,7 +6316,7 @@ HANDLES			Word   MYCSEG:0EAC		   1204	 #2834
 HDOT			Word   MYCSEG:1AE0		   #5125  5179	5179  5179  5179  5182	5184  5184  5187  5188	5189  5189
 HDRS?			Word   MYCSEG:1746		   4229	 4231  #4269  4280  4292  4303
 HERE			Word   MYCSEG:16E7		   3097	 3306  3341  3513  3524	 3577  3609  3630  3728	 3875  3909  3975 +
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 103
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 103
 Symbol Table
 
 
@@ -6378,7 +6378,7 @@ OPENF			Near   MYCSEG:0CA6		   #2547  3192
 OUTBYTE			Near   MYCSEG:1A91		   5076	 #5078
 OUTC			Near   MYCSEG:1AA2		   #5088  5099	5101  5103
 OUTC@			Word   MYCSEG:18AB		   #4548
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 104
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 104
 Symbol Table
 
 
@@ -6440,7 +6440,7 @@ SEMI			Word   MYCSEG:15FA		   #4027
 SETVAR			Near   MYCSEG:0660		   #1079  2500	2633  2978  3055  3214	3838  4166  4176  4187	4197  4365+
 							   4375	 4385  4395  4405  4460	 4471  4482  4493  4504	 4515  4527  4538 +
 							   4549	 4560  4571  5264
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 105
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 105
 Symbol Table
 
 
@@ -6502,7 +6502,7 @@ TDNEGAT			Word   MYCSEG:0B20		   #2162  3229
 TDO			Word   MYCSEG:091C		   #1599
 TDROP			Word   MYCSEG:1982		   2232	 2590  2620  2622  2715	 2820  3017  3043  3345	 3398  3852  #4799
 TDROP2			Word   MYCSEG:198C		   #4808
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 106
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 106
 Symbol Table
 
 
@@ -6564,7 +6564,7 @@ TOCSP			Word   MYCSEG:18B9		   3341	 #4560
 TOCURR			Word   MYCSEG:1845		   2705	 #4460
 TODBL			Word   MYCSEG:18A0		   3230	 #4538
 TOEOF			Word   MYCSEG:0D75		   2536	 2577  #2633
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 107
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 107
 Symbol Table
 
 
@@ -6626,7 +6626,7 @@ TSTR			Word   MYCSEG:0994		   #1734  3411
 TSTRCOM			Word   MYCSEG:1597		   3317	 #3953	4249
 TSTRCOMMA		Near   MYCSEG:1264		   #3396
 TSUBT			Word   MYCSEG:0BEF		   #2407  2612	2615  2865  3183  3875
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 108
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 108
 Symbol Table
 
 
@@ -6688,7 +6688,7 @@ X?EMIT			Near   MYCSEG:07EA		   #1339  2674
 X?SS			Near   MYCSEG:0868		   #1421
 X@PLSTO			Near   MYCSEG:04D1		   #807	 1925
 X@PLUS			Near   MYCSEG:04C3		   #798	 1898  1916
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 109
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 109
 Symbol Table
 
 
@@ -6750,7 +6750,7 @@ XFILL			Near   MYCSEG:0446		   #712	 2007
 XFNAME			Near   MYCSEG:06B2		   #1131  2697
 XFOR			Near   MYCSEG:01B1		   #275	 1569
 XFROMF			Near   MYCSEG:019D		   #253	 1669
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 110
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 110
 Symbol Table
 
 
@@ -6812,7 +6812,7 @@ XRESET			Near   MYCSEG:0176		   208	#225
 XRET4TH			Near   MYCSEG:0195		   #248	 1507
 XRFR			Near   MYCSEG:02D7		   #472	 4729
 XROT			Near   MYCSEG:02C1		   #453	 4973
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 111
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 111
 Symbol Table
 
 
@@ -6874,7 +6874,7 @@ XZCHK			Near   MYCSEG:033E		   #544	 4907  4917  4927
 XZSTOR			Near   MYCSEG:02AA		   #434	 1774
 X_CO			Near   MYCSEG:03A9		   #610	 1557
 X_FIND			Near   MYCSEG:056B		   #909	 3028
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 112
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 112
 Symbol Table
 
 
@@ -6936,7 +6936,7 @@ _PUSHDI			Near   MYCSEG:0282		   #405
 _SCANER			Near   MYCSEG:0450		   #721	 737  740  744
 _STRCMP			Near   MYCSEG:05B1		   764	#962
 _STREQU			Near   MYCSEG:05A6		   752	#954
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 113
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 113
 Symbol Table
 
 
@@ -6998,7 +6998,7 @@ PUSHREG							   #118	 447  451  455	659  814  858  1042  1087  1100	 1162  1216
 							   1248	 1424
 SJMP							   #127	 185  293  298	507  1342
 SWAPREG							   #121	 385  459  552	616  640  734  774  786	 795  801  834	951  1149 +
-Turbo Assembler	 Version 3.2	    12/11/18 16:04:37	    Page 114
+Turbo Assembler	 Version 3.2	    12/14/19 15:48:34	    Page 114
 Symbol Table
 
 

@@ -1,5 +1,9 @@
 ' (JUMP =: (DEF
 
+=! [S]
+\ =! [ID]
+=! |BEFTOR
+
 \ def abort (s)      !"
 \ def dpush (*items)
 \ def dpop(n=1)
@@ -32,7 +36,6 @@
 : NOT DUP NAND ;
 : NEG NOT 
 : 1+ (@+; ,< 1 ,
-: |+ EX SKIP
 \ def lit(s)        LIT,,
 : (LIT @R+ ;
 \ CODE EXIT   assemble ("return()")   ;CODE
@@ -55,6 +58,7 @@
 \ CODE +    a,b = dpop(2); dpush(a+b)  ;CODE
 : + +2/
 : DROP; DROP ;
+: |+ EX + ;
 : (| @R+ XR PUSH; 
 : IXEC J 
 : EXECUTE PUSH;
@@ -207,7 +211,8 @@ VAL' 1 =: BYE
 : ROR 0 +2/ SWAP ODD 0<> SIGN + ;
 : ROL4 TWICE TWICE
 : ROL DUP +2/ 0< 0; 1+ ;
-: H. |DROP TWICE TWICE ROL4 DUP 15 AND DIG. ;
+: H. |SPC |DROP TWICE TWICE ROL4 DUP 15 AND DIG. ;
+
 \ CODE IF global _tab assemble ("if dpop():") _tab += 1 ;CODE
 \ M: IF` (IF MARK>;
 \ CODE THEN  global _tab  _tab -= 1 ;CODE
@@ -336,7 +341,7 @@ N: TIB   ' LTIB ,
 : `OP-TBL (XARY HEX BIN `TO-BASE `'CHAR `^CHAR
 : DIGIT? \ CHAR ==> DIGIT   IN CURRENT BASE
  A! -1 `BASE |NIP VAL SCN| 1+ DUP ALPHA A@ - ;
-: `DIG? \ "`DIG?" TIB [S] |BEFTOR
+: `DIG?  \ "`DIG?" TIB [S] |BEFTOR
   DIGIT? -IF `OPT? 0;  \ CAN BE AN OPTION ?
   A@ `IN-OPT -IF ?XEP| \ ON EXIT OPTION WILL BE A OK-FLAG
   TIB-                \ SKIP USED OPTION
@@ -346,7 +351,7 @@ N: TIB   ' LTIB ,
 : `BASE* `BASE U* ;
 : `^CHAR TIBC@ 31 AND `BASE*+ ; \ CONTROL CHAR
 : `'CHAR TIBC@ `BASE*+ ;        \ REGULAR CHAR
-: ATOI  "ATOI" TIB [S] |BEFTOR
+: ATOI \ "ATOI" TIB [S] |BEFTOR
 MEMTI| DEC `SIGN 0 LTIB (IF 1 
  BEGIN TIBC@ `DIG? 1+ 0; LTIB 0= UNTIL 0 ; 
 
@@ -439,12 +444,16 @@ $FE00 CONST  TBUF
 : `SKIPBL? J BL = 0; TIB J CSKIP 
 : `PARSE-LEN?  |LTIB  SWAP (| - 
 : `LASTSCAN (-IF CALL  DROP  LTIB THEN ;
-: `CSCAN? TIB J CSCAN (-IF CALL `LASTSCAN DUP ;THEN DUP 1+ ;
-: TOKEN? |N?? \ CR "TOKEN?" TIB [S] |BEFTOR 
-: TOKEN       \ "TOKEN" CR TIB [S] |BEFTOR 
+: `CSCAN? \ "`CSCAN?" CR TIB [S] |BEFTOR 
+ TIB J CSCAN (-IF CALL `LASTSCAN DUP ;THEN DUP 1+ ;
+: TOKEN? |N??  CR "TOKEN?" TIB [S] |BEFTOR 
+: TOKEN     \   "TOKEN" CR TIB [S] |BEFTOR 
    BL CALL ?C@ ;THEN   
-: WORD  CALL  TBUF  S>"! '` C!A+ ;THEN 
-: PARSE `SOURCE PUSH `SKIPBL?  TIB^ `CSCAN? `PARSE-LEN? EXIT ;
+: WORD  CALL  TBUF  S>"! '` C!A+ 
+\  DUP [ID]
+  ;THEN 
+: PARSE    "PARSE" CR TIB [S] |BEFTOR 
+ `SOURCE PUSH `SKIPBL?  TIB^ `CSCAN? `PARSE-LEN? EXIT ;
 \ CODE (     word(')')         ;CODE
 : (` ') WORD DROP ;
 \ CODE OPEN openblocks (dpop()) ;CODE
@@ -462,6 +471,11 @@ $FE00 CONST  TBUF
 : |CR EX CR ;
 : `OK ."_ok" CR .">>_"  ;;  
 : `. CR TBUF ID. ERRA ID. CR ;
+: S6 (| CALL XEP| XEP| XEP| THEN 
+: S3 |SPC CALL TWICE THEN ROT DUP  H. ;
+: |BEFTOR ."_<BEFORE_" ID. CR S6 (BRK
+  EX CR S6 (BRK ."_AFTER>_" ;
+
 
 ' `. VAL' vERR T! 
 

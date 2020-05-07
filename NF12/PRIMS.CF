@@ -1,4 +1,4 @@
-\ REDEFINITIONS ------------------------
+\ REDEFINITIONS AND FORWARD DEFINITIONS ---------------
 
 '  (JUMP   =:  (DEF
  
@@ -12,7 +12,7 @@
 
 \ PRIMITIVES  --------------------- 
 
-HERE 1+ =: `BRK $CC C, ' (NOP 1- $E9 ,R
+\ HERE 1+ =: `BRK $CC C, ' (NOP 1- $E9 ,R
 
 : (LIT (@R+ ;
 
@@ -25,13 +25,12 @@ HERE 1+ =: `BRK $CC C, ' (NOP 1- $E9 ,R
 : (D#2 (POP (XR     \ DOES_2 PRIMITIVE METHOD
 : 4+ (@+; ,< 4 , 
 
+: (VAR3 (D#2 ;;
+
 : (SET2 (D#1 
 : !    (PUSH (!R+ (RDRP; ; UNW 
 
 : (| (@R+ (XR (PUSH; ; UNW
-
-: `?ODD  (DUP  \ 
-: ODD (@&; ,< 1 , 
 
 : 5+ (@+; ,< 5 , 
 
@@ -49,6 +48,7 @@ HERE 1+ =: `BRK $CC C, ' (NOP 1- $E9 ,R
 : @ (PUSH  
 : (CON (@R+ 
 : EXIT (RDRP; ; UNW
+: `(CON3 (D#2 @ ;
 
 : 0<>;  (0= 
 : 0;    EXIT ?; 
@@ -64,13 +64,17 @@ HERE 1+ =: `BRK $CC C, ' (NOP 1- $E9 ,R
 : + (+2/ (DROP; CALL TWICE TWICE THEN TWICE
 : 2* |+ (DUP ; 
 
+\ : `D2* 2* |+ XEP| (DUP
+: `UM+ (+2/ (0<
+: ODD (@&; ,< 1 , 
+
 : `RANGE>S 1+ 
 : OVER- (OVER
 : - |+ (NEG ;
 
 : `C@+ TO SWAP
 : CSTR `?C@ 
-: U1+ (U1+ ;
+: `U1+ (U1+ ;
 
 : `>DEA 4+ 
 : NAME> CSTR + ; 
@@ -99,6 +103,8 @@ HERE 1+ =: `BRK $CC C, ' (NOP 1- $E9 ,R
 : @EXEC @
 : EXECUTE (PUSH; ; UNW
 
+\ : `FROM (D#0 EXECUTE @ ;
+
 \ VARIABLES ------------------
 
 : |LTIB CALL (EX (SET2 THEN ,<    
@@ -115,15 +121,18 @@ $D800 CONST T
 \ $D800 CONST EDGE
 
 \ : ORG! H - (SET2 : HOFS (CON ; H ORG!
-0 VALUE HOFS
+: `HOFS  CALL (XR (PUSH CALL (EX (POP THEN  (SET2 THEN ,<
+0 CONST HOFS
 
 : _BEGIN |LASTH 
 : HERE H 
 : R>T HOFS + 
 ; 
 
->, (POP ,<  0 VECTOR LOCATE   
-' LOCATE 2+ CONST `STATE
+: `!STATE    CALL (XR EXECUTE
+: `LOCATOR  (POP (SKIP THEN
+: `STATE@  `(CON3 (SET2 ,<  \ FORTH STATE 
+0 DEFER LOXEC               \ LOCATE ABD EXECUTE
 
 >, (EX
 : _MARK H  
@@ -132,7 +141,6 @@ $D800 CONST T
 
 : MCLR $D800 ,< 
 0 VALUE MOBJ 
-: <M> MOBJ |H TO MOBJ ;
 
 : CSP! (SP@ (SET2 
 : CSP (CON ;; 
@@ -160,11 +168,14 @@ $F800 CONST  TBUF
 : `BS  |C. ,< 
   8 CONST  bs 
 1024 CONST  1K 
- 256 CONST  1B   
-: EOS! ^M ,< 
+ 256 CONST  1B 
+ 
+: EOS! bs ,< 
 0 VALUE EOS    
 
-: `LT! (DUP (SET2 : >LT< (CON (;  0  ,<
+: `LT! (DUP ,< 
+0 VALUE `>LT< 
+
 0 VALUE  BLK  
 ' BYE VECTOR vBLK
 : SOURCE BLK 0; ETIB 0<>; BLK vBLK 1K + TO ETIB ;
@@ -259,9 +270,9 @@ HERE >, (D#0
 : :;   `(@, ;; 
 
 >, (NOP
-: TOKEN?  |N??  
-: TOKEN  BL  CALL `?C@ ;THEN
-: WORD  CALL    : `S>TB! TBUF    
+: TOKEN? |N??
+: TOKEN  BL   CALL `?C@ ;THEN
+: WORD  CALL  : `S>TB! TBUF    
 : S>"! (IO; ,<   ,"^W~-~^Q~-~5~^@^Cy~GF~^E`" =H `_@MAKESTR   
     ,"^V~Q^Cq~}~&~s~$~|~Y^H~^M^V~^W~C~^P~" >,  THEN    
 : PARSE  SOURCE ETIB |LTIB `LT! (IO; ,<
@@ -317,7 +328,7 @@ N: `TO' -2 , N: `VAL' 2 , =, AT' -4 ,
 : DXEP+| (DUP 1+ XEP| ;
 : `A+L XEP| 
 : I+ (J + ; 
-: <RNG| `RANGE>S `A+L STR| ;
+: (<RNG| `RANGE>S `A+L STR| ;
 
 : `C_ON `1 (SKIP 
 : `C_OFF 0 

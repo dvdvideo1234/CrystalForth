@@ -13,6 +13,15 @@
 : CSP (CON ;; 
 : |HLD CALL EX (SET2 THEN ,<       0 CONST HLD
 ' BYE  DEFER vERR   
+
+ZDO VALUE 6 TIMES _FL _AX _BX _CX _DX _DX2
+: `REGS! EX TO _FL TO _AX TO _BX TO _CX TO _DX ;  
+: (DOS `REGS! (INT# ,< $21 ,  
+: (VID `REGS! (INT# ,< $10 , 
+: (KEY 0 D0 D0 [ DROP NIP NIP NIP ] (INT# ,< $16 , 
+: BK (KEY DUP W>B 0; W>B ;
+
+
 : Key! (LIT BK (SET2 (CON   
 : KEY BK ;;
 : Emt! (LIT BE (SET2 (CON   
@@ -51,8 +60,6 @@
 : `OK ."_ok" CR .">>_"  ;;  
 : `. Emt! Key! CR TBUF ID. ERRA ID. CR ;; 
 
-ZDO VALUE 6 TIMES _FL _AX _BX _CX _DX _DX2
-
 : FND?? |N?? TOKEN? FND? ;
 : SAME? FND? 0; 4+ [ID] TBUF ; 
 : ,' |, 
@@ -85,8 +92,6 @@ N: `RSTACK -$2C0 10 + , -$40 ,
 : HIDE FND?? 5 +  '` SWAPC! ; 
 
 \ INTS DOS, FILES & VIDEO
-HERE >, (D#0 C@ (INT TO _FL TO _AX TO _BX TO _CX TO _DX ;  
-N: (DOS  $21 ,  =, (VID $10 , 
 HERE >, (D#0 @ (DOS ;
 >, `RW  (VAR3 ,< N: Fread  $3F00 , 0 ,
 >, `RW  (VAR3 ,< N: Fwrite $4000 , 0 ,  

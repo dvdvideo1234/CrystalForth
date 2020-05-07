@@ -1,23 +1,20 @@
       \   INTERPRETTER 
       
-: `,<? 0<>; : TARG,< AT LOCATE  : `INTERP T TO `_@FIND  ,< 
-0 WARY []OPER >,  ">NUM `">NUMC @EXEC @, ,< 
+: `,<? 0<>; : TARG,< `LOCATOR  : `INTERP T TO `_@FIND 
+: []OPER (XARY  ">NUM `">NUMC @EXEC @, ,< 
  
       \   COMPILER
       
-: TARG: CSP! TARG:!  : >, AT LOCATE   vTARG CFND []OPER ;
+: TARG: CSP! TARG:!  : >, `LOCATOR   vTARG CFND []OPER ;
 
-      \ FUNCTION EVAL 
+      \ FUNCTION EVAL  & EXECUTE MACRO 
                 
-: `SEVAL CSTR : EVAL `MEMTI| : `@EVAL  `STACK 
- TOKEN    DROP; ?; LOCATE @EXEC RECURSE ;
+: (MAC (D#0 `!STATE >, : `SEVAL CSTR : EVAL `MEMTI| (SKIP
+ BEGIN LOXEC  : `@EVAL  `STACK  TOKEN 0= UNTIL (DROP; ; UNW
 
-      \ COMPILE & EXECUTE MACRO 
+      \ COMPILE  MACRO 
 	  
-: (MAC (D#0 `STATE @ (PUSH >, `SEVAL (POP `STATE ! ; 
-: M: ';  : ?M: <M> HOFS (PUSH 0 TO HOFS TARG:! (, (MAC `",
- (POP TO HOFS <M> ;
-: D# HERE >, CSP!  
-: |LASTH (EX LASTH! ; 
+: M: ';  : ?M: 0 `HOFS CALL TARG:! (, (MAC `", THEN : <M> MOBJ
+ |H TO MOBJ ;   : D# HERE >, CSP!       : |LASTH (EX LASTH! ; 
  
 

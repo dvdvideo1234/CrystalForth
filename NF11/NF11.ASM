@@ -138,7 +138,8 @@ ACALL_  MACRO LBL
   ENDM
 
 entry_  macro ADR,DAT,nam
-  DW    ADR,DAT
+  DW    ADR
+  DB    DAT
   nam_  nam
   endm
 
@@ -150,15 +151,15 @@ rsp = sp    ; RETURN STACK POINTER
 RA	= DI		; RETURN ( ADDRESS ) STACK TOP register
 AR  = BP    ; ARITHMETIC ( ADDRESS ) register
 
-NXT = BX    ; DATA STACK NEXT REGISTER
+NXT = CX    ; DATA STACK NEXT REGISTER
+NXTL= CL    ; DATA STACK NEXT REGISTER
+NXTD= CL    ; DATA STACK NEXT REGISTER
 
-top = cx    ; DATA STACK TOP REGISTER
-topL= cL    ; DATA STACK TOP REGISTER LOW
-topH= cH    ; DATA STACK TOP REGISTER HI
+top = Bx    ; DATA STACK TOP REGISTER
+topL= BL    ; DATA STACK TOP REGISTER LOW
+topH= BH    ; DATA STACK TOP REGISTER HI
 
 W   = DX    ; WORK  register (RETURN  register )
-WL  = DL    ; WORK  register LOW
-WH  = DH    ; WORK  register HI
 
 ; MINIMAL SET INTERPRETTER COMMANDS
 ;--------------------------------------------
@@ -186,6 +187,8 @@ _START:
   mov   bx,1000h     ; only 64k allocate
   mov   ah,4ah
   int   21h
+  MOV   AX,3
+  INT   010H
   JMP   @ABORT
 
  ALIGN_ 0
@@ -263,7 +266,6 @@ P_ _IO
   PUSH    RA 
   CALL    IP
   DROP2_  TOP NXT
-  CLD
   POP     RA 
 
 P_ _RET				; (RET
@@ -308,7 +310,8 @@ P_ _PUSH
 
 
 P_ _SKIPDR	 			; ?.SKIP
-  JCXZ  @SKIPDR
+  OR    TOP,TOP
+  JZ  @SKIPDR
   RET
 @SKIPDR:
   DEC   TOP
@@ -316,30 +319,30 @@ P_ _IF	 			    ; (IF
   ACALL_  @DROP
   
 P_ _IFZ	 			    ; (IF#
-  JCXZ    @JUMP
+  OR    TOP,TOP
+  JZ    @JUMP
   
 P_ _SKIP  
 @SKIP:
   LEA   ip,[IP+2]
   RET
 
-P_ _MIF           ; (-IF
-  INC   TOP
-  SKIPW_  W
-  
 P_ _NEXT
   DEC   RA
-  SKIPB_  WL
+  SKIPW_  W
   
-P_ _IFM    			  ; (IF-
-  DEC   TOP
+P_ _MIF           ; (-IF
+  INC   TOP  
 @IFM:  
+  DEC   TOP
   JS    @SKIP
 
 P_ _JUMP    			; (JUMP
 @JUMP:
   MOV   IP,[IP]
   RET
+P_ _IFM    			  ; (IF-
+  JMP  @IFM
 
 P_ _EX
   XCHG	IP,RA
@@ -471,10 +474,8 @@ P_ _ALIGN
   JNZ   @1P
   RET
 
-P_ _4P
+P_ _3P
   INC   TOP
-  INC   TOP
-P_ _2P
   INC   TOP
 P_ _1P
 @1P:
@@ -500,17 +501,14 @@ P_ _MDIV
 P_ _PLAVG
   ADD   NXT,TOP
   MOV	TOP,NXT
-  
 P_ _DIV2
   RCR   TOP,1
   RET
    
 P_ _PMUL
-  TEST	NXT,1
+  TEST	NXTL,1
   JE    @LDIV2
   ADD   TOP, AR
-  
-P_ _LDIV2
 @LDIV2:
   RCR   TOP,1
   RCR   NXT,1
@@ -524,12 +522,9 @@ P_ _AND
   AND     TOP,NXT
   JMPS_ @NIP
   
-P_ _NOT
-  INC   TOP
-  
-P_ _NEG
-  NEG	TOP
-  RET
+P_ _ADD
+  ADD     TOP,NXT
+  JMPS_ @NIP
    
 P_ _ZEQ
 @ZEQ:
@@ -551,10 +546,11 @@ P_ _0LESS
 ; -----------------------
 
 L_ _MFND
-    DW  _T,_IO 
-    INC     PW [BX]
+    DW  _T,_3P,_CSTR,_ADD,_IO 
+    MOV     TOP,NXT
+    INC     PW [TOP]
     CALL    @FND
-    DEC     PW [SI]
+    DEC     PW [TOP]
     RET
     
     
@@ -577,9 +573,8 @@ L_ _DFND
     repe	  cmpsb
     POP     SI
     jNZ 	  @FND?
-    MOV		  CL,2
     MOV     SI,DX
-    ADD		  [SI+2],CX
+    inc 	  cx
 @DCX:
     MOV     DI,SI
     JMPS_   @RETVAL
@@ -814,6 +809,7 @@ L_ _MAKESTR         ; S>"!
     STD                 ; BACKWARDS
     CMPSB               ; PREPARE FOR DIRECTION
     REP     MOVSB       ; NAME (MEMORY) MOVE
+    CLD
     POPF
     MOV     [DI],DL     ; LENGTH OF THE STRING
     ADC     di,CX       ; ADD CARRY TO DI
@@ -1032,11 +1028,12 @@ L_ _MEMCMP							; MEM-,
     JCXZ    @CMP
 		REP 	  CMPSB
 		JE		  @CMP
+    XCHG    AX,CX     ; SAVE AX
 		DEC		  SI
 		LODSB 
 		SUB     AL,[DI-1]
 		CBW   
-    XCHG    AX,CX
+    XCHG    AX,CX     ; RESTORE AX
     JMPS_   @CMP      ; IN CX REMAINS LENGTH OF THE BUFFER
 
 ;_BLOCK  DW  _JUMP,_NOP
