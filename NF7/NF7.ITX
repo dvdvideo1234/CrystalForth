@@ -1,0 +1,63 @@
+  COL_ _LOOPS
+        DW _FOR,@@LPS
+@@LPS0  DW _J,_EXECUTE
+@@LPS   DW _NEXT,@@LPS0
+        DW _2RDROP,_EXIT
+
+  COL_ _TYPES
+        DW _LOOPS,_COUNT,_EMIT,_EXIT
+
+
+  COL_    _SDOT
+        DW _@_STR
+  COL_    _TDOT
+        DW _COUNT,_TYPES
+@ABORTX DW _DROP,_EXIT
+
+  COL_ _CR
+        DW _SDOT
+        DB 2,13,10
+        DW _EXIT
+        
+  COL_    _ID
+        DW _TDOT
+  COL_ _SPC
+        DW _BL,_EMIT,_EXIT
+
+ COL_ _LOCATE
+        DW _TOKEN?,_DICT,_FND,_ZEQ,_??,_EXIT 
+        
+IF 1
+_BP DW @NOP
+@NOP:
+    INT 3
+    JMP @MAIN  
+ENDIF    
+
+
+;  XT_  _CMOVE,@_PARAM          ; CMOVE
+;  MOV   DI,bX
+;  REP   MOVSB   ; NAME  MOVE
+;  RET
+
+; SEE 3AE
+;__
+;COL_ _LOCATE
+;  DW _TOKEN?,_FND,_N??,_RET
+;COL_ _TICK
+;  DW _LOCATE,_LD,_RET
+;  
+;COL_ _HERE
+;  DW _H,_HOFFS,_ADD,_RET  
+  
+;_CONST  DW @_MAKER,@_CONS,_comma        ; CONSTANT
+
+;VALUE_  _HOFFS,0
+     
+;XT_ _XOR,@XOR   
+;XT_ _OVER,@OVER       ; OVER
+;XT_ _J,@J             ; ^
+;XT_ _NAND,@NAND       ; ^
+;XT_ _POP,@POP         ; ^
+;XT_ _PUSH,@PUSH       ; ^
+
