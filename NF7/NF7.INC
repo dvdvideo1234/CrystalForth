@@ -1,3 +1,9 @@
+BP_ MACRO
+  IF DBG 
+    DW _BREAK
+  ENDIF
+ENDM
+
 locals  @@
 
 pd  equ dword ptr
@@ -12,16 +18,22 @@ JMPS    MACRO LBL
   jmp  SHORT LBL
 ENDM
 
-SKIPW   MACRO
-  DB    0BFH
-ENDM
-
 SKIPA   MACRO
   DB    03DH
 ENDM
 
 SKIPB   MACRO
   DB    03CH
+ENDM
+
+SKIPR   MACRO reg
+  mov   reg,0
+  org   $-2
+ENDM
+
+SKIPC   MACRO reg
+  mov   reg,0
+  org   $-1
 ENDM
 
 CLR     MACRO  REG
@@ -92,9 +104,19 @@ ppppp = $
 qqqqq = ppppp
 endm
 
+NOPS = 0;
+
+ALIGN1_  MACRO 
+  IF ($-@START+1) AND 1
+    NOP
+    NOPS = NOPS + 1
+  ENDIF
+ENDM
+
 ALIGN_  MACRO  FLAG
   IF ($-START+FLAG) AND 1
     NOP
+    NOPS = NOPS + 1
   ENDIF
 ENDM
 
@@ -126,6 +148,7 @@ const_  macro   lbl,dat
 LBL  DW __@CONS,DAT
 endm
 
+  ;__XALIGN LBL
 value_  macro   lbl,dat
   DW __@setvar
   const_ LBL,dat
@@ -136,11 +159,13 @@ DEFER_  macro   lbl,dat
 LBL  DW     __@defer,dat
 endm
 
+  ;__XALIGN LBL
 vector_ macro   lbl,dat
   DW __@setvar
   DEFER_ LBL,dat
 endm
 
+  ;__XALIGN LBL
 point_  macro   lbl,dat
   DW @_setpnt
   XALIGN_ LBL
