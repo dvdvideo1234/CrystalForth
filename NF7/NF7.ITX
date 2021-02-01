@@ -1,38 +1,178 @@
-  COL_ _LOOPS
+IF DBG
+
+_EXECUTE DW @_NIP
+  XCHG  T,TOP
+  XCHG  T,W
+  JMP   @NESTW
+
+
+@ACALL:
+  CALL  W 
+  JMP   @MAIN
+
+P_ _BREAK
+    INT 3
+    JMP @MAIN  
+P_ _XSTK
+  PUSH  TOP
+  X
+  JMP   @DROP
+P_ _FROMF
+  JMP IP
+  
+XT_ _TROFF,@ACALL  
+@DEBUGOFF:
+  SKIPR W
+  MOV   W,[IP]
+@DBG?:  
+  XCHG  W,PW @MAIN
+  RET
+
+XT_ _TRON,@ACALL  
+@DEBUGON:  
+  SKIPR W
+  JMPS  $
+  ORG $-1
+  DB @TODEBUG-(@MAIN+2)
+  JMPS  @DBG?  
+
+@DEBUGER:
+  CALL  @IPAR
+  CALL  __TOF  ; IP [IP] AR
+  DW _CR,_J,_WDOT,_J,_LD,_WDOT,_I,_WDOT
+  DW _XSTK,_PUSH,_PUSH,_3ROT,_POP,_POP,_XSTK
+  DW    _3ROT,_BK,_FROMF
+  AND   TOPL,0DFH
+  CMP   TOPL,'S'
+  JE    @STOPDBG
+  CALL  @DEBUGON
+@STOPDBG:
+  POP   TOP
+  X
+  POP   IP AR
+  X
+  MOV   W,[IP]
+  CMPSW
+  JMP   [W-2]
+  
+;L_ _EXECUTE
+;  DW _PUSH,_RET
+L_ _I
+  DW _J,_RET
+  
+L_ _XDROP
+  DW _EX,_DROPX
+L_ _I@
+  DW _J,_LD,_RET
+  
+CONST_ _1H,16
+
+L_ _TIMES
         DW _FOR,@@LPS
 @@LPS0  DW _J,_EXECUTE
 @@LPS   DW _NEXT,@@LPS0
-        DW _2RDROP,_EXIT
+__@EXT2 DW _RDROP
+__@EXIT DW _RDROPX
 
-  COL_ _TYPES
-        DW _LOOPS,_COUNT,_EMIT,_EXIT
+L_ _0X 
+  DW _IF,__@EXIT,_RET
 
+L_    _SDOT
+  DW _@_STR
+L_ _TYPES
+  DW _CSTR
+L_ _TYPE
+  DW _XDROP
+L_ _ATP
+    DW _TIMES,_CSTR,_EMIT,_RET
 
-  COL_    _SDOT
-        DW _@_STR
-  COL_    _TDOT
-        DW _COUNT,_TYPES
-@ABORTX DW _DROP,_EXIT
+L_ _OK
+    DW _SDOT
+    NAM_ ' Ok'
+    DW _CR
+    DW _SDOT
+    NAM_ '>'
+    DW _RET
+    
+L_ _CR
+    DW _SDOT
+    DB 2,13,10
+    DW _0,_CNTC
+L_ _ST
+    DW _STP,_DROPX
+    
+L_ _ON_ERROR
+    DW _CR,_ID,_TBUF   
+    
+L_ _ID
+    DW _TYPES
+L_ _SPC
+    DW _BL,_EMIT,_RET
+    
+    
+L_ _3ROT
+  DW _SPC,_1ROT,_1ROT
+L_ _1ROT
+  DW _ROT,_DUP    
+L_ _WDOT
+  DW _SPC,_DUP,_HWTOB,_BDOT
+L_ _BDOT  
+  DW _WTOB,_1HDIV,_HDOT
+L_ _HDOT
+  DW _LIT,15,_AND,_ALPHA,_EMIT,_RET
+    
+P_ _ALPHA
+  MOV   TOPH,0
+	CMP		TOPL,10
+	JB		@ALP
+	ADD		TOPL,7
+@ALP:    
+	ADD		TOPL,'0'
+  JMP  @MAIN
+ 
+L_ _UMUL 
+  DW _XDROP
+L_ _UMMUL 
+  DW _AST,_0,_1H,_TIMES,_PMUL,_RET
 
-  COL_ _CR
-        DW _SDOT
-        DB 2,13,10
-        DW _EXIT
-        
-  COL_    _ID
-        DW _TDOT
-  COL_ _SPC
-        DW _BL,_EMIT,_EXIT
+L_ _1HDIV 
+  DW _1H
+L_ _UMDIV 
+  DW _XSWAP,_AST,_0,_1H,_TIMES,_SDIV,_RET
 
- COL_ _LOCATE
-        DW _TOKEN?,_DICT,_FND,_ZEQ,_??,_EXIT 
-        
-IF 1
-_BP DW @NOP
-@NOP:
-    INT 3
-    JMP @MAIN  
+L_ _MROT
+  DW _SWAP
+L_ _USWAP  
+  DW _PUSH,_SWAP,_POP,_RET
+L_ _XSWAP
+  DW _EX,_SWAP,_RET
+L_ _ROT
+  DW _XSWAP,_JUMP,_USWAP
+L_ _AND
+  DW _NAND
+L_ _NOT
+  DW _DUP,_NAND,_RET  
+L_ _AST
+  DW _PUSH,_XA,_JUMP,__@EXIT
+XT_ _FOR,__FOR   
+XT_ _NEXT,__NEXT  
+XT_ _STOD,__STOD
+XT_ _J,__J
+XT_ _RDROP,__RDROP
+XT_ _RDROPX,__RDROPX
+XT_ _PUSH,__PUSH       ; ^
+XT_ _XA,__XA         ; ^
+XT_ _POP,__POP         ; ^
+XT_ _HWTOB ,__HWTOB
+XT_ _WTOB  ,__WTOB
+
 ENDIF    
+
+
+;XT_ _XOR,@XOR   
+;XT_ _OVER,@OVER       ; OVER
+;XT_ _J,@J             ; ^
+;XT_ _NAND,@NAND       ; ^
 
 
 ;  XT_  _CMOVE,@_PARAM          ; CMOVE
@@ -54,10 +194,11 @@ ENDIF
 
 ;VALUE_  _HOFFS,0
      
-;XT_ _XOR,@XOR   
-;XT_ _OVER,@OVER       ; OVER
-;XT_ _J,@J             ; ^
-;XT_ _NAND,@NAND       ; ^
-;XT_ _POP,@POP         ; ^
-;XT_ _PUSH,@PUSH       ; ^
-
+;L_ _ROL4
+;  DW _ROL1,_ROL1,_ROL1
+;L_ _ROL1
+;  DW _STOD,_IF,_2MUL,_X1P
+;L_ _2MUL
+;  DW _DUP,_P2DIV,_DROPX
+;L_ _X1P
+;  DW _EX,_1P,_RET

@@ -1,0 +1,17 @@
+IF DBG
+
+ ;ORG EndMem
+IF DBG 
+ DB '  $35 EMIT BL EMIT $36 EMIT $1234 H. $4321 H. CR  '
+ DB ' 1 2 3 3ROT H. H. H. CR                                       '
+ DB '  : DIG.   ALPHA EMIT  ;  1 DIG.  9 DIG. CR BYE     '
+ENDIF
+ DB '                                                                '
+ DB '                                                                '
+ DB '                                                                '
+ DB '   33 EMIT  $31 EMIT  $32 EMIT  $33 EMIT                        '
+ DB 'BYE                                                             '
+ DB '                                                                '
+ DB '                                                                '
+
+ENDIF

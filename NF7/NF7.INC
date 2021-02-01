@@ -1,6 +1,14 @@
 BP_ MACRO
   IF DBG 
-    DW _BREAK
+    ;DW _BREAK
+  ENDIF
+ENDM
+
+FIX_ MACRO  ONFIX
+  IF DBG 
+    DW ONFIX
+  ELSE
+    DW _NOP
   ENDIF
 ENDM
 
@@ -125,7 +133,7 @@ HLBL    =      $
 ENDM
 
   ;__XALIGN LBL
-col_    macro  lbl
+L_    macro  lbl
 LBL  DW  @NEST
 endm
 
