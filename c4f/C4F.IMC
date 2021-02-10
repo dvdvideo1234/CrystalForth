@@ -1,0 +1,191 @@
+; COMMANDS      OF INTERPRETER  (MINIMAL SET)
+; (JUMP (; (IF (IF-   CONTROLS
+; push pop J DUP      STACK
+; !R+ @R+ xR XA       TRANSFER
+; NAND +2/ +* -/      MATH & LOGIC
+
+
+ADR?_ MACRO
+  IF ($-START) AND 1
+    CHKADDRESS
+  ENDIF
+ENDM
+
+BP_ MACRO
+  IF DBG 
+    DW _BREAK
+  ENDIF
+ENDM
+
+;FIX_ MACRO  ONFIX
+;  IF DBG 
+;    DW ONFIX
+;  ELSE
+;    DW _NOP
+;  ENDIF
+;ENDM
+
+locals  @@
+
+pd  equ dword ptr
+pw  equ word  ptr
+pb  equ byte  ptr
+
+TO_   = -2
+AT_   = -4
+VAL_  = 2
+
+JMPS_   MACRO LBL
+  jmp   SHORT LBL
+ENDM
+
+SKIPA_  MACRO
+  DB    03DH
+ENDM
+
+SKIPB_  MACRO
+  DB    03CH
+ENDM
+
+SKIPr_  MACRO reg
+  mov   reg,0
+  org   $-2
+ENDM
+
+SKIPc_  MACRO reg
+  mov   reg,0
+  org   $-1
+ENDM
+
+X       MACRO
+  xchg  Rsp,DSP
+ENDM
+
+DROP_   macro  REG
+  X
+  POP     REG
+  X
+endm
+
+DUP_    macro  REG
+  X
+  PUSH  REG
+  X
+endm
+
+Zero?_  MACRO   REG
+  OR    REG,REG
+ENDM
+
+CLR_    MACRO   REG
+  XOR    REG,REG
+ENDM
+
+@NOPSCNT = 0        
+ALIGN_  MACRO  FLAG
+  IF ($-START+FLAG) AND 1
+    NOP
+    @NOPSCNT = @NOPSCNT + 1
+  ENDIF
+ENDM
+
+
+P_  MACRO NAM,ADR
+  NOP
+NAM:
+  org   $-1
+  DW  ADR
+ENDM
+
+XT_  MACRO NAM,ADR
+  ALIGN_ 0
+P_ NAM,ADR
+ENDM
+
+L_  MACRO NAM
+NAM:
+ENDM
+
+N_  MACRO
+  JMP SHORT   @NOP
+ENDM
+
+VAR_    macro   LBL,DAT
+P_ LBL,__VAR
+  DW DAT
+ENDM
+
+const_  macro   lbl,dat
+P_ LBL,__CONST
+  DW DAT
+endm
+
+value_  macro   lbl,dat
+  DW __setvar
+  const_ LBL,dat
+endm
+
+DEFER_  macro   lbl,dat
+P_ LBL,__defer
+  DW DAT
+endm
+
+vector_ macro   lbl,dat
+  DW __setvar
+  DEFER_ LBL,dat
+endm
+
+point_  macro   lbl,dat
+  DW __setpnt
+P_ LBL,__point
+  DW dat
+endm
+
+nam_    macro   msg
+  local endstr
+  db    endstr-$-1
+  db    msg
+endstr  label   byte
+endm
+
+entry_  macro ADR,nam
+  DW ADR
+  DB 0
+  nam_ nam
+endm
+  
+ANEXT_  macro   ; JUMP TO A NEXT OPERATION ADDRESS
+  JMP   @NOP
+endm
+
+AXCHG_  macro   ; JUMP TO ADDRESS TO XCHG WORK REGISTER WITH TOP
+  JMP   @XCHG
+endm
+  
+ADUP_   macro   ; JUMP TO ADDRESS TO PUSH AND SET TOP REGISTER WITH WORK REGISTER
+  JMP   @WPUSH
+endm
+  
+APUSH_  macro   ; JUMP TO ADDRESS TO PUSH WORK REGISTER
+  JMP   @RPUSH
+endm
+  
+ADROP_  macro   ; JUMP TO ADDRESS TO DROP TOP
+  JMP   @DROP
+endm
+  
+; REGISTERS     for interpretter
+T   = BX  ; DATA STACK TOP REGISTER
+TL  = BL  ; DATA STACK TOP REGISTER
+TH  = BH  ; DATA STACK TOP REGISTER
+IP  = SI  ; INSTRUCTION POINTER
+RSP = SP  ; RETURN STACK POINTER
+DSP = BP  ; DATA STACK POINTER
+AR  = DX  ; ARITHMETIC (ALTERNATIVE) REGISTER
+
+WA  = DI  ; WORK ADDRESS REGISTER
+;NP  = CX  ; TO NEXT POINTER
+W   = AX  ; WORK REGISTER
+WL  = AL  ; WORK REGISTER
+WH  = AH  ; WORK REGISTER
+

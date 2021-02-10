@@ -1,0 +1,140 @@
+L_ _OVERM
+  DW _OVER
+L_ _SUB
+  DW _NEG
+L_ _ADD
+  DW _PLAVG
+L_ _DROP
+  DW _DROPX
+  
+CONST_  _TBL,80H
+CONST_  _TIB,-512
+CONST_  _TBUF,-256
+CONST_  _0,0
+     
+VALUE_  _H,FREEMEM
+VALUE_  _HOFS,0
+L_ _HERE
+  DW _H,_HOFS,_ADD,_RET
+
+VALUE_  _BLK,0
+VALUE_  _ETIB,0
+VALUE_  _LTIB,0
+VALUE_  _DICT,@VOCTOP
+POINT_  _FIND,__@DICTPTR
+POINT_  _INIT,__@INI
+
+__DOES  DW  _@DOES
+__DOES2 DW  _@DOES2
+__DOES3 DW  _@DOES3
+
+P_ _OPERAT,__WARY
+  DW _NUMBER,_PERFORM,_COMP_NUM,_@COMMA 
+
+__commaer:
+  DW __does
+@commaer:
+  dw _STR,_comma,_perfORM,_RET
+ADR?_  
+
+__MAKER:
+  DW __does
+  dw _HERE,_1P,_ENTRY,_JUMP,@commaER    ; _HERE !!!
+ADR?_  
+
+_VAR    DW __MAKER,__VAR,_COMMA         ; VAR
+_CONST  DW __MAKER,__CONST,_COMMA       ; CONST
+_SEMICO DW __commaer,_RET,_LPAR         ; ;
+_clit   dw __@COMMA,_lit                ; (#,
+
+L_ _NUMBER
+  DW _CSTR,_NUM
+L_ _??
+  DW _ABORT?
+  NAM_  "?"
+  DW _RET
+
+L_ _COMP_NUM
+  DW _NUMBER,_cLIT,_comma,_RET
+L_ _TOKEN
+  DW _BL,_PARSE,_TBUF,_MAKESTR,_LIT,'`',_ALD,_ST,_DUP,_C@,_RET
+
+L_ _PARSE
+__@SOURCE:
+  DW _NOP,_ETIB,_LTIB,_PARS,TO_+_LTIB,_RET
+  
+L_ _HENTRY
+  DW _HERE
+L_ _ENTRY
+  DW _0,_TOKEN?,_DICT,_STRPUSH,_STM,_1P,_STM,TO_+_DICT,_RET
+
+L_    _TOKEN?
+  DW _TOKEN
+L_ N??  
+  DW _ZEQ,_??,_RET
+
+__@COMMA:
+  DW  __does
+L_ _@COMMA
+      DW _LD
+L_ _COMMA
+      DW _H,_STP,TO_+_H,_RET
+ADR?_      
+
+L_ _ABORT?
+  DW _SLSKIP,_SWAP,_IF,_DROP   ; IF NO ERROR JUST EXIT
+__@ERR:  ; SHOW ERROR  VECTOR
+  DW _ABORT_INI
+__@AFTER:  ; INIT AFTER ERROR AND BEFORE ABORT VECTOR
+  DW _SHOW_ERR,_ABORT
+
+__@INI    DW _NOP      ; INIT VECTOR
+    DW  _H,_STR,_DICT,_MPUSH, TO_+_DICT,_LIT,EndMem,_LIT,8000H,_XEVAL
+    
+    DW  TO_+_INIT
+L_ _LPAR                    ; INTERPRETTER
+      DW TO_+_FIND    ; EXECUTE OR TRY FOR NUMBER
+__@DICTPTR   DW _DICT ; DICTPTR - POINTS DICTIONARY IN WHITCH TO SEARCH 
+      DW _FND,_RET       
+
+L_ _COLON
+  DW _HENTRY
+L_ _RPAR                    ; COMPILER
+  DW TO_+_FIND,_DUP,_INC,_DICT,_MFND,_IFM,@RPAR   ; EXECUTE COMPILING WORD
+  DW _DROP,_DUP,_DEC,_DICT,_MFND,_1P              ; COMPILE WORD OR  LITERAL
+@RPAR DW _1P,_RET
+
+L_ _XEVAL
+  DW _EX
+L_ _EVAL
+      DW _MEMTI
+@EVAL DW _TOKEN,_IF,_DROP,_FIND
+  BP_
+      DW _OPERAT,_PERFORM
+      DW _JUMP,@EVAL
+        
+L_ _MEMTI
+  DW _APLSL,_0
+L_ _TI 
+  DW _BLK,_XR,_LTIB,_PUSH,_ETIB,_PUSH,_TIEX,_EX,_POP,_POP,_POP
+L_ _TIEX
+  DW TO_+_BLK,TO_+_LTIB,TO_+_ETIB,_BLK,_IF,_DROP,_0,TO_+_ETIB,_RET
+  
+L_ _?XEPM ; ?XEP-|
+  DW _1M
+L_ _?XEP  ; ?XEP|
+  DW _DUP
+L_ _XEP   ; XEP|
+  DW _XR,_EXECUTE
+L_ _DOVAR
+  DW _POP,_RET
+L_ _SPLSL
+  DW _XEP
+L_ _APLSL  
+  DW _XEP
+L_ IPLS
+  DW _J,_ADD,_RET
+  
+P_ _VVV,__VAR
+  DW 5
+  
