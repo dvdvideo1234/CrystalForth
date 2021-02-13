@@ -19,7 +19,7 @@ Start   Label byte
 @ABORT:
   MOV   RSP,@R_TOP-2
   MOV   DSP,@S_TOP-2
-  CALL  @DBG
+  CALL  @DEBUGOFF
   CALL  @RET
   DW    _INIT
 @MAINLP:                  ; TEXT INTERPRETTER
@@ -32,8 +32,12 @@ __@OK:
 
 L_ _AND
   DW _NAND,_NOT,_RET
+  
+L_ _XREADLN
+  DW _XLDSTO,_NOP
 L_ _READLN
   DW    _TIB,_TBL,_ACCEPT,_RET
+  
 L_ _SKIPROW  
   DW _BLK,_IF,_SLASHES
 L_ _BACKSLASH  
@@ -44,25 +48,36 @@ L_ _SLASHES ;_REM  //
   DW 0,_PARS
 L_ _2DROP  
   DW _DROP,_DROPX
+  
 L_ _STRENDZ
   DW _CSTR,_TBUF,_MAKESTR,_ALD,_OFF,_RET
+  
 L_ _FKEY
   DW _HTOP,_DOSkey,_RET
+  
 L_ _INCLUDE
   DW _TOKEN?
 L_ _INCLUDED  
   DW _SKIPROW
 L_ FEVAL
+  DW _XLDSTI,_FKEY
   DW _STRENDZ,_1P,TO_+_HANDLES,_HANDLES ; CHK FOR PUSH
   DW _OPENR,_??,TO_+_HANDLES
 @ALINE:
-  DW _READLN,_EVAL,_TEOF,_LDZST,_IF,@ALINE,_HANDLES,_CLOSE
-L_ _ENDREAD  
-  DW _POP,_POP
-L_ _SETIO  
-  DW _STEMIT,_STKEY,_RET
-L_ _STDIO
-  DW _LIT,_BK,_LIT,_BE,_JUMP,_SETIO
+  DW _XREADLN,_EVAL,_TEOF,_LDZST,_IF,@ALINE
+L_ _CLOSE1
+  DW _HANDLES,_CLOSE,_RET
+  
+L_ _XLDSTO
+  DW _GTEMIT,_XR,_PUSH,_RLDP,_STEMIT,_EX,_POP,_STEMIT,_RET
+  
+L_ _XLDSTI
+  DW _GTKEY,_XR,_PUSH,_RLDP,_STKEY,_EX,_POP,_STKEY,_RET
+  
+L_ _STDEMIT
+  DW _LIT,_BE,_STEMIT,_RET
+L_ _STDKEY
+  DW _LIT,_BK,_STKEY,_RET
   
 
 VAR_ _TEOF,0
@@ -135,7 +150,7 @@ XT_ _CLOSE,$+2
 
 XT_ _WFND,__PAR
   CALL  @AFND
-  CMP   SI,[DI]
+  CMP   SI,[DI-3]
   RET
   
 @NUM@:
@@ -421,10 +436,12 @@ XT_ _num,__PAR     ;= (>#       ; (NUM
 @AEND:  
   JMP   @END
 
-XT_ _OPENR,__PARR
-  DW    _DROP
-  DW    _FKEY
+XT_ _OPENR,__PAR
   MOV   AL,00H
+  JMPS_ @OPENRW
+  
+XT_ _OPENW,__PAR
+  MOV   AL,01H
   JMPS_ @OPENRW
   
 XT_ _OPENRW,__PAR
@@ -461,16 +478,6 @@ __POP:
   MOV   W,[WA]
   JMP   @WPUSH
   
-__PARR:
-  MOV   AX,[WA]
-  XCHG  AX,PW @EMIT
-  PUSH  AX
-  SCASW
-__PARW:
-  MOV   AX,[WA]
-  XCHG  AX,PW @KEY
-  PUSH  AX
-  SCASW
 __PAR:
   CLR_  CX  
   PUSH  IP AR
@@ -487,7 +494,6 @@ __DUP:
   PUSH  WA
 @DUPT:  
   DUP_  T
-@DBG:   
   RET
   
 @BE:         ; (BE
@@ -532,7 +538,7 @@ XT_ _BK,__DUP          ; (BK
   POP   IP
   JMPS_ @DROP
   
-XT_ _swpstk,__PARXT
+XT_ _Xstk,__PARXT
   JMPS_ @DROP
   
 @FOR:
@@ -637,8 +643,8 @@ __CONST:
   XCHG    T,W   
 @NOP:   
   LODSW
-@TEST:  
   TEST    WL,1
+@TEST:  
   JZ      @NEST
   INC     W
   XCHG    W,WA
@@ -652,14 +658,23 @@ __CONST:
   JMPS_   @NOP
 
 XT_  _PERFORM,__DRLD
+@TEST1:
+  ZERO?_  W
+  JE      @NOP
+@TEST2:
+  TEST    WL,1
   JMPS_ @TEST
 
 XT_ _OVER,__DUP
   MOV   T,[DSP+2]
   JMPS_ @NOP
 __DBG:
-  JMP     @DBG
+  JMP     @DO_TRACE
 		
+__DEFER:
+  MOV     W,[WA]
+  JMPS_   @TEST1
+
 __POINT:
   MOV     W,[WA]
   JMPS_   @NEST
@@ -740,7 +755,7 @@ XT_ _RSTP,__DROP        ; (!R+
   SHL     PW [DSP],1
   RCL     T,1
   CMP     T,AR
-  JB      @NOP
+  JB      @NOP3
   SUB     T,AR        
 @U1P:  
 	INC     PW [DSP]
@@ -778,211 +793,76 @@ XT_ _FROMF,@FROMF
 @FROMF:
   JMP IP
 
-XT_ _AND15,__AND
-  DW 15
-  
-XT_ _CNTC,__VAR
-  DW 0
-    
-;XT_ _U2SWAP,@U2SWAP
-;L_ _2SWAP
-;  DW _U2SWAP,_PUSH,_U2SWAP,_POP,_RET
-  
-; vvvvvvvvvv----------- MINI DEBUGGER -------------vvvvvvvvvvv
-
-XT_ _BYE,0
-P_ _LIT,@LIT           ; ( DUP
-P_ _PUSHX,@PUSHX            ; (PUSH;
-P_ _C@,@C@
-P_ _HWTOB,@HWTOB
-P_ _WTOB,@WTOB
-P_ _SKIP,@SKIP		      ; (SKIP
-P_ _ROT,@ROT
-P_ _MROT,@MROT
-P_ _SWAP,@SWAP
-P_ _D2DIV,@D2DIV
-P_ _NEG,@NEG
-P_ _NOT,@NOT
-P_ _0LESS,@0LESS
-P_ _ZEQ,@ZEQ
-P_ _MIF	,@MIF
-P_ _2DIV,@2DIV          ; ( 2/
-P_ _NEXT,@NEXT          ; (NEXT
-P_ _DROPX,@DROPX        ; (DROP;
-P_ _NOP,@NOP        
-P_ _ABORT,@ABORT
-p_ _INC,@INC	          ; (INC
-p_ _DEC,@DEC	          ; (DEC
-P_ _ALPHA,@ALPHA
-P_ _RDROP,@RDROP        ; RDROP
-P_ _RDROPX,@RDROPX      ; RDROPX
-P_ _FOR,@FOR				    ; (FOR	
-p_ _BE,@BE
-P_ _EX,@EX
-P_ _BREAK,@BRK3
-p_ _2M,@2M
-p_ _1M,@1M  
-p_ _2P,@2P
-p_ _1P,@1P  
-P_ _NIP,@NIP
-P_ _LD,@LD
-   
-;----------------------------------	
-
-P_ _IFM,@IFM2           ; (IF-        
-P_ _JUMP,@JUMP          ; (JUMP
-;P_ _IF,@IF              ; (IF
-P_ _RET,@RET            ; ( (;
-
-P_ _PLAVG,@PLAVG				; ( +2/
-P_ _SDIV,@SDIV          ; ( -/
-P_ _PMUL,@PMUL          ; ( +*
-;P_ _nAND,@NAND	        ; ( NAND
-
-P_ _PUSH,@PUSH          ; (PUSH
-;P_ _POP,@POP            ; ( POP
-;P_ _J,@_DUP            ; ( J
-;P_ _DUP,@_DUP          ; ( DUP
-
-;P_ _RLDP,@_DUP         ; (@R+
-P_ _XR,@XR           ; ( XR  XCHG
-P_ _XA,@XA
-
-P_ _STKEY,__SETVAR
-P_ _GTKEY,__CONST
-L_ _KEY
-@KEY  DW _BK,_RET
-  
-P_ _STEMIT,__SETVAR
-P_ _GTEMIT,__CONST
-L_ _EMIT
-@EMIT  DW _BE,_CNTC,_INC,_RET
-  
-L_ _TRICE
-  DW _PUSH,_J,_XR
-L_ _IXEC
-  DW _J,_PUSH
-L_ _EXECUTE
-  DW _PUSHX
-
-L_ _XSPC
-  DW _EX
-L_ _SPC
-  DW _BL,_JUMP,_EMIT
-P_ _BL,__CONST
-  DW 32
-
-L_ _3ROTD
-  DW _XSPC,_ROTDOT,_ROTDOT
-L_ _ROTDOT
-  DW _ROT,_DUP
-L_ _WDOTSPC
-  DW _XSPC 
-L_ _WDOT
-  DW _DUP,_HWTOB,_BDOT
-L_ _BDOT
-  DW _DUP,_2DIV,_2DIV,_2DIV,_2DIV,_HDOT
-L_ _HDOT  
-  DW _AND15,_ALPHA,_EMIT,_RET
-  
-;L_ _I
-;  DW _J,_RET
-;  
-;  
-;L_ _BRK
-;  DW _I,_WDOTSPC,_RPLD,_WDOTSPC,_SPLD,_WDOTSPC
-;  DW _ALD,_WDOTSPC,_SPC,_SPC,_3ROTD,_BP,_RET
-
 ADR?_
 INCLUDE C4F.IKR ; KERNEL
 ADR?_
 
-  DW __VAR3,__TO_PUSH
-XT_ _FORWARDS,__TO_POP
-  DW @@1,@@1,20 DUP (0)
-@@1:  
-  DW __VAR3,__TO_PUSH
-XT_ _BACKWARDS,__TO_POP
-  DW @@2,@@2,20 DUP (0)
-@@2:  
-XT_ _HTOP,@HTOP
-  DW __VAR3,__TO_PUSH
-XT_ _HANDLES,__TO_POP
-  DW @@3,@@3,20 DUP (0)
-@@3:  
+; vvvvvvvvvv----------- MINI DEBUGGER -------------vvvvvvvvvvv
 
-L_ _ABORT_INI
-  DW AT_+_FORWARDS,_STKINI
-  DW AT_+_BACKWARDS,_STKINI
-  DW _CLOSE_ALL,_STDIO
-L_ _HANDLES_INI
-  DW AT_+_HANDLES
-L_ _STKINI
-  DW _STR
-L_ _SWAPST  
-  DW _SWAP
-L_ _ST  
-  DW _STP,_DROPX
+XT_ _TROFF,@ACALL  
+@DEBUGOFF:
+  SKIPR_ W
+  LODSW
+  TEST  WL,1
+  ORG   $-1
+@DBG?:  
+  XCHG  W,PW @NOP
+  RET
+
+@ACALL:  
+  CALL    WA
+  JMP     @NOP
   
-L_ _SHOW_ERR
-  DW _TBUF,_ID,_ID
-L_ _CR
-    DW _SDOT
-    DB 2,13,10,0
-    DW _CNTC
-L_ _OFF
-    DW _LDZST,_DROPX
-    
-L_ _DLD
-  DW _LDP,_XDROP
-L_ _LDP
-  DW _PUSH,_RLDP,_POP,_RET
-L_ _STKSIZE
-  DW _DLD,_SUB,_2DIV,_RET
+@DO_TRACE:
+  CALL  @DEBUGOFF
+  MOV   AX,OFFSET _BE
+  XCHG  AX,PW @EMIT
+  PUSH  AX AR 
+  CALL  @EX  
+  DW    _CR,_PUSH,_PUSH,_PUSH,_ROTD,_POP,_POP,_POP,_ROTD
+  DW  _H,_WDOT,_J,_WDOT
+  DW    _RPLD,_WDOT,_SPLD,_2P,_WDOT
+  DW  _SPC,_I,_WDOT,_I,_2P,_LD,_WDOT,_ILD,_WIDOT
+  BP_
+  BP_
+  BP_
+  BP_
+  DW  _BK
+  DW  _FROMF
+  AND   T,0DFH
+  CMP   T,'S'
+  JE    @STOPDBG
+  CALL  @DEBUGON
+@STOPDBG:
+  CALL  @DROPT
+  POP   IP AR
+  POP   PW @EMIT
+  LODSW
+  JMP   @TEST2
   
-L_ _CLOSE_ALL
-  DW AT_+_HANDLES,_2P,_LD,_XDROP   ; ADRES
-  DW AT_+_HANDLES,_STKSIZE
-  DW _TIMES,_STR,_CLOSE,_RET
+XT_ _TRON,@ACALL  
+@DEBUGON:  
+  SKIPR_ W
+  JMPS_  $
+  ORG $-1
+  DB __DBG-(@NOP+2)
+  JMPS_  @DBG?  
+  
+ALIGN_ 0
+L_ _ILD
+  DW _J,_LD,_RET
 
-L_ _XDROP
-  DW _EX,_DROPX
-
-L_ _TIMES
-        DW _FOR,@@LPS
-@@LPS0  DW _J,_EXECUTE
-@@LPS   DW _NEXT,@@LPS0
-__@EXT2 DW _RDROP
-__@EXIT DW _RDROPX
-
-L_ _0X 
-  DW _IF,__@EXIT,_RET
-
-L_    _SDOT
-  DW _SLSKIP
-L_ _TYPES
-  DW _CSTR
-L_ _TYPE
-  DW _XDROP
-L_ _ATP
-    DW _TIMES,_CSTR,_EMIT,_RET
-
-L_ _OK
-    DW _SDOT
-    NAM_ ' Ok'
-    DW _CR
-    DW _SDOT
-    NAM_ '>'
-    DW _RET
-    
-L_ _ID
-    DW _XSPC,_TYPES,_RET
-    
 freemem:
   DW ENDMEM-FREEMEM-2
+    ENTRY_  _NOP,'NOP'
+    ENTRY_  _LIT,'(#'
+    ENTRY_  _RET,'(;'
     ENTRY_  _ENTRY,'=:'
+    ENTRY_  _BYE,'BYE'
   DW 0,0
 EndMem:
+
+  DB '  BYE GAMEL OT GARY  '
 
 
   
