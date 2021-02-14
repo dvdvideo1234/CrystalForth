@@ -115,6 +115,13 @@ P_ LBL,__VAR
   DW DAT
 ENDM
 
+BOUND_    macro   LBL,SIZE,LUFT
+  DW  __BOUND
+VAR_ LBL,MADR-SIZE
+  DW MADR
+MADR = MADR-SIZE-LUFT 
+ENDM
+
 const_  macro   lbl,dat
 P_ LBL,__CONST
   DW DAT

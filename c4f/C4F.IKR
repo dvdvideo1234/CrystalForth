@@ -9,6 +9,7 @@ XT_ _CNTC,__VAR
 ;  DW _U2SWAP,_PUSH,_U2SWAP,_POP,_RET
   
 XT_ _BYE,0
+P_ _4P,@4P           ; ( 4+
 P_ _LIT,@LIT           ; ( DUP
 P_ _PUSHX,@PUSHX            ; (PUSH;
 P_ _C@,@C@
@@ -183,11 +184,24 @@ L_ _OK
     DW _RET
     
 L_ _WIDOT
-  DW _DICT,_WFND,_IF,_WDOT
+  DW _DICT,_WFND,_IF,@WID2
 L_ _WID
   DW _2P,_1P
 L_ _ID
     DW _XSPC,_TYPES,_RET
+@WID2:
+  DW _2P,_DICT,_WFND,_IF,@WID3
+  DW _SDOT
+  NAM_ 'TO '
+  DW _JUMP,_WID
+@WID3:
+  DW _2P,_DICT,_WFND,_IF,@WID4
+  DW _SDOT
+  NAM_ 'AT '
+  DW _JUMP,_WID
+@WID4:
+  DW  _2M,_2M,_WDOT,_RET
+  
     
 L_ _OVERM
   DW _OVER
@@ -199,9 +213,17 @@ L_ _DROP
   DW _DROPX
   
 CONST_  _TBL,80H
-CONST_  _TIB,-512
-CONST_  _TBUF,-256
 CONST_  _0,0
+
+CONST_  _TBUF,MADR
+MADR = MADR - 32
+BOUND_  _RBND,512,32
+@R_TOP  = $-2    ; 512 B RSTACK
+BOUND_  _SBND,512,32
+@S_TOP  = $-2    ; 512 B DSTACK
+
+VALUE_  _CMDLN,MADR
+VALUE_  _DICT,0
      
 VALUE_  _H,FREEMEM
 VALUE_  _HOFS,0
@@ -211,8 +233,6 @@ L_ _HERE
 VALUE_  _BLK,0
 VALUE_  _ETIB,0
 VALUE_  _LTIB,0
-VALUE_  _DICT,@VOCTOP
-VALUE_  _CMDLN,0
 POINT_  _FIND,__@DICTPTR
 POINT_  _INIT,__@INI
 
@@ -253,9 +273,9 @@ L_ _TOKEN
   DW _BL,_WORD,_DC@,_RET
 L_ _WORD  
   DW _PARSE,_TBUF
- BP_ 
+; BP_ 
   DW _MAKESTR
- BP_ 
+; BP_ 
   DW _LIT,'`',_ALD,_ST,_RET
 
 L_ _PARSE
@@ -292,18 +312,21 @@ L_ _XEVAL
 L_ _EVAL
       DW _MEMTI
 @EVAL DW _TOKEN,_IF,_DROP
-  BP_
+;  BP_
       DW _FIND
-  BP_
+;  BP_
       DW _OPERAT,_PERFORM
+  BP_
+      DW _RPLD,TO_+_RBND
+      DW _SPLD,TO_+_SBND
       DW _JUMP,@EVAL
         
 L_ _MEMTI
   DW _APLSL,_0
 L_ _TI 
-  DW _BLK,_XR,_LTIB,_PUSH,_ETIB,_PUSH,_TIEX,_EX,_POP,_POP,_POP
+  DW _BLK,_XR,_LTIB,_PUSH,_ETIB,_PUSH,_PUSH,_TIEX,_EX,_POP,_POP,_POP
 L_ _TIEX
-  DW TO_+_BLK,TO_+_LTIB,TO_+_ETIB,_BLK,_IF,_DROP,_0,TO_+_ETIB,_RET
+  DW TO_+_BLK,TO_+_LTIB,TO_+_ETIB,_BLK,_IF,_NOP,_0,TO_+_ETIB,_RET
   
 L_ _?XEPMM ; ?XEP--|
   DW _1M
@@ -328,9 +351,13 @@ L_ _LOCATE
 __@INI:
     
     DW _NOP      ; INIT VECTOR
-    DW  _H,_STR,_DICT,_MPUSH, TO_+_DICT
+    DW  _H,_STR,_TBL,_CMDLN
+;  BP_    
+    DW _STRPUSH,_DUP, TO_+_CMDLN
+;  BP_    
+    DW  _MPUSH, TO_+_DICT
     
-    DW  _TRON
+    ;DW  _TRON
     DW _LIT,1
     DW _LIT,2
     DW _LIT,3 ;,_ROTD,_OK,_BYE
@@ -341,8 +368,7 @@ __@INI:
     DW _NOP     
     DW _NOP     
     
-    DW  _TBL,_TBUF,_STRPUSH, TO_+_CMDLN
-  BP_    
+;  BP_    
     DW  _LIT,EndMem,_LIT,8000H,_XEVAL
     
     DW  TO_+_INIT

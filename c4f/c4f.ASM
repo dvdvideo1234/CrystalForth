@@ -1,4 +1,4 @@
-DBG = 0
+DBG = 1
 INCLUDE C4F.IMC
 
 MyCseg  segment para  use16
@@ -7,18 +7,13 @@ MyCseg  segment para  use16
 
         org 100h
 
-@TBUF   = -256          ;  256
-@TIB    = @TBUF  * 2    ;  256
-                        ;  512 B FSTACK
-@R_TOP  = @TIB   * 2    ; 1024 B RSTACK
-@S_TOP  = @R_TOP * 2    ; 2048 B DSTACK
-@VOCTOP = @S_TOP * 2    ; 4096 B = 4 BUFFERS * 1024 B
+MADR    = -260          ;  MEMORY ADDRESS POINTER
 
 Start   Label byte
 
 @ABORT:
-  MOV   RSP,@R_TOP-2
-  MOV   DSP,@S_TOP-2
+  MOV   RSP,PW @R_TOP
+  MOV   DSP,PW @S_TOP
   CALL  @DEBUGOFF
   CALL  @RET
   DW    _INIT
@@ -36,7 +31,7 @@ L_ _AND
 L_ _XREADLN
   DW _XLDSTO,_NOP
 L_ _READLN
-  DW    _TIB,_TBL,_ACCEPT,_RET
+  DW    _TBL,_TBL,_ACCEPT,_RET
   
 L_ _SKIPROW  
   DW _BLK,_IF,_SLASHES
@@ -108,6 +103,13 @@ XT_ _DOSkey,__PAR
   JMP   @RAP2
 @LASTCH  DB 0
 
+__BOUND: ; __VAR LOWBOUND HIBOUND OF STACK
+  CMP   T,[WA+4]
+  JNBE  @EMPTY_ERR
+  CMP   T,[WA+2]
+  JNAE  @FULL_ERR
+  JMPS_ @ADROP
+
 __TO_PUSH:
   MOV   W,[WA+4]
   LEA   CX,[WA+6]
@@ -118,6 +120,7 @@ __TO_PUSH:
   DEC   T
   MOV   [T],W
   MOV   [WA+4],T
+@ADROP:  
   ADROP_
 
 __TO_POP:
@@ -823,10 +826,10 @@ XT_ _TROFF,@ACALL
   DW  _H,_WDOT,_J,_WDOT
   DW    _RPLD,_WDOT,_SPLD,_2P,_WDOT
   DW  _SPC,_I,_WDOT,_I,_2P,_LD,_WDOT,_ILD,_WIDOT
-  BP_
-  BP_
-  BP_
-  BP_
+;  BP_
+;  BP_
+;  BP_
+;  BP_
   DW  _BK
   DW  _FROMF
   AND   T,0DFH
@@ -854,15 +857,16 @@ L_ _ILD
 
 freemem:
   DW ENDMEM-FREEMEM-2
-    ENTRY_  _NOP,'NOP'
-    ENTRY_  _LIT,'(#'
-    ENTRY_  _RET,'(;'
-    ENTRY_  _ENTRY,'=:'
-    ENTRY_  _BYE,'BYE'
+;    ENTRY_  _NOP,'NOP'
+;    ENTRY_  _LIT,'(#'
+;    ENTRY_  _RET,'(;'
+;    ENTRY_  _ENTRY,'=:'
+;    ENTRY_  _BYE,'BYE'
+  INCLUDE C4F.INM
   DW 0,0
 EndMem:
 
-  DB '  BYE GAMEL OT GARY  '
+  DB ' DROP DROP DROP DROP DROP BYE GAMEL OT GARY  '
 
 
   
