@@ -1,4 +1,4 @@
-DBG = 1
+DBG = 0
 INCLUDE C4F.IMC
 
 MyCseg  segment para  use16
@@ -18,70 +18,18 @@ Start   Label byte
   CALL  @RET
   DW    _INIT
 @MAINLP:                  ; TEXT INTERPRETTER
-  DW    _READLN,_EVAL
+  DW    _READLN,_SPC,_EVAL
 __@OK:
-  DW  _OK
-  DW _JUMP,@MAINLP
-
- ;vvvvvv--------------   IO  ---------------
-
-L_ _AND
-  DW _NAND,_NOT,_RET
-  
-L_ _XREADLN
-  DW _XLDSTO,_NOP
-L_ _READLN
-  DW    _TBL,_TBL,_ACCEPT,_RET
-  
-L_ _SKIPROW  
-  DW _BLK,_IF,_SLASHES
-L_ _BACKSLASH  
-  DW _LTIB,_DUP,_IF,@SLASH,_1M,_LIT,-64,_AND
-@SLASH:
-  DW TO_+_LTIB,_RET
-L_ _SLASHES ;_REM  //
-  DW 0,_PARS
-L_ _2DROP  
-  DW _DROP,_DROPX
-  
-L_ _STRENDZ
-  DW _CSTR,_TBUF,_MAKESTR,_ALD,_OFF,_RET
-  
-L_ _FKEY
-  DW _HTOP,_DOSkey,_RET
-  
-L_ _INCLUDE
-  DW _TOKEN?
-L_ _INCLUDED  
-  DW _SKIPROW
-L_ FEVAL
-  DW _XLDSTI,_FKEY
-  DW _STRENDZ,_1P,TO_+_HANDLES,_HANDLES ; CHK FOR PUSH
-  DW _OPENR,_??,TO_+_HANDLES
-@ALINE:
-  DW _XREADLN,_EVAL,_TEOF,_LDZST,_IF,@ALINE
-L_ _CLOSE1
-  DW _HANDLES,_CLOSE,_RET
-  
-L_ _XLDSTO
-  DW _GTEMIT,_XR,_PUSH,_RLDP,_STEMIT,_EX,_POP,_STEMIT,_RET
-  
-L_ _XLDSTI
-  DW _GTKEY,_XR,_PUSH,_RLDP,_STKEY,_EX,_POP,_STKEY,_RET
-  
-L_ _STDEMIT
-  DW _LIT,_BE,_STEMIT,_RET
-L_ _STDKEY
-  DW _LIT,_BK,_STKEY,_RET
-  
-
-VAR_ _TEOF,0
-@TEOF = $-2
+  DW  _OK,_JUMP,@MAINLP
 
 XT_ _LDZST,$+2
   CLR_  W
   XCHG  W,[T]
   JMP   @XCHG
+
+__NIP:
+  DROP_ W
+  JMP   WA
 
 XT_ _DOSkey,__PAR
   MOV   AH,3fh
@@ -143,6 +91,7 @@ __TO_POP:
   NAM_ "STACK EMPTY"
 SHOW_ERR: 
   POP   T
+  CALL  @DEBUGOFF
   CALL  @RET
   DW __@ERR ;  CALL ERROR - DOES NOT RETURN
 
@@ -175,7 +124,7 @@ XT_ _WFND,__PAR
 @@numini:
   Xor   Bx,Bx      ; ACCUMULATOR
 @@setbas:
-  mov   AR,W
+  mov   DI,W
 @@END?:
   JCXZ  @@ERNUM
 @@GETC:
@@ -192,10 +141,10 @@ XT_ _WFND,__PAR
   sub   al,7
 @@ton2:
   sub   al,'0'
-  cmp   W,AR
+  cmp   W,DI
   jnc   @@ERNUM
   xchg  W,Bx
-  mul   AR
+  mul   DI
   xchg  W,Bx
   add   Bx,W
   JCXZ  @@EXNUM
@@ -203,16 +152,16 @@ XT_ _WFND,__PAR
 @@ERNUM:
   INC   CX
 @@EXNUM:
-  pop   AR    ; rdrop
+  pop   DX    ; rdrop
 @@noEXn:
   RET
 
 @@SGN:
   CMP   AL,'-'     ; SGN
   JNE   @@N1
-  POP   AR
+  POP   DX
   CALL  @@END?
-  CALL  AR
+  CALL  DX
   NEG   bX
   RET
 
@@ -253,8 +202,7 @@ XT_ _DC@,__DUP
   CLR_  TH
   JMPS_ @NOP2
   
-XT_ _STM,__DROP
-  XCHG   W,T
+XT_ _STM,__NIP
   MOV   [T-2],W
 @2M:
   DEC   T
@@ -262,8 +210,12 @@ XT_ _STM,__DROP
   DEC   T
   JMPS_ @NOP2
 
-XT_ _STP,__DROP
-  XCHG   W,T
+XT_ _STMB,__NIP
+  MOV   [T-1],WL
+  DEC   T
+  JMPS_ @NOP2
+
+XT_ _STP,__NIP
   MOV   [T],W
 @2P:
   INC   T
@@ -272,15 +224,19 @@ XT_ _STP,__DROP
 @NOP2:
   JMP   @NOP
 
-XT_ _@DOES3,__POPIP
+XT_ @DOES3,__POPIP
 @4P:
   ADD   T,4
   JMP  @NOP
 
-XT_ _@DOES,__POPIP
+@APLSL:
+  ADD   [DSP],T
   JMPS_ @NOP2
 
-XT_ _@DOES2,__POPIP
+XT_ @DOES,__POPIP
+  JMPS_ @NOP2
+
+XT_ @DOES2,__POPIP
   JMPS_ @2P
 
 
@@ -375,30 +331,29 @@ XT_ _PARS,__PAR
   PUSH  WA
   JMPS_ @END
 
-XT_ _MAKESTR,__PAR
-  POP   DI AX SI
-  MOV   cL,AL
-  STOSB
+XT_ _MPOP,__PAR
+  POP   DI CX SI
   REP   MOVSB   ; NAME  MOVE
-  MOV   [DSP],DI  ; AR SET
+  MOV   [DSP],DI  ; AR SET   AS END
   JMPS_  @RAP2
 
 XT_ _MPUSH,__PAR
   POP   DI CX SI
-@MPUSH:  
-  SUB   T,CX
+  MOV   [DSP],DI  ; AR SET AS END
   ADD   SI,CX   ; AFTER NAME ADDRESS
   STD           ; BACKWARDS
   CMPSB         ; PREPARE FOR DIRECTION
   REP   MOVSB   ; NAME  MOVE
   CLD
+  INC   DI
+  MOV   T,DI    ; T SET AS START
   JMPS_  @RAP2
   
 XT_ _ACCEPT,__PAR
-  POP  SI DI
-  PUSH DI
+  POP  SI DI      ; SIZE IN SI
+  PUSH DI         ; SAVE START
 @ACC:
-  CMP   CX,SI
+  CMP   CX,SI     ; CHK SIZE 
   JE    @END
 @AKEY:  
   MOV   AX,OFFSET _KEY
@@ -406,12 +361,12 @@ XT_ _ACCEPT,__PAR
   CALL  @DROPW
   CMP   AL,13
   JE    @END
-  CMP   AL,10   ;DISCARD LF
+  CMP   AL,10     ;DISCARD LF
   JE    @AKEY
   CMP   AL,8
   JNE   @BL?
   JCXZ   @ACC
-  DEC   CX      ;DISCARD LAST CHAR
+  DEC   CX        ;DISCARD LAST CHAR
   DEC   DI
   CALL  @BS
   JMPS_ @ACC
@@ -420,20 +375,15 @@ XT_ _ACCEPT,__PAR
   JG    @ACHAR
   MOV   AL,' '
 @ACHAR:
-  STOSB         ; ADD CHAR
+  STOSB           ; ADD CHAR
   INC   CX
   CALL  @OEMIT
   JMPS_ @ACC
   
-XT_ _STRPUSH,__PAR
-  POP   DI SI
-  MOV   CL,[SI]
-  INC   CX
-  JMP   @MPUSH
-  
-XT_ _num,__PAR     ;= (>#       ; (NUM
+XT_ _num,__PAR    ;= (>#       ; (NUM
+  ;INT   3
   POP   CX SI
-  MOV   T,10  ; base := 10
+  MOV   AX,10     ; base := 10
   CALL  @NUM@
   PUSH  BX
 @AEND:  
@@ -598,6 +548,7 @@ XT_ _ALD,__DUP
 XT_ _DUP,__DUP           ; ( DUP
   JMPS_   @NOP
   
+XT_ _TUCK,__DUP  
 @MROT:      
 		XCHG	T,[DSP+2]
 @SWAP:
@@ -667,6 +618,9 @@ XT_  _PERFORM,__DRLD
 @TEST2:
   TEST    WL,1
   JMPS_ @TEST
+
+XT_  _EXEC,__DROP
+  JMPS_ @TEST2
 
 XT_ _OVER,__DUP
   MOV   T,[DSP+2]
@@ -752,7 +706,7 @@ XT_ _RSTP,__DROP        ; (!R+
   MOV     [DSP],T       
 @2DIV:               ; ( 2/
   RCR     T,1
-  JMPS_   @NOP
+  JMPS_   @NOP3
 	
 @SDIV:          ; ( -/
   SHL     PW [DSP],1
@@ -792,10 +746,10 @@ XT_ _NAND,__DROP
   SBB     T,T
   JMPS_   @NOT
       
-XT_ _FROMF,@FROMF
-@FROMF:
-  JMP IP
-
+@ACALL:  
+  CALL    WA
+  JMP     @NOP
+  
 ADR?_
 INCLUDE C4F.IKR ; KERNEL
 ADR?_
@@ -812,37 +766,29 @@ XT_ _TROFF,@ACALL
   XCHG  W,PW @NOP
   RET
 
-@ACALL:  
-  CALL    WA
-  JMP     @NOP
-  
 @DO_TRACE:
   CALL  @DEBUGOFF
-  MOV   AX,OFFSET _BE
-  XCHG  AX,PW @EMIT
-  PUSH  AX AR 
-  CALL  @EX  
-  DW    _CR,_PUSH,_PUSH,_PUSH,_ROTD,_POP,_POP,_POP,_ROTD
-  DW  _H,_WDOT,_J,_WDOT
-  DW    _RPLD,_WDOT,_SPLD,_2P,_WDOT
-  DW  _SPC,_I,_WDOT,_I,_2P,_LD,_WDOT,_ILD,_WIDOT
-;  BP_
-;  BP_
-;  BP_
-;  BP_
-  DW  _BK
-  DW  _FROMF
-  AND   T,0DFH
-  CMP   T,'S'
+  CALL  @TR1
   JE    @STOPDBG
   CALL  @DEBUGON
 @STOPDBG:
-  CALL  @DROPT
-  POP   IP AR
-  POP   PW @EMIT
   LODSW
   JMP   @TEST2
+
   
+XT_ _TR1,@ACALL  
+@TR1:
+  PUSH  AR 
+  CALL  @EX  
+  DW    _GTEMIT,_STDEMIT,_CR,_PUSH
+  DW    _ROTD,_POP,_POP,_POP,_POP,_XSTK,_ROTD,_XSTK,_PUSH,_PUSH,_PUSH
+  DW    _H,_WDOT,_J,_WDOT,_RPLD,_WDOT,_SPLD,_2P,_WDOT
+  DW    _SPC,_I,_WDOT,_I,_2P,_LD,_WDOT,_ILD,_WIDOT,_STEMIT,_BK,_FROMF
+  AND   T,0DFH
+  CMP   T,'S'
+  POP   IP AR
+  JMP   @DROPT
+
 XT_ _TRON,@ACALL  
 @DEBUGON:  
   SKIPR_ W
@@ -851,22 +797,22 @@ XT_ _TRON,@ACALL
   DB __DBG-(@NOP+2)
   JMPS_  @DBG?  
   
-ALIGN_ 0
-L_ _ILD
-  DW _J,_LD,_RET
+XT_ _FROMF,@FROMF
+@FROMF:
+  JMP IP
 
 freemem:
   DW ENDMEM-FREEMEM-2
 ;    ENTRY_  _NOP,'NOP'
 ;    ENTRY_  _LIT,'(#'
 ;    ENTRY_  _RET,'(;'
-;    ENTRY_  _ENTRY,'=:'
+    ENTRY_  _ENTRY,'=:'
 ;    ENTRY_  _BYE,'BYE'
-  INCLUDE C4F.INM
+;  INCLUDE C4F.INM
   DW 0,0
 EndMem:
 
-  DB ' DROP DROP DROP DROP DROP BYE GAMEL OT GARY  '
+;  DB ' 123 DROP DROP DROP DROP DROP BYE '
 
 
   

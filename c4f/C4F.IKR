@@ -1,15 +1,5 @@
-XT_ _AND15,__AND
-  DW 15
-  
-XT_ _CNTC,__VAR
-  DW 0
-    
-;XT_ _U2SWAP,@U2SWAP
-;L_ _2SWAP
-;  DW _U2SWAP,_PUSH,_U2SWAP,_POP,_RET
-  
 XT_ _BYE,0
-P_ _4P,@4P           ; ( 4+
+P_ _APLSL,@APLSL
 P_ _LIT,@LIT           ; ( DUP
 P_ _PUSHX,@PUSHX            ; (PUSH;
 P_ _C@,@C@
@@ -28,7 +18,6 @@ P_ _MIF	,@MIF
 P_ _2DIV,@2DIV          ; ( 2/
 P_ _NEXT,@NEXT          ; (NEXT
 P_ _DROPX,@DROPX        ; (DROP;
-;P_ _NOP,@NOP        
 P_ _ABORT,@ABORT
 p_ _INC,@INC	          ; (INC
 p_ _DEC,@DEC	          ; (DEC
@@ -46,7 +35,7 @@ p_ _1P,@1P
 P_ _NIP,@NIP
 P_ _LD,@LD
    
-;----------------------------------	
+;----------------------------------	CORE
 
 P_ _IFM,@IFM2           ; (IF-        
 P_ _JUMP,@JUMP          ; (JUMP
@@ -63,10 +52,80 @@ P_ _PUSH,@PUSH          ; (PUSH
 ;P_ _J,@_DUP            ; ( J
 ;P_ _DUP,@_DUP          ; ( DUP
 
+;P_ _RSTP,@_DUP         ; (!R+
 ;P_ _RLDP,@_DUP         ; (@R+
 P_ _XR,@XR           ; ( XR  XCHG
 P_ _XA,@XA
 
+;vvvvvv--------------   IO  ---------------
+
+L_ _ILD
+  DW _J,_LD,_RET
+
+L_ _SKIPROW  
+  DW _LTIB,_0X,_XLTIB,_1M,_LL,_NEG
+L_ _AND
+  DW _NAND,_NOT,_RET
+  
+L_ _XREADLN
+  DW _XLDSTO,_NOP
+L_ _READLN
+  DW    _TBL,_LL,_ACCEPT,_RET
+
+L_ _XLTIB
+  DW _LTIB,_EX,TO_+_LTIB,_RET
+  
+L_ _STRENDZ
+  DW _CSTR,_TBUF,_MAKESTR,_ALD,_OFF,_RET
+  
+;P_ _ATFKEY,__VAR
+L_ _FKEY
+  DW _HTOP,_DOSkey,_RET
+  
+L_ _INCLUDE
+  DW _TOKEN?
+L_ _INCLUDED  
+  DW _SKIPROW
+L_ FEVAL
+  DW _XLDSTI,_FKEY
+  DW _STRENDZ,_1P,TO_+_HANDLES,_HANDLES ; CHK FOR PUSH
+  DW _OPENR,_??,TO_+_HANDLES
+  DW _SKIP
+@ALINE:
+  DW _EVAL,_XREADLN,_TEOF,_LDZST,_IF,@ALINE,_EVAL
+L_ _CLOSE1
+  DW _HANDLES,_CLOSE,_RET
+  
+L_ _XLDSTO
+  DW _GTEMIT,_XR,_PUSH,_RLDP,_STEMIT,_EX,_POP,_STEMIT,_RET
+  
+L_ _XLDSTI
+  DW _GTKEY,_XR,_PUSH,_RLDP,_STKEY,_EX,_POP,_STKEY,_RET
+  
+L_ _STDEMIT
+  DW _LIT,_BE,_STEMIT,_RET
+L_ _STDKEY
+  DW _LIT,_BK,_STKEY,_RET
+  
+
+VAR_ _TEOF,0
+@TEOF = $-2
+
+
+XT_ _AND15,__AND
+  DW 15
+  
+XT_ _ODD,__AND
+  DW 1
+  
+L_ _ALIGN2
+  DW _HERE,_ODD
+L_ _ALLOT
+  DW _XHERE,_ADD,_RET
+  
+XT_ _CNTC,__VAR
+  DW 0
+    
 P_ _STKEY,__SETVAR
 P_ _GTKEY,__CONST
 L_ _KEY
@@ -133,7 +192,10 @@ L_ _ST
   DW _STP,_DROPX
   
 L_ _SHOW_ERR
-  DW _TBUF,_ID,_ID
+  DW _TBUF,_ID
+    DW _SDOT
+    NAM_ ":"
+  DW _ID
 L_ _CR
     DW _SDOT
     DB 2,13,10,0
@@ -146,17 +208,20 @@ L_ _DLD
 L_ _LDP
   DW _PUSH,_RLDP,_POP,_RET
 L_ _STKSIZE
-  DW _DLD,_SUB,_2DIV,_RET
+  DW _DLD,_TUCK,_SUB,_2DIV,_RET
   
 L_ _CLOSE_ALL
-  DW AT_+_HANDLES,_2P,_LD,_XDROP   ; ADRES
-  DW AT_+_HANDLES,_STKSIZE
-  DW _TIMES,_STR,_CLOSE,_RET
+  DW AT_+_HANDLES,_STKSIZE  ; ADRES & COUNT
+  DW _TIMESDR,_STR,_CLOSE,_RET
 
 L_ _XDROP
   DW _EX,_DROPX
 
+L_ _TIMESDR
+  DW _XR,_POP,_XDROP
 L_ _TIMES
+  DW _PUSH,_XR
+L_ _TIMESX
         DW _FOR,@@LPS
 @@LPS0  DW _J,_EXECUTE
 @@LPS   DW _NEXT,@@LPS0
@@ -173,7 +238,7 @@ L_ _TYPES
 L_ _TYPE
   DW _XDROP
 L_ _ATP
-    DW _TIMES,_CSTR,_EMIT,_RET
+    DW _TIMESX,_CSTR,_EMIT,_RET
 
 L_ _OK
     DW _SDOT
@@ -203,6 +268,8 @@ L_ _ID
   DW  _2M,_2M,_WDOT,_RET
   
     
+L_ _LCALC
+  DW _ALD
 L_ _OVERM
   DW _OVER
 L_ _SUB
@@ -212,6 +279,7 @@ L_ _ADD
 L_ _DROP
   DW _DROPX
   
+CONST_  _LL,40H
 CONST_  _TBL,80H
 CONST_  _0,0
 
@@ -236,9 +304,9 @@ VALUE_  _LTIB,0
 POINT_  _FIND,__@DICTPTR
 POINT_  _INIT,__@INI
 
-__DOES  DW  _@DOES
-__DOES2 DW  _@DOES2
-__DOES3 DW  _@DOES3
+__DOES  DW  @DOES
+__DOES2 DW  @DOES2
+__DOES3 DW  @DOES3
 
 P_ _OPERAT,__WARY
   DW _NUMBER,_PERFORM,_COMP_NUM,_@COMMA 
@@ -251,7 +319,7 @@ ADR?_
 
 __MAKER:
   DW __does
-  dw _HERE,_1P,_ENTRY,_JUMP,@commaER    ; _HERE !!!
+  dw _ALIGN2,_HERE,_1P,_ENTRY,_JUMP,@commaER    ; _HERE !!!
 ADR?_  
 
 _VAR    DW __MAKER,__VAR,_COMMA         ; VAR
@@ -269,6 +337,14 @@ L_ _??
 L_ _COMP_NUM
   DW _NUMBER,_cLIT,_comma,_RET
   
+L_ _MAKESTR
+  DW _1P,_MPOP
+@SETLEN:  
+  DW _LCALC,_SWAP,_STMB,_RET
+
+L_ _STRPUSH
+  DW _PUSH,_CSTR,_POP,_MPUSH,_JUMP,@SETLEN
+  
 L_ _TOKEN
   DW _BL,_WORD,_DC@,_RET
 L_ _WORD  
@@ -280,12 +356,14 @@ L_ _WORD
 
 L_ _PARSE
 __@SOURCE:
-  DW _NOP,_ETIB,_LTIB,_PARS,TO_+_LTIB,_RET
+  DW _NOP,_ETIB,_XLTIB,_PARS,_RET
   
+L_ _HENTRY2
+  DW _ALIGN2
 L_ _HENTRY
   DW _HERE
 L_ _ENTRY
-  DW _0,_TOKEN?,_DICT,_STRPUSH,_STM,_1P,_STM,TO_+_DICT,_RET
+  DW _0,_TOKEN?,_DICT,_STRPUSH,_STMB,_STM,TO_+_DICT,_RET
 
 L_    _TOKEN?
   DW _TOKEN
@@ -297,7 +375,14 @@ __@COMMA:
 L_ _@COMMA
       DW _LD
 L_ _COMMA
-      DW _H,_STP,TO_+_H,_RET
+      DW _XHERE,_STP,_RET
+      
+L_ _SPAREST  ; (DATA,ADR) SPARE DATA AT ADRES AND STORE
+  DW _DUP,_XR,_ILD,_PUSH,_PUSH,_ST
+  DW _EX,_POP,_POP,_ST,_RET
+      
+L_ _XHERE
+  DW _H,_EX,TO_+_H,_RET
 ADR?_      
 
 L_ _ABORT?
@@ -309,6 +394,8 @@ __@AFTER:  ; INIT AFTER ERROR AND BEFORE ABORT VECTOR
 
 L_ _XEVAL
   DW _EX
+L_ _SEVAL
+  DW _CSTR
 L_ _EVAL
       DW _MEMTI
 @EVAL DW _TOKEN,_IF,_DROP
@@ -318,32 +405,32 @@ L_ _EVAL
       DW _OPERAT,_PERFORM
   BP_
       DW _RPLD,TO_+_RBND
-      DW _SPLD,TO_+_SBND
+      DW _SPLD,_2P,TO_+_SBND
       DW _JUMP,@EVAL
         
 L_ _MEMTI
   DW _APLSL,_0
 L_ _TI 
-  DW _BLK,_XR,_LTIB,_PUSH,_ETIB,_PUSH,_PUSH,_TIEX,_EX,_POP,_POP,_POP
-L_ _TIEX
+  DW _BLK,_XR,_LTIB,_PUSH,_ETIB,_PUSH,_PUSH,@TIEX,_EX,_POP,_POP,_POP
+@TIEX:
   DW TO_+_BLK,TO_+_LTIB,TO_+_ETIB,_BLK,_IF,_NOP,_0,TO_+_ETIB,_RET
   
-L_ _?XEPMM ; ?XEP--|
-  DW _1M
-L_ _?XEPM ; ?XEP-|
-  DW _1M
-L_ _?XEP  ; ?XEP|
-  DW _DUP
-L_ _XEP   ; XEP|
-  DW _XR,_EXECUTE
-L_ __DOVAR
-  DW _POP,_RET
-L_ _SPLSL
-  DW _XEP
-L_ _APLSL  
-  DW _XEP
-L_ _IPLS
-  DW _J,_ADD,_RET
+;L_ _?XEPMM ; ?XEP--|
+;  DW _1M
+;L_ _?XEPM ; ?XEP-|
+;  DW _1M
+;L_ _?XEP  ; ?XEP|
+;  DW _DUP
+;L_ _XEP   ; XEP|
+;  DW _XR,_EXECUTE
+;L_ __DOVAR
+;  DW _POP,_RET
+;L_ _SPLSL
+;  DW _XEP
+;L_ _APLSL  
+;  DW _XEP
+;L_ _IPLS
+;  DW _J,_ADD,_RET
   
 L_ _LOCATE
   DW _TOKEN?,_DICT,_FND,_N??,_RET
@@ -357,19 +444,20 @@ __@INI:
 ;  BP_    
     DW  _MPUSH, TO_+_DICT
     
-    ;DW  _TRON
-    DW _LIT,1
-    DW _LIT,2
-    DW _LIT,3 ;,_ROTD,_OK,_BYE
-    
-    DW _NOP     
-    DW _NOP     
-    DW _NOP     
-    DW _NOP     
-    DW _NOP     
+;    DW  _TRON
+;    DW _LIT,1
+;    DW _LIT,2
+;    DW _LIT,3 ;,_ROTD,_OK,_BYE
+;    
+;    DW _NOP     
+;    DW _NOP     
+;    DW _NOP     
+;    DW _NOP     
+;    DW _NOP     
     
 ;  BP_    
-    DW  _LIT,EndMem,_LIT,8000H,_XEVAL
+    ;DW  _LIT,EndMem,_LIT,8000H,_XEVAL
+    DW  _CMDLN,_XEVAL
     
     DW  TO_+_INIT
 L_ _LPAR                    ; INTERPRETTER
@@ -378,9 +466,24 @@ __@DICTPTR   DW _DICT ; DICTPTR - POINTS DICTIONARY IN WHITCH TO SEARCH
       DW _FND,_RET       
 
 L_ _COLON
-  DW _HENTRY
+  DW _HENTRY2
 L_ _RPAR                    ; COMPILER
   DW TO_+_FIND,_DUP,_INC,_DICT,_MFND,_IFM,@RPAR   ; EXECUTE COMPILING WORD
   DW _DROP,_DUP,_DEC,_DICT,_MFND,_1P              ; COMPILE WORD OR  LITERAL
 @RPAR DW _1P,_RET
 
+L_ @TICK
+  DW __DOES
+L_ T@ADD  
+  DW _LD,_LOCATE,_LD,_ADD,_RET
+_TICK DW @TICK,0 
+  
+L_ @EXEC  
+  DW __DOES,T@ADD,_EXEC,_RET
+_TOEX DW @EXEC,-2 
+_ATEX DW @EXEC,-4 
+
+L_ @COMP
+  DW __DOES,T@ADD,_COMMA,_RET
+_TOCOM DW @COMP,-2  
+_ATCOM DW @COMP,-4  
