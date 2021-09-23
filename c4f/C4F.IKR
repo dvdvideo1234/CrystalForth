@@ -1,21 +1,21 @@
 XT_ _BYE,0
 P_ _APLSL,@APLSL
-P_ _LIT,@LIT           ; ( DUP
-P_ _PUSHX,@PUSHX            ; (PUSH;
-P_ _C@,@C@
-P_ _HWTOB,@HWTOB
-P_ _WTOB,@WTOB
+P_ _LIT,@LIT            ; (LIT
+P_ _PUSHX,@PUSHX        ; (PUSH;
+P_ _C@,@C@              ; (C@
+P_ _HWTOB,@HWTOB        ; (HW>B
+P_ _WTOB,@WTOB          ; (W>B
 P_ _SKIP,@SKIP		      ; (SKIP
-P_ _ROT,@ROT
-P_ _MROT,@MROT
-P_ _SWAP,@SWAP
-P_ _D2DIV,@D2DIV
-P_ _NEG,@NEG
-P_ _NOT,@NOT
-P_ _0LESS,@0LESS
-P_ _ZEQ,@ZEQ
-P_ _MIF	,@MIF
-P_ _2DIV,@2DIV          ; ( 2/
+P_ _ROT,@ROT            ; (ROT
+P_ _MROT,@MROT          ; (-ROT
+P_ _SWAP,@SWAP          ; (SWAP
+P_ _D2DIV,@D2DIV        ; (D2/
+P_ _NEG,@NEG            ; (NEG
+P_ _NOT,@NOT            ; (NOT
+P_ _0LESS,@0LESS        ; (0<
+P_ _ZEQ,@ZEQ            ; (0=
+P_ _MIF	,@MIF           ; (-IF
+P_ _2DIV,@2DIV          ; (2/
 P_ _NEXT,@NEXT          ; (NEXT
 P_ _DROPX,@DROPX        ; (DROP;
 P_ _ABORT,@ABORT
@@ -39,23 +39,23 @@ P_ _LD,@LD
 
 P_ _IFM,@IFM2           ; (IF-        
 P_ _JUMP,@JUMP          ; (JUMP
-;P_ _IF,@IF              ; (IF
-P_ _RET,@RET            ; ( (;
+;P_ _IF,@IF             ; (IF
+P_ _RET,@RET            ; (;
 
-P_ _PLAVG,@PLAVG				; ( +2/
-P_ _SDIV,@SDIV          ; ( -/
-P_ _PMUL,@PMUL          ; ( +*
-;P_ _nAND,@NAND	        ; ( NAND
+P_ _PLAVG,@PLAVG				; (+2/
+P_ _SDIV,@SDIV          ; (-/
+P_ _PMUL,@PMUL          ; (+*
+;P_ _nAND,@NAND	        ; (NAND
 
 P_ _PUSH,@PUSH          ; (PUSH
-;P_ _POP,@POP            ; ( POP
-;P_ _J,@_DUP            ; ( J
-;P_ _DUP,@_DUP          ; ( DUP
+;P_ _POP,@POP           ; (POP
+;P_ _J,@_DUP            ; (J
+;P_ _DUP,@_DUP          ; (DUP
 
 ;P_ _RSTP,@_DUP         ; (!R+
 ;P_ _RLDP,@_DUP         ; (@R+
-P_ _XR,@XR           ; ( XR  XCHG
-P_ _XA,@XA
+P_ _XR,@XR              ; (XR  
+P_ _XA,@XA              ; (XA  
 
 ;vvvvvv--------------   IO  ---------------
 
@@ -89,7 +89,9 @@ L_ _INCLUDED
 L_ FEVAL
   DW _XLDSTI,_FKEY
   DW _STRENDZ,_1P,TO_+_HANDLES,_HANDLES ; CHK FOR PUSH
-  DW _OPENR,_??,TO_+_HANDLES
+  DW _OPENR
+  BP_
+  DW _??,TO_+_HANDLES
   DW _SKIP
 @ALINE:
   DW _EVAL,_XREADLN,_TEOF,_LDZST,_IF,@ALINE,_EVAL
@@ -151,13 +153,22 @@ L_ _SPC
   DW _BL,_EMIT,_RET
 P_ _BL,__CONST
   DW 32
+  
+L_ _DIV16
+  DW _2DIV
+L_ _DIV8
+  DW _2DIV
+L_ _DIV4
+  DW _2DIV
+  DW _2DIV
+  DW _RET
 
 L_ _ROTD
   DW _XSPC,_TRICE,_ROT,_DUP
 L_ _WDOT
   DW _DUP,_HWTOB,_BDOT,_XSPC
 L_ _BDOT
-  DW _WTOB,_DUP,_2DIV,_2DIV,_2DIV,_2DIV,_HDOT
+  DW _WTOB,_DUP,_DIV16,_HDOT
 L_ _HDOT  
   DW _AND15,_ALPHA,_EMIT,_RET
   

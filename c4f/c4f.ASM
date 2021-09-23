@@ -1,4 +1,4 @@
-DBG = 0
+DBG = 1
 INCLUDE C4F.IMC
 
 MyCseg  segment para  use16
@@ -14,8 +14,8 @@ Start   Label byte
 @ABORT:
   MOV   RSP,PW @R_TOP
   MOV   DSP,PW @S_TOP
-  CALL  @DEBUGOFF
-  CALL  @RET
+  CLD
+  CALL  @EXDBGM
   DW    _INIT
 @MAINLP:                  ; TEXT INTERPRETTER
   DW    _READLN,_SPC,_EVAL
@@ -227,7 +227,7 @@ XT_ _STP,__NIP
 XT_ @DOES3,__POPIP
 @4P:
   ADD   T,4
-  JMP  @NOP
+  JMPS_ @NOP2
 
 @APLSL:
   ADD   [DSP],T
@@ -603,6 +603,9 @@ __CONST:
   INC     W
   XCHG    W,WA
   JMP     [WA-2]  
+  
+@EXDBGM:
+  CALL  @DEBUGOFF
 @EX:
   POP     W
 @NEST:  
@@ -716,8 +719,7 @@ XT_ _RSTP,__DROP        ; (!R+
   SUB     T,AR        
 @U1P:  
 	INC     PW [DSP]
-@NOP3:  
-  JMP     @NOP
+  JMPS_   @NOP3
 	
 @PMUL:          ; ( +*
   TEST    PB [DSP],1
@@ -726,7 +728,8 @@ XT_ _RSTP,__DROP        ; (!R+
 @D2DIV:
   RCR     T,1
   RCR     PW [DSP],1
-  JMPS_   @NOP3
+@NOP3:  
+  JMP     @NOP
 		
 XT_ _NAND,__DROP
   AND     T,W
@@ -746,7 +749,7 @@ XT_ _NAND,__DROP
   SBB     T,T
   JMPS_   @NOT
       
-@ACALL:  
+__ACALL:  
   CALL    WA
   JMP     @NOP
   
@@ -756,7 +759,7 @@ ADR?_
 
 ; vvvvvvvvvv----------- MINI DEBUGGER -------------vvvvvvvvvvv
 
-XT_ _TROFF,@ACALL  
+XT_ _TROFF,__ACALL  
 @DEBUGOFF:
   SKIPR_ W
   LODSW
@@ -767,7 +770,7 @@ XT_ _TROFF,@ACALL
   RET
 
 @DO_TRACE:
-  CALL  @DEBUGOFF
+  ;CALL  @DEBUGOFF
   CALL  @TR1
   JE    @STOPDBG
   CALL  @DEBUGON
@@ -776,20 +779,20 @@ XT_ _TROFF,@ACALL
   JMP   @TEST2
 
   
-XT_ _TR1,@ACALL  
+XT_ _TR1,__ACALL  
 @TR1:
   PUSH  AR 
-  CALL  @EX  
+  CALL  @EXDBGM  
   DW    _GTEMIT,_STDEMIT,_CR,_PUSH
   DW    _ROTD,_POP,_POP,_POP,_POP,_XSTK,_ROTD,_XSTK,_PUSH,_PUSH,_PUSH
   DW    _H,_WDOT,_J,_WDOT,_RPLD,_WDOT,_SPLD,_2P,_WDOT
   DW    _SPC,_I,_WDOT,_I,_2P,_LD,_WDOT,_ILD,_WIDOT,_STEMIT,_BK,_FROMF
-  AND   T,0DFH
-  CMP   T,'S'
+  AND   TL,0DFH
+  CMP   TL,'S'
   POP   IP AR
   JMP   @DROPT
 
-XT_ _TRON,@ACALL  
+XT_ _TRON,__ACALL  
 @DEBUGON:  
   SKIPR_ W
   JMPS_  $
@@ -806,7 +809,7 @@ freemem:
 ;    ENTRY_  _NOP,'NOP'
 ;    ENTRY_  _LIT,'(#'
 ;    ENTRY_  _RET,'(;'
-    ENTRY_  _ENTRY,'=:'
+;    ENTRY_  _ENTRY,'=:'
 ;    ENTRY_  _BYE,'BYE'
 ;  INCLUDE C4F.INM
   DW 0,0

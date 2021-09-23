@@ -133,7 +133,7 @@ value_  macro   lbl,dat
 endm
 
 DEFER_  macro   lbl,dat
-P_ LBL,__defer
+P_ LBL,__DEFER
   DW DAT
 endm
 
