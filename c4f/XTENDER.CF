@@ -76,9 +76,7 @@ N: `VAL' 2 ,
 : FORGET FND?? DUP @DEF? EVEN TO H >DEA TO T ; 
 : (code POP T @ ! ; 
 
-HERE >, (D#0 @2 
-: WITHIN OVER- PUSH - POP 
-: U< SWAP NOT +2/ NIP 0< ; 
+HERE >, (D#0 @2 WITHIN ;
 N: `BREL? -128 , 128 , 
 =, PRNTBL 32 , 240 ,
 HERE >, (D#0 TO WITHIN 0= ;
