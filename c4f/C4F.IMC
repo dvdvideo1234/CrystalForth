@@ -4,33 +4,6 @@
 ; !R+ @R+ xR XA       TRANSFER
 ; NAND +2/ +* -/      MATH & LOGIC
 
-
-ADRS_ MACRO LBL,ASZ
- MADR = MADR - ASZ
- ORG MADR
-LBL:
-ENDM
-
-ADR?_ MACRO
-  IF ($-START) AND 1
-    CHKADDRESS
-  ENDIF
-ENDM
-
-BP_ MACRO
-  IF DBG 
-    DW _BREAK
-  ENDIF
-ENDM
-
-;FIX_ MACRO  ONFIX
-;  IF DBG 
-;    DW ONFIX
-;  ELSE
-;    DW _NOP
-;  ENDIF
-;ENDM
-
 locals  @@
 
 pd  equ dword ptr
@@ -41,164 +14,169 @@ TO_   = -2
 AT_   = -4
 VAL_  = 2
 
-JMPS_   MACRO LBL
+JMPS   MACRO LBL
   jmp   SHORT LBL
-ENDM
+  ENDM
 
-SKIPA_  MACRO
+SKIPA  MACRO
   DB    03DH
-ENDM
+  ENDM
 
-SKIPB_  MACRO
+SKIPB  MACRO
   DB    03CH
-ENDM
+  ENDM
 
-SKIPr_  MACRO reg
+SKIPr  MACRO reg
+MADR = $
   mov   reg,0
-  org   $-2
-ENDM
-
-SKIPc_  MACRO reg
-  mov   reg,0
+  IF $-MADR-2
   org   $-1
-ENDM
+  ENDIF
+  org   $-1
+  ENDM
 
 X       MACRO
   xchg  Rsp,DSP
-ENDM
+  ENDM
 
-DROP_   macro  REG
+SWAP   macro
+  XCHG  [DSP],TOP
+  endm
+
+Z?  MACRO   REG
+  OR    REG,REG
+  ENDM
+
+CLR    MACRO   REG
+  XOR    REG,REG
+  ENDM
+
+R2P_    macro   REG
+  INC   REG
+  INC   REG
+  endm
+
+R2M_    macro   REG
+  DEC   REG
+  DEC   REG
+  endm
+
+NIP_   macro
+  R2P_ DSP ; LEA  DSP,[DSP+2]
+  endm
+        
+D_TO   macro   REG
   X
-  POP     REG
+  POP   REG
   X
 endm
 
-DUP_    macro  REG
+TO_D    macro  REG
   X
   PUSH  REG
   X
 endm
 
-Zero?_  MACRO   REG
-  OR    REG,REG
-ENDM
+R_TO   macro   REG
+  POP   REG
+endm
 
-CLR_    MACRO   REG
-  XOR    REG,REG
-ENDM
+TO_R    macro  REG
+  PUSH  REG
+endm
 
-@NOPSCNT = 0        
-ALIGN_  MACRO  FLAG
+ALiGN_  MACRO  FLAG
   IF ($-START+FLAG) AND 1
-    NOP
-    @NOPSCNT = @NOPSCNT + 1
+  NOP
+  @NOPSCNT = @NOPSCNT+1
   ENDIF
-ENDM
+  ENDM
+        
+@NOPSCNT = 0        
 
-
-P_  MACRO NAM,ADR
+P_  MACRO NAM
+  ALIGN_ 0
   NOP
 NAM:
   org   $-1
-  DW  ADR
-ENDM
+  ENDM
 
-XT_  MACRO NAM,ADR
-  ALIGN_ 0
-P_ NAM,ADR
-ENDM
+PP_  MACRO NAM,LBL
+  P_ NAM
+LBL:
+  ENDM
 
 L_  MACRO NAM
+  ALIGN_  0
 NAM:
-ENDM
+  ENDM
+
+LL_  MACRO NAM,ADR
+  ALIGN_  0
+NAM:
+  DW ADR
+  ENDM
 
 N_  MACRO
   JMP SHORT   @NOP
-ENDM
+  ENDM
 
+BUF_ MACRO ADR,LEN
+  MADR = MADR - (LEN)
+  ADR  = MADR
+ENDM
+ 
 VAR_    macro   LBL,DAT
-P_ LBL,__VAR
-  DW DAT
-ENDM
-
-BOUND_    macro   LBL,SIZE,LUFT
-  DW  __BOUND
-VAR_ LBL,MADR-SIZE
-  DW MADR
-MADR = MADR-SIZE-LUFT 
-ENDM
-
-const_  macro   lbl,dat
-P_ LBL,__CONST
-  DW DAT
-endm
+LBL  DW __VAR,DAT
+  ENDM
 
 value_  macro   lbl,dat
-  DW __setvar
-  const_ LBL,dat
-endm
+  DW     __SETVAR
+  CONST_ lbl,dat
+  endm
+
+CONST_  macro   lbl,dat
+LBL  DW __cons,dat
+  endm
 
 DEFER_  macro   lbl,dat
-P_ LBL,__DEFER
-  DW DAT
-endm
+LBL  DW __defer,dat
+  endm
 
 vector_ macro   lbl,dat
-  DW __setvar
-  DEFER_ LBL,dat
-endm
+  DW     __SETVAR
+  DEFER_  lbl,dat
+  endm
 
 point_  macro   lbl,dat
   DW __setpnt
-P_ LBL,__point
-  DW dat
-endm
+  DEFER_  lbl,dat
+  endm
+
+entry_  macro ADR,nam
+  DW    ADR,0
+  nam_  nam
+  endm
 
 nam_    macro   msg
   local endstr
   db    endstr-$-1
   db    msg
 endstr  label   byte
-endm
+        endm
 
-entry_  macro ADR,nam
-  DW ADR
-  DB 0
-  nam_ nam
-endm
-  
-ANEXT_  macro   ; JUMP TO A NEXT OPERATION ADDRESS
-  JMP   @NOP
-endm
-
-AXCHG_  macro   ; JUMP TO ADDRESS TO XCHG WORK REGISTER WITH TOP
-  JMP   @XCHG
-endm
-  
-ADUP_   macro   ; JUMP TO ADDRESS TO PUSH AND SET TOP REGISTER WITH WORK REGISTER
-  JMP   @WPUSH
-endm
-  
-APUSH_  macro   ; JUMP TO ADDRESS TO PUSH WORK REGISTER
-  JMP   @RPUSH
-endm
-  
-ADROP_  macro   ; JUMP TO ADDRESS TO DROP TOP
-  JMP   @DROP
-endm
-  
 ; REGISTERS     for interpretter
-T   = BX  ; DATA STACK TOP REGISTER
-TL  = BL  ; DATA STACK TOP REGISTER
-TH  = BH  ; DATA STACK TOP REGISTER
-IP  = SI  ; INSTRUCTION POINTER
-RSP = SP  ; RETURN STACK POINTER
-DSP = BP  ; DATA STACK POINTER
-AR  = DX  ; ARITHMETIC (ALTERNATIVE) REGISTER
-
-WA  = DI  ; WORK ADDRESS REGISTER
-;NP  = CX  ; TO NEXT POINTER
-W   = AX  ; WORK REGISTER
-WL  = AL  ; WORK REGISTER
-WH  = AH  ; WORK REGISTER
-
+TOP   = BX  ; DATA STACK TOP REGISTER
+TOPL  = BL  ; DATA STACK TOP REGISTER
+TOPH  = BH  ; DATA STACK TOP REGISTER
+IP    = SI  ; INSTRUCTION POINTER
+RSP   = SP  ; RETURN STACK POINTER
+DSP   = BP  ; DATA STACK POINTER
+AR    = DX  ; ARITHMETIC (ALTERNATIVE) REGISTER
+NXT   = [DSP]  ; TO NEXT POINTER
+      
+WA    = DI  ; WORK ADDRESS REGISTER
+;NP    = CX  ; WORK REGISTER
+W     = AX  ; WORK REGISTER
+WL    = AL  ; WORK REGISTER
+WH    = AH  ; WORK REGISTER

@@ -44,7 +44,7 @@ APT- _MROT   =: -ROT    \ V
 \ CONTROL
 APT- _NEXT   =: (NEXT   \ V 
 APT- _NOP    =: NOP     \ V
-APT- _SLSKIP =: ("SKIP  \ V
+APT- _ASTR   =: ("SKIP  \ V
 APT- _SKIP   =: SKIP    \ V
 APT- _EX     =: EX      \ V
 APT- _FOR    =: (FOR    \ V
@@ -94,11 +94,39 @@ APT- _CLOSE  =: FCLOSE  \ V
 APT- _INT    =: (INT#   \ V
 
 \ CONSTANTS
-APT- _@INIT  =: @INIT   \ V
-APT- _@MCADR =: @MCADR  \ V
-APT- _@R_BTM =: @R_BTM  \ V
-APT- _@S_BTM =: @S_BTM  \ V
-APT- _@TBUF  =: @TBUF   \ V
-APT- _@TIB   =: @TIB    \ V
-APT- _@VCTOP =: @VCTOP  \ V
+\ APT- _@INIT  =: @INIT   \ V
+\ APT- _@MCADR =: @MCADR  \ V
+\ APT- _@R_BTM =: @R_BTM  \ V
+\ APT- _@S_BTM =: @S_BTM  \ V
+\ APT- _@TBUF  =: @TBUF   \ V
+\ APT- _@TIB   =: @TIB    \ V
+\ APT- _@VCTOP =: @VCTOP  \ V
 APT- _@_DBG  =: @_DBG   \ V
+
+\ CONSTANTS
+APT- _TBL      =: TBL
+APT- _TIB      =: TIB
+APT- _TBUF     =: TBUF
+APT- _BL       =: BL
+APT- _0        =: 0
+APT- _1        =: 1
+
+\ VALUES
+APT- _ETIB     =: ETIB
+APT- _LTIBX    =: |LTIB
+APT- _LTIB     =: LTIB
+APT- _TX       =: |T                
+APT- _T        =: T
+APT- _HX       =: |H                 
+APT- _H        =: H
+APT- _BLK      =: BLK
+APT- _VT       =: vT
+APT- _CNTC     =: CNTC
+APT- _INIT     =: INIT
+APT- _FIND     =: FIND
+APT- _EMIT     =: EMIT
+APT- _KEY      =: KEY
+
+APT- _DFLTEMT  =: DFEMIT!
+APT- _DFLTKEY  =: DFKEY!
+

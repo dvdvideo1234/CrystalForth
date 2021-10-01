@@ -7,10 +7,9 @@
 : S3 |SPC CALL TWICE THEN ROT DUP 
 : H. W>BB CALL 
 : B. |SPC THEN  W>B 1H U/MOD TWICE 
-: DIG. |C. ALPHA ;
-\ : ALPHA 9>? + 
-\ : 48+ (@+; ,< '0 , 
-: /LINE? 0<>; |CR BK 27 = 0; EOS! ;
+: DIG. |C.
+: ALPHA 9>? + (@+; ,< '0 , 
+: /LINE? 0= 0; |CR BK 27 = 0; EOS! ;
 
 : ?TAB HLDSZ -         \ TAB NUMOUT 
 : SPACES TIMES| SPC 

@@ -2,12 +2,11 @@
      
     4 CONST `NBUFS    
     0 VALUE `PREV 
-$E800 VALUE  FIRST 
     0 VALUE  `USE 
    -1 VALUE  SCRH
 
 : `@FBUFS `PREV ,< 
-    4 BARY `FBUFS  
+    4 WARY `FBUFS  
 : `@BUFS  `PREV ,< 
     4 WARY `BUFS 
 
@@ -17,9 +16,9 @@ $E800 VALUE  FIRST
 : WBLK `fsk |DROP `1KRW| Fwrite ;
 : RBLK `fsk |DROP `1KRW| Fread ; 
 : `@BUF `PREV 1K U* FIRST + ; 
-: UPDATE  `@FBUFS C_ON ; 
+: UPDATE  `@FBUFS ON ; 
 : -BUF `@BUFS ON 
-: DISCARD `@FBUFS C_OFF ; 
+: DISCARD `@FBUFS OFF ; 
 : `+BUF `USE 1+ `NBUFS 1- AND DUP TO `USE ;    
 : !BUFS  `NBUFS TIMES| `+BUF TO `PREV
 : `?SAVE `@FBUFS C@ 0; `@BUF `@BUFS @ WBLK DISCARD ;
@@ -35,7 +34,7 @@ $E800 VALUE  FIRST
 : BLOCK `;ABLK -IF DROP J BUFFER J RBLK ;THEN TO `PREV ;
 : `-USE SCRH 1+ 0; SCRH Fclose 
 : `/SCR -1 TO SCRH ; 
-: SOURCE BLK 0; ETIB 0<>; BLK BLOCK 1K + TO ETIB ;
+: SOURCE BLK 0; ETIB 0= 0; BLK BLOCK 1K + TO ETIB ;
 
 : USE/ `/SCR /BUFS ; 
 : FCUT FLUSH `fsk 0 SCRH Fwrite ;
