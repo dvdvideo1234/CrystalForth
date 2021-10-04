@@ -1,14 +1,11 @@
 128 CONST HLDBUF
 : #> DROP HLD 
 : HLDSZ HLDBUF HLD - ;
-: 9>? 9 OVER U<     \ HEX NUMOUT 
-: 7& (@&; ,< 7 , 
 : S6 (| CALL XEP| XEP| XEP| THEN 
 : S3 |SPC CALL TWICE THEN ROT DUP 
 : H. W>BB CALL 
 : B. |SPC THEN  W>B 1H U/MOD TWICE 
-: DIG. |C.
-: ALPHA 9>? + (@+; ,< '0 , 
+: DIG. |C. ALPHA ;
 : /LINE? 0= 0; |CR BK 27 = 0; EOS! ;
 
 : ?TAB HLDSZ -         \ TAB NUMOUT 
@@ -19,8 +16,7 @@
 : <#>| <# EX ?TAB #> TYPE ; 
 : `6 DUP 0< 0; NEG EX '-  
 : HOLD |HLD
-: C!- 1- PUSH C!I POP
-; 
+: C!- 1- PUSH C!I POP; 
 : # BASE  (U/ ALPHA HOLD ; 
 : U. 0 
 : U.RS |SPC 

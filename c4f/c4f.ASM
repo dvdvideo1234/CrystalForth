@@ -42,13 +42,12 @@ P_ _ABORT
 
 ;-------------- VARIABLES ----------------
 
-LL_ _XOPER,_EX
 L_ _OPER
-   DW _XARY
+   DW _WARY
 _@NUMBER  DW 0
     DW _@EXEC
 _@COMPNUM DW 0
-   DW _@COMMA
+   DW _@COMMA,0,0   ;  FOR COMMENT
 
   CONST_  _TBL,80H
   CONST_  _TIB,@TIB
@@ -108,8 +107,10 @@ LL_ _LPAR,TO_+_FIND             ; [`
 
 ; ============== COMPILER ===================
 
-L_ _COLON
-  DW _NOP,_HENTRY
+L_ _COLON             ; :
+  DW _NOP
+L_ _COLONC             ; :`
+  DW _HENTRY
 LL_ _RPAR,TO_+_FIND
   DW _XOPER,_IFND,_TBUF,_DEC,_IFM,@RPAR,_DROP,_CFND,_1P
 @RPAR DW _1P,_RET
@@ -196,18 +197,12 @@ L_ _@Eval
   
 ; -------------- MATH ------------------
 
-;L_ _POSTX
-;  DW _RLDP,_XR,_PUSHX
-    
 LL_ _RANGES,_1P
 LL_ _OVERM,_OVER
 LL_ _SUB,_NEG
 LL_ _ADD,_PLAVG
   DW _DROPX
-
-  
-
-  
+ 
 ;L_ _DZ1
 ;  DW _POP,_XR,_RET
 
@@ -224,27 +219,16 @@ LL_ _COMMA,_HX
 L_ _STP
   DW  _PUSH,_RSTP,_POPX
 
-L_ _SWC           ; SWETCH ON CHAR
-  DW _ASTR,_B?,_1P
-L_ _XARY
-  DW _2MUL,_POP,_ADD,_LD
-LL_ _EXECUTE,_PUSHX
+LL_ _XOPER,_EX
+  DW _OPER
 L_ _@EXEC
   DW _LD,_EXEC,_RET
-
-;L_ _0X
-;  DW _ZEQ
-;L_ _N0X
-;  DW _IF,@NP
-;L_ _EXIT  
-;  DW _RDROP
 
 L_ _POSTENT                 ; ==:   \ N:  OR =,
   DW _DUP 
   DW _POSTX,_COMMA
 L_ _HENTRY                  ; _HER_E  !!!
 _@HERE   DW _H
-;_@H_CHK  DW _NOP
 L_ _ENTRY                   ; =:
   DW _0,_TOKEN?
 L_ _ENTRYZ                   ; (=:
@@ -407,7 +391,7 @@ P_ _INT
 L_ _PARSE
 _@PARSE  DW _NOP,_ETIB,_LTIBX
 L_ _PARS                ;= (PARS
-  DW __PAR;3          
+  DW __PAR          
   POP CX DI AX
   CMP   AL,' '
   JNE   @@SKIPX
@@ -614,8 +598,8 @@ PP_ __,@WPUSH
 PP_ _NOP,@NOP
   LODSW
 _@_DBG:
-  ;TEST    WL,1        ; A8 01
-  JMPS    @JDBG
+  TEST    WL,1        ; A8 01
+  ;JMPS    @JDBG
 @DBG2:
   JZ      @NEST
   DEC     W
@@ -813,6 +797,7 @@ P_ __PAR
   PUSH  TOP
   CLR   CX
 P_ __ASM
+  INT   3
   JMP   IP
 
 P_ _CLRSTK
@@ -832,8 +817,6 @@ P_ _BP
     INT 3
   JMP     @NOP
   
-    JMP     @NOP
-
 ; vvvvvvvvvv----------- MINI DEBUGGER -------------vvvvvvvvvvv
 
 IF DBG
@@ -923,49 +906,13 @@ ENDIF
 
     ALIGN_ 0
   
-IF 0
-
-;L_ _DF
-;  DW _ANDX,0DFH
-
-;L_ @_BASE
-;  DW _DZ0,_LD,_2M,_W_B,_2P
-VALUE_ @BASE,10  
-;L_ @DEC
-;  DW @_BASE,10
-; L_ @HEX
-;   DW @_BASE,16
-; L_ @BIN
-;   DW @_BASE,2
-L_ _OPT
-  DW  _LIT,1,_OVER,_ULESS,_RET
   
-L_ @MINUS?
-  DW _OPT,_0X
-  DW _OVER,_C@,_LIT,'-',_SUB,_N0X,_EX
-  DW _PUSH,_NEG,_POP,_RET
-
-;L_ @ACHAR
-  
-LL_ _NUM,_CSTR
-L_ _SNUM
-    DW @MINUS?,_PUSH,_PUSH,_0
-@@1 DW _J,_IF,@@9
-@@3 DW _CRLDP ; ,_J,@OPS,_
-    DW _DUP,AT_+_WITHIN,'0',':'
-    DW _IF,@@8,_LIT,'0',_SUB
-    DW _PUSH,@BASE,_UMUL,_POP,_ADD
-    DW _JJM,@@1
-@@8 DW _DROP
-@@9 DW _RDROP,_POP,_RET
- ENDIF 
-  
-freemem:
-  DW ENDMEM-FREEMEM-2
-;INCLUDE NF9_1.IC1
-  ENTRY_  _ENTRY,'=:'
-  ENTRY_  0,''
-EndMem:
+;freemem:
+;  DW ENDMEM-FREEMEM-2
+;;INCLUDE NF9_1.IC1
+;  ENTRY_  _ENTRY,'=:'
+;  ENTRY_  0,''
+;EndMem:
 
 MyCseg  ends
         end  Start

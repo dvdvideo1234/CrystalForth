@@ -73,7 +73,8 @@
 \ : !I J 
 \ : !  PUSH !R+ RDROP; \ INIT INITR (PNT2 \ SETPOINT
 \ : = - 0= ;
-: |DROP EX DROP;
+: |DROP EX
+: .; DROP;
 : I J ;
 : >DEA 4+ 
 : NAME> CSTR + ;;
@@ -93,7 +94,7 @@
 : |#,, EX (LIT, , ;
 
 \ : STR  |SWAP
-: @+ PUSH @R+ POP ; 
+: @+ PUSH @R+ POP; 
 \ : (CON @R+ RDROP; 
 \ : (D#1  POP XR 2+ ; 
 \ : (PNT2 (D#1 XR !R+ RDROP;
@@ -209,7 +210,7 @@
 0 VALUE LASTH
 : C@, C@ 
 : C, |H  
-: C!+ PUSH C!R+ POP ;
+: C!+ PUSH C!R+ POP;
 : |ALIGNED EX    
 : ALIGNED NOP \  |LASTH  FIX
  HODD NIP 0; $90 C, ;
@@ -261,12 +262,17 @@ N: ERASE 0 ,  =, BLANK 32 ,
 
 \ NUMBERS ---------------------------
 
-: OPT? 1 OVER U< ;
-: `DIGS  (BSCN ,< 36 C, \ NUM/CHAR
-,"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ" 2ALIGNED
-: `-? OPT? 0; OVER C@ '- = 0; S1- EX XEP| NEG ;
+: ("SW ("SKIP B?" 1+ 
+: (XARY 2* POP + @ PUSH;
+: 9>? 9 SKIP
+: OPT? `1 OVER U<  (@&; ,< 7 , 
+: ALPHA 9>? + (@+; ,< '0 ,   \ FOR NUMOUT 
 HERE >, (D#0 @  : BASE! 2- W>B 2+ ,<  10 VALUE BASE 
 N: `DECI 10 , N: `BIN 2 , N: `HEX 16 ,  DROP
+: DIG?  '0 - 9>? - DUP BASE U< ;
+\ : `DIGS  (BSCN ,< 36 C, \ NUM/CHAR
+\ ,"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ" 2ALIGNED
+: `-? OPT? 0; OVER C@ '- = 0; S1- EX XEP| NEG ;
 : `DIG# BASE! 0 ;
 : BASE*+ (| + XEP| BASE
 : U* |DROP 
@@ -274,8 +280,7 @@ N: `DECI 10 , N: `BIN 2 , N: `HEX 16 ,  DROP
  0 VALUE FLAG
 >, (PNT2 ,<  0 DEFER FUN_STATE 
 : `ADIG  A@
-: `DIG?  $DF AND `DIGS  DUP A! BASE U< DUP 0=  TO FLAG 
-      0;  A@ AHEAD
+: `DIG?  $DF AND DIG? DUP 0=  TO FLAG   (IF .;  AHEAD
 : `DIG^  TO FUN_STATE   FLAG 31 AND AHEAD
 : `ADIG' TO FUN_STATE  
 : `MUL+                     FLAG   THEN THEN BASE*+
