@@ -1,0 +1,161 @@
+\ VARIABLES STAGE 2 \ COMPILE  MACRO ------------------
+
+   -1 CONST TRUE
+: ON  TRUE 
+: SWAP! SWAP ! ;   
+: OFF 0 SWAP! ;   
+
+: `HOFS
+  CALL XR PUSH CALL EX POP THEN  (SET2 THEN ,<
+0 CONST HOFS 
+: _BEGIN |LASTH  
+: HERE H  
+: R>T HOFS + ; 
+>, EX  
+: _MARK H   
+: Z, 0 , ;      
+: CSP! SP@ (SET2   
+: CSP (CON ;; 
+: |HLD CALL EX (SET2 THEN ,<       0 CONST HLD
+
+ZDO VALUE 6 TIMES _FL _AX _BX _CX _DX _DX2
+: `REGS! EX TO _FL TO _AX TO _BX TO _CX TO _DX ;
+' BYE  DEFER vERR   
+HERE >, (D#0 C@ `REGS! (INT# ; 
+N: (DOS  $21 ,  
+=, (VID  $10 , 
+\ DROP
+\ : (KEY 0 D0 D0 [ DROP NIP NIP NIP ] (INT# ,< $16 , 
+\ : BK (KEY DUP W>B 0; W>B ;
+
+
+\ : KEY! (LIT BK (SET2 (CON   
+\ : KEY BK ;;
+\ : EMT! (LIT BE (SET2 (CON   
+\ : EMIT BE CALL 1+ (SET2 THEN ,<    0 CONST CNTC
+: |C. EX EMIT ; 
+: |SPC EX      
+: SPC |C. BL ;     
+: `BS  |C. ,<   8 CONST  bs       256 CONST 1B
+: EOS! bs ,<    0 VALUE EOS 
+: M: ';  
+: ?M: 0 `HOFS CALL TARG:! `(MAC `", THEN 
+: <M> MOBJ   |H TO MOBJ ;   
+: D# HERE >, CSP!       
+: |LASTH EX LASTH! ; 
+ 
+\ HERE .  TEST9 2084
+
+\ HI LEVEL FUNCTIONS  --------------------- 
+
+
+: T. T   
+: WID.  4+ 
+: ID. |SPC 
+: ". CSTR        
+: TYPE STR| CSTR EMIT ; 
+: ((" ("SKIP ;; 
+: < - 0< ;        
+: ((." ("SKIP  ". ;;  
+: |[] ."[" EX ."]" ;;
+: [ID] CSTR      
+: [S] |SPC |DROP     
+: [TYPE] |[] TIMES| CSTR DUP |C. BL < 0; DROP '. ;; 
+: ?|CR 0; 
+: |CR EX 
+: CR ."^M^J" CNTC OFF ;
+: `OK ."_ok" CR .">>_"  ;;  
+: `. EMT! KEY! CR TBUF ID. NOP ID. CR ;; \ ERRA
+
+: TFND T  FND ;
+: FND? TOKEN? TFND N?? ;
+: SAME? TFND 0; 4+ [ID] TBUF ; 
+: ,' |, 
+: ' FND?
+: @DEF? @2 
+: UNDEF? ODD !"UNDEF?" ;;
+: ADR' '  TO ODD ODDH? ; 
+HERE >, (D#0 @   
+: @ADR+ ' + ;
+N: `TO' -2 , 
+N: `VAL' 2 , 
+=, `AT' -4 , 
+
+: FORGET FND? DUP @DEF? EVEN TO H >DEA TO T ; 
+: (code POP T @ ! ; 
+
+HERE >, (D#0 @2 WITHIN ;
+N: `BREL? -128 , 128 , 
+=, PRNTBL 32 , 240 ,
+HERE >, (D#0 TO WITHIN 0= ;
+N: `RSTACK -$2C0 10 + , -$40 ,
+=, `DSTACK -$2C0 $280 - , -$2C0 , 
+
+
+: `STACK  RP@  2- 2-
+ `RSTACK !"RSTK?"     SP@ 2- `DSTACK !"DSTK?" ; 
+: `RW IXEC ! IXEC `1 EXIT ; 
+: HIDE FND? 5 +  '` SWAPC! ; 
+
+\ INTS DOS, FILES & VIDEO
+HERE >, (D#0 @ (DOS ;
+>, `RW  (VAR3 ,< N: Fread  $3F00 , 0 ,
+>, `RW  (VAR3 ,< N: Fwrite $4000 , 0 ,  
+=, Fseek  $4200 ,
+: StdGet 0 
+: FKEY  -1 AT Fread ROT Fread TO Fread @ ;
+: ERRput 2  
+: FEMIT SWAP AT Fwrite ROT Fwrite ;
+
+: IO? _FL ODD !"IO?" ;;
+: `File| >ZSTR 
+: `|IO? EX IO? _AX _DX TO _DX2 ;
+HERE >, (D#0 @ DROT (DOS ;
+\ >, >FTOP| 
+: FOPEN `File| ,< 
+N: Fopen $3D02 ,
+\ >, >FTOP| 
+: FCREATE `File| ,< 
+N: Fcreate $3C00 ,
+=, StdPut $200 , 
+HERE >, (D#0 @ XDROT (DOS ; 
+\ : CLSD NFILES AFILE - TIMES|
+\  FTOP> ,<
+N: Fsize $4202 , 
+N: Fpos $4201 , 
+N: Fcut $4000 , 
+=, Fclose $3E00 , 
+
+\ HERE .  TEST10 2616
+
+
+ 16 CONST 1H
+ 10 CONST lf
+: UNTIL| BEGIN IXEC 
+: WHILEZ| UNTIL RDROP ;
+: WHILE| (IF EXIT 
+: UNTILZ| IXEC  WHILE| ;
+: 2DUP OVER OVER ;
+: 2DROP DROP DROP ;
+\ : >LO 1B    \ DIVIDE U* U/MOD 
+\ : U/ |DROP 
+\ : D/M A! 0 
+\ : (D/M TWICE| TWICE| -/ -/ -/ 
+\ : -/ (-/ ; 
+\ : W>BB |SWAP
+\ : SPLIT 1B (U/ ;
+: W>BB |SWAP
+: SPLIT DUP W>B XEP| HW>B ;
+: UNITS? (U/  0; 1+ ; 
+: EOS| EOS XR PUSH 0 TO EOS EX POP TO EOS ; 
+: vague? DUP 2+ @ ODD ;
+\ : >HI 1B U* ;   \ MULTIPLY 
+\ : U* |DROP 
+\ : UM* A! 0 TWICE| TWICE| +* +* +* 
+\ : +* (+* ; 
+
+INCLUDE fLUSH.CF  \ HERE .  TEST10 2986
+INCLUDE NUMOUT.CF \ HERE .  TEST11 3292
+INCLUDE WORDS1.CF
+\ INCLUDE DEBUG.CF 
+
