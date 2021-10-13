@@ -135,6 +135,11 @@ value_  macro   lbl,dat
   CONST_ lbl,dat
   endm
 
+QUAN_  macro   lbl,dat
+  DW     __VAR3,__SETVAR
+  CONST_ lbl,dat
+  endm
+
 CONST_  macro   lbl,dat
 LBL  DW __cons,dat
   endm

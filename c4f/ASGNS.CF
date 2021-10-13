@@ -24,12 +24,13 @@ APT- _OVERM    =: OVER-
 APT- _2M       =: 2-         
 APT- _1M       =: 1-         
 APT- _2MUL     =: 2*       
-APT- _ZERO     =: O&       
+APT- _ZERO     =: 0&       
 APT- _SUB      =: -        
 APT- _ADD      =: +        
 APT- _4P       =: 4+         
 APT- _2P       =: 2+         
 APT- _1P       =: 1+         
+APT- _2PX      =: 2+;         
 APT- _U1P      =: U1+         
 APT- _2DIV     =: 2/      \ V
 APT- _D2DIV    =: D2/     \ V
@@ -38,11 +39,12 @@ APT- _NEG      =: NEG     \ V
 \ REGISTERS    
 APT- _ALD      =: A@      \ V
 APT- _AST      =: A!      \ V
-APT- _CSEG     =: CS@     \ V
+\ APT- _CSEG     =: CS@     \ V
 APT- _RPLD     =: RP@     \ V
 APT- _SPLD     =: SP@     \ V
                
 \ STACK        
+APT- _ADDX     =: .;
 APT- _DROPX    =: DROP;   \ V
 APT- _NIP      =: NIP     \ V
 APT- _OVER     =: OVER    \ V
@@ -51,15 +53,11 @@ APT- _POPX     =: POP;    \ V
 APT- _RDROP    =: RDROP   \ V
 APT- _SWAP     =: SWAP    \ V
 APT- _DROP     =: DROP    \ V DROP
-APT- _JM       =: J-         
+APT- __ASM     =: 4TH>         
 APT- _RDROPX   =: RDROP;  \ V
 APT- _MROT     =: -ROT    \ V
-APT- _CLRSTK   =: STACK!  \ CLEAR STACKS   
                
 \ CONTROL      
-APT- _JJM      =: (JJ-        
-APT- _OF       =: (OF         
-APT- _RDROPSK  =: (R.SK    
 APT- _NEXT     =: (NEXT   \ V 
 APT- _NOP      =: NOP     \ V
 APT- _ASTR     =: ("SKIP  \ V
@@ -67,17 +65,18 @@ APT- _SKIP     =: SKIP    \ V
 APT- _EX       =: EX      \ V
 APT- _FOR      =: (FOR    \ V
 APT- _MIF      =: (-IF    \ V
+APT- _DUP_IF   =: (?IF    \ V
 APT- _0X       =: 0;         
-\ APT- _N0X      =: 0<>;        
-APT- _EXIT     =: EXIT       
                
 \ LOGIC        
 APT- _XOR      =: XOR     \ V
 APT- _NOT      =: NOT     \ V
 APT- _ZEQ      =: 0=      \ V
+APT- _NEQ      =: <>      \ V
+\ APT- _EQ       =: =       \ V
 APT- _0LESS    =: 0<      \ V
 APT- _ULESS    =: U<      
-APT- _WITHIN   =: WITHIN     
+\ APT- _WITHIN   =: WITHIN     
                
 \ MEMORY       
 APT- _MAKESTR  =: S!    
@@ -97,10 +96,12 @@ APT- _WSTR     =: STR
 APT- _CSTR     =: CSTR       
 APT- _IST      =: !I       
 APT- _ST       =: !       
+\ APT- _OC@EQ    =: OVRC@=
                
 \ COMPILER PRIMITIVES
 APT- _@COMMA   =: @,
 APT- _COMMA    =: ,
+APT- _DLIT      =: (##    \ V
 APT- _LIT      =: (LIT    \ V
 APT- __VAR     =: (VAR    \ V
 APT- __VAR3    =: (VAR3   \ V
@@ -109,12 +110,9 @@ APT- _POSTX    =: (|
 APT- _DZ0      =: (D#0        
 APT- _DZ1      =: (D#1        
 APT- _DZ2      =: (D#2        
-\ APT- _MAKER    =: (N,      
 APT- __SETPNT  =: (PNT2 
 APT- __SETVAR  =: (SET2 
-\ APT- _COMMAER  =: (,,    
 APT- _@SEMICO  =: @SEMICO     
-\ APT- _SWC      =: ("SW     \ (X"OF        
 APT- _PARS     =: (PARS   \ V
 APT- _MAC      =: (MAC        
 APT- _TARY     =: (TARY   \ V 
@@ -122,33 +120,35 @@ APT- _5ARY     =: (5ARY   \ V
 APT- _LARY     =: (LARY   \ V 
 APT- _WARY     =: (WARY   \ V 
 APT- _BARY     =: (BARY   \ V 
-\ APT- _XARY     =: (XARY       
 APT- _PLSX     =: (@+;    \ V
 APT- _ANDX     =: (@&;    \ V
 \ ERRORS
 APT- _N??      =: N??        
 APT- _??       =: ??         
-APT- _ALLERR   =: `("?     
-APT- _ABORT0?  =: `(0?    
+APT- _ALLERR   =: ((;"     
+APT- _ABORT0?  =: ((0"    
 APT- _ABORT?   =: ((A"     
 
 \ SPECIAL      
-\ APT- _BPDOT    =: (BRK.   \ V
 APT- _BP       =: (BRK    \ V
 APT- _ABORT    =: ABORT   \ V
 APT- _QUIT     =: QUIT    \ V
 APT- _@EXEC    =: @EXEC   \ V
 APT- _EXEC     =: EXEC    \ V
 APT- _@_OK     =: @OK       
-APT- _XOPER    =: |OPER      
 APT- _OPER     =: OPER[]       
-APT- _@TIZ     =: @TIZ        
 APT- _REINIT   =: REINIT     
 APT- _REINIT2  =: REINIT2    
 APT- _LPAR     =: TARG,<  \ ,<       
 APT- _COLON    =: TARG:   \ :
 APT- _RPAR     =: >,       
-
+APT- _BPDBG    =: @DO_DBG      
+APT- _TROFF    =: TROFF    
+APT- _TRON     =: TRON
+APT- _VDBG     =: vDBG
+APT- _VPIN     =: vPIN
+APT- _ANOP     =: ANOP
+,
 \ SEARCH 
 APT- _B?       =: B?"         
 APT- _BSCN     =: (BSCN      
@@ -164,6 +164,10 @@ APT- _WORD     =: WORD
 APT- _SEVAL    =: SEVAL      
 APT- _EVAL     =: EVAL       
 APT- _@EVAL    =: @EVAL      
+APT- _CONVERT  =: CONVERT      
+APT- _TO_NAME  =: >DEA      
+APT- _AFT_NAME =: >NAME     
+\ APT- _TIZ      =: TIZ
                
 \ IO           
 APT- _BE       =: BE      \ V BIOS EMIT
@@ -192,7 +196,7 @@ APT- _HX       =: |H
 APT- _H        =: H
 \ APT- _BLK      =: BLK 
 APT- _VT       =: vT
-\ APT- _CNTC     =: CNTC
+APT- _CNTC     =: CNTC
 APT- _INIT     =: @INIT
 APT- _FIND     =: FIND
 \ APT- _EMIT     =: EMIT
@@ -212,27 +216,22 @@ APT- _WFND     =: WFND    \ V
 
 \ TO FIX
 APT- _@_INI    =: @INI      
-APT- _@_DBG    =: @_DBG   \ V
+APT- _@_DBG    =: @DBG   \ V
 APT- _@_ACCEPT =: @ACPT   
-APT- _@_ERROR  =: @ERR    
+APT- _@_ERR    =: @ERR    
 APT- _@_ABINI  =: @ABINI  
 APT- _@PARSE   =: @PARSE
 APT- _@SAME    =: @SAME
 APT- _@HERE    =: @HERE
 APT- _SEMICO   =: TARG;
-\ _@COMPNUM
-\ _@EVAL
-\ _@EXEC
-\ _@FIB
-\ _@MACADR
-\ _@MACTOP
-\ _@NUMBER
-\ _@R_BTM
-\ _@R_TOP
-\ _@S_BTM
-\ _@S_TOP
-\ _@TIZ
-\ _@_DBG
-\ _@_ERROR
+APT- _@FIB     =: `FIB
+APT- _@TIZ     =: `TIZ
+APT- _@MACADR  =: `MACADR
+APT- _@R_BTM   =: `R_BTM
+APT- _@R_TOP   =: `R_TOP
+APT- _@S_BTM   =: `S_BTM
+APT- _@S_TOP   =: `S_TOP
+APT- _@COMPNUM =: `COMPNUM
+APT- _@NUMBER  =: `NUMBER
 
   

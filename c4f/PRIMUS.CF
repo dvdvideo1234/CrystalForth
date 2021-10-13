@@ -1,0 +1,190 @@
+\ REDEFINITIONS AND FORWARD DEFINITIONS ---------------
+
+'  (JUMP   =:  (DEF
+=! |LASTH
+ 
+\ =============   VARIABLES  ==============
+
+  64  CONST 1L
+1024  CONST 1K
+   1  CONST   `1
+  ' `1 2+  =: BYE
+   -1 CONST TRUE
+' `FIB CONST FIB  
+ 
+: ON  TRUE SKIP
+: OFF 0 
+: SWAP! SWAP ! ;   
+  
+ 0 VALUE  BLK     
+: MCLR (LIT `MACADR  ,<    
+' `MACADR VALUE MOBJ   
+ 
+: EMT! (LIT BE   ,<
+' BE VALUE  `@E  >, AT CNTC ++ ;
+' `@E 2+ =: EMIT 
+ 
+: KEY! (LIT BK     ,<
+' BK  VALUE  `@K1  >, ;;
+' `@K1 2+ =: KEY 
+
+HERE >, (D#0 @  
+: BASE! 2- W>B 2+ ,<
+  10 VALUE BASE 
+N: `DECI 10 , N: `BIN 2 , N: `HEX 16 ,  DROP
+
+\ ============ PRIMITIVE METHODS ===============
+
+: 9>? 9 SKIP
+: OPT? `1 OVER U<  (@&; ,< 7 , 
+: DIG?  '0 - -IF 0& ;THEN 9>? - DUP BASE U< ;
+: WITHIN OVER- PUSH - POP U< ;
+: (OV@#= OVER C@ @R+
+: = XOR 0= ;
+
+: |DROP EX DROP;
+: |NIP EX NIP ;   
+: |SWAP EX SWAP ;
+: IXEC J
+: EXECUTE PUSH; 
+:  `RW IXEC ! IXEC `1 
+: EXIT RDROP;
+: S1- U1+ 1- ; 
+: ?XEP+| DUP 1+ SKIP 
+: ?XEP| DUP 
+: XEP| XR EXECUTE POP;
+: U* |DROP 
+: UM* A! 0 TWICE TWICE +* +* +* +* ;
+: U/ |NIP    : U/MOD A! 0 
+: (UM/ |SWAP TWICE TWICE -/ -/ -/ -/ ;
+: UMOD U/MOD DROP;
+: UM/MOD U/MOD XEP| (UM/ ; \ ( UD U - U UD )
+: A-L XEP|  
+: I- J - ;
+: S+L XEP| 
+: A+L XEP| 
+: I+ J + ;   
+: AND NAND NOT ;
+: DEA? DUP 4+ C@ ;
+: ?"LEN ?C@ 1+ ; 
+: HODD H DUP \ H TO FIX HERE 
+: ODD (@&; ,< 1 , 
+: TUCK DUP -ROT ;
+: |ROT EX
+: ROT -ROT -ROT ;
+: XDROT XEP| 
+: DROT |ROT  
+: D0 0 0 ;
+: EVEN (@&; ,< -2 , 
+: C@A+ XA C@R+ XA ;
+: C!- 1- XEP|
+: C!I J 
+: C! PUSH C!R+ RDROP; 
+: I J ;
+: NUP XEP| DUP ;
+
+
+: MEMTI| A+L 0   
+: TI| BLK XR LTIB PUSH
+ ETIB PUSH PUSH CALL EX POP POP POP THEN
+ TO BLK TO LTIB TO ETIB 
+: /BLK BLK 0; 0 TO ETIB ; 
+
+: (LIT, (MAC ,< 2 C, ,"(#"  2ALIGNED
+: (;,   (MAC ,< 2 C, ,"(;"  2ALIGNED
+: `(MAC (MAC ,< 4 C, ,"(MAC"  2ALIGNED
+: |#,, EX (LIT, , ;
+
+\ : STR  |SWAP
+: @+ PUSH @R+ POP; 
+: 2@ |SWAP
+: @2 @+ @ 
+: NOP;  ;
+
+: (RNG| RANGE>S  
+: STR| XR POP    
+: .TIMES |DROP   
+: TIMES PUSH XR  
+: TIMES| (FOR CALL BEGIN J EXECUTE THEN (NEXT RELS<
+ RDROP RDROP; 
+: (<RNG| RANGE>S A+L STR| ;
+: |@! @+ 2- XR EXECUTE POP!;
+: +!  |@! + ;
+
+\ ERROR PRIMITIVES  --------------------- 
+
+: ODDH? !"ODDH?" ;;
+
+      \ FUNCTION EVAL  & EXECUTE MACRO 
+: `MEMTO STR| CSTR   \  THEN \ C!A+
+: C!A+ XA C!R+ XA ;
+
+: |, EX 
+: `<RELS_ , 
+: LASTH! H ,<
+0 VALUE LASTH
+: C@, C@ 
+: C, |H  
+: C!+ PUSH C!R+ POP;
+: |ALIGNED EX    
+: ALIGNED NOP \  |LASTH  FIX
+ HODD NIP 0; $90 C, ;
+' |ALIGNED VECTOR  v",
+
+\ MEMORY  PRIMITIVES  ------------------
+
+: CMOVE SWAP 
+: MEMTO A! `MEMTO ; 
+: >ZSTR CSTR H ?XEP| MEMTO A@ OFF ; 
+: CMOVE> A+L SWAP |DROP MPUSH ;
+HERE >, (D#0 @ 
+: FILL A! STR| A@ C!+ ;
+N: ERASE 0 ,  =, BLANK 32 ,
+  
+\ COMPILER BASIC PRIMITIVES  ------------ 
+
+: "STR, '" 
+: `", WORD ?C@ N?? 
+: ", CSTR v", DUP C, 
+: S, STR| CSTR C, ; 
+
+\ NUMBERS ---------------------------
+
+\ L_ _STR?
+\   DW _AFT_NAME,_1M,_C@,_RET
+: "? DUP >NAME 1- C@ TO = ,< '" , >, ;;
+: ("SW ("SKIP B?" 1+ 
+: (XARY 2* POP + @ PUSH;
+: ALPHA 9>? + (@+; ,< '0 ,   \ FOR NUMOUT 
+
+: `-? OPT? 0; (OV@#= ,< '- , >, 0; S1- EX XEP| NEG ;
+: "># CSTR
+: S># `DECI 0 -ROT (?IF 2+; `-?
+   BASE CONVERT NIP ;
+
+: ">NUMC |#,,    
+: ">NUM 
+\  vDBG ,< 4 , >,
+"># ?? ; 
+
+
+\ 
+INCLUDE XTEND.CF \ HERE .  TEST11 3292
+\ INCLUDE INITER.CF
+ 
+' @INI VAL' @INIT T!
+\ ' `INTERP VAL' LOXEC T! \ TARGET FORTH INITIAL STATE
+' ">NUMC ' `COMPNUM T!   \ FIX @COMPNUM
+' ">NUM  ' `NUMBER  T!   \ FIX @NUMBER
+'  `.     ' @ERR    T!   \ FIX ERROR.
+' MEMTI|  ' `TIZ    T!   \ FIX EVAL 
+' `STACK  ' @EVAL   T!   \ FIX @EVAL 
+' LineIn  ' @ACPT   T!
+'  `OK    ' @OK     T!   \ FIX  vOK.
+\ '  SOURCE ' @PARSE  T!   \ FIX PARSE
+'  SAME?  ' @SAME   T!   \ FIX (=:
+'  HERE   ' HODD    T!   \ FIX HODD
+'  HERE   ' @HERE   T!   \ FIX H=:
+'  CSP!   ' TARG:   T!   \ FIX TARG:
+'  |LASTH ' ALIGNED T!   \ FIX ALIGNED
+\ '  FIX VAL' H       T!   \ NEW H 

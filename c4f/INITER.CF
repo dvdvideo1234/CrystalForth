@@ -7,7 +7,7 @@
   CR CR CR T. ."RESTART_!"
   
 \ 01. TEST [ID]
-\ CR "123456" [ID]  "BYE" [ID] "_BYE_" [ID]  (BRK
+ CR "123456" [ID]  "BYE" [ID] "_BYE_" [ID]  (BRK
   
 \ 02. TEST H.
 \  CR "123456"  "BYE"  "_BYE_" (BRK

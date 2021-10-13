@@ -2,21 +2,27 @@
 : `BD |SPC STR| CSTR B. ; 
 : DUMP 1H UNITS? STR| 
 : DU CR DUP H. SPC 1H 2DUP `BD [TYPE] ; 
-: WFIND |A T `FND| @ - ;
+: (WSCN XR STR POP WSCAN ;
+: WFIND T WFND ;
+: PINZ 0 
+: PIN I CR H. HERE H. B. SP@ H. S6
+ T H. T @ H. T. TBUF ID. BK DROP ;
+: |TBUF!. @R+ PIN EX PINZ ;;
+' |TBUF!.  VAL' vDBG T!
+\ ' PINZ     VAL' vPIN T!
 
-
-\ vTARG IO; $04E8 , $3B00 , $FC5D , $C3 C,
-\  ' @FIND? JMP#, ALIGNED
 : `WID. ID. WID. ; 
 : JID. J 
 : @ID. DUP H. STR DUP H. SWAP @ H. 
-: ?ID. WFIND IF WID. ;THEN 2- WFIND IF " VAL" `WID. ;THEN 4+ 
-WFIND IF " TO" `WID. ;THEN 2+ WFIND IF " AT" `WID. ;THEN 4 -
-: $. ." $" H. ; 
+: ?ID. WFIND IF WID. ;THEN 2- WFIND IF "VAL" `WID. ;THEN 4+ 
+WFIND IF "TO" `WID. ;THEN 2+ WFIND IF "AT" `WID. ;THEN 4 -
+: $. ."$" H. ; 
 0 VALUE `ADR2 
-: `" (WSCN ,< 6 , >, (!" (." (MAC (0" (" ("SW ,< 
-0 |VALUE `|WW `WW 
-: `A:? WFIND (IF DROP; ." : " WID. ; 
+: `" (WSCN ,< 7 , 
+>, ((A" ((." (MAC ((0" ((" ((;" ("SW ,< 
+: `|WW CALL EX (SET2 THEN ,<
+0 CONST `WW 
+: `A:? WFIND (IF .; ."_:_" WID. ; 
 : SEE ' 
 : @SEE TO `WW 
 : SL bs TIMES| 
@@ -25,17 +31,16 @@ WFIND IF " TO" `WID. ;THEN 2+ WFIND IF " AT" `WID. ;THEN 4 -
 \ : DUTEST 1 2 3 " 1234" ;  
 
 \  BREAKPOINT  DEBUGERR 
-CREATE `DBGSAV Z, Z, 
-: `DBGIN TO EMIT A@ `DBGSAV 2! Emt! CR ; 
+0 VALUE  `DBGEmt 
+0 VALUE  `DBGA 
+: `DBGIN A@ TO `DBGA  TO EMIT TO `DBGEmt  EMT! CR ; 
 : R3 POP POP POP J H. PUSH J H. PUSH J H. PUSH ; 
-: `DBG SPC PUSH S3 POP HERE H. vTARG H. `DBGSAV @ H. SPC @ID. ;
-: DBG. `DBGIN R3 I `DBG TO BK 
-: `DBGOUT `DBGSAV @2 AT EMIT A! ;
+: `DBG SPC  S3 HERE H. T H. `DBGA H. SPC  ;
+: DBG. `DBGIN R3 `DBG JID. BK DROP
+: `DBGOUT `DBGEmt  AT EMIT  `DBGA A! ;
 
-=P 4TH>  $E3FF , \ STEP BY STEP  DEBUGERR
-: TRACE ADR' CALL (TROFF; THEN PUSH TRON ; 
-: `@DBG      ,<  ' (TROFF;  2+ CAL#, ' (EX 1- CAL#, >, 
- `DBGIN R3 I `DBG BK `DBGOUT 4TH> ,< 
-VAL' TRON  CAL#,    $DF24 , $533C ,  $75AD , 03 C,
-' (TROFF;  2+ CAL#, $8B5B , $F C, ' (NOP 1+ JMP#, ALIGNED
-' `@DBG ' (IF- 1- -      ' (IF- 3 - !
+: TRACE ADR' CALL TROFF ;THEN PUSH TRON ; 
+: `@DBG   `DBGIN POP R3 PUSH `DBG I DUP H. @ H.
+       J DUP H. ?ID. `DBGOUT  ,< 
+VAL' @DO_DBG DEFER (DBGRET 
+' `@DBG  ' @DO_DBG  T!

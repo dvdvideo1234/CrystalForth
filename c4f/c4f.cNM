@@ -1,0 +1,101 @@
+$026C =: _OVERM      $0343 =: _DROP       $0138 =: _0
+$0314 =: _PARSE      $033B =: _DROPX      $039F =: _0LESS
+$0318 =: _PARS       $03E9 =: _DUP        $02AA =: _0X
+$03CF =: _PLAVG      $0276 =: _DZ1        $01D0 =: _1P
+$02EF =: _PLSX       $018A =: _EMIT       $03D5 =: _2DIV
+$0381 =: _PMUL       $02B8 =: _ENTRY      $02CE =: _2M
+$03E7 =: _POP        $0144 =: _ETIB       $045D =: _2MUL
+$0266 =: _POSTX      $0256 =: _EVAL       $01CE =: _2P
+$0349 =: _PUSHX      $03F9 =: _EX         $023C =: _??
+$036B =: _PUSH       $0436 =: _EXEC       $0292 =: _@COMMA
+$02ED =: _RDROPX     $02B0 =: _EXIT       $025C =: _@EVAL
+$040B =: _RDROPSK    $017E =: _FIND       $02A4 =: _@EXEC
+$03FF =: _RDROP      $01E2 =: _FND        $01AC =: _@_ABINI
+$01AA =: _REINIT2    $0369 =: _FOR        $0110 =: _@_ACCEPT
+$019E =: _REINIT     $0162 =: _H          $03F1 =: _@_DBG
+$02E9 =: _RET        $02B4 =: _HENTRY     $024E =: _@_ERROR
+$043B =: _RLDP       $015C =: _HX         $02B6 =: _@_H_CHK
+$01BC =: _RPAR       $041E =: _IF         $01A0 =: _@_INI
+$03E1 =: _RPLD       $041D =: _IFM        $0114 =: _@_OK
+$0353 =: _RSTP       $01D4 =: _IFND       $011B =: _ABORT
+$0371 =: _SDIV       $0365 =: _INC        $0246 =: _ABORT?
+$028C =: _SEMICO     $0178 =: _INIT       $0244 =: _ABORT0?
+$0254 =: _SEVAL      $02FB =: _INT        $0272 =: _ADD
+$0425 =: _SKIP       $0457 =: _J          $03E3 =: _ALD
+$03DF =: _SPLD       $040D =: _JJM        $0242 =: _ALLERR
+$02C6 =: _STM        $040F =: _JM         $02F7 =: _ANDX
+$0296 =: _STP        $0419 =: _JUMP       $0341 =: _AST
+$026E =: _SUB        $019A =: _KEY        $0443 =: _ASTR
+$042F =: _SWAP       $0433 =: _LD         $035F =: _BE
+$0158 =: _T          $03E5 =: _LIT        $03B1 =: _BK
+$0128 =: _TBL        $01AE =: _LPAR       $0134 =: _BL
+$0130 =: _TBUF       $0148 =: _LTIBX      $0168 =: _BLK
+$012C =: _TIB        $014E =: _LTIB       $02DB =: _C@
+$013C =: _TIZ        $0252 =: _MAC        $01D8 =: _CFND
+$02D2 =: _TOKEN      $0210 =: _MAKESTR    $0475 =: _CLRSTK
+$0238 =: _TOKEN?     $027C =: _MAKER      $0172 =: _CNTC
+$0152 =: _TX         $0415 =: _MIF        $01B8 =: _COLON
+$03C8 =: _ULESS      $0490 =: _MINUS?     $0282 =: _COMMAER
+$02E0 =: _UMUL       $0228 =: _MPUSH      $0294 =: _COMMA
+$0222 =: _UPDICT     $02AC =: _N0X        $0480 =: _COMP_NUM
+$016E =: _VT         $023A =: _N??        $044F =: _CRLDP
+$03C0 =: _WITHIN     $0390 =: _NAND       $034D =: _CRSTP
+$020C =: _WORD       $0397 =: _NEG        $03DD =: _CSEG
+$03AB =: _WSTR       $0405 =: _NEXT       $0359 =: _CSTR
+$02DD =: _W_B        $03F1 =: _NOP        $0389 =: _D2DIV
+$042B =: _XA         $0395 =: _NOT        $02D6 =: _DC@
+$029E =: _XARY       $04AA =: _NUM        $033D =: _DEC
+$011C =: _XOPER      $0480 =: _NUMBER     $0182 =: _DFLTEMT
+$0427 =: _XR         $011E =: _OPER       $0192 =: _DFLTKEY
+$039B =: _ZEQ        $03D9 =: _OVER       $0226 =: _DPUSH
+$03A1 =: _ZERO        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
