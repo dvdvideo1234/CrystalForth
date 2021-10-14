@@ -1,10 +1,10 @@
 HERE    VAL' H T!             \ TARGET FORTH HEAP
 
-THIDE (DEF      
-THIDE (TARY     
-THIDE (5ARY     
-THIDE (LARY   
-THIDE (WARY        
+\ THIDE (DEF      
+\ THIDE (TARY     
+\ THIDE (5ARY     
+\ THIDE (LARY   
+\ THIDE (WARY        
 THIDE CALL`      
 
 APT-  ((A"    =:  (!"

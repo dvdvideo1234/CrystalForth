@@ -76,7 +76,7 @@ APT- _NEQ      =: <>      \ V
 \ APT- _EQ       =: =       \ V
 APT- _0LESS    =: 0<      \ V
 APT- _ULESS    =: U<      
-\ APT- _WITHIN   =: WITHIN     
+APT- _WITHIN   =: WITHIN     
                
 \ MEMORY       
 APT- _MAKESTR  =: S!    
@@ -141,17 +141,20 @@ APT- _REINIT   =: REINIT
 APT- _REINIT2  =: REINIT2    
 APT- _LPAR     =: TARG,<  \ ,<       
 APT- _COLON    =: TARG:   \ :
-APT- _RPAR     =: >,       
+APT- _RPAR     =: >,     
+
+\ DEBUG  
 APT- _BPDBG    =: @DO_DBG      
 APT- _TROFF    =: TROFF    
 APT- _TRON     =: TRON
 APT- _VDBG     =: vDBG
 APT- _VPIN     =: vPIN
-APT- _ANOP     =: ANOP
-,
+APT- _NOOP     =: NOOP
+
 \ SEARCH 
 APT- _B?       =: B?"         
 APT- _BSCN     =: (BSCN      
+APT- _WSCN     =: (WSCN      
 \ APT- _BSCANE   =: B?<>     
 \ APT- _WSCANE   =: W?<>   
 APT- _BSCAN    =: BSCAN     \ V
@@ -164,10 +167,8 @@ APT- _WORD     =: WORD
 APT- _SEVAL    =: SEVAL      
 APT- _EVAL     =: EVAL       
 APT- _@EVAL    =: @EVAL      
-APT- _CONVERT  =: CONVERT      
 APT- _TO_NAME  =: >DEA      
 APT- _AFT_NAME =: >NAME     
-\ APT- _TIZ      =: TIZ
                
 \ IO           
 APT- _BE       =: BE      \ V BIOS EMIT
@@ -206,6 +207,7 @@ APT- _FIND     =: FIND
 \ APT- _DFLTKEY  =: KEY!    
 
 \ VOCABULARY    
+APT- _POSTENT  =: ==:      
 APT- _ENTRY    =: =:      
 APT- _ENTRYZ   =: (=:      
 APT- _HENTRY   =: TARG:!  \ H=:     
@@ -213,25 +215,28 @@ APT- _IFND     =: IFND
 APT- _CFND     =: CFND    \ V
 APT- _FND      =: FND     \ V
 APT- _WFND     =: WFND    \ V  
+APT- _WFIND    =: WFIND    \ V  
 
-\ TO FIX
+\ USED
 APT- _@_INI    =: @INI      
 APT- _@_DBG    =: @DBG   \ V
 APT- _@_ACCEPT =: @ACPT   
 APT- _@_ERR    =: @ERR    
-APT- _@_ABINI  =: @ABINI  
-APT- _@PARSE   =: @PARSE
+APT- _@R_BTM   =: `R_BTM
+APT- _@R_TOP   =: `R_TOP
+APT- _@S_BTM   =: `S_BTM
+APT- _@S_TOP   =: `S_TOP
 APT- _@SAME    =: @SAME
 APT- _@HERE    =: @HERE
 APT- _SEMICO   =: TARG;
 APT- _@FIB     =: `FIB
 APT- _@TIZ     =: `TIZ
 APT- _@MACADR  =: `MACADR
-APT- _@R_BTM   =: `R_BTM
-APT- _@R_TOP   =: `R_TOP
-APT- _@S_BTM   =: `S_BTM
-APT- _@S_TOP   =: `S_TOP
 APT- _@COMPNUM =: `COMPNUM
 APT- _@NUMBER  =: `NUMBER
+
+\ TO FIX
+APT- _@_ABINI  =: @ABINI  
+APT- _@PARSE   =: @PARSE
 
   

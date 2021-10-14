@@ -1,6 +1,3 @@
-;MAX = 1
-;DBG = 0
-
 INCLUDE C4F.IMC
 
 MyCseg  segment para  use16
@@ -59,9 +56,6 @@ _@COMPNUM DW 0
   CONST_  _BL,32
   CONST_  _0,0
   
-; L_ _TIZ
-;   DW _DUP,TO_+_LTIB,_ADD
-
   VALUE_   _ETIB,0
   L_ _LTIBX                  ; |LTIB
         DW _LTIB,_EX
@@ -74,8 +68,8 @@ _@COMPNUM DW 0
   VALUE_   _H,0
   
   VECTOR_  _VT,_T
-  VECTOR_  _VDBG,_ANOP
-  VECTOR_  _VPIN,_ANOP
+  VECTOR_  _VDBG,_NOOP
+  VECTOR_  _VPIN,_NOOP
 
   QUAN_     _CNTC,0
   POINT_   _INIT,_@_INI
@@ -95,10 +89,8 @@ _@_ABINI  DW _NOP,_SKIP
 ; ============   INTERPRETTER   ==============
 
 L_ _SEMICO
-_@SEMICO DW _NOP
-  
-;  DW _TRON
-  
+_@SEMICO DW _NOP  ;  DW _TRON
+
 LL_ _LPAR,TO_+_FIND             ; [`
 @LPAR DW _VT,_FND,_RET         
 
@@ -122,7 +114,7 @@ LL_ _RPAR,TO_+_FIND
   
 @PX DW _CFND
 LL_ _2PX,_2P
-LL_ _ANOP,_RET
+LL_ _NOOP,_RET
 
 L_ _TO_NAME
   DW _4P
@@ -569,6 +561,7 @@ L_ _DUP_IF
   DW _DUP
 LL_ _IF,__ADROPX
   Z?      W
+@IFZ:
   JNZ     @SKIP	
 	
 P_ __POINT   
@@ -633,8 +626,8 @@ P_ _J               ; ( J
   PUSH    W
   JMPS    @_J
        
-;L_ _WITHIN
-;  DW _OVERM,_PUSH,_SUB,_POP 
+L_ _WITHIN
+  DW _OVERM,_PUSH,_SUB,_POP 
 L_ _ULESS
   DW __ADROPX
   SUB   TOP,W
@@ -659,7 +652,7 @@ PP_ _ZERO,@FLAG
 
 P_ _PMUL          ; ( +*
   TEST    PB [DSP],1
-  JNZ     @D2DIV
+  JZ      @D2DIV
   ADD     TOP,AR
 PP_ _D2DIV,@D2DIV
   RCR     TOP,1
@@ -695,6 +688,8 @@ L_ _BSCAN
   REPNE   SCASB
   RET
 
+L_ _WSCN
+  DW _XR,_WSTR,_POP
 L_ _WSCAN
   DW      __SCANER
   REPNE   SCASW
@@ -716,38 +711,16 @@ P_ __PAR
 P_ __ASM
   JMP   IP
 
-L_ _CONVERT
-  DW    __PAR
-  POP   BX AX SI DI
-  XCHG  AX,CX
-@@1:
-  LODSB
-  CMP   AL,'A'
-  JB    @@2
-  SUB   AL,7
-@@2:
-  SUB   AL,'0'
-  CMP   AX,BX
-  JNC   @@9
-  XCHG  DI,AX
-  MUL   BX
-  XCHG  DI,AX
-  ADD   DI,AX
-  LOOP  @@1
-  SKIPB
-@@9:
-  DEC   SI
-@@8:
-  PUSH  DI SI CX
-  JMP   @PARX
-  
 ; vvvvvvvvvv----------- MINI DEBUGGER -------------vvvvvvvvvvv
 
+LL_ _WFIND,_T
 LL_ _WFND,__PAR          ;_STREQU
   CALL  @METHOD
   CMP   SI,[DI-4]
   RET
 
+  ALIGN_ 0
+  DW _EX
 LL_ _TROFF,_CALL_IP
 @DBG_OFF:
   SKIPR   DI 
@@ -756,6 +729,16 @@ LL_ _TROFF,_CALL_IP
   XCHG    DI,PW _@_DBG
   RET
   
+P_ _TROFF?
+  CALL    @DBG_OFF
+  CMP     WA,12345
+  org     $-2
+  TEST    WL,1
+  JMP     @IFZ
+  
+L_ _TRONM?
+  DW _TROFF?,_NOOP
+  DW _EX
 LL_ _TRON,_CALL_IP
 @DBG_ON:
   SKIPR   DI      ;  EB 0C	
@@ -777,6 +760,46 @@ _BPDBG    DW _NOP,_BK,__ADROPX
   TEST    AL,1
   JMP     @DBG2
    
+    ALIGN_ 0
+  
+;  DB "GAGA"
+  
+  
+;freemem:
+;  DW ENDMEM-FREEMEM-2
+;;INCLUDE NF9_1.IC1
+;  ENTRY_  _ENTRY,'=:'
+;  ENTRY_  0,''
+;EndMem:
+
+MyCseg  ends
+        end  Start
+
+;L_ _CONVERT
+;  DW    __PAR
+;  POP   BX AX SI DI
+;  XCHG  AX,CX
+;@@1:
+;  LODSB
+;  CMP   AL,'A'
+;  JB    @@2
+;  SUB   AL,7
+;@@2:
+;  SUB   AL,'0'
+;  CMP   AX,BX
+;  JNC   @@9
+;  XCHG  DI,AX
+;  MUL   BX
+;  XCHG  DI,AX
+;  ADD   DI,AX
+;  LOOP  @@1
+;  SKIPB
+;@@9:
+;  DEC   SI
+;@@8:
+;  PUSH  DI SI CX
+;  JMP   @PARX
+  
 IF 0
 
 L_ _BSCANE
@@ -859,17 +882,3 @@ L_ _WSCANE
    
 ENDIF
 
-    ALIGN_ 0
-  
-;  DB "GAGA"
-  
-  
-;freemem:
-;  DW ENDMEM-FREEMEM-2
-;;INCLUDE NF9_1.IC1
-;  ENTRY_  _ENTRY,'=:'
-;  ENTRY_  0,''
-;EndMem:
-
-MyCseg  ends
-        end  Start
