@@ -1,6 +1,7 @@
 HERE    VAL' H T!             \ TARGET FORTH HEAP
 
-\ THIDE (DEF      
+THIDE (DEF      
+APT-   `1     =:  1
 \ THIDE (TARY     
 \ THIDE (5ARY     
 \ THIDE (LARY   

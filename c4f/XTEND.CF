@@ -1,32 +1,35 @@
 \ VARIABLES STAGE 2 \ COMPILE  MACRO ------------------
 
-: `HOFS
-  CALL XR PUSH CALL EX POP THEN  (SET2 THEN ,<
-0 CONST HOFS 
-: _BEGIN |LASTH  
-: HERE H  
-: R>T HOFS + ; 
->, EX  
-: _MARK H   
-: Z, 0 , ;      
+
+: ?"LEN ?C@ 1+ ; 
+: EVEN (@&; ,< -2 , 
+: C@A+ XA C@R+ XA ;
+: NUP XEP| DUP ;
+
+
+\ : STR  |SWAP
+: |@! XR I@ EXECUTE POP!;
+: +!  |@! + ;
+
+\ ERROR PRIMITIVES  --------------------- 
+
+      \ FUNCTION EVAL  & EXECUTE MACRO 
+
+\ MEMORY  PRIMITIVES  ------------------
+
+: CMOVE SWAP 
+: MEMTO A! STR| CSTR   \  THEN \ C!A+
+: C!A+ XA C!R+ XA ;
+: >ZSTR CSTR H ?XEP| MEMTO A@ OFF ; 
+: CMOVE> A+L SWAP |DROP MPUSH ;
+HERE >, (D#0 @ 
+: FILL A! STR| A@ C!+ ;
+N: ERASE 0 ,  =, BLANK 32 ,
+  
+
 : CSP! SP@ (SET2   
 : CSP (CON ;; 
 
-ZDO VALUE 6 TIMES _FL _AX _BX _CX _DX _DX2
- -1 VALUE SCRH
- 
-: `REGS! TO _FL TO _AX TO _BX TO _CX TO _DX ;
-: |HLD CALL EX (SET2 THEN ,<       0 CONST HLD
-\ ' BYE  DEFER vERR   
-HERE >, (D#0 C@ (| `REGS! (INT# ;;
-N: (DOS  $21 ,  
-=, (VID  $10 , 
-
-: |C. EX EMIT ; 
-: |SPC EX      
-: SPC |C. BL ;     
-: `BS  |C. ,<   8 CONST  bs       256 CONST 1B
-: EOS! bs ,<    0 VALUE EOS 
 : M: ';  
 : ?M: 0 `HOFS CALL TARG:! `(MAC `", THEN 
 : <M> MOBJ   |H TO MOBJ ;   
@@ -36,31 +39,13 @@ N: (DOS  $21 ,
 \ HI LEVEL FUNCTIONS  --------------------- 
 
 
-: T. T   
-: WID.  4+ 
-: ID. |SPC 
-: ". CSTR        
-: TYPE STR| CSTR EMIT ; 
 : < - 0< ;        
-: ((." ("SKIP  ". ;;  
 : |[] ."[" EX ."]" ;;
 : [ID] CSTR      
 : [S] |SPC |DROP     
 : [TYPE] |[] TIMES| CSTR DUP |C. BL < 0; DROP '. ;; 
-: ?|CR 0; 
-: |CR EX 
-: CR ."^M^J" 0 TO CNTC ;
-: `OK ."_ok" CR .">>_"  ;;  
-: `. EMT! KEY! CR TBUF ID. NOP ID. CR ; \ ERRA
 
-: FND? TOKEN? (| N?? 
-: TFND T  FND ;
 : SAME? TFND 0; 4+ [ID] TBUF ; 
-: ,' |, 
-: ' FND?
-: @DEF? @2 
-: UNDEF? ODD !"UNDEF?" ;;
-: ADR' '  TO ODD ODDH? ; 
 HERE >, (D#0 @   
 : @ADR+ ' + ;
 N: `TO' -2 , 
@@ -74,20 +59,9 @@ HERE >, (D#0 @2 WITHIN ;
 N: `BREL? -128 , 128 , 
 =, PRNTBL 32 , 240 ,
 
-: `WITHSTK @R+ @R+ WITHIN 0= ;
-: `STACK 
-  RP@    `WITHSTK `R_BTM  `R_TOP  !"RSTK?" 
-  SP@ 2- `WITHSTK `S_BTM  `S_TOP  !"DSTK?"
-  vPIN
-  ;; 
-
 : HIDE FND? 5 +  '` 
 : SWAPC! SWAP C! ; 
 
-\ INTS DOS, FILES & VIDEO
-: `fsk 1K TUCK UM* SCRH EX SCRH 
-: IO? _FL ODD !"IO?" ;;
-: `File| >ZSTR EX IO? _AX ;
 HERE >, (D#0 @ (DOS ;
 >, `RW  (VAR3 ,< N: Fread  $3F00 , 0 ,
 >, `RW  (VAR3 ,< N: Fwrite $4000 , 0 , 
@@ -98,17 +72,6 @@ HERE >, (D#0 @ (DOS ;
 : FKEY  -1 AT Fread ROT Fread TO Fread @ ;
 : ERRput 2  
 : FEMIT SWAP AT Fwrite ROT Fwrite ;
-
-HERE >, (D#0 @ DROT (DOS ;
-\ >, >FTOP| 
-: FOPEN `File| ,< 
-N: Fopen $3D02 ,
-\ >, >FTOP| 
-: FCREATE `File| ,< 
-N: Fcreate $3C00 ,
-: LineIn OVER C! DUP [ 1+ CSTR ] ,<
-N: `LineIn2 $A00 ,
-=, StdPut   $200 , 
 
 HERE >, (D#0 @ XDROT (DOS ; 
 \ : CLSD NFILES AFILE - TIMES|
@@ -121,14 +84,15 @@ N: Fcut $4000 ,
 \ HERE .  TEST10 2616
 
 
- 16 CONST 1H
- 10 CONST lf
-: UNTIL| BEGIN IXEC 
-: WHILEZ| UNTIL RDROP ;
-: WHILE| (IF EXIT 
-: UNTILZ| IXEC  WHILE| ;
-: 2DUP OVER OVER ;
-: 2DROP DROP DROP ;
+\ COMPARING PRIMITIVES  
+: RED| 2DUP EX (IF SWAP ;;
+: UMAX |NIP 
+: URED RED| U< ; 
+: UMIN |DROP URED ; 
+\ : MAX |NIP  
+\ : REDI RED| < ; 
+\ : MIN |DROP REDI ;
+\ BYTE. >LO
 
 \ : INCLUDE TO TOKEN? EOS| 
 \ @OPENI| FGet UNTIL| READLN EVAL EOS ; 
@@ -149,18 +113,11 @@ N: Fcut $4000 ,
 \  (IF  EXIT  KEY `CHTAB AGAIN ;
 \  UNW ' RDL ' QUIT !
 
-: W>BB |SWAP
-: SPLIT DUP W>B XEP| HW>B ;
-: UNITS? U/MOD SWAP  0; 1+ ; 
-: EOS| EOS XR PUSH 0 TO EOS EX POP TO EOS ; 
-: vague? DUP 2+ @ ODD ;
 \ : >HI 1B U* ;   \ MULTIPLY 
 \ : U* |DROP 
 \ : UM* A! 0 TWICE| TWICE| +* +* +* 
 \ : +* (+* ; 
 
 \ INCLUDE fLUSH.CF  \ HERE .  TEST10 2986
-INCLUDE NUMOUT.CF \ HERE .  TEST11 3292
-INCLUDE WORDS1.CF
-INCLUDE DEBUG.CF 
+\ INCLUDE NUMOUT.CF \ HERE .  TEST11 3292
 

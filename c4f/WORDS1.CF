@@ -1,3 +1,8 @@
+: DEA? DUP 4+ C@ ;
+: vague? DUP 2+ @ ODD ;
+: EOS| EOS XR PUSH 0 TO EOS EX POP TO EOS ; 
+: /LINE? 0= 0; |CR BK 27 = 0; EOS! ;
+0 VALUE CSP
 \ : U1+ XEP| 1+ ;
 : `NAME. XEP| J VAL DEA? 1+ CNTC + 74 U< /LINE?
   J STR H. 2+ ID. 13 

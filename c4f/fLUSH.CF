@@ -1,11 +1,8 @@
 \ FLUSH
      
-    4 CONST `NBUFS    
     0 VALUE `PREV 
-    0 VALUE  `USE 
-  
-\  -1 VALUE  SCRH
-
+: `+BUF CALL 1+ TO NBUFS DUP (SET2 THEN ,< 
+    0 CONST  `USE 
 : `@FBUFS `PREV ,< 
     4 WARY `FBUFS  
 : `@BUFS  `PREV ,< 
@@ -13,11 +10,10 @@
 
 : WBLK `RWPOS Fwrite IO? ;
 : RBLK `RWPOS Fread  IO? ; 
-: `@BUF `PREV 1K U* FIRST + ; 
+: `@BUF `PREV 1K* FIRST + ; 
 : UPDATE  `@FBUFS ON ; 
 : -BUF `@BUFS ON 
 : DISCARD `@FBUFS OFF ; 
-: `+BUF `USE 1+ `NBUFS 1- AND DUP TO `USE ;    
 : !BUFS  `NBUFS TIMES| `+BUF TO `PREV
 : `?SAVE `@FBUFS C@ 0; `@BUF `@BUFS @ WBLK DISCARD ;
 
@@ -33,14 +29,11 @@
 : BLOCK `;ABLK -IF DROP J BUFFER J RBLK ;THEN TO `PREV ;
 : `-USE SCRH 1+ 0; SCRH Fclose 
 : `/SCR -1 TO SCRH ; 
-: SOURCE BLK 0; ETIB 0= 0; BLK BLOCK 1K + TO ETIB ;
 
 : USE/ `/SCR /BUFS ; 
 : FCUT FLUSH `fsk 0 SCRH Fwrite ;
 : USING TOKEN? 
 : USED FLUSH `-USE FOPEN TO SCRH ; 
-: THRU (RNG| ?XEP+| 
-: LOAD 1K OVER TI| VAL EVAL ; 
 \  ' BLOCK VAL! vBLK  \ FIX  
 \  USE/  USING PIF.COM 
 

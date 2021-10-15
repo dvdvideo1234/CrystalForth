@@ -53,7 +53,7 @@ _@COMPNUM DW 0
   CONST_  _TIB,@TIB
   CONST_  _TBUF,@TBUF
   CONST_  _FIRST,@VOCTOP
-  CONST_  _BL,32
+;  CONST_  _BL,32
   CONST_  _0,0
   
   VALUE_   _ETIB,0
@@ -71,8 +71,8 @@ _@COMPNUM DW 0
   VECTOR_  _VDBG,_NOOP
   VECTOR_  _VPIN,_NOOP
 
-  QUAN_     _CNTC,0
   POINT_   _INIT,_@_INI
+  
   DW __VAR3
   POINT_   _FIND,@LPAR
     
@@ -90,16 +90,18 @@ _@_ABINI  DW _NOP,_SKIP
 
 L_ _SEMICO
 _@SEMICO DW _NOP  ;  DW _TRON
-
 LL_ _LPAR,TO_+_FIND             ; [`
 @LPAR DW _VT,_FND,_RET         
 
 LL_ _MAC,_DZ0               ; _MAC
+;      DW AT_+ _FIND
+;  DW _SKIP,_RPAR+2      ; FIX SKIP WITH |SAVE!
 LL_ _SEVAL,_CSTR            ; EVAL
 L_ _EVAL                   ; EVAL
-_@TIZ  DW _NOP
+;  DW _TRONM?
+_@TIZ  DW _NOP          ; FIX WITH TI
 L_ _@Eval
-@EV  DW _NOP,_TOKEN,_IF,@ADDX
+@EV  DW _NOP,_TOKEN,_IF,@ADDX  ; FIX WITH STK?
   DW _FIND,_OPER,_@EXEC,_JUMP,@EV
 
 ; ============== COMPILER ===================
@@ -151,8 +153,7 @@ xFND?:
   jmp   @parx
 
 L_ _WORD                  
-  DW _PARSE,_TBUF
-;  DW _VDBG,2
+  DW _PARSE,_TBUF         ;  DW _VDBG,2
 LL_  _MAKESTR,__PAR       ; (S!
   POP   DI AX SI
   PUSH  DI
@@ -230,7 +231,7 @@ L_ _ST
   DW _PUSH,_POPSTX ; 
   
 L_ _TOKEN                  
-  DW _Bl,_WORD
+  DW _LIT,32,_WORD
 L_ _DC@
   DW _DUP,__ARET
 P_ _C@
@@ -278,6 +279,7 @@ P_ __SCANER
   X   
   XCHG    AX,TOP
   push    cX
+ ; INT 3           ; !!!!
   CALL    IP
   POP     TOP 
   JE      @@1
@@ -398,6 +400,11 @@ P_ _CSTR
   INC   TOP
   JMPS  @K0
 
+P_ _NEQ    
+P_ _XOR
+  XOR     TOP,[DSP]       
+  JMPS    @NIP
+
 p_ _BE		           ; (BE
 	XCHG    AX,TOP
   MOV     AH,0EH
@@ -411,10 +418,11 @@ P_ _FOR				; (FOR
 P_ _PUSH		       ; (PUSH
   PUSH    TOP
 @DROP:  
-  X
-@DROPZ:  
-  R_TO    TOP
-  JMPS    @SWPSTK
+  MOV     TOP,[DSP]
+PP_ _NIP,@NIP  
+  INC     DSP
+  INC     DSP
+  N_
   
 L_ _nAND	          ; ( AND
   DW __ADROPX
@@ -465,6 +473,7 @@ PP_ _2DIV,@2DIV               ; ( 2/
   
 P_ _CSEG
   PUSH    CS
+  SKIPB
 P_ _OVER
   PUSH    [DSP]
   SKIPB
@@ -556,11 +565,17 @@ P_ _SKIP
 @SKIP:		        ; (SKIP
   LODSW
   N_
-	
-L_ _DUP_IF
-  DW _DUP
-LL_ _IF,__ADROPX
-  Z?      W
+
+L_ _SKIP?
+  Z?      TOP
+  JZ      @IF1
+  N_
+  
+P_ _IF
+  INC     TOP
+@IF1:
+  DEC     TOP
+  CALL    @ADROP
 @IFZ:
   JNZ     @SKIP	
 	
@@ -590,13 +605,6 @@ P_ _XA            ; ( XA
   POP     W
   XCHG    W,AR
   JMPS    @RPUSH
-
-P_ _NEQ    
-P_ _XOR
-  XOR   TOP,[DSP]       
-PP_ _NIP,@NIP
-  NIP_
-  N_
 
 L_ _@EXEC
   DW _LD
@@ -633,8 +641,6 @@ L_ _ULESS
   SUB   TOP,W
   JMPS  @FLAG
 
-;L_ _OC@EQ
-;    DW    _OVER,_C@
 ;    DW    _RLDP
 ;L_ _EQ
 ;    DW    _XOR,__ARET
@@ -696,12 +702,15 @@ L_ _WSCAN
   RET
 
 P_ __ADROPX
-  XCHG  W,TOP
-  D_TO  top
+  CALL  @ADROP
 P_ __ARET
   POP   WA
   XCHG  WA,IP
   JMP   WA
+@ADROP:
+  XCHG  W,TOP
+  D_TO  top
+  RET
   
 P_ __PAR
   PUSH  AR

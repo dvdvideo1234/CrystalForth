@@ -39,7 +39,6 @@ APT- _NEG      =: NEG     \ V
 \ REGISTERS    
 APT- _ALD      =: A@      \ V
 APT- _AST      =: A!      \ V
-\ APT- _CSEG     =: CS@     \ V
 APT- _RPLD     =: RP@     \ V
 APT- _SPLD     =: SP@     \ V
                
@@ -65,7 +64,7 @@ APT- _SKIP     =: SKIP    \ V
 APT- _EX       =: EX      \ V
 APT- _FOR      =: (FOR    \ V
 APT- _MIF      =: (-IF    \ V
-APT- _DUP_IF   =: (?IF    \ V
+\ APT- _SKIP?    =: SKIP?   \ V
 APT- _0X       =: 0;         
                
 \ LOGIC        
@@ -73,7 +72,6 @@ APT- _XOR      =: XOR     \ V
 APT- _NOT      =: NOT     \ V
 APT- _ZEQ      =: 0=      \ V
 APT- _NEQ      =: <>      \ V
-\ APT- _EQ       =: =       \ V
 APT- _0LESS    =: 0<      \ V
 APT- _ULESS    =: U<      
 APT- _WITHIN   =: WITHIN     
@@ -96,7 +94,6 @@ APT- _WSTR     =: STR
 APT- _CSTR     =: CSTR       
 APT- _IST      =: !I       
 APT- _ST       =: !       
-\ APT- _OC@EQ    =: OVRC@=
                
 \ COMPILER PRIMITIVES
 APT- _@COMMA   =: @,
@@ -146,7 +143,10 @@ APT- _RPAR     =: >,
 \ DEBUG  
 APT- _BPDBG    =: @DO_DBG      
 APT- _TROFF    =: TROFF    
+' TROFF        =: TR-`    
 APT- _TRON     =: TRON
+' TRON         =: TR`
+APT- _TRONM?   =: TR-| 
 APT- _VDBG     =: vDBG
 APT- _VPIN     =: vPIN
 APT- _NOOP     =: NOOP
@@ -173,10 +173,6 @@ APT- _AFT_NAME =: >NAME
 \ IO           
 APT- _BE       =: BE      \ V BIOS EMIT
 APT- _BK       =: BK      \ V BIOS KEY
-\ APT- _OPEN     =: FOPEN   \ V
-\ APT- _READ     =: FREAD   \ V
-\ APT- _WRITE    =: FWRITE  \ V
-\ APT- _CLOSE    =: FCLOSE  \ V
 APT- _INT      =: (INT#   \ V
 
 \ CONSTANTS
@@ -184,7 +180,6 @@ APT- _TBL      =: TBL
 APT- _TIB      =: TIB
 APT- _TBUF     =: TBUF
 APT- _FIRST    =: FIRST
-APT- _BL       =: BL
 APT- _0        =: 0
 
 \ VALUES
@@ -195,16 +190,9 @@ APT- _TX       =: |T
 APT- _T        =: T
 APT- _HX       =: |H                 
 APT- _H        =: H
-\ APT- _BLK      =: BLK 
 APT- _VT       =: vT
-APT- _CNTC     =: CNTC
 APT- _INIT     =: @INIT
 APT- _FIND     =: FIND
-\ APT- _EMIT     =: EMIT
-\ APT- _KEY      =: KEY
-\ APT- _MOBJ     =: MOBJ       
-\ APT- _DFLTEMT  =: EMT!    
-\ APT- _DFLTKEY  =: KEY!    
 
 \ VOCABULARY    
 APT- _POSTENT  =: ==:      
@@ -221,22 +209,22 @@ APT- _WFIND    =: WFIND    \ V
 APT- _@_INI    =: @INI      
 APT- _@_DBG    =: @DBG   \ V
 APT- _@_ACCEPT =: @ACPT   
-APT- _@_ERR    =: @ERR    
+APT- _@_ERR    =: `ERR    
 APT- _@R_BTM   =: `R_BTM
 APT- _@R_TOP   =: `R_TOP
 APT- _@S_BTM   =: `S_BTM
 APT- _@S_TOP   =: `S_TOP
 APT- _@SAME    =: @SAME
-APT- _@HERE    =: @HERE
+APT- _@HERE    =: `HERE
 APT- _SEMICO   =: TARG;
 APT- _@FIB     =: `FIB
 APT- _@TIZ     =: `TIZ
 APT- _@MACADR  =: `MACADR
 APT- _@COMPNUM =: `COMPNUM
 APT- _@NUMBER  =: `NUMBER
+APT- _@PARSE   =: `PARSE
 
 \ TO FIX
 APT- _@_ABINI  =: @ABINI  
-APT- _@PARSE   =: @PARSE
 
   

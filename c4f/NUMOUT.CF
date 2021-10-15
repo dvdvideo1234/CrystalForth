@@ -1,12 +1,6 @@
 128 CONST HLDBUF
 : #> DROP HLD 
 : HLDSZ HLDBUF HLD - ;
-: S6 (| CALL XEP| XEP| XEP| THEN 
-: S3 |SPC CALL TWICE THEN ROT DUP 
-: H. W>BB CALL 
-: B. |SPC THEN  W>B 1H U/MOD TWICE 
-: DIG. |C. ALPHA ;
-: /LINE? 0= 0; |CR BK 27 = 0; EOS! ;
 
 : ?TAB HLDSZ -         \ TAB NUMOUT 
 : SPACES TIMES| SPC 
@@ -15,7 +9,10 @@
 \ : BASE! 2- W>B 2+ ,< 10 VALUE BASE 
 : <#>| <# EX ?TAB #> TYPE ; 
 : `6 DUP 0< 0; NEG EX '-  
-: HOLD |HLD C!- ; 
+: HOLD |HLD 
+: C!- 1- XEP|
+: C!I J 
+: C! PUSH C!R+ RDROP; 
 : # BASE  U/MOD SWAP  ALPHA HOLD ; 
 : U. 0 
 : U.RS |SPC 
@@ -30,14 +27,4 @@
 : .R# <#>| SWAP `6 SWAP `u. 
 ; 
 : #. 0 SWAP |SPC .R# ; 
-
-\ COMPARING PRIMITIVES  
-: RED| 2DUP EX (IF SWAP ;;
-: UMAX |NIP 
-: URED RED| U< ; 
-: UMIN |DROP URED ; 
-\ : MAX |NIP  
-\ : REDI RED| < ; 
-\ : MIN |DROP REDI ;
-\ BYTE. >LO
 
