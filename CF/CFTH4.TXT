@@ -1,0 +1,569 @@
+$0100 OBJ $0100 ORG 
+
+  MOVBI, AH| 74 ( ' ~004A ) IB, 
+  MOVXI, BX| 4096 ( ' ~1000 ) IX, 
+  INTI, 33 ( ' ~0021 ) IB, 
+  CALL, 71 ( L' @INITER ) (RX,) 
+
+  1884 ( L' @075C ) DA, 
+
+=L @010C ( $010C ) 
+  2240 ( L' @08C0 ) DA, 
+  1422 ( L' @058E ) DA, 
+  2812 ( L' @0AFC ) DA, 
+  359 ( L' (JUMP ) DA, 
+  268 ( L' @010C ) DA, 
+  784 ( L' @0310 ) DA, 
+
+=L @HINUM ( $0118 ) 
+  0 ( L' ~0000 ) DA, 
+  319 ( L' (@+; ) DA, 
+  1 ( L' ~0001 ) DA, 
+  421 ( L' (IO; ) DA, 
+\ MOVXI, CX| -15381 ( ' ~C3EB ) IX, 
+  185 ( ' ~00B9 ) DB, 
+  235 ( ' ~00EB ) DB, 
+  195 ( ' ~00C3 ) DB, 
+
+=L @TRSWCH ( $0123 ) 
+  XCHG, W| CX> /M/ 408 ( L' @MAIN_LP ) X, 
+  RET, 
+
+P=: (TROFF; 
+  CALL, 130 ( L' @01AD ) (RX,) 
+
+=L @TROFF ( $012B ) 
+\ MOVXI, CX| 3979 ( ' ~0F8B ) IX, 
+
+=L @TROFF ( $012B ) 
+  185 ( ' ~00B9 ) DB, 
+  MOV, W| T| CX> D0/ /BX 
+  JMPS, -13 ( L' @TRSWCH ) (RB,) 
+
+P=: (2PUSH; 
+  PUSHX, AX| 
+  LODS, W| 
+
+P=: (PUSH; 
+  PUSHX, AX| 
+  NOP, 
+
+P=: (DROP; 
+  LODS, W| 
+\ CMPAI, W| 1827 ( ' ~0723 ) IX, 
+  61 ( ' ~003D ) DB, 
+
+P=: (@&; 
+  AND, W| T| AX> D0/ /BX 
+  JMPS, 93 ( L' @RET ) (RB,) 
+
+P=: (2RDRP; 
+  POPX, CX| 
+  NOP, 
+
+P=: (RDRP; 
+  POPX, CX| 
+\ CMPAI, W| 1795 ( ' ~0703 ) IX, 
+  61 ( ' ~003D ) DB, 
+
+P=: (@+; 
+  ADD, W| T| AX> D0/ /BX 
+  JMPS, 85 ( L' @RET ) (RB,) 
+
+P=: (IF 
+  OR, W| T| AX> R| AX| 
+  J, Z| Y| 31 ( L' (FOR ) (RB,) 
+  LODS, W| 
+  NOP, 
+
+P=: (SKIP 
+
+=L @0148 ( $0148 ) 
+  INCX, BX| 
+  INCX, BX| 
+  JMPS, 76 ( L' @MAIN_LP ) (RB,) 
+
+P=: (NEXT 
+  POPX, CX| 
+  DECX, CX| 
+  PUSHX, CX| 
+  JMPS, 16 ( L' (IF- ) (RB,) 
+
+=L @INITER ( $0151 ) 
+  POPX, BX| 
+  MOVXI, SP| -66 ( ' ~FFBE ) IX, 
+  MOVXI, SI| -706 ( ' ~FD3E ) IX, 
+  CALL, -48 ( L' @TROFF ) (RX,) 
+  JMPS, 59 ( L' @MAIN_LP ) (RB,) 
+  233 ( ' ~00E9 ) DB, 
+
+=L @DBGADR+ ( $015E ) 
+  4212 ( ' ~1074 ) DW, 
+
+P=: (IF- 
+  DECX, AX| 
+  J, S| Y| -27 ( L' @0148 ) (RB,) 
+\ CMPAI, W| -21168 ( ' ~AD50 ) IX, 
+  61 ( ' ~003D ) DB, 
+
+P=: (FOR 
+  PUSHX, AX| 
+  LODS, W| 
+
+P=: (JUMP 
+  MOV, W| T| BX> D0/ /BX 
+  JMPS, 46 ( L' @MAIN_LP ) (RB,) 
+
+P=: (QARY 
+  SHL, 1| W| R| AX| 
+
+P=: (LARY 
+  SHL, 1| W| R| AX| 
+
+P=: (WARY 
+  SHL, 1| W| R| AX| 
+
+P=: (BARY 
+  ADD, W| T| AX> R| BX| 
+
+P=: (; 
+  JMPS, 35 ( L' @RET ) (RB,) 
+
+P=: (POP; 
+  POPX, CX| 
+  POPX, BX| 
+  JMPS, 11 ( L' @PUSHW ) (RB,) 
+
+P=: (!R+ 
+  POPX, DI| 
+  STOS, W| 
+  PUSHX, DI| 
+  LODS, W| 
+  JMPS, 26 ( L' @MAIN_LP ) (RB,) 
+
+P=: (@R+ 
+  POPX, DI| 
+  MOV, W| T| CX> D0/ /DI 
+  SCAS, W| 
+  PUSHX, DI| 
+
+=L @PUSHW ( $0183 ) 
+  DECX, SI| 
+  DECX, SI| 
+  MOV, W| F| AX> D0/ /SI 
+
+=L @XCHGW ( $0187 ) 
+  XCHGX, CX| 
+  JMPS, 14 ( L' @MAIN_LP ) (RB,) 
+
+P=: (XR 
+  POPX, CX| 
+  PUSHX, AX| 
+  JMPS, -7 ( L' @XCHGW ) (RB,) 
+
+P=: (XA 
+  POPX, DI| 
+  PUSHX, DX| 
+  MOV, W| T| DX> R| DI| 
+  JMPS, 4 ( L' @MAIN_LP ) (RB,) 
+
+P=: (EX 
+  POPX, CX| 
+  PUSHX, BX| 
+  PUSHX, CX| 
+
+=L @RET ( $0197 ) 
+  POPX, BX| 
+
+P=: (NOP 
+
+=L @MAIN_LP ( $0198 ) 
+  MOV, W| T| CX> D0/ /BX 
+  INCX, BX| 
+  INCX, BX| 
+  TESTI, B| R| CL| 1 ( ' ~0001 ) IB, 
+  J, Z| Y| -12 ( L' (EX ) (RB,) 
+  DECX, CX| 
+  JMPO, R| CX| 
+
+P=: (IO; 
+  PUSHX, BX| 
+  MOV, W| T| DX> DB/ /SI 4 (SB,) 
+  MOV, W| T| CX> DB/ /SI 2 (SB,) 
+  MOV, W| T| BX> D0/ /SI 
+
+=L @01AD ( $01AD ) 
+  POPX, DI| 
+  CALLO, R| DI| 
+  JMPS, -27 ( L' @RET ) (RB,) 
+
+P=: (BE 
+  MOVBI, AH| 14 ( ' ~000E ) IB, 
+  INTI, 16 ( ' ~0010 ) IB, 
+
+P=: (DROP 
+  JMPS, 1 ( L' (PUSH ) (RB,) 
+
+P=: (PUSH 
+  PUSHX, AX| 
+  LODS, W| 
+  JMPS, -36 ( L' @MAIN_LP ) (RB,) 
+
+P=: (J 
+  POPX, DI| 
+  POPX, CX| 
+  PUSHX, CX| 
+  PUSHX, DI| 
+  JMPS, -63 ( L' @PUSHW ) (RB,) 
+
+P=: (A@ 
+  PUSHX, DX| 
+\ CMPAI, B| 84 ( ' ~0054 ) IB, 
+  60 ( ' ~003C ) DB, 
+
+P=: (RP@ 
+  PUSHX, SP| 
+\ CMPAI, B| 86 ( ' ~0056 ) IB, 
+  60 ( ' ~003C ) DB, 
+
+P=: (SP@ 
+  PUSHX, SI| 
+\ CMPAI, B| 80 ( ' ~0050 ) IB, 
+  60 ( ' ~003C ) DB, 
+
+P=: (DUP 
+  PUSHX, AX| 
+  POPX, CX| 
+  JMPS, -73 ( L' @PUSHW ) (RB,) 
+
+P=: (OVER 
+  PUSH, D0/ /SI 
+
+P=: (POP 
+  JMPS, -7 ( L' (DUP ) (RB,) 
+
+P=: (U< 
+  SUB, W| F| AX> D0/ /SI 
+  LODS, W| 
+  MOVXI, CX| -7983 ( ' ~E0D1 ) IX, 
+  SBB, W| T| AX> R| AX| 
+  JMPS, -66 ( L' @MAIN_LP ) (RB,) 
+
+P=: (-/ 
+  SHL, 1| W| D0/ /SI 
+  RCL, 1| W| R| AX| 
+  CMP, W| T| AX> R| DX| 
+  J, C| Y| 4 ( L' @01E6 ) (RB,) 
+  SUB, W| T| AX> R| DX| 
+
+P=: (U1+ 
+  INC, W| D0/ /SI 
+
+=L @01E6 ( $01E6 ) 
+  JMPS, -80 ( L' @MAIN_LP ) (RB,) 
+
+P=: (+2/ 
+  ADD, W| F| AX> D0/ /SI 
+  MOV, W| T| AX> D0/ /SI 
+
+P=: (2/ 
+  RCR, 1| W| R| AX| 
+  JMPS, -88 ( L' @MAIN_LP ) (RB,) 
+
+P=: (+* 
+  TESTI, W| D0/ /SI 1 ( ' ~0001 ) IX, 
+  J, Z| Y| 2 ( L' @01F8 ) (RB,) 
+  ADD, W| T| AX> R| DX| 
+
+P=: (D2/ 
+
+=L @01F8 ( $01F8 ) 
+  RCR, 1| W| R| AX| 
+  RCR, 1| W| D0/ /SI 
+  JMPS, -102 ( L' @MAIN_LP ) (RB,) 
+
+P=: (NAND 
+  AND, W| F| AX> D0/ /SI 
+  LODS, W| 
+
+=L @NOT ( $0201 ) 
+  INCX, AX| 
+
+P=: (NEG 
+  NEG, W| R| AX| 
+  JMPS, -110 ( L' @MAIN_LP ) (RB,) 
+
+P=: (0= 
+  NEG, W| R| AX| 
+  SBB, W| T| AX> R| AX| 
+
+P=: (NOT 
+  JMPS, -11 ( L' @NOT ) (RB,) 
+
+=L @OPTABLE ( $020C ) 
+  659 ( L' @^NUM ) DA, 
+  654 ( L' @'NUM ) DA, 
+  568 ( L' @BASE# ) DA, 
+  574 ( L' @BASE16 ) DA, 
+  577 ( L' @BASE8 ) DA, 
+  580 ( L' @BASE2 ) DA, 
+
+=L @OPCHARS ( $0218 ) 
+    ,"%&$#'"^"
+
+=L @GETSIGN? ( $021E ) 
+  INCX, SI| 
+  J, Z| Y| 20 ( L' @SETERR ) (RB,) 
+  CMPI, B| D0/ X/S 45 ( ' ~002D ) IB, 
+  J, Z| N| 14 ( L' @0234 ) (RB,) 
+  INCX, SI| 
+  J, Z| Y| 12 ( L' @SETERR ) (RB,) 
+  POPX, DX| 
+  CALLO, R| DX| 
+  NOT, W| R| DI| 
+  NOT, W| R| BP| 
+  INCX, DI| 
+  J, Z| N| 1 ( L' @0234 ) (RB,) 
+  INCX, BP| 
+
+=L @0234 ( $0234 ) 
+  RET, 
+
+=L @SETERR ( $0235 ) 
+  DECX, SI| 
+
+=L @GETRET ( $0236 ) 
+  POPX, DX| 
+  RET, 
+
+=L @BASE# ( $0238 ) 
+  XCHGX, DI| 
+
+=L @NUMINI ( $0239 ) 
+  XOR, W| T| DI> R| DI| 
+  XOR, W| T| BP> R| BP| 
+\ CMPAI, W| 4272 ( ' ~10B0 ) IX, 
+  61 ( ' ~003D ) DB, 
+
+=L @BASE16 ( $023E ) 
+  MOVBI, AL| 16 ( ' ~0010 ) IB, 
+\ CMPAI, W| 2224 ( ' ~08B0 ) IX, 
+  61 ( ' ~003D ) DB, 
+
+=L @BASE8 ( $0241 ) 
+  MOVBI, AL| 8 ( ' ~0008 ) IB, 
+\ CMPAI, W| 688 ( ' ~02B0 ) IX, 
+  61 ( ' ~003D ) DB, 
+
+=L @BASE2 ( $0244 ) 
+  MOVBI, AL| 2 ( ' ~0002 ) IB, 
+  DECX, AX| 
+  DECX, AX| 
+  XOR, B| T| AH> R| AH| 
+  MOV, W| T| CX> R| AX| 
+  INCX, CX| 
+  INCX, CX| 
+
+=L @NORMAL ( $024E ) 
+  CALL, -27 ( L' @GETRET ) (RX,) 
+  PUSHX, DI| 
+  MOVXI, DI| 536 ( ' @OPCHARS ) IX, 
+  PUSHX, CX| 
+  MOVXI, CX| 6 ( ' ~0006 ) IX, 
+  REP, 
+  SCAS, B| 
+  MOV, W| T| DI> R| CX| 
+  POPX, CX| 
+  J, Z| N| 13 ( L' @026D ) (RB,) 
+  SHL, 1| W| R| DI| 
+  MOV, W| T| DX> DW/ /DI 524 ( L' @OPTABLE ) X, 
+  POPX, DI| 
+  INCX, SI| 
+  J, Z| Y| -53 ( L' @SETERR ) (RB,) 
+  DECX, SI| 
+  JMPO, R| DX| 
+
+=L @026D ( $026D ) 
+  POPX, DI| 
+  CMPAI, B| 58 ( ' ~003A ) IB, 
+  J, C| Y| 6 ( L' @0278 ) (RB,) 
+  CMPAI, B| 65 ( ' ~0041 ) IB, 
+  J, C| Y| -65 ( L' @SETERR ) (RB,) 
+  SUBAI, B| 7 ( ' ~0007 ) IB, 
+
+=L @0278 ( $0278 ) 
+  SUBAI, B| 48 ( ' ~0030 ) IB, 
+  J, C| Y| -71 ( L' @SETERR ) (RB,) 
+  CMP, W| T| AX> R| CX| 
+  J, C| N| -75 ( L' @SETERR ) (RB,) 
+
+=L @CONV ( $0280 ) 
+  XCHGX, BP| 
+  MUL, W| R| CX| 
+  XCHGX, BP| 
+  XCHGX, DI| 
+  MUL, W| R| CX| 
+  XCHGX, DI| 
+  ADD, W| T| DI> R| AX| 
+  ADC, W| T| BP> R| DX| 
+  JMPS, -64 ( L' @NORMAL ) (RB,) 
+
+=L @'NUM ( $028E ) 
+  CALL, -91 ( L' @GETRET ) (RX,) 
+  JMPS, -19 ( L' @CONV ) (RB,) 
+
+=L @^NUM ( $0293 ) 
+  CALL, -96 ( L' @GETRET ) (RX,) 
+  ANDAI, B| 31 ( ' ~001F ) IB, 
+  JMPS, -26 ( L' @CONV ) (RB,) 
+
+=L @CONVERT ( $029A ) 
+  MOVBI, AL| 10 ( ' ~000A ) IB, 
+  CALL, -129 ( L' @GETSIGN? ) (RX,) 
+  CALL, -105 ( L' @NUMINI ) (RX,) 
+
+=L @02A2 ( $02A2 ) 
+  MOV, B| T| AL> D0/ X/S 
+  CALLO, R| DX| 
+  INCX, SI| 
+  J, Z| N| -7 ( L' @02A2 ) (RB,) 
+  RET, 
+
+  421 ( ' (IO; ) DW, 
+  PUSHX, BP| 
+  PUSHX, SI| 
+  XCHGX, SI| 
+  LEA, BX> D0/ X/S 
+  NOT, W| R| SI| 
+  CALL, -28 ( L' @CONVERT ) (RX,) 
+  MOV, W| F| BP> /M/ 280 ( L' @HINUM ) X, 
+  XCHGX, SI| 
+  POPX, SI| 
+  POPX, BP| 
+  MOV, W| F| DI> D0/ /SI 
+  RET, 
+
+  XCHGX, DI| 
+  LODS, W| 
+  XCHGX, CX| 
+  LODS, W| 
+  MOVBI, CH| 0 ( ' ~0000 ) IB, 
+  ADD, W| T| DI> R| CX| 
+  INCX, DI| 
+  MOVI, B| D0/ /DI 96 ( ' ~0060 ) IB, 
+
+=L @MOVE> ( $0682 ) 
+  XCHGX, SI| 
+  PUSHX, CX| 
+  ADD, W| T| SI> R| CX| 
+  STD, 
+  COMPS, B| 
+  REPZ, 
+  MOVS, B| 
+  CLD, 
+  POPX, CX| 
+  MOV, B| F| CL> D0/ /DI 
+  XCHGX, SI| 
+  XCHGX, DI| 
+  RET, 
+  NOP, 
+
+  XCHGX, CX| 
+  MOV, W| T| DI> R| BX| 
+  JCXZ, 12 ( L' @06AD ) (RB,) 
+  SUB, W| T| DI> R| CX| 
+  CMPAI, B| 32 ( ' ~0020 ) IB, 
+  J, Z| N| 6 ( L' @06AD ) (RB,) 
+  REPZ, 
+  SCAS, B| 
+  J, Z| Y| 2 ( L' @06AD ) (RB,) 
+  DECX, DI| 
+  INCX, CX| 
+
+=L @06AD ( $06AD ) 
+  MOV, W| F| DI> DB/ /SI 2 (SB,) 
+  JCXZ, 5 ( L' @06B7 ) (RB,) 
+  REP, 
+  SCAS, B| 
+  J, Z| N| 1 ( L' @06B7 ) (RB,) 
+  DECX, DI| 
+
+=L @06B7 ( $06B7 ) 
+  SUB, W| T| DI> DB/ /SI 2 (SB,) 
+  MOV, W| F| DI> D0/ /SI 
+  XCHGX, CX| 
+  RET, 
+
+
+=L @FND ( $06E0 ) 
+  CALL, 7 ( L' @FINDER ) (RX,) 
+  PUSHX, SI| 
+  MOV, W| T| SI> R| BX| 
+  REPZ, 
+  COMPS, B| 
+  POPX, SI| 
+  RET, 
+
+=L @FINDER ( $06EA ) 
+  POPX, DX| 
+  XOR, W| T| CX> R| CX| 
+
+=L @06ED ( $06ED ) 
+  ADD, W| T| AX> R| CX| 
+  MOV, W| T| DI> R| AX| 
+  LEA, DI> DB/ /DI 4 (SB,) 
+  MOV, B| T| CL> D0/ /DI 
+  JCXZ, 13 ( L' @0705 ) (RB,) 
+  INCX, CX| 
+  CALLO, R| DX| 
+  XCHGX, DI| 
+  J, Z| N| -17 ( L' @06ED ) (RB,) 
+  MOVBI, CL| 2 ( ' ~0002 ) IB, 
+  ADD, W| F| CX> DB/ /DI 2 (SB,) 
+  MOV, W| F| DI> D0/ /SI 
+
+=L @0705 ( $0705 ) 
+  MOV, W| T| AX> R| CX| 
+  RET, 
+
+  PUSHX, AX| 
+  INC, B| D0/ /BX 
+  CALL, -112 ( L' @FND ) (RX,) 
+  DEC, B| D0/ /BX 
+  POPX, DX| 
+  JCXZ, 1 ( L' @0756 ) (RB,) 
+  RET, 
+
+=L @0756 ( $0756 ) 
+  XCHGX, DX| 
+  CALL, -122 ( L' @FND ) (RX,) 
+  INCX, AX| 
+  RET, 
+
+  XCHGX, DI| 
+  LODS, W| 
+  XCHGX, CX| 
+  LODS, W| 
+  CALL, -233 ( L' @MOVE> ) (RX,) 
+  INCX, AX| 
+  RET, 
+  NOP, 
+
+  INTI, 33 ( ' ~0021 ) IB, 
+  MOV, W| F| BX> D0/ /SI 
+  MOV, W| F| CX> DB/ /SI 2 (SB,) 
+  MOV, W| F| DX> DB/ /SI 4 (SB,) 
+  PUSHF, 
+  DECX, SI| 
+  DECX, SI| 
+  MOV, W| F| AX> D0/ /SI 
+  POPX, AX| 
+  RET, 
+
+  CALL, 4 ( L' @109D ) (RX,) 
+  CMP, W| T| BX> DB/ /DI -4 (SB,) 
+  RET, 
+
+=L @109D ( $109D ) 
+  JMP, -2486 ( L' @FINDER ) (RX,) 
+

@@ -1,0 +1,45 @@
+@titlepage
+
+@title                  C to Forth compiler
+@*
+@vskip 0.25in
+@center @image{bertie,4in,,,}
+@author                 Microprocessor Engineering Limited
+@page
+@page
+@title                  C to Forth compiler
+@page
+C to Forth compiler                                     @*
+Copyright @copyright{} 1998, 2003, 2007, 2012, 2013 Microprocessor Engineering Limited @*
+Published by Microprocessor Engineering @*
+@image{mpelogo,2in,,,}
+@vskip 0pt plus 1filll
+User manual                                                   @*
+Manual revision 1.2                                          @*
+@today{}                                                      @*
+                                                              @*
+Software                                                      @*
+Software version 1.2                                         @*
+                                                              @*
+For technical support                                         @*
+Please contact your supplier                                  @*
+                                                              @*
+For further information                                       @*
+MicroProcessor Engineering Limited                            @*
+133 Hill Lane                                                 @*
+Southampton SO15 5AF                                          @*
+UK                                                            @*
+                                                              @*
+Tel:       +44 (0)23 8063 1441                                @*
+Fax:       +44 (0)23 8033 9691                                @*
+e-mail:    mpe@@mpeforth.com                            @*
+  tech-support@@mpeforth.com                            @*
+web:       www.mpeforth.com                             @*
+                                                              @*
+@end titlepage
+@tex
+\newwrite\offsetfile
+\immediate\openout\offsetfile=\jobname.off
+\immediate\write\offsetfile{\string\entry\space{\string\code\space{!!firstpage!!}}{\number\sheetno}}
+\immediate\closeout\offsetfile
+@end tex

@@ -1,0 +1,58 @@
+CR ."REM1_"
+
+: "+BL! BL 
+: "+C! SWAP 
+: C+"! DXEP| NAME> C! J INC ;
+: `">1C C@+ C@ SWAP 1- 0; DROP -1 ; 
+
+: `!) POP ,<
+ 0 VECTOR `V)
+ 
+' (CON 1#> ; <M> 2MKR VARCON , <M>
+: PARS# ,<         \ DOUBLE VAR AFTER VARCON
+0 VARCON `LVL# Z, Z, 
+: `!FPARS#^ PARS#  4+ ,< \ ADDRES TO COUNT TO PARS#
+0 VALUE `FPARS#^
+
+: `LVL- PARS# DEC ;
+
+' (VAR  1#> PUSH @I CMOVTO POP ! ; 2#> 2@ OVER- ;
+<M> 3MKR `"ADDER D, <M> 
+: (TEXT) ,<
+D0 `"ADDER `"ACCUM  
+TO' `"ACCUM  =: ()+S
+
+: `>PADPAD PAD 
+: (EMPTY) DUP `"ACCUM 2! ;
+
+: `INITER PARS#  6  ERASE  `!FPARS#^  `>PADPAD  \ EMPTY REMARK
+  AT LOXEC ,< \ TO `(LOCATE  SAVE
+0 VALUE  `(LOCATE  \  OLD INTERPRETTER MODE  
+
+: `?PAR+ `LVL#  0<>; TBUF CSTR OVER C@ '` = 
+    IF S- THEN SWAP C!-
+: `PAR+ "+BL! CSTR TO `"ACCUM  
+: `PAR++  `FPARS#^ INC ;
+: `TEST) `!)
+: `() `LVL- `LVL# 0<>;  `PAR++ 
+: `(  PARS# INC ;
+: `NORM) `!)                   
+: `) `LVL# `LVL- 0<>; \ `LVL# = -1 IS "OK" TO EXIT (
+: `)))   `(LOCATE TO LOXEC     
+: `// PARS#  2+ TO `FPARS#^ ;  
+
+: (`   : ( `INITER `NORM) \ SAVE OLD INTERPRETTER MODE
+  >LOCATE `">1C ?()|\" `?PAR+ `( `V) `// \` ,< \ (INTERPRETTER
+: |() (` EX  `))) ;   \ COMMENTS LIKE PREPOSITION 
+: (?) '  |() `TEST) EXECUTE  EX `LVL- PARS# 2@ ;
+: (INCLUDE) TO TOKEN? |()  VAL INCLUDE ;
+\ : (NICER) ;
+
+
+( 
+`( ID1 ID2 ID3 ID4 ID5 `| ID0 ID9 ID8 ID7 ID6 ID5
+  ID2 ID4 ID6 ID8 
+  ID09876 `)  CR (TEXT) TYPE 
+)
+BYTE. "+BL!
+

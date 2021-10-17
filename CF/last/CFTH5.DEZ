@@ -1,0 +1,38 @@
+0 0 PAD 1024 BLK>MEM  2DROP
+\ $100  DEZOBJ   $100 DEZORG 
+PAD  DEZOBJ   $100 DEZORG
+
+CR CR      
+ 1B 8 D-S CR     \ START
+\   1B 4 D-S
+\ ' (DA,)  6 TIMES
+\   1B 16 + 4 D-S
+\ ' (DA,)  5 TIMES
+ ' (DA,)  11 TIMES
+$120 0 D-S   \ CORE 
+DDF (DB,) (DB,) (DB,) 
+$012B DT  DDF  (DB,)  DDD
+$0135 DT  DDF  (DB,) 
+$013D DT  DDF  (DB,) 
+\ $015D DT \ DDF  (DB,) (DW,)
+$0163 DT  DDF  (DB,) 
+$1C3  DT DDF  (DB,) DDD  DDF (DB,) DDD   DDF (DB,) DDD
+$1D3  DT DDF  (DB,) DDD
+$20C  DT   \ END CORE 
+       ' (DA,) 6 TIMES \ NUMBER
+$21E  (S,)
+$23D  DT  DDF (DB,) DDD   DDF (DB,) DDD   DDF (DB,) DDD
+$2AA  DT CR (DA,)
+$2C7  DT  DDF (DB,) DDD 
+$2D3  DT  DDF (DB,) DDD 
+' @MPUSH DT CR (DA,)
+' @S>"!  DT CR (DA,)
+' @PARS  DT CR (DA,)
+' @FND   DT CR (DA,)
+$35A DT CR (DW,)
+$364 DT CR (DW,)
+$036E DT  CR CR ."\___HI_LEVEL_ROUTINES" CR
+
+  ' (DA,) 201 TIMES \ HI FORTH
+ CR  \ END OF NUMBER 
+

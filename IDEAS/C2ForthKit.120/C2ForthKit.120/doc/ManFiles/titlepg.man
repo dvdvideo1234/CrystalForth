@@ -1,0 +1,61 @@
+( *! titlepg                                                            )
+( *R @titlepage                                                         )
+( *R                                                                    )
+\ *R @title                  C to Forth compiler
+\ \ *R @subtitle               Native Code ANS Forth Implementation
+\ *R @*
+\ *R @vskip 0.25in
+\ *R @center @image{bertie,4in,,,}
+( *R @author                 Microprocessor Engineering Limited         )
+\ end of front cover
+\ *R @page
+\ blank inside front cover
+\ *R @page
+\ Inside RHS repeat title
+\ *R @title                  C to Forth compiler
+\ \ *R @subtitle               Native Code ANS Forth Implementation
+\ *R @page
+\ LHS page
+( *R C to Forth compiler                                     @*   )
+\ *R Copyright @copyright{} 1998, 2003, 2007, 2012, 2013 Microprocessor Engineering Limited @*
+\ *R Published by Microprocessor Engineering @*
+\ *R @image{mpelogo,2in,,,}
+\ *R @vskip 0pt plus 1filll
+( *R User manual                                                   @*   )
+( *R Manual revision 1.2                                          @*   )
+( *R @today{}                                                      @*   )
+( *R                                                               @*   )
+( *R Software                                                      @*   )
+( *R Software version 1.2                                         @*   )
+( *R                                                               @*   )
+( *R For technical support                                         @*   )
+( *R Please contact your supplier                                  @*   )
+( *R                                                               @*   )
+( *R For further information                                       @*   )
+( *R MicroProcessor Engineering Limited                            @*   )
+( *R 133 Hill Lane                                                 @*   )
+( *R Southampton SO15 5AF                                          @*   )
+( *R UK                                                            @*   )
+( *R                                                               @*   )
+\ *R Tel:       +44 (0)23 8063 1441                                @*
+\ *R Fax:       +44 (0)23 8033 9691                                @*
+( *R e-mail:    mpe@@mpeforth.com                            @*   )
+( *R   tech-support@@mpeforth.com                            @*   )
+( *R web:       www.mpeforth.com                             @*   )
+( *R                                                               @*   )
+\ end of LHS, TOC will start on RHS
+( *R @end titlepage                                                     )
+
+\ Create file manual.off with one line of form:
+\   \entry {\code {!}}{29}
+\ This is used by the Forth to find the the PDF page number of the
+\ main body of the document.
+\ *R @tex
+\ *R \newwrite\offsetfile
+\ *R \immediate\openout\offsetfile=\jobname.off
+\ *R \immediate\write\offsetfile{\string\entry\space{\string\code\space{!!firstpage!!}}{\number\sheetno}}
+\ *R \immediate\closeout\offsetfile
+\ *R @end tex
+
+( *> ###                                                                )
+

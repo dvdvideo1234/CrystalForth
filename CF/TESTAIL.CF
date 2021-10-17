@@ -1,0 +1,17 @@
+\ : NEXT  LODS, W1|  MOV, W| F| R| BX| AX>
+\   MOV, W| F| R| BX> DX|   INCX, DX|    JMPO, D0| /BX ; 
+\ : NEST MOV, W| T| CX> D0| /BX  INCX, BX|   INCX, BX|  
+\  TESTI, B| R| CL| 1 C, JMPO, R| CX|  ; 
+\ 8B 0F 43 43 F6 C1 01 FF E1 
+\ CODE: TEST  LODS, W|  MOV, W| F| R| BX| AX>
+\   MOV, W| F| R| BX> DX|   INCX, DX|    JMPO, D0| /BX ;CODE
+\    ' TEST EVEN 10 DUMP
+\ CR ."______AD_89_C3_89_DA_42_FF_27" 
+\    
+\ 30 / 27 / 144   36 / 36 / 148
+BYTE. TT
+CR .( TOTAL BEFORE LOADING ) ' \` 256 TO BYTES?
+CR .( TOTAL AFTER  LOADING )  BYTE. \`
+CR .( DICTIONARY   ) $D800 T  TO BYTES?
+CR .( FREE MEMORY  ) T PAD  TO BYTES?
+

@@ -1,0 +1,144 @@
+\ TABLES --------------------------------------------------
+54 CONST HIBBB  HIBBB 1- LARY [BBB]  ' [BBB] VAL' BBB[] !
+
+<M>
+: `[]>BI DUP BBB[] TO BI^ 1+ ; 
+0 VALUE BBC : TBI? 0 BBC TBI SCN| `[]>BI DUP \ FLAG NOT FOUND
+  BI^ @ TBI @ - 0<>;   BY^ C@ TBY @ - 0<>;
+  BA^ C@ TBA @ - 0<>; DUP - ; \ 0 - FLAG FOUND
+
+: TB^ [ 1- TO BI^ ]  TBI !  TBY !  TBA !  TBI? 1+ 0<>; DROP 
+ BBC `[]>BI DUP HIBBB U< #"BBC?" DUP 
+ TO BBC  TBI @ BI^ ! TBY @ BY^ C!  TBA @ BA^ C! ;
+\ : TB^ DROP 2DROP ; : TB, 0 C,  ; \ STUBS
+>, >FILE : TB. 0 BBB[] BBC STR| STR H. CSTR B. CSTR B. CR ;
+<M>
+
+
+: CODE: P=: !TALLY ;  : ;CODE ;C CHECK26 CHECK32 ;
+
+ `ENDER  -END-
+ 
+\ cell relative to IP
+CELL# 00 OVER $80 TB^ COMMAER (RX,) ,  .COMMA-STANDARD
+\ byte relative to IP 
+1     00 OVER $40 TB^ COMMAER (RB,) C, .COMMA-STANDARD
+\ Segment: WORD 
+2     00 OVER $20 TB^ COMMAER SG, WRD, .COMMA-STANDARD
+\ port number: byte
+1     00 OVER $10 TB^ COMMAER P,    C, .COMMA-STANDARD
+\ imm byte data oblig sz
+1     00 OVER $08 TB^ COMMAER IS,   C, .COMMA-STANDARD
+\ imm data: cell 
+CELL# 02 OVER $04 TB^ COMMAER IX,   ,  .COMMA-STANDARD
+\ imm data: byte
+1     01 OVER $04 TB^ COMMAER IB,   C, .COMMA-STANDARD
+\ imm data: addr/offset
+CELL# 08 OVER $02 TB^ COMMAER X,    ,  .COMMA-STANDARD
+\ imm byte: addr/offset
+1     04 OVER $02 TB^ COMMAER B,    C, .COMMA-STANDARD
+\ obligatory word     
+2     00 OVER $01 TB^ COMMAER W,  WRD, .COMMA-STANDARD
+
+\ --------- STANDART fixups ----------
+\ v-- Bits           \  1 OPERAND IS BYTE \  2 OPERAND IS CELL
+\  4 OFFSET DB|      \  8 ADDRESS  DW|    \ 10 Register op    
+\ 20 Memory op       \ 40 D0              \ 80 [BP]           
+
+$20 0 $0700 TB^ \ MEMORY ADDRESSING    
+ 1  0 8 FMLY 1FI X/S X/D P/S P/D /SI /DI -- /BX
+$A0 0 $0700 TB^  6 1FI /BP
+ 
+$60 $0  $C000 TB^ $00 1FI      D0|   \ NO OFFSET
+$24 $1  $C000 TB^ $40 1FI      DB|   \ BYTE OFFSET
+$28 $2  $C000 TB^ $80 1FI      DW|   \ WORD OFFSET
+$10 $0  $C000 TB^ $C0 1FI      R|    \ REGISTER REGISTER
+$08 $2  $C700 TB^ $06 1FI      /MEM  \ MEMORY
+\ Overrules D0| [BP] 
+
+$12 0 $0700 TB^  \ DESTINATION REGISTERS
+    1 0 8 FMLY 1FI AX| CX| DX| BX| SP| BP| SI| DI|
+$11 0 $0700 TB^
+    1 0 8 FMLY 1FI AL| CL| DL| BL| AH| CH| DH| BH|
+$12 00 $3800 TB^  \ SOURCE REGISTERS
+   8  0 8 FMLY 1FI AX> CX> DX> BX> SP> BP> SI> DI>
+$11 00 $3800 TB^    
+   8  0 8 FMLY 1FI AL> CL> DL> BL> AH> CH> DH> BH> 
+
+00 00 $02 TB^   2 0 2 FMLY 2FI F| T|   
+01 00 $01 TB^   0 2FI B|
+02 00 $01 TB^   1 2FI W|
+
+\ --------- two fixup operands ----------
+$00 00 $FF03 TB^
+                $88 2PI MOV,
+         8 0 8 FMLY 2PI ADD, OR, ADC, SBB, AND, SUB, XOR, CMP,
+$22 00 $FF00 TB^
+                $8D 2PI LEA, 
+       1 $C4 2 FMLY 2PI LES, LDS,  
+$00 00 $FF01 TB^ 
+       2 $84 2 FMLY 2PI TEST, XCHG,   
+
+\ --------- one fixup operand ---------- 
+ 00 $04 $C701 TB^   $C6 2PI MOVI,   $F6 2PI TESTI,    
+$12  00  $700 TB^ 8 $40 4 FMLY 1PI INCX, DECX, PUSHX, POPX,
+   $90 1PI XCHGX,   $10 $04 $701 TB^     $800 $80 8  
+FMLY 2PI ADDI, ORI, ADCI, SBBI, ANDI, SUBI, XORI, CMPI,
+02  $08 $C700 TB^  $800 $83 8 
+FMLY 2PI ADDSI, -- ADCSI, SBBSI, -- SUBSI, -- CMPSI,
+00  00  $C701 TB^  $800   $FE 2 FMLY 2PI INC, DEC,  
+$800 $10F6 6 FMLY 2PI NOT, NEG, MUL, IMUL, DIV, IDIV, 
+$02  00 $C700 TB^  $1000 $10FF 2  FMLY 2PI CALLO,  JMPO, 
+        $8F 2PI POP,   $30FE 2PI PUSH, 
+$22 00  $C700 TB^   $1000 $18FF 2  FMLY 2PI CALLFO, JMPFO,
+$11 $04 $700  TB^  $B0 1PI MOVBI,
+$12 $04 $700  TB^  $B8 1PI MOVXI,
+
+\ --------- no fixup operands ----------
+01 00 $20100 TB^  0 1FI  B1|   02 00 $20100 TB^  1 1FI  W1|
+
+8 $02 $20100 TB^  2 $A0 2 FMLY 1PI MOVTA, MOVFA, 
+0 $04 $20100 TB^  08 04 8 
+FMLY 1PI ADDAI, ORAI, ADCAI, SBBAI, ANDAI, SUBAI, XORAI, CMPAI, 
+00 00 $20100 TB^     $A8 1PI TESTAI, 
+            2 $A4 6 FMLY 1PI MOVS, COMPS, -- STOS, LODS, SCAS,       
+0 $10 $20100 TB^  2 $E4 2 FMLY 1PI INAI, OUTAI,  
+0 $00 $20100 TB^  2 $EC 2 FMLY 1PI INAD, OUTAD, 
+
+\ --------- special fixups ----------
+00 00   $1800 TB^ $8 0 4 FMLY 1FI ES| CS| SS| DS| 
+$26 1PI SEG:,     $1 6 2 FMLY 1PI PUSHS, POPS,
+02 00   $DF02 TB^        $8C  2PI MOVSG,
+00 00    $100 TB^  1 0 2 FMLY 1FI Y| N|
+00 00    $E00 TB^  2 0 8 FMLY 1FI O| C| Z| CZ| S| P| L| LE|
+00 $40   $F00 TB^         $70 1PI J,
+00 $00 $10002 TB^          00 2FI 1|
+00 $08 $10002 TB^          02 2FI V|   
+00   0 $1C703 TB^ 
+$800 $D0 8 FMLY 2PI ROL, ROR, RCL, RCR, SHL, SHR, -- SAR,
+
+\ --------- no fixups --------------- 
+$0A $22 00 TB^           $9A 1PI CALLF,   $EA 1PI JMPF,
+$01 $04 00 TB^  $CD 1PI INTI,   1 $D4 2 FMLY 1PI AAM, AAD,
+$02 $02 00 TB^  8 $C2 2 FMLY 1PI RET+, RETF+,  
+$01 $40 00 TB^           $EB 1PI JMPS,
+1 $E0 4 FMLY 1PI LOOPNZ, LOOPZ, LOOP, JCXZ,                      
+$02 $80 00 TB^  1 $E8 2 FMLY 1PI CALL, JMP, 
+ 
+\ --------- BARE CODE --------------- 
+$00 $00 00 TB^
+8 $C3 2 FMLY 1PI RET,  RETF,   
+8 $27 4 FMLY 1PI DAA, DAS, AAA, AAS,                            
+1 $98 8 FMLY 1PI CBW, CWD, -- WAIT, PUSHF, POPF, SAHF, LAHF,   
+1 $CC 4 FMLY 1PI INT3, -- INTO, IRET,          $D7 1PI XLAT,
+1 $F0 6 FMLY 1PI LOCK, -- REP, REPZ, HLT, CMC,                 
+1 $F8 6 FMLY 1PI CLC, STC, CLI, STI, CLD, STD,  
+
+\ 2840 QARY      \ 2638 LARY  
+(
+CR .(  ASSEM) BYTE. HIBBB     
+DEA' AX| TO DISS   DEA' SG,  TO DISS  
+DEA' IS,  TO DISS  DEA' P,  TO DISS
+CR   DISS.
+)
+

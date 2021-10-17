@@ -1,0 +1,17 @@
+Warcraft II cheats
+deck me out 	Gives you all the weapon/armor upgrades.
+disco 	Plays the hidden track "I'm a medieval man".
+every little thing she does 	Gives you all spell upgrades and infinite mana.
+glittering prizes 	10,000 gold, 5000 lumber, and 5000 oil for you AND opponent.
+hatchet 	Cut down trees in 2 chops for you AND opponent.
+it is a good day to die 	Invincible to enemy attacks (except for Whirlwind, Blizzard, or Death and Decay) and do more damage to enemy.
+make it so 	Speeds up building and unit production for you AND opponent.
+noglues 	Disables mission briefings and victory/defeat screens.
+on screen 	Shows you the whole map.
+showpath 	Shows you the whole map, although it leaves the fog of war in the minimap.
+there can be only one 	Takes you to the campaign victory sequence.
+tigerlily 	Enables level jumping. Use Human # and Orc # to jump levels where # is the level you want to go to.
+For Expansion pack levels type x before the levels (i.e., "xorc10")
+ucla 	The phrase "Go Bruins!" appears on the screen.
+unite the clans 	Win the scenario instantly.
+valdez 	Gain 5000 oil 

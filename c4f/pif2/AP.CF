@@ -1,0 +1,31 @@
+FORGET MARKER!
+: MARKER! ;
+INCLUDE MACRO.CF
+' =:    =: ALIAS
+: !CSP CSP! ;
+: <> - 0= 0= ;
+: INVERT NOT ;
+: >CFA @ ;
+: >BODY 
+: CELL+ 2+ ;
+: BODY> 
+: CELL- 2- ;
+: @+ STR ;
+: |OR EX OR ;
+: 2^ 31 AND 1 SWAP 
+: LSHIFT TIMES| 2* ;
+: RSHIFT TIMES| 2/ ;
+: ROTLEFT 2^ UM* OR ;
+: CFA> WFIND N?? ;
+: (>NFA 4+ ;
+: ?CSP -SP A" SP?" ;
+: CELLS 2* ;
+: ?ERROR SWAP IF ? DROP Emt! ." ERR#" . bs ?? ;
+: SET CREATE CLARYW ; \ SET
+: SET+! >R R@ @ !+ R> ! ;
+: !SET DUP CELL+ SWAP! ;
+: SET? @+ - 2/ ;
+: +! >R R@ @ + R> ! ;
+: CFA NOP ;
+
+INCLUDE as8086s.frt

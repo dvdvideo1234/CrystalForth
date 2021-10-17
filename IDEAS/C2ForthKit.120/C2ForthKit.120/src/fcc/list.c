@@ -1,0 +1,56 @@
+/* TSEPOS 2 11 1 */
+#include "c.h"
+
+static List freenodes;		/* free list nodes */
+
+/* append - append x to list, return new list */
+List append(x, list) void *x; List list; {
+	List new;
+
+	if (new = freenodes)
+		freenodes = freenodes->link;
+	else
+		NEW(new, PERM);
+	if (list) {
+		new->link = list->link;
+		list->link = new;
+	} else
+		new->link = new;
+	new->x = x;
+	return new;
+}
+
+/* length - # elements in list */
+int length(list) List list; {
+	int n = 0;
+
+	if (list) {
+		List lp = list;
+		do
+			n++;
+		while ((lp = lp->link) != list);
+	}
+	return n;
+}
+
+/* xltoa - convert list to an NULL-terminated array allocated in arena */
+void *xltoa(list, arena) List *list; unsigned arena; {
+	int i = 0;
+	void **array = newarray(length(*list) + 1, sizeof array[0], arena);
+
+	if (*list) {
+		List lp = *list;
+		do {
+			lp = lp->link;
+			array[i++] = lp->x;
+		} while (lp != *list);
+#ifndef PURIFY
+		lp = (*list)->link;
+		(*list)->link = freenodes;
+		freenodes = lp;
+#endif
+	}
+	*list = NULL;
+	array[i] = NULL;
+	return array;
+}

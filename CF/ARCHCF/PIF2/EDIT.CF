@@ -1,0 +1,150 @@
+\ PREPARE FOR COMPILING EDITOR
+CR .( EDITOR)
+\ : _BLK 1K U* 1B + ;  ' _BLK DEFER BLOCK)
+\ : SP.` : SP. SP@ H. CSP H. PREFETCH ID. ;
+
+: SCR- |SCR DUP 0; 1- ; 
+: SCR+ |SCR 1+ ;
+0 |VALUE |SPTR SPTR  
+0 VALUE SPTRTOP   
+: (@|; @R+ OR EXIT ;
+
+: S> SPTR 
+: SDROP |SPTR NAME> ; 
+: SPTRTOP? SPTRTOP T -
+ SPTR SPTRTOP U< 0= OR 0; T DUP  TO SPTRTOP TO SPTR TWICE| D0 
+: >S W>B |SPTR MPUSH 1- ; 
+: >S! CSTR >S ;  
+
+: LIST DUP TO SCR BLOCK 
+: .BLOCK [ SCR 
+: NU. 6 U.R ]  1H STR| 1H J NOT + J ?|CR 
+: .LINE 2 U.RS 1L [TYPE] ;
+
+\ 17 . \ 17 BLOCK1 OF EDITOR
+ZDO VALUE 6 TIMES  `PDATA `INS  `SZ  `ALTER `X `Y
+' ETIB =: `EOS^ 
+
+: `MOVER CONST DOES> @ 
+: `XY+ |XY + ; 
+  4 `MOVER `4+> 
+ -1 `MOVER `<-  
+  1 `MOVER `->  
+-64 `MOVER `L_UP 
+ 64 `MOVER `L_DN    
+: `L_END |XY 
+: `/L (@|; ,< 63 , 
+: `<_| `L_DN  
+: `L_BEG |XY L/ 
+;
+: `|POS XY EX `PDATA + ; 
+: `POS^ `|POS ;; ,< 
+: `LINE/ `|POS L/ ;  
+: `/LINE `|POS `/L ; 
+: `EOL `|POS `/L 1+ ;
+: `PREPINS XEP|  `POS^ J `SZ - DUP 
+: `SZBLANK `SZ BLANK ;
+: `|DELPOS `POS^ DUP `SZ + OVER `SZBLANK EX ONPLACE ;
+: `|INSPOS EX `PREPINS ONPLACE ; 
+: `SZMOV `/LINE `POS^ - ;
+: `REST 1K XY - ;
+
+\ 18 . \  BLOCK2 OF EDITOR
+: `XY>CR XY 1L U/MOD TO `Y TO `X ; 
+: `_INS `INS 0= TO `INS ; 
+75 15 >POS: `ENDPOS EOS! ; 
+: `ESQ/E /BUFS `ENDPOS ; 
+72 0 >POS: `.INS `INS IF ." INS" ;THEN ." OVT" ; 
+70 2 >POS: `.INBUF XY NU. ; 
+: `Q/ED FLUSH `ENDPOS ; 
+70 4 >POS: `.X.Y `X 3 U.R `Y 3 U.R ; 
+70 6 >POS: `.CH `POS^ C@ DUP '$ EMIT B. 3 .R ; 
+70 8 >POS: `.TEST ."  TEST " `Y . ;
+: `STATE. `.INS `.INBUF `.CH `XY>CR `.X.Y
+: `POSXY `X 4+ `Y GOTOXY ; 
+: `|LDRU 1 TO `SZ EX UPDATE `POSXY
+ `LINE/ `Y  cr EMIT    .LINE DROP ;
+: `TAB> `4+> SKIP 
+: `<TAB  `<- |XY (@&; ,< -4 , 
+: `RELOAD SCR BLOCK DUP TO `PDATA 1K + TO ETIB  SPTRTOP? ;
+
+\ 19 . \  BLOCK2 OF EDITOR
+: `1L<?| 1L   
+: `>SZ?| TO `SZ 
+: `SZ<?| `REST `SZ U< IF RDROP; THEN 
+: `|RDRC EX SKIP
+: `RESET -BUF 
+: `LOADRAW `RELOAD 
+: `REDRAW HOME `PDATA .BLOCK 
+;
+: `B SCR- SKIP 
+: `N SCR+ `LOADRAW 
+; 
+: `ZPOS 0 TO XY ;  
+: `ALT   | ? `LOADRAW `ALTER |SCR TO `ALTER ; 
+: `DELL `1L<?| 
+: `DO-DEL `|DELPOS `EOS^ ; 
+: `INSL `1L<?| 
+: `DO-INS `|INSPOS `EOS^ ; 
+: `INSC `|LDRU CALL `POS^ C! ;THEN
+     `INS 0; `SZMOV 0; `|INSPOS  `EOL ; 
+: `BS `<-  
+: `DELC `|LDRU `|DELPOS `EOL ; 
+: `ONEC A@ BL U< IF 
+: WHAT? 7 EMIT ;THEN A@ `INSC `-> 
+;
+: `TEST BL `POS^ C@ U< ;  
+: `<XY0; `<- 
+: `XY0; XY  0; 
+;
+: `BACK BEGIN `<XY0; `TEST UNTIL
+ BEGIN `<XY0; `TEST 0= UNTIL `-> ; 
+: `ADV `REST TO LTIB BL PARSE TO `SZ DROP XY! `XY0; `<- ;
+
+\ 20 . \  BLOCK2 OF EDITOR
+: `AW `ADV : `PREP ( ARE) `BACK  
+: `SKIP `ADV `-> ;
+: `SCR; `ZPOS `<- 
+: `PREPARE `L_END `PREP ;
+: `altS 1L 1+ `>SZ?| 1L TO `SZ `POS^
+`<_| `DO-INS `POS^ 2DUP - NUP - ONPLACE ; 
+: `COPY `1L<?| RDROP 
+: `DO-COPY `POS^ `SZ DUP `XY+ >S 
+; 
+: `CUT `1L<?| 
+: `DO-CUT `DO-COPY  `SZ NEG `XY+ `DO-DEL 
+;
+: `BKCW `AW `BACK `BACK 
+: `CUTW `AW `SZ 0; `SZ 1+ TO `SZ `BACK `|RDRC `DO-CUT `PREP ; 
+: `MOVE `CUTW `SZ 0; | ? `SKIP 
+: `PASTE SPTR C@ DUP TO `SZ 0; `SZ<?| 
+: `DO-PASTE `DO-INS S> 1+ `POS^ `SZ CMOVE ; 
+
+: `WIPE ;
+
+\ EDITORII
+
+21 . \  BLOCK5 OF EDITOR \ KEY CONSTANTS} \ DO# =: 19 TIMES 
+30 =: kaA   75 =: kLEFT 72 =: kUP      71 =: kHOME  79 =: kEND 
+73 =: kPGUP 81 =: kPGDN 80 =: kDOWN    77 =: kRIGHT 82 =: kINS
+83 =: kDEL  17 =: kaW  116 =: kcRIGHT  32 =: kaD    15 =: ksTAB
+31 =: kaS  115 =: kcLEFT 117 =: kcEND 119 =: kcHOME   
+ 
+: `@KEY KEY W>BB DUP IF NIP ("SW ,< 19 C, 
+DO' C, 8 TIMES  kaA kLEFT kUP kHOME kEND kPGUP kPGDN kDOWN
+DO' C, 8 TIMES  kRIGHT kINS kDEL kaW kcRIGHT kcLEFT kcEND ksTAB
+DO' C, 3 TIMES  kcHOME kaS kaD ALIGNED \ EDITORI2
+>, WHAT? `ALT `<- `L_UP `L_BEG `L_END `B `N `L_DN `-> `_INS
+ `DELC `WIPE `ADV `BACK `SCR; `<TAB `ZPOS `altS `DELL ,<
+
+22 . \  BLOCK5 OF EDITOR \ KEY CONSTANTS
+>, THEN DROP ("SW ,< 20 C, DO# C, 7 TIMES ^J ^K ^X 127 ^H ^D ^M
+DO# C, 13 TIMES  ^G ^Z ^N ^B ^R ^I ^C ^V ^Q ^F ^A ^[ ^S
+ALIGNED >, 
+ `ONEC `<- `-> `CUT `BKCW `BS `DELC `<_| `CUTW `PREPARE `N `B
+ `RESET `TAB> `COPY `PASTE `ESQ/E `MOVE `ADV `Q/ED `INSL  ,<
+: EDIT TO SCR 
+: PE PAGE 
+: E  D0 AT TI| `LOADRAW EOS| BEGIN `STATE. `@KEY  EOS UNTIL ;  
+
+\ 23 . \  BLOCK5 OF EDITOR \ KEY CONSTANTS ;; } (BSCN

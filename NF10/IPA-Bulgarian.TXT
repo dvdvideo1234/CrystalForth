@@ -1,0 +1,53 @@
+IPA 	Examp 	English approximation
+b 		баба 	box
+c 		кьополу	cute
+d 		дом 	dust
+d?z 	дзифт 	birds
+d?? 	джем 	jab
+f 		филм 	fact
+? 		гарван 	good
+? 		гяур	argue
+j 		сойка 	yes
+k 		къща 	skill
+l 		лимон 	leap
+? 		лош 	all
+? 		любов 	million
+m 		море 	mocha
+n 		нос 	north
+? 		баня 	canyon
+? 		банка 	sing
+p 		пет 	speak
+r 		работа 	trilled r, like in Spanish
+s 		стол 	salt, mask
+? 		шума 	sugar
+t 		тайна 	style
+t?s 	цар 	bats
+t?? 	чай 	cheese
+v 		вода 	view
+x 		хартия 	loch (Scottish English)
+z 		зима 	zoo
+? 		жълт 	pleasure 
+
+ Vowels IPA 	Examples 	English approximation
+a 		брат 	father
+? 		кът 	plus (General American, Scottish English)
+? 		цена 	edge
+i 		сив 	police
+? 		слон 	off
+u 		хубав 	pool
+
+Marginal consonants
+ IPA 	Examples 	English approximation
+? 		видях го 	between go and ahold
+c 		Хюз 		huge
+w 		уиски 		water 
+
+Reduced vowels
+ IPA 	Examples 		English approximation
+? 		щерка, камък 	sofa
+o 		нещо, уста 		thought (RP), coat (Scottish English)
+
+Other symbols IPA 	Description
+? 	Stress on the following syllable
+? 	Secondary stress on the following syllable
+?? 	Palatalization of the preceding consonant 

@@ -1,0 +1,169 @@
+
+@chapter C2Forth - Compiling C for a Forth System
+
+@*
+With the development of MPE's VFX Forth family of compilers
+that produce optimised native code from high level Forth,
+an experiment was performed to use high level Forth as the
+assembly language of a C compiler. The C2Forth system is the
+result.
+@vskip 0pt
+@*
+The C2Forth system allows you to compile C source to be run
+VFX Forth and XC6/7 cross compilers. It consists of a tool
+chain that produces Forth source from C source, and a build
+harness for the Forth System.
+@vskip 0pt
+
+@section Overview
+
+
+@vskip -6pt
+@*
+Traditional C compiler chains usually have four stages.
+@vskip 0pt
+
+
+@table @code
+@item PreProcess
+This step takes a C source file and parses it
+ and any included header files to produce a
+ single reference source. Macros are expanded at
+ this stage and conditional compilation structures
+ are evaluated to remove irrelevant information.
+
+@end table
+
+
+
+@table @code
+@item Compile
+This step takes to output from the preprocess
+ stage and produces an assembler listing for the
+ target CPU.
+
+@end table
+
+
+
+@table @code
+@item Assemble
+The assembler source from the compile stage is
+ assembled into a binary form along with any
+ relocation information, symbol tables and
+ missing dependancy lists.
+
+@end table
+
+
+
+@table @code
+@item Link
+All the binaries for a project (as output from
+ the Assemble stage) are merged along with any
+ pre-compiled libraries. Dependant symbols from
+ an object are resolved with exported symbols
+ from the surrounding binaries and libraries to
+ form a standalone image.
+
+@end table
+
+@*
+MPE has developed a C tool chain which targets a virtual machine
+rather than a specific processor. The compiler is based on the LCC
+system with the preprocess/assembler/linker derived from other
+sources.
+@vskip 0pt
+@*
+The MPE virtual machine design is a dual stack, no register
+architecture design which is similar to a conventional Forth
+virtual machine. The virtual machine runtime is written in
+Forth.
+@vskip 0pt
+
+@subsection C Preprocessor
+
+
+@vskip -4pt
+@*
+The preprocessor used comes as part of the LCC toolchain.
+Only detail changes have been made to this code, mostly to
+aid compilation.
+@vskip 0pt
+
+@subsection C Compiler
+
+
+@vskip -4pt
+@*
+The compiler is a heavily modified derivative of LCC. The LCC
+system is designed such that all the processing of C source into
+DAG lists as well as tree reduction and analysis are common. Only
+the part of the code which translates the final DAG trees into
+assembler need retargeting. The "back-end" which performs this job
+is usually built with lBurg.
+@vskip 0pt
+@*
+lBurg is a code-generator generator system developed by the same
+authors as LCC. Unfortunately the LCC and lBurg combination was
+never designed to cope with the kind of architecture our dual
+stack VM used. For that reason it became necessary to replace the
+"normal" back-end interface in LCC with our own.
+@vskip 0pt
+
+@subsection Assembler and Linker
+
+
+@vskip -4pt
+@*
+A VFX Forth Kernel replaces the more traditional Assembler and
+Linker. The output from the compiler for each file in the project
+is passed into the Forth Kernel which has a support harness. The
+binary is placed directly into the Forth dictionary and label names
+are linked either against each other or against the current Forth
+search-order. Therefore libraries and such are not linkable binaries
+but Forth definitions built into the system before the converted
+code.
+@vskip 0pt
+
+@section Current Status and Goals
+
+
+@vskip -6pt
+@*
+This tool chain has reached the stage of proving that a good Forth
+compiler can be used as a back-end for C. As the usage of C2Forth
+increases, the amount of carnal knowledge about the target Forth
+system will decrease. Ultimately the goal is to have output source
+which is 100% ANS Forth compliant. This is theoretically possible to
+achieve - just difficult.
+@vskip 0pt
+@*
+No attempt has been made to either implement a harness or port the
+existing one onto anything other than an MPE VFX Forth system.
+@vskip 0pt
+
+@section Contents of the distribution
+
+
+@vskip -6pt
+
+@cartouche
+@example
+\BIN            C compiler binaries
+    CPP         C Preprocessor
+    FCC         C Compiler
+    OMAKE       Make utility
+    C2FPOST     Parsing utility to take FCC output and pad
+                it into a form which can be safely TFTP'd
+                in 512byte packets.
+\DOC            C2F Distribution documentation.
+                See C2Forth.pdf
+\DOC\LIBC       Documentation on sample C library implementation.
+\HARNESS        C2F Forth Target Harness, reference source.
+                See C2Forth.pdf for details.
+\INCLUDE        C Header files for sample C library implementation.
+\LIB            Forth source for C library functions.
+\SRC            C source code for tools.
+\TESTS          Some simple test programs and a suitable makefile @end example
+@end cartouche

@@ -1,0 +1,40 @@
+\ banner.bld - C2Forth banner example build file
+
+((
+Copyright (c) 2003, 2007, 2012
+MicroProcessor Engineering
+133 Hill Lane
+Southampton SO15 5AF
+England
+
+tel:   +44 (0)23 8063 1441
+fax:   +44 (0)23 8033 9691
+email: mpe@mpeforth.com
+       tech-support@mpeforth.com
+web:   http://www.mpeforth.com
+Skype: mpe_sfp
+
+From North America, our telephone and fax numbers are:
+       011 44 23 8063 1441
+       011 44 23 8033 9691
+       901 313 4312 (North American access number to UK office)
+
+
+To do
+=====
+
+Change history
+==============
+))
+
+decimal
+
+c" $C2FORTH" macroSet? 0= [if]		\ if no macro yet
+s" C2FORTH" envmacro: $c2forth		\ define it
+[then]
+
+include %$c2forth%/harness/c2f_vfx.bld
+"C"
+#include %$c2forth%/tests/banner.cxx
+"Forth"
+

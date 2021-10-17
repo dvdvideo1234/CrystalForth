@@ -1,0 +1,93 @@
+
+@chapter Limitations
+
+@*
+You would have to go a long way to find two langauges so far apart
+as C and Forth so obviously this system has some limitations.
+@vskip 0pt
+
+@section Short Data Types
+
+
+@vskip -6pt
+@*
+Some C programmers are used to the data type SHORT on a 32bit
+system being 16 bits. The current C compiler tool treats all SHORTs
+as INTs.
+@vskip 0pt
+
+@section Floating Point
+
+
+@vskip -6pt
+@*
+There is absolutly no support in this system for floating point
+numbers at all.
+@vskip 0pt
+
+@section Namespace Visibility and Linking
+
+
+@vskip -6pt
+@*
+At the moment the runtime code on the Forth kernel makes no
+attempt to obey the C EXTERN directive. All public labels are
+built in the global name space, i.e. Forth's current)vocabulary.
+Also since the delivery mechanism for this system is source
+code to an open Forth, there is no binary library format to
+link against.
+@vskip 0pt
+
+@section Standard C Library
+
+
+@vskip -6pt
+@*
+Due to the lack of a binary library format there is no
+method of compiling C libraries from C source code and
+storing the object code for linking. C2Forth has been
+designed to link C to Forth; since the Forth search-order
+is used to resolve symbols during compilation it is possible
+to write library functions in Forth(with a preceeding
+underscore in the name) and call that definition from the C
+code by name. (You will need a header file and prototype for
+the C compiler.)C2Forth contains a very limited subset of
+the C standard library as Forth source code along with C
+header files.
+@vskip 0pt
+
+@section Target Forth Kernel
+
+
+@vskip -6pt
+@*
+This system has been designed to exploit the optimising Forth
+kernels built by MPE. As such some tradeoffs have been made
+between portability of output code and speed.
+@vskip 0pt
+@*
+The VFX kernels from MPE all have the following characteristics:
+@vskip 0pt
+
+@itemize @bullet 
+@item 32 bit CELL, 8 bit CHAR.
+
+@item Native Code Generation.
+
+@item An XT (or CFA) is an executable address not some other id.
+
+@item Return Stack access is permitted outside of the current definition.
+
+@item Headerless definitions supported.
+
+@item MPE standard local variable code present.
+@end itemize
+@*
+There is no technical reason why the required kernel support
+cannot be built on any Forth System. The next section describes
+the output form of the Forth source and the functionality
+required above and beyond ANS Forth. The harness/kernel file
+supplied is for our VFX targets and as such, the nearer a
+Forth Kernel is to our specification, the easier it will be
+to port the existing harness.
+@vskip 0pt

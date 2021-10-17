@@ -1,0 +1,67 @@
+CR .( NUMOUT )
+128 CONST HLDBUF
+: #> DROP HLD 
+: HLDSZ HLDBUF HLD - ;
+: >LO 1B    \ DIVIDE U* U/MOD 
+: U/ |DROP 
+: D/M A! 0 
+: (D/M TWICE| TWICE| -/ -/ -/ 
+: -/ (-/ 
+; 
+: SPLIT 1B D/M ;
+: UMOD |DROP 
+: U/MOD D/M SWAP 
+; 
+: UNITS? D/M  0; 1+ ; 
+
+: >HI 1B    \ MULTIPLY 
+: U* |DROP 
+: UM* A! 0 TWICE| TWICE| +* +* +* 
+: +* (+*
+; 
+: 9>? 9 OVER U<     \ HEX NUMOUT 
+: 7& (@&; ,< 7 , 
+: S6 |JUMP XEP| XEP| XEP| THEN 
+: S3 |SPC CALL TWICE| THEN ROT DUP 
+: H. W>BB CALL 
+: B. |SPC THEN  W>B 1H U/MOD TWICE| 
+: DIG. |C. 
+: ALPHA 9>? + 
+: 48+ (@+; ,< '0 , 
+: /LINE? 0<>; |CR BK 27 = 0; EOS! ;
+
+: ?TAB HLDSZ -         \ TAB NUMOUT 
+: SPACES TIMES| SPC 
+; 
+: <# HLDBUF TO HLD 
+: BASE! 2- W>B 2+ ,< 
+10 VALUE BASE 
+: <#>| <# EX ?TAB #> TYPE ; 
+: `6 DUP 0< 0; NEG EX '-  
+: HOLD |HLD C!- 
+; 
+: # BASE  D/M ALPHA HOLD ; 
+: U. 0 
+: U.RS |SPC 
+: U.R lf 
+: U.R# <#>| 
+: `u. 31 AND XEP| 
+: S# UNTILZ| # DUP 
+;
+: . 0 
+: .RS |SPC 
+: .R lf 
+: .R# <#>| SWAP `6 SWAP `u. 
+; 
+: #. 0 SWAP |SPC .R# ; 
+
+\ COMPARING PRIMITIVES  
+: RED| 2DUP EX IF ? SWAP ; 
+: UMAX |NIP 
+: URED RED| U< ; 
+: UMIN |DROP URED ; 
+\ : MAX |NIP  
+\ : REDI RED| < ; 
+\ : MIN |DROP REDI ;
+BYTE. >LO
+

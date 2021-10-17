@@ -1,0 +1,173 @@
+
+@chapter Usage with VFX Forth
+
+@*
+This section explains how to compile the supplied test programs
+and build them on the ProForth VFX system using the reference
+harness.
+@vskip 0pt
+
+@section Building the Test Apps
+
+
+@vskip -6pt
+@*
+In the distributions \TESTS directory there are three sample
+applications.
+@vskip 0pt
+
+
+@table @code
+@item BANNER
+Does large screen pretty printing, similar to the Unix
+ banner program.
+
+@end table
+
+
+
+@table @code
+@item TESTHEAP
+Performs a stress test on the system heap.
+
+@end table
+
+
+
+@table @code
+@item VARTEST
+Test program for simply variadic functions.
+
+@end table
+
+@*
+By entering MAKE <testname> in the \TESTS directory you can build
+each test program. The translated source for each file will have
+a CXX file extension. This is the Forth style output.
+@vskip 0pt
+@*
+MAKE itself is a batch file which calls OMAKE (in the \BIN folder)
+and uses the supplied .MAK file which can be used as a template
+for all builds.
+@vskip 0pt
+
+@section Running the Test Apps
+
+
+@vskip -6pt
+@*
+In order to compile and run the test programs from the Forth
+sources you need to perform the steps below. For Windows
+systems, there are batch files (scripts) that simplify the
+process. If you are using a Unix system, you can use these
+as the basis of your own scripts.
+@vskip 0pt
+
+@subsection Windows script
+
+
+@vskip -4pt
+@*
+In the root of the C2Forth system, you will find a batch
+file called @emph{InstallWin.bat}. Run this from a console
+prompt at the root of the C2Forth directory.
+@vskip 0pt
+@example
+C:\Products\C2ForthKit.120>InstallWin @end example
+@*
+The script creates apermanent environment variable called
+C2FORTH that specifies the root of the C2Forth directory.
+If you are using Windows XP, you may have to download
+@emph{setx.exe} from the Microsoft web site as it is required
+by @emph{InstallWin.bat}.
+@vskip 0pt
+@*
+The @strong{tests} directory contains @emph{banner.bld} which
+can be compiled directly by VFX Forth for Windows.
+@vskip 0pt
+
+@subsection Run VFX Forth
+
+
+@vskip -4pt
+@*
+You need any version of VFX Forth.
+@vskip 0pt
+
+@subsection Change to the C2Forth Folder
+
+
+@vskip -4pt
+@*
+VFX Forth contains a command CD which behaves the same way as the
+Unix/Windows CD shell command. Use it to change to the folder
+into which you installed the C2F system. You can use DIR <cr> to
+verify you are in the correct directory.
+@vskip 0pt
+
+@subsection Compile the C2F Reference Harness and Libraries
+
+
+@vskip -4pt
+@*
+This distribution contains a sample implementation of the C2F
+harness and some simple C style libraries. Change into the \HARNESS
+folder and include the sources using:
+@vskip 0pt
+@example
+  include c2f_vfx.bld <CR> @end example
+
+@subsection Change to the \TESTS directory
+
+
+@vskip -4pt
+@*
+On the default installation you can change to the \TESTS folder
+after building the harness by performing:-
+@vskip 0pt
+@example
+  CD ..\TESTS <cr> @end example
+
+@subsection Compile your first test app
+
+
+@vskip -4pt
+@*
+Compilation of a C build is performed in three steps.
+@vskip 0pt
+@*
+The first is to initialise the C2F harness for a new compile.
+@vskip 0pt
+@example
+  "C" <cr>                        Initialise C2F Harness @end example
+@*
+Second, include the source files which make up your project:
+@vskip 0pt
+@example
+  #include banner.cxx <cr>        Include banner source @end example
+@*
+Third, signal the end of the build and switch back to Forth.
+@vskip 0pt
+@example
+  "FORTH" <cr>                    Back to Forth Mode @end example
+@*
+If all has gone well you should see a report on the compilation.
+If you perform @strong{@code{WORDS <cr>}} on the Forth system you will find that
+all the C procedures are available. Type _MAIN <CR> to run the
+program.
+@vskip 0pt
+
+@section Rebuilding the C toolchain
+
+
+@vskip -6pt
+@*
+If you are going to rebuild the compiler using the same
+tools as MPE, you will need a copy of Visual C++ 6.0. The
+batch file @emph{setpath.bat}, adds the VC++ include directory
+to the Windows search order.
+@vskip 0pt
+@*
+If you convert the code to use other compilers, please return
+your updates and scripts to MPE for the benefit of others.
+@vskip 0pt

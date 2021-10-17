@@ -1,0 +1,126 @@
+10 0 PAD  13000  BLK>MEM  2DROP
+PAD  DEZOBJ   $100 DEZORG
+DDD  $012B $0103 - (S,)
+$0130 DT CR ' (DW,) 3 TIMES
+CR (DB,) (DB,) 
+CR ' (DW,) 11 TIMES CR
+
+$016D DT (DW,) (DW,) CR
+$01A8 DT (DW,) (DW,) (DW,) (DW,) CR
+$01BF DT (DW,) (DW,) (DW,) (DW,) CR
+
+$026E DT ."__\_DOS_Fn_62H_Get_Program_Segment_Prefix" CR
+$03B7 DT ."__\_AX_-_BYTE_INDEX_IN_BUFFER" CR
+DDD      ."__\_CX_-_BIT_INDEX_AND_MASK" CR
+$03F8 DT (DW,) (DW,) CR
+$0400 DT (DW,) (DW,) CR
+$0579 DT (DW,) (DW,) CR
+
+$05DC DT CR CR ."__\_=====--_START-ARM-DOM_--=====" 
+$06F6 DT CR ' (DW,) 3 TIMES
+$0705 DT CR ' (DW,) 3 TIMES
+$070E DT CR ' (DW,) 3 TIMES
+CR ' (DW,) 8 TIMES
+$0961 DT CR ' (DW,) 3 TIMES
+$0A1A DT  ."__\_=====--_END-ARM-DOM_--=====" CR CR
+
+$1382 DT  CR ."__\_=====--_wrblk_--=====" CR 
+$1396 DT  CR ."__\_=====--_copy-file_--=====" CR 
+$13E9 DT  CR ."__\_=====--_setlen_--=====" CR 
+$15FC DT (DW,) (DW,) CR
+$1932 DT (DW,) (DW,) CR
+$1943 DT (DW,) (DW,) CR
+
+$1B86 DT CR CR ."__\_=====--_START-ARM-FUNS_--====="
+CR ' (DW,) 30 TIMES 
+
+$1C02 DT  CR ' (DB,) 16 TIMES
+
+$1C34 DT  CR ."__\_=====--_lock-arch_--=====" CR 
+$1C81 DT  CR ."__\_=====--_commit_--=====" CR 
+$1C8E DT (DW,) (DW,) CR
+
+$1C97 DT  CR ."__\_=====--_share-state_--=====" CR 
+$1CC8 DT  CR ."__\_=====--_arm-state_--=====" CR 
+$1CD6 DT  CR ."__\_=====--_getl_--=====" CR 
+$1CF6 DT  CR ."__\_=====--_movelement_--=====" CR 
+$1D35 DT  CR ."__\_=====--_l4read_--=====" CR 
+$1D50 DT  CR ."__\_=====--_info-arch_--=====" CR 
+$1DE9 DT  CR ."__\_=====--_open_--=====" CR 
+$1E76 DT (DW,) (DW,) CR
+$1E81 DT (DW,) (DW,) CR
+$1E8E DT (DW,) (DW,) CR
+$1E9C DT (DW,) (DW,) CR
+$1EA9 DT (DW,) (DW,) CR
+
+$1ECD DT  CR ."__\_=====--_CS-UPCASE_--=====" CR 
+$1F0A DT  CR ."__\_=====--_get-path_--=====" CR 
+$1F9E DT  CR ."__\_=====--_self-quit_--=====" CR 
+$1FC6 DT  DDF (DB,)
+$201B DT  (DW,) (DW,)
+$2076 DT  CR ."__\_=====--_self-instal_--=====" CR 
+$20A7 DT  CR ."__\_=====--_PRESENT_--=====" CR 
+
+$2347 DT  DDF (DB,) 
+$247D DT ."__\_=====--_END_OF_ARM_FUNS_--=====" CR CR
+
+  CR ' (DW,) 27 TIMES
+$24D2 DT
+\ ."__\_=====--END_OF_ARM_CORE--=====" CR 
+CR
+
+$2515 DT  DDF (DB,) 
+$2521 DT  DDF (DB,) 
+$2599 DT  DDF (DB,) (DW,)
+$2615 DT  DDF (DB,) (DW,)
+$2634 DT  DDF (DB,) (DW,) 
+      DDD DDF (DB,) (DW,) 
+$27C2 DT CR
+$27E4 DT CR
+$27F5 DT CR  DDD DDF (DB,) CR
+$2808 DT CR
+$2826 DT CR
+$283B DT CR
+$2851 DT CR
+$2883 DT ."__\_=====--_END_OF_ARM-DOM_--=====" CR
+
+CR DDF (DB,) (DB,) (DB,) DDD
+CR DDF (DB,) (DW,) (DW,) 
+$289B DT  CR DDF (DB,) (DW,)
+$28A7 DT   $3C (S,)
+
+CR CR ."__\_=====--_START-INITIALIZATION_--=====" CR
+$2912 DT  $3E (S,) 
+$2953 DT  40  (S,) 
+$2A19 DT  19  (S,) 
+
+$2A3E DT CR ."__\_=====--_MOVING-118-BYTES-TO-5C_--=====" CR CR
+\ $5C DEZORG
+$2A4A DT DDF (DB,)  (DW,)  
+$2A63 DT DDF (DB,)  (DW,)   
+\ $2A3E $A0 $5C - + DT
+$2A82 DT  (DW,) (DW,) (DW,)
+     DDD  (DW,) (DW,) (DW,)
+     DDD  (DW,) (DW,) (DW,)
+$2AAC DT  (DW,) (DW,) (DW,)
+2 DIZABY
+\ $2AB4 2- DT  DDD
+CR ."__\_=====--_END-OF-MOVING-AREA_--=====" CR CR 
+\ $2AB4  DEZORG ."__\_=====--_NEW-DEZORG_--=====" CR 
+
+
+$2AC3 DT CR ."__\_=====--_FREE-ENV-STRINGS_--=====" CR
+
+$2ACB DT CR ."__\_INT_2F_FUNCTION_SETTING" CR
+
+$2ADE DT DDF  (DB,) (DW,) 
+$2AE9 DT $3C (S,) 
+$2B33 DT $57 (S,) 
+$2BBF DT (DW,) (DW,) (DW,) 
+$2BCC DT (DW,) (DW,) (DW,) 
+$2BD9 DT (DW,) (DW,) (DW,) 
+$2BE6 DT (DW,) (DW,) (DW,) 
+$2BF3 DT (DW,) (DW,) (DW,) 
+$2C25 DT DDF (DB,) (DB,) \ SILENT-MUTE
+$2C6A DT
+

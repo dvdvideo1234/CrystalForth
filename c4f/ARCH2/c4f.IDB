@@ -1,0 +1,56 @@
+
+__ACALL:  
+  CALL    WA
+  JMP     @NOP
+  
+ADR?_
+INCLUDE C4F.IKR ; KERNEL
+ADR?_
+
+; vvvvvvvvvv----------- MINI DEBUGGER -------------vvvvvvvvvvv
+
+XT_ _TROFF,__ACALL  
+@DEBUGOFF:
+  SKIPR_ W
+  LODSW
+  TEST  WL,1
+  ORG   $-1
+@DBG?:  
+  XCHG  W,PW @NOP
+  RET
+
+@DO_TRACE:
+  ;CALL  @DEBUGOFF
+  CALL  @TR1
+  JE    @STOPDBG
+  CALL  @DEBUGON
+@STOPDBG:
+  LODSW
+  JMP   @TEST2
+
+  
+XT_ _TR1,__ACALL  
+@TR1:
+  PUSH  AR 
+  CALL  @EXDBGM  
+  DW    _GTEMIT,_STDEMIT,_CR,_PUSH
+  DW    _ROTD,_POP,_POP,_POP,_POP,_XSTK,_ROTD,_XSTK,_PUSH,_PUSH,_PUSH
+  DW    _H,_WDOT,_J,_WDOT,_RPLD,_WDOT,_SPLD,_2P,_WDOT
+  DW    _SPC,_I,_WDOT,_I,_2P,_LD,_WDOT,_ILD,_WIDOT,_STEMIT,_BK,_FROMF
+  AND   TL,0DFH
+  CMP   TL,'S'
+  POP   IP AR
+  JMP   @DROPT
+
+XT_ _TRON,__ACALL  
+@DEBUGON:  
+  SKIPR_ W
+  JMPS_  $
+  ORG $-1
+  DB __DBG-(@NOP+2)
+  JMPS_  @DBG?  
+  
+XT_ _FROMF,@FROMF
+@FROMF:
+  JMP IP
+

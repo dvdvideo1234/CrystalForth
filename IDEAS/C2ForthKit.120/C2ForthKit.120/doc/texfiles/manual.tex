@@ -1,0 +1,25 @@
+\input texinfo
+@setfilename            C2Forth.info
+@setcontentsaftertitlepage
+@afourpaper
+@settitle               C2Forth
+@setchapternewpage      odd
+@paragraphindent        0
+@exampleindent          0
+@finalout
+@tex
+\newcount\sheetno\sheetno=0
+\global\def\advancepageno{\global\advance\sheetno 1\ifnum\pageno<0\global\advance\pageno -1\else\global\advance\pageno 1\fi}
+@end tex
+@include titlepg
+@include c2forth
+@include limit
+@include coutput
+@include harness
+@include libs
+@include libc
+@include use
+@unnumbered{Index}
+@*
+@printindex fn
+@bye

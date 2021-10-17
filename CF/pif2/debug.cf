@@ -1,0 +1,39 @@
+\ DEBUGERR  ------
+: UNITS? D/M  0; 1+ ; 
+: `BD |SPC STR| CSTR B. ; 
+: DUMP 1H 
+UNITS? STR| 
+: DU CR DUP H. SPC 1H 2DUP `BD [TYPE] ; 
+: WFIND |A vTARG IO; $04E8 , $3B00 , $FC5D , $C3 C,
+ ' @FIND? JMP#, ALIGNED
+: `WID. ID. WID. ; 
+: JID. J 
+: @ID. DUP H. STR DUP H. SWAP @ H. 
+: ?ID. WFIND IF WID. ;THEN 2- WFIND IF " VAL" `WID. ;THEN 4+ 
+WFIND IF " TO" `WID. ;THEN 2+ WFIND IF " AT" `WID. ;THEN 4 -
+: $. ." $" H. ; 
+0 VALUE `ADR2 
+: `" (WSCN ,< 6 , >, (!" (." (MAC (0" (" ("SW ,< 
+0 |VALUE `|WW `WW 
+: `A:? WFIND IF ? DROP ." : " WID. ; 
+: SEE ' 
+: @SEE TO `WW : SL bs TIMES| 
+: WW `|WW CR DUP H. DUP 
+`A:? STR DUP H. DUP ?ID. `" 1+ 0; PUSH ("SKIP [ID] POP ;
+\ : DUTEST 1 2 3 " 1234" ;  
+
+\  BREAKPOINT  DEBUGERR 
+CREATE `DBGSAV Z, Z, 
+: `DBGIN TO EMIT A@ `DBGSAV 2! Emt! CR ; 
+: R3 POP POP POP J H. PUSH J H. PUSH J H. PUSH ; 
+: `DBG SPC PUSH S3 POP HERE H. vTARG H. `DBGSAV @ H. SPC @ID. ;
+: DBG. `DBGIN R3 I `DBG TO BK 
+: `DBGOUT `DBGSAV @2 AT EMIT A! ;
+
+=P 4TH>  $E3FF , \ STEP BY STEP  DEBUGERR
+: TRACE ADR' CALL (TROFF; THEN PUSH TRON ; 
+: `@DBG      ,<  ' (TROFF;  2+ CAL#, ' (EX 1- CAL#, >, 
+ `DBGIN R3 I `DBG BK `DBGOUT 4TH> ,< 
+VAL' TRON  CAL#,    $DF24 , $533C ,  $75AD , 03 C,
+' (TROFF;  2+ CAL#, $8B5B , $F C, ' (NOP 1+ JMP#, ALIGNED
+' `@DBG ' (IF- 1- -      ' (IF- 3 - !

@@ -1,0 +1,33 @@
+CR .( VARS )
+: XY? 1K LTIB - ; 
+: 1KMOD (@&; ,< 1023 , 
+0 |VALUE |SCR SCR  0 VALUE XY  \ VARS
+6 FML# CONST -$700 SBUF  $40 1L   13 cr  16 1H   10 lf  -$1 -1
+: ON -1 SWAP! ; 
+: OFF 0 SWAP! ; 
+: |XY XY EX 
+: >XY 1KMOD TO XY ; 
+
+0#> DUP PUSH @2 U< 0" STK>" @I @+ POP! ;         \ STK-
+1#> DUP PUSH @+ 2+ SWAP U< 0" >STK" @I !- POP! ; \ STK+
+<M> ' (VAR3  3MKR  STK: `CLARYSET  <M>
+
+: STK! DUP 2+ @ SWAP! ; \ NO ELEMENTS == EMPTY STK
+: STK? @2 SWAP - 2/ ; \ COUNT OF ELEMENTS
+: STK@ @ @ ; \ TOP ELEMENT  ==  LAST ELEMENT
+
+120 STK: PARSTACK    AT PARSTACK  STK!
+
+0#> DUP PUSH @+ 2+ SWAP U< 0" <KIT" @I @- POP! ; \ KIT-
+1#> DUP PUSH @2 U< 0" KIT>" @I !+ POP! ;         \ KIT+
+<M> ' (VAR3  3MKR  KIT: `CLARYSET  <M>
+  
+: `KIT DUP 4+ SWAP ;
+: KIT" `KIT         \ ADDRESS & COUNT OF ELEMENTS
+: KIT? @+ 2+ - 2/ ; \ COUNT OF ELEMENTS
+: KIT! `KIT ! ;     \ NO ELEMENTS   == EMPTY KIT
+: KIT@ @ @- DROP ;  \ LAST ELEMENT
+
+\ 3 KIT: WLIST  AT WLIST KIT!
+\ VARS
+BYTE. XY?

@@ -1,0 +1,427 @@
+\ exported  VARIABLES AND FUNCTIONS
+: WRD, , ;
+: BYTE>SIGNED DUP 128 AND 0; -128 OR  ;
+2 CONST CELL#
+0 VALUE HIBBB \ MAX BBB INDEX  
+0 VECTOR BBB[] 
+0 VALUE BIBYBA-COUNTER  \ BIBYBA COUNT OF ELEMENTS
+
+EXPORT SHOW-ALL   \ FIRST TO EXPORT
+EXPORT SHOW-PI  
+EXPORT SHOW-FR  
+EXPORT SHOW-FI  
+EXPORT SHOW-,   
+EXPORT SHOW:
+EXPORT FSHOW
+EXPORT TB^
+EXPORT D-F
+EXPORT D-S
+EXPORT D-R
+EXPORT DDD
+EXPORT .COMMA-STANDARD
+EXPORT |COMMA
+EXPORT .ADDRESS
+EXPORT !HIDDEN?
+EXPORT COMMAER
+EXPORT 1PI
+EXPORT 2PI
+EXPORT 1FR
+EXPORT 1FI
+EXPORT CODE 
+EXPORT ;CODE 
+EXPORT -END-   \ LAST  TO EXPORT
+( ) FUNC: `  ,<
+
+\ COMMON VARIABLES AND FUNCTIONS
+: CELL+ 2+ ;
+: DEA' FND?? DUP CELL+ @ UNDEF? ;
+1 VALUE  I-ALIGNMENT ( Instruction alignment )
+VARIABLE BA-DEFAULT    0 BA-DEFAULT !
+VARIABLE BA-XT
+'       T =: STARTVOC
+'   HERE  =: AS-HERE
+'   C,    =: AS-C,
+0 VALUE ISL@  ( Length of current instruction )
+: !ISS AS-HERE ,<
+0 VALUE  ISS@  ( Start of current instruction )
+0 VALUE AS-POINTER@
+: `!HIDDEN? AS-POINTER@ ,<  0 VALUE POINTER2
+\ : !AS-SPC BL ,<
+\ 0 VALUE AS-SPC
+\ : |DZAS EX AS-POINTER@ POINTER2 - 0;  ,<
+\ ADR' NOP VECTOR DZAS
+\ 
+: `|.()  ."(_" EX .")_" ;
+: (H.)  `|.() H. ;
+: |.HEX EX  |CR
+    `|.() ISS@ DUP H. OVER OVER- |SPC STR| CSTR VAL B. ;
+: `.ADDRESS  AS-POINTER@ 1+ + `|.() '' EMIT SPC ?ID. ;
+
+\ : HIBIT 0 SWAP |DROP CALL WHILE| U1+ THEN 2/ DUP ;
+\ : HIBIT 0 SWAP [ DROP 1- ] UNTILZ| U1+ 2/ DUP ;
+: !POSTIT  !ISS
+: !OLDCOMMA 0 ,<
+0 VALUE OLDCOMMA@
+\ : >CURL DUP @ 5+ C@  ,<
+0 VALUE CURL
+
+\ : >DIS  @ 3 
+: CELLS+ |+ \ CELLS + ;
+: CELLS ( CELL# HIBIT TIMES| ) 2* ;
+: >DATA @ CELL+ ;
+: HERE- AS-HERE
+: CELL- 2- ;
+: CORRECT-R CELL# CURL -
+: LSHIFTB TIMES| B* ;       \ SHIFT BYTES LEFT
+\ : B* 8 \ : << TIMES| 2* ; \ LSHIFT
+: CORRECT-L CELL# CURL -
+: RSHIFTB TIMES| B/ ;        \ SHIFT BYTES RIGHT
+\ : B/ 8 \ : >> TIMES| 2/ ; \ RSHIFT
+: CHECK28 2DUP AND !28"  ;  \ PRE OR CHK
+\ : FIXUP<   CORRECT-R ISS@ 
+: OR!?   |@! CHECK28 OR ;
+
+\ : SPLIT, SPLIT
+\ : BB, C, C, ;
+\ 
+
+\ \\\\\\\\\\\\\\\\ ASSEMBLER GEN \\\\\\\\\\\\\\\\\\\\\
+
+: IS-A VARIABLE HERE- DOES> PUSH @ @ @R+ = EXIT ; \ CHECK TYPE
+: REMEMBER` ?CSP HERE- SWAP! CSP! ;  \ REMEMBER TYPE
+
+( ------------- BOOKKEEPING ---------------------- )
+
+\ BI - Bits that needs fixed up
+CREATE TBI     Z, Z, Z,  \ THE BLACK BOARD IS CLEAR
+\ BY - Bits represent a commaer that is to be supplied
+TBI 1 CELLS + CONST TBY
+\ BA - State bits, bad if two consequitive bits are up
+TBI 2 CELLS + CONST TBA
+
+: @BBB DUP @ 4+   \ DEA / DEA ADDRESS (CURL := LENGTH)
+: BBB@BODY+  C@+  C@ TO CURL   BBB[] DUP ,< 
+                \ SIZE    TALLY:,  TALLY:|  TALLY:,,
+0 VALUE BI^     \ WORDP   OR!      AND!     --      >BI  
+: BY^ BI^ 2+ ;  \ BYTEP   OR!      OR!      AND!    >BY  
+: BA^ BI^ 3 + ; \ BYTEP   OR!U     OR!U     OR!U    >BA  
+
+
+<M>
+: `[]>BI DUP BBB[] TO BI^ 1+ ; 
+: `TBI? 0 BIBYBA-COUNTER TBI SCN| `[]>BI DUP \ FLAG NOT FOUND
+  BI^ @ TBI @ - 0<>;   BY^ C@ TBY @ - 0<>;
+  BA^ C@ TBA @ - 0<>; DUP - ; \ 0 - FLAG FOUND
+
+: `TB^ [ 1- TO BI^ ]  TBI !  TBY !  TBA !  `TBI? 1+ 0<>; DROP 
+ BIBYBA-COUNTER `[]>BI DUP HIBBB U< #"BBC?" DUP 
+ TO BIBYBA-COUNTER  TBI @ BI^ ! TBY @ BY^ C!  TBA @ BA^ C! ;
+>, >FILE 
+: TB. 0 BBB[] BIBYBA-COUNTER STR| STR H. CSTR B. CSTR B. CR ;
+<M>
+
+
+: BAD? TBA  @
+: BADPAIRS? DUP 2* AND $AAAAAAAAAAAAAAAA AND ;
+: CHECK32 BAD? !32" ; ( Always an error )
+: CHECK29  2DUP OR -1 - !29"   ;  \ PRE AND CHK
+: AND!?  PUSH NOT @I CHECK29 AND POP! ;
+: AT-REST?  TBI @ 0=   TBY @ 0=  AND ;
+: MC<0 + 1- C@  $80 SWAP 
+: CONTAINED-IN  OVER AND = ; ( leaving it IS      )
+: CHECK26 AT-REST? #26" ;  ( Error at postit time )
+: CHECK30 DUP OLDCOMMA@ < !30" DUP TO OLDCOMMA@ ;
+: RESET-BAD   BA-XT @ DUP IF PUSH ] DROP  BA-DEFAULT @ TBA ! ;
+( *************** PREFERRED NOT YET USED ******************* )
+( If bits were already down it is wrong. For next two words. )
+( Reset bits of DATA into ADDRESS bytewise. )
+: (AND!BYTE) PUSH $FF AND NOT I C@ CHECK29 AND
+: POPC! POP C! ;
+( Reset bits of DATA byte by byte into ADDRESS )
+: AND!BYTE BEGIN 2DUP (AND!BYTE) SWAP B/
+              DUP WHILE SWAP 1+ REPEAT 2DROP ;
+( If bits were already up its wrong. for next two words. )
+( Or DATA into ADDRESS bytewise. )
+: (OR!BYTE) DUP PUSH C@  CHECK28 OR POPC! ;
+( Or DATA byte by byte from behind into ADDRESS )
+: OR!BYTE BEGIN 1- 2DUP (OR!BYTE) SWAP
+           B/ DUP WHILE SWAP REPEAT 2DROP ;
+: assem, CELL#
+: assemble,  STR| 
+: lsbyte, DUP AS-C, B/ ;
+
+\ TALLIES  ------------------------------------------------
+: !TALLY  0 TBI !  0 TBY !  RESET-BAD  !OLDCOMMA  ; 
+: TALLY:, STR TBI ! CSTR TBY !
+: ;TALLY C@ TBA 
+: OR!U |@! OR ;
+: TALLY:| STR TBI AND!? CSTR TBY OR!? ;TALLY ;
+: TALLY:,, CELL+ CSTR CHECK30 TBY AND!? ;TALLY ;
+
+\ : |SHOW` DUP CR 2- ?ID. DUP @ H.
+\ EX |SPC TO BK H DUP H. 6 A-L |[] BYTES. ;
+
+\ Bits  ON COMMAERS  ---------------------------------
+\ $80 (RX,) address relative to IP : CELL
+\ $40 (RB,) address relative to IP : byte
+\ $20 SG,   Segment: WORD
+\ $10 P,    port number : byte
+\  $8 IS,   immediate byte data, obligatory size
+\  $4 IX,   immediate data : cell
+\  $4 IB,   immediate byte data
+\  $2 X,    immediate data : address/offset
+\  $2 B,    immediate byte : address/offset
+\  $1 W,    obligatory word
+
+\ Bits - BI  -------------------------------------
+\   1 OPERAND IS BYTE
+\   2 OPERAND IS CELL
+\   4 OFFSET DB|
+\   8 ADDRESS  DW|
+\  10 Register op
+\  20 Memory op
+\  40 D0
+\  80 [BP]
+
+\ MAKERS -------------------------------------------------
+: TB, BI^ C, ; \ ON COMPILE TIME ONLY
+IS-A IS-COMMA
+: `COMMAER CREATE  
+   ,'  \ ASSEMLER COMMAER (CELL)
+   TB, \ BIBYBA INDEX   (BYTE)
+   C,  \ LENGTH OF COMMAER OPERAND (BYTE)
+   DOES> REMEMBER STR PUSH BBB@BODY+ TALLY:,, ;
+IS-A IS-1PI
+: `1PI CREATE-- assem, TB,  1 C, DOES> REMEMBER
+: POSTIT DUP CELL+ CHECK26 !TALLY  
+   !POSTIT BBB@BODY+  TALLY:, CURL  DUP TO ISL@  S, ;
+IS-A IS-2PI
+: `2PI CREATE-- assem, TB,  2 C, DOES> REMEMBER POSTIT ;
+IS-A IS-1FR
+: `1FR CREATE-- assem, TB,  1 C, DOES> REMEMBER
+: FIXUP>   STR HERE-
+: FIXUP OR!? BBB@BODY+ TALLY:| CHECK32 ;
+IS-A IS-1FI
+: `1FI CREATE-- assem, TB, 1 C, DOES> REMEMBER STR ISS@ FIXUP ;
+IS-A `IS-END
+: `ENDER <BUILD DOES> REMEMBER ;; ,< \ NO TAIL
+
+: IS-PI DUP IS-1PI  SWAP  IS-2PI  OR ;
+: IS-F  DUP IS-1FR  SWAP  IS-1FI  OR ;
+: IS-OP DUP IS-PI   OVER  IS-F    OR  SWAP IS-COMMA OR ;
+       
+ `ENDER  `-END-  
+
+\ ------------- DATA STRUCTURES --------------------------
+( A row of dea's representing a disassembly )
+12 KIT: DISS    : !DISS AT DISS KIT! ;  !DISS
+: DISS-  DISS DROP ;     \ Discard last item of `DISS'
+: DISS" AT DISS KIT" ;   ( `DISS' STATE )
+: DISS? AT DISS KIT? ;   ( `DISS' COUNT )
+: DISS. |CR SPC DISS" STR| @+ XEP| DUP IS-COMMA
+  IF J AT DISS 6 + - . THEN WID.  ;
+' DISS.  VECTOR DISS-VECTOR
+
+\ ------------- TRYERS ---------------------------
+: @BBW. [ CSTR ] AHEAD   : SPHHH. XEP|  SP@  TBI SWAP
+: @HHH. [ STR ] THEN CR H. SPC STR H. (IXEC H. EX H. DROP ;
+: DB2. BI^ DUP @BBW.     : DB. SPHHH. ". DBG. ;
+
+\ 0 VALUE IN-PI
+
+: TRY-PI DUP IS-PI 0; AT-REST? 0; @BBB TALLY:,
+: DISS+ DUP TO DISS
+\ IN-PI IF [ @BBB DROP ] CR XEP| DISS.  THEN
+;
+
+: TRY-FIX DUP IS-F 0;
+    @BBB @ TBI @ CONTAINED-IN 0; 
+    BI^ TALLY:| DISS+ ;
+
+: TBB. TBI @ H. TBY @ H. TBA @ H. ;
+: RESULT? AT-REST? DISS? AND   BAD? 0= AND ;
+: BACKTRACK? 0;  
+: BACKTRACK DROP DISS  \"BACKTRACKING_"
+\ TBB. DISS? SPACES ."?_" DISS. \ CR
+  >DEA
+: REBUILD  !TALLY   DISS? 0;  DISS" !DISS STR| @+ XEP| |DROP
+: TRYER   TRY-PI  TRY-FIX
+: TRY-COMMA DUP IS-COMMA 0; @BBB CELL+ C@ TBY @
+ CONTAINED-IN
+\ "COMMA" DB2.
+ 0; BI^ TALLY:,, DISS+ ;
+
+: AWORD: C: : Z, DOES> CR PUSH STARTVOC AHEAD BEGIN X: SWAP
+ (IXEC  >DEA THEN DUP `IS-END  UNTIL  POP 2DROP ; \ SENTINEL
+
+\ SHOW sift WORDS
+: |WIDI DUP EX 0; DUP WID. 1L OVER DEA? 1+ CNTC + U< 0; CR ; 
+AWORD: `SHOW-ALL |WIDI IS-OP    ; \ SHOW OPLIST
+AWORD: `SHOW-PI  |WIDI IS-PI    ; \ SHOW IT
+AWORD: `SHOW-FR  |WIDI IS-1FR   ; \ SHOW IT
+AWORD: `SHOW-FI  |WIDI IS-1FI   ; \ SHOW IT
+AWORD: `SHOW-,   |WIDI IS-COMMA ; \ SHOW IT
+
+: .RESULT RESULT? 0; DISS-VECTOR  DISS- REBUILD ;
+: SHOW-STEP  TRYER  .RESULT >DEA  BAD? BACKTRACK?
+    CALL WHILE| BACKTRACK THEN DUP `IS-END DISS? AND ;
+: `FSHOW "DUMP.TXT" >FILE \ SAVE SHOW: TO FILE
+: `SHOW: !DISS   !TALLY DEA' DUP |2DROP UNTIL|
+ SHOW-STEP DISS? 0= OVER `IS-END OR  ;
+
+
+: MC@-S 2DUP MC<0 AHEAD
+: GETCODE?   XEP| AS-POINTER@  AHEAD
+: GETMASK DXEP| 
+: GETCODE THEN CURL THEN
+: MC@ 0 -ROT 
+: lsbytes <ITER|
+: lsbyte@  C@ SWAP B* OR ;
+: INSTRUCTION  ISS@ ISL@ MC@ ;
+: GETFR CELL+ CURL - GETCODE ;
+
+0 VALUE LATEST-INSTRUCTION@
+: COMPATIBLE? TBA @ OR BADPAIRS? 0= ;
+: ADORN-ADDRESS DROP CR ;
+
+( ---------------- DISASSEMBLERS ------------------------ )
+
+: DIS-PI DUP IS-PI 0; DUP >DATA @ AS-POINTER@ @ CONTAINED-IN 0;
+   AT-REST?  0; \  ENABLE DEBUGGING IN DISASSEM
+\ DUP >DATA C@ $FF = TO IN-PI
+\ IN-PI IF DUP 4+ DB. THEN
+   @BBB GETMASK 
+\ IN-PI IF AS-POINTER@ @ "GETMASK" DB2. DROP THEN   
+   GETFR 
+\ IN-PI IF "GETFR" DB. THEN   
+   OR 
+\ IN-PI DBG?   
+   NOT
+\ IN-PI DBG?   
+   GETCODE?  
+   AND 
+\ IN-PI DBG?   
+   OVER >DATA @ 
+\ IN-PI DBG?   
+   = 0;
+\ IN-PI IF  "DIS-PI-OK" DB2.  THEN
+
+   @BBB TALLY:, 
+\ IN-PI IF  "TALLY:," DB. THEN
+   
+   DISS+ 
+   DUP TO LATEST-INSTRUCTION@   
+    CURL  TO ISL@  AS-POINTER@ TO ISS@      \ OLD ADDRESS TO ISS
+: ADJUST-ADDRESS CURL AS-POINTER@ + TO AS-POINTER@
+;
+
+: DIS-FI DUP IS-1FI 0;
+   @BBB  @ TBI @ CONTAINED-IN 0;
+   BA^ C@  COMPATIBLE? 0;
+   BI^ @  INSTRUCTION  AND OVER >DATA  @ = 0; 
+\ IN-PI IF  DUP 4+  DB2.  THEN
+   BI^ TALLY:|
+\ IN-PI IF  "TALLY:|" DB. THEN
+   DISS+
+;
+
+: DIS-FR
+   DUP IS-1FR 0;
+   @BBB  @ TBI @ CONTAINED-IN 0;
+   BA^ C@  COMPATIBLE? 0;
+   \ CELL# ISL@ - IF ? `DISF   
+   
+   BI^ GETFR 
+   ISL@ CURL - LSHIFTB  
+   INSTRUCTION  
+   AND  \ MASKING FR BITS
+   CELL# ISL@ - LSHIFTB 
+\ IN-PI IF CR OVER H. DUP H. ."DATA>_" OVER >DATA @ H.
+\ ."INST&>_" INSTRUCTION TBI @ AND H. 
+\ OVER 4+  DB2. THEN
+   OVER >DATA @ =  
+   0;
+\ IN-PI IF  DUP 4+  DB2.  THEN
+   BI^ TALLY:|
+\ IN-PI IF  "TALLY:|" DB. THEN
+   DISS+
+;
+
+: DIS-COMMA DUP IS-COMMA 0;
+   @BBB CELL+ C@ TBY @ CONTAINED-IN 0;
+   BA^ C@  COMPATIBLE? 0;
+\ CR DUP WID. ."OK-PI"
+\ "DIS-COMMA1" DB2.
+   BI^ TALLY:,,
+\ "DIS-COMMA2" DB2.
+   DISS+ ;
+   
+: |WID EX WID. ;   
+: `|COMMA  VAL GETCODE? EX ADJUST-ADDRESS ;
+: .DISS   DISS" STR| @+ XEP|  DUP |WID IS-COMMA 0;
+: .COMMA   @BBB @ DUP PUSH 0<>; RDROP
+: `.COMMA-STANDARD  `|COMMA U. ; 
+
+0#> C@ OVER 5+ C@ = SKIP : THERE?; WFIND 0<>; DROP EXIT ;
+?:, =PRIM?; '( ,   ?:, =LBL?; '@ ,  DROP
+: .PRIMITIVE?  AS-POINTER@ ODD 0<>; 
+   AS-POINTER@ 1+ THERE?;  =PRIM?; ."\_P=:_" WID. CR ;
+: .LABEL? AS-POINTER@ THERE?; =LBL?; ."\_=L_" WID. CR ;
+
+: `DDD  : `(DISASSEMBLE)   !DISS !TALLY STARTVOC
+: `((DISASSEMBLE))  |.HEX SWAP DUP TO AS-POINTER@ PUSH !HIDDEN?
+	.PRIMITIVE? 
+    .LABEL?	
+	BEGIN \ AS-SPC 
+	BL EMIT SPC
+\ CR ."DDD_" DUP WID. S3 SP@ H. TO BK
+	DIS-PI DIS-FI DIS-FR DIS-COMMA       >DEA \ TO NEXT IN LIST
+    DUP `IS-END RESULT? OR UNTIL DROP
+    RESULT? IF .DISS     \ Advances pointer past commaers
+      \ LATEST-INSTRUCTION @ >PRF @ BA-XT !
+      RDROP AS-POINTER@ ;THEN POP
+: SHOW-MEM  UNTILZ| CSTR . ."C,__" DUP I-ALIGNMENT UMOD ;
+
+: `D-F ( : FORCED-DISASSEMBLY )
+    !DISS   !TALLY   AS-POINTER@ SWAP `((DISASSEMBLE)) DROP ;
+>, >FILE \ DUMP OUTPUT TO FILE
+: `D-S ( DISASSEMBLE-STRING ) OVER+ \ !AS-SPC 
+: `D-R ( : DISASSEMBLE-RANGE ) SWAP |2DROP UNTIL|
+\ CR CR CR ."DISASSEMBLE-RANGE__" OVER H. ."-_" DUP H. CR
+  `(DISASSEMBLE) 2DUP  1+ U< ;
+
+: `CODE !TALLY CSP! ; 
+: `;CODE ?CSP CHECK26 CHECK32 ;
+
+\ : ADZAS  '\ TO AS-SPC
+\ PUSH PUSH POINTER2 AS-POINTER@ `D-R !AS-SPC POP POP ;
+\ ADR' ADZAS TO DZAS
+
+
+EXPORTED `SHOW-ALL SHOW-ALL
+EXPORTED `SHOW-PI  SHOW-PI 
+EXPORTED `SHOW-FR  SHOW-FR 
+EXPORTED `SHOW-FI  SHOW-FI 
+EXPORTED `SHOW-,   SHOW-, 
+EXPORTED `SHOW:    SHOW:
+EXPORTED `FSHOW    FSHOW
+EXPORTED `TB^      TB^
+EXPORTED `D-F      D-F
+EXPORTED `D-S      D-S
+EXPORTED `D-R      D-R
+EXPORTED `DDD      DDD
+EXPORTED `COMMAER  COMMAER
+EXPORTED `.COMMA-STANDARD .COMMA-STANDARD
+EXPORTED `|COMMA   |COMMA
+EXPORTED `.ADDRESS .ADDRESS
+EXPORTED `!HIDDEN? !HIDDEN?
+EXPORTED `1PI      1PI
+EXPORTED `2PI      2PI
+EXPORTED `1FI      1FI
+EXPORTED `1FR      1FR
+EXPORTED `CODE CODE
+EXPORTED `;CODE ;CODE
+EXPORTED `-END-    -END-
+\ 
+RETURN`
+PRUNEM

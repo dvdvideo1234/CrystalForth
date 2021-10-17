@@ -1,0 +1,64 @@
+' ' =: T'   : CLARY H OVER ERASE ALLOT ;
+: F: 0 1 VAL =: ;  
+: NEWT TVOC @ 
+\ CR ."HERE=_" HERE H. 
+\ DBG. 
+;;  : TCFND NEWT FND ;  : FX @R+ @R+ ! ;
+: INITO   FX SAME? TO (=:  FX vTARG VAL >, 
+: !IN-EGG 0 ,< 0 VALUE IN-EGG
+: `EXIST? ( A D A )  IF NIP  DUP  2+ DEC ;THEN RDROP
+\ CR ."NOT_EXIST>CREATE" DUP ID.
+\ DBG. 
+ <D>| (=: ;
+: NEWSAME? ( A D A" / RETA ) RDROP ( A D A" ) TCFND PUSH vague?
+  0= I 0= 0= AND !"DEFINED!" POP \ A D A F  FOUND AND NOT_vague
+  `EXIST? ( A A ) PUSH XR PUSH BEGIN I
+\ CR ."FIX_LIST" I H.
+\ DBG. 
+  WHILE I@ J POP ! PUSH REPEAT 2EXIT ;
+: TINIT  FX NEWSAME? TO (=:  FX NEWT VAL >, 1B TO IN-EGG ;
+
+: % LTIB PUSH FND?? DUP VAL T' SWAP 4+ POP TO LTIB SKIP 
+: %2 T' TINIT =: INITO ; 
+
+ 
+0 VAR `T_DATA    0 VALUE `T_HND     0 VAR `TOTAL
+CREATE `FILLEND Z, Z, Z,
+
+: TWRITE1     `T_DATA !     `T_DATA SWAP
+: TWRITE3 DUP   `TOTAL +!   `T_HND  Fwrite ;; 
+\ : TPRUNE      ESC      PRUNE     ESC ;
+: ADDZONE RANGE|
+: ADDBLK BLOCK 1K TWRITE3 ;
+: TSAVE  \ TPRUNE  
+ `TOTAL OFF 
+    TOKEN? FOPEN (  FCREATE ) 
+    TO `T_HND   
+    TBEG H OVER- TWRITE3  \ CODE
+    2 TVOC @  "--END--" TCFND N??  OVER- TWRITE1 \ T SIZE
+    TVOC @   `T_DATA @   TWRITE3               
+    `FILLEND 5 TWRITE3
+    `T_HND Fclose
+;
+
+0#> VAL INCLUDE ; ?:, TARAM :"TARAMPOL.CF" :, FURT :"FURTH1.CF"
+CREATE @MARK 4 CLARY
+: STOP IN-EGG 0; THOFS !HH @MARK @HH FREEMEM INITO  ;
+: START STOP  : EGG CR CR ."EGG_" 23000  @MARK !HH 
+  SETMEM  TARAM THOFS @HH  TINIT      FURT ;
+
+: ' TOKEN? TCFND N?? VAL T' ; 
+: TVAL ' 2+ , ;
+: TTO ' 2- , ; 
+: TAT ' 2- 2- , ;
+: TSEE  ' @SEE ;             
+: TWORDS  <D>| WORDS ; 
+: THIDE   <D>| HIDE ;
+: COM>0 ."LENGTH_=_" $100 - . ;
+: STAT? CR ."|BODY_" VAL' T@ COM>0 ."|CODE_" HERE COM>0
+  1K $100 + HERE - ."|BYTES_TO_ADD_=_" . CR
+;
+: WORD_THE_ONE '  \ =:
+ 12 ,  , Z, 2 C, '= C, ': C,  Z, Z, 0 C,  ;
+ 
+PRUNEM

@@ -1,0 +1,43 @@
+\ c2f_vfx.bld - C2Forth harness build file
+
+((
+Copyright (c) 2003, 2007, 2012
+MicroProcessor Engineering
+133 Hill Lane
+Southampton SO15 5AF
+England
+
+tel:   +44 (0)23 8063 1441
+fax:   +44 (0)23 8033 9691
+email: mpe@mpeforth.com
+       tech-support@mpeforth.com
+web:   http://www.mpeforth.com
+Skype: mpe_sfp
+
+From North America, our telephone and fax numbers are:
+       011 44 23 8063 1441
+       011 44 23 8033 9691
+       901 313 4312 (North American access number to UK office)
+
+
+To do
+=====
+
+Change history
+==============
+))
+
+decimal
+
+c" $C2FORTH" macroSet? 0= [if]		\ if no macro yet
+s" C2FORTH" envmacro: $c2forth		\ define it
+[then]
+
+include %$c2forth%/harness/c2f_core
+include %$c2forth%/lib/ctype
+include %$c2forth%/lib/errno
+include %$c2forth%/lib/stdio
+include %$c2forth%/lib/string
+include %$c2forth%/lib/stdlib
+include %$c2forth%/lib/assert
+include %$c2forth%/lib/conio

@@ -1,0 +1,7 @@
+0#> DUP PUSH 2@ U< 0" SET>" I@ @+ !R+ EXIT ;   \ @SET-
+1#> DUP PUSH @+ 2+ SWAP U< 0" >SET" I@ !- !R+ EXIT ; \ SET+!
+' (VAR3 3MAKER  `CLARYSET
+
+: !SET DUP 2+ @ SWAP! ;
+: SET# 2@ SWAP - 2/ ;
+

@@ -1,0 +1,732 @@
+H =: -START-  
+3 6 WIPES
+H OBJ  
+$0100 ORG   
+H 3000 ERASE
+
+=P (COLD   \ 12 -
+  MOVXI, SI| -706 ( ' ~FD3E ) IX, 
+  MOVXI, SP| -66 ( ' ~FFBE ) IX, 
+  CALL, L' @TROFF  RW,
+  CALL, L' @RET    RW, 
+
+  
+   L' @H>T   DA,  \ TOBE INIT
+=L @SYSLP    
+   L' @@EVAL DA,  \ TOBE EVAL
+   L' @BYE   DA,  
+=L @QUIT  
+   L' @BYE   DA,  \ TOBE @EVAL , EVAL
+   L' (JUMP  DA, 
+   L' @SYSLP DA,
+  
+=L @HI#   
+   L' (CON   DA, 
+=L @HINUM 0  DA, 
+=L @1+  
+   L' (@+;   DA, 
+=L @BYE   1  DA, 
+  
+=L @TRON  
+  L' (IO;    DA,  
+  SKIPR CX| 
+  JMPS,  L' @DBGDEF (RB,) \ DBGDEF HAS TO BE CALCULATED
+
+=L @TRSWCH 
+  XCHG, W| CX> /M/  L' @MAIN_LP  X, 
+  RET, 
+
+=P (TROFF;   \ 1 - 
+  CALL, L' @IO RW,
+
+=L @TROFF 
+  SKIPR CX| 
+  MOV, W| T| CX> D0/ /BX 
+  JMPS, ' @TRSWCH RB,
+
+=P (2PUSH;  \ 2 -
+  PUSHX, AX| 
+  LODS, W| 
+
+=P (PUSH;   \ 3 -
+  PUSHX, AX| 
+  NOP, 
+
+=P (DROP; 
+  LODS, W|   \ 4 -
+  SKIPA
+
+=P (@&;     \ 5 -
+  AND, W| T| AX> D0/ /BX 
+  JMPS, L' @RET RB,
+
+=P (2RDRP;  \ 6 -
+  POPX, CX| 
+  NOP, 
+
+=P (RDRP;   \ 7 -
+  POPX, CX| 
+  SKIPA
+
+=P (@+;     \ 8 - 
+  ADD, W| T| AX> D0/ /BX 
+  JMPS, L' @RET RB,
+
+=P (IF     \ 9 -
+  OR, W| T| AX> R| AX| 
+  J, Z| Y|  L' (FOR RB,
+  LODS, W| 
+  NOP, 
+
+=P (SKIP   \ 10 -
+
+=L @SKIP ( $0148 ) 
+  INCX, BX| 
+  INCX, BX| 
+  JMPS, L' @MAIN_LP RB, 
+
+=P (NEXT   \ 11 -
+  POPX, CX| 
+  DECX, CX| 
+  PUSHX, CX| 
+  JMPS, L' (IF- RB, 
+
+=L @>DBG 
+  JMP, 0 (RX,) 
+
+=P (IF-    \ 13 -
+  DECX, AX| 
+  J, S| Y|  ' @SKIP RB,
+  SKIPA
+
+=P (FOR    \ 14 -
+  PUSHX, AX| 
+  LODS, W| 
+
+=P (JUMP   \ 15 -
+  MOV, W| T| BX> D0/ /BX 
+  JMPS, L' @MAIN_LP RB, 
+
+=P (QARY   \ 16 -
+  SHL, 1| W| R| AX| 
+
+=P (LARY   \ 17 -
+  SHL, 1| W| R| AX| 
+
+=P (WARY   \ 18 -
+  SHL, 1| W| R| AX| 
+
+=P (BARY   \ 19 -
+  ADD, W| T| AX> R| BX| 
+
+=P (;      \ 20 -
+  JMPS,  L' @RET RB, 
+
+=P (POP;   \ 21 -
+  POPX, CX| 
+  POPX, BX| 
+  JMPS,  L' @PUSHW RB, 
+
+=P (!R+    \ 22 -
+  POPX, DI| 
+  STOS, W| 
+  PUSHX, DI| 
+  LODS, W| 
+  JMPS, L' @MAIN_LP RB, 
+
+=P (@R+    \ 23 -
+  POPX, DI| 
+  MOV, W| T| CX> D0/ /DI 
+  SCAS, W| 
+  PUSHX, DI| 
+
+=L @PUSHW 
+  DECX, SI| 
+  DECX, SI| 
+  MOV, W| F| AX> D0/ /SI 
+
+=L @XCHGW 
+  XCHGX, CX| 
+  JMPS, L' @MAIN_LP RB, 
+
+=P (XR     \ 24 -
+  POPX, CX| 
+  PUSHX, AX| 
+  JMPS, ' @XCHGW RB, 
+
+=P (XA     \ 25 -
+  POPX, DI| 
+  PUSHX, DX| 
+  MOV, W| T| DX> R| DI| 
+  JMPS, L' @MAIN_LP RB, 
+
+=P (EX     \ 26 -
+  POPX, CX| 
+  PUSHX, BX| 
+  PUSHX, CX| 
+
+=L @RET ( $0197 ) 
+  POPX, BX| 
+
+=P (NOP    \ 27
+
+=L @MAIN_LP ( $0198 ) 
+  MOV, W| T| CX> D0/ /BX 
+  
+' @>DBG HERE - =C @DBGDEF \ DEBUG FIX-ED
+
+  INCX, BX| 
+  INCX, BX| 
+  TESTI, B| R| CL| 1 ( ' ~0001 ) IB, 
+  J, Z| Y| ' (EX  RB, 
+  DECX, CX| 
+  JMPO, R| CX| 
+
+=P (IO;    \ 28 -
+  PUSHX, BX| 
+  MOV, W| T| DX> DB/ /SI 4 (SB,) 
+  MOV, W| T| CX> DB/ /SI 2 (SB,) 
+  MOV, W| T| BX> D0/ /SI 
+
+=L @IO
+  POPX, DI| 
+  CALLO, R| DI| 
+  JMPS, ' @RET  RB,
+
+=P (BE     \ 29
+  MOVBI, AH| $E  IB, 
+  INTI,  $10  IB, 
+
+=P (DROP   \ 30
+  JMPS, L' (PUSH RB,
+
+=P (PUSH   \ 31 -
+  PUSHX, AX| 
+  LODS, W| 
+  JMPS, ' @MAIN_LP RB,
+
+=P (J      \ 32
+  POPX, DI| 
+  POPX, CX| 
+  PUSHX, CX| 
+  PUSHX, DI| 
+  JMPS, ' @PUSHW RB,
+
+=P (A@     \ 33
+  PUSHX, DX| 
+  SKIPB
+
+=P (RP@    \ 34
+  PUSHX, SP| 
+  SKIPB
+
+=P (SP@    \ 35
+  PUSHX, SI| 
+  SKIPB
+
+=P (DUP    \ 36
+  PUSHX, AX| 
+  POPX, CX| 
+  JMPS, ' @PUSHW RB,
+
+=P (OVER   \ 37
+  PUSH, D0/ /SI 
+
+=P (POP    \ 38 -
+  JMPS, ' (DUP RB,
+
+=P (U<     \ 39
+  SUB, W| F| AX> D0/ /SI 
+  LODS, W| 
+  SKIPR CX| 
+
+=P (0<    \ 40
+  SHL, 1| W| R| AX| 
+  SBB, W| T| AX> R| AX| 
+  JMPS, ' @MAIN_LP RB,
+
+=P (-/     \ 41
+  SHL, 1| W| D0/ /SI 
+  RCL, 1| W| R| AX| 
+  CMP, W| T| AX> R| DX| 
+  J, C| Y|      L' @01E6 RB,
+  SUB, W| T| AX> R| DX| 
+
+=P (U1+    \ 42
+  INC, W| D0/ /SI 
+
+=L @01E6 ( $01E6 ) 
+  JMPS, ' @MAIN_LP RB,
+
+=P (+2/    \ 43
+  ADD, W| F| AX> D0/ /SI 
+  MOV, W| T| AX> D0/ /SI 
+
+=P (2/     \ 44
+  RCR, 1| W| R| AX| 
+  JMPS, ' @MAIN_LP RB,
+  
+=P (+*     \ 45
+  TESTI, W| D0/ /SI 1  IX, 
+  J, Z| Y| 2  (RB,) 
+  ADD, W| T| AX> R| DX| 
+
+=P (D2/    \ 46
+=L @D2/  
+  RCR, 1| W| R| AX| 
+  RCR, 1| W| D0/ /SI 
+  JMPS, ' @MAIN_LP RB,
+
+=P (NAND   \ 47
+  AND, W| F| AX> D0/ /SI 
+  LODS, W| 
+
+=L @NOT ( $0201 ) 
+  INCX, AX| 
+
+=P (NEG    \ 48
+  NEG, W| R| AX| 
+  JMPS, ' @MAIN_LP RB,
+
+=P (0=    \ 49
+  NEG, W| R| AX| 
+  SBB, W| T| AX> R| AX| 
+
+=P (NOT    \ 50
+  JMPS, ' @NOT RB,
+
+=L @OPTABLE 
+  L' @^NUM   DA, 
+  L' @'NUM   DA, 
+  L' @BASE#  DA, 
+  L' @BASE16 DA, 
+  L' @BASE8  DA, 
+  L' @BASE2  DA, 
+
+=L @OPCHARS ( $0218 ) 
+    ,"%&$#'"^"
+
+=L @GETSIGN? ( $021E ) \ 220
+  INCX, SI| 
+  J, Z| Y| L' @SETERR RB,
+  CMPI, B| D0/ X/S '- IB, 
+  J, Z| N| L' @0234 RB, 
+  INCX, SI| 
+  J, Z| Y| L' @SETERR RB,
+  POPX, DX| 
+  CALLO, R| DX| 
+  NOT, W| R| DI| 
+  NOT, W| R| BP| 
+  INCX, DI| 
+  J, Z| N| 1  (RB,) 
+  INCX, BP| 
+
+=L @0234 
+  RET, 
+
+=L @SETERR 
+  DECX, SI| 
+
+=L @GETRET  
+  POPX, DX| 
+  RET, 
+
+=L @BASE# 
+  XCHGX, DI| 
+
+=L @NUMINI 
+  XOR, W| T| DI> R| DI| 
+  XOR, W| T| BP> R| BP| 
+  SKIPA
+
+=L @BASE16 ( $023E ) 
+  MOVBI, AL| 16  IB, 
+  SKIPA
+
+=L @BASE8 ( $0241 ) 
+  MOVBI, AL| 8  IB, 
+  SKIPA
+
+=L @BASE2 ( $0244 ) 
+  MOVBI, AL| 2  IB, 
+  DECX, AX| 
+  DECX, AX| 
+  XOR, B| T| AH> R| AH| 
+  MOV, W| T| CX> R| AX| 
+  INCX, CX| 
+  INCX, CX| 
+
+=L @NORMAL 
+  CALL, ' @GETRET RW,
+  PUSHX, DI| 
+  MOVXI, DI| ' @OPCHARS IX, 
+  PUSHX, CX| 
+  MOVXI, CX| 6  IX, 
+  REP, 
+  SCAS, B| 
+  MOV, W| T| DI> R| CX| 
+  POPX, CX| 
+  J, Z| N|  L' @?DIGIT RB,
+  SHL, 1| W| R| DI| 
+  MOV, W| T| DX> DW/ /DI ' @OPTABLE  X, 
+  POPX, DI| 
+  INCX, SI| 
+  J, Z| Y|  ' @SETERR RB,
+  DECX, SI| 
+  JMPO, R| DX| 
+
+=L @?DIGIT 
+  POPX, DI| 
+  CMPAI, B| ': IB, 
+  J, C| Y|  L' @ASC>NUM RB,
+  CMPAI, B| 'A IB, 
+  J, C| Y|  ' @SETERR RB,
+  SUBAI, B| 7  IB, 
+
+=L @ASC>NUM 
+  SUBAI, B|  '0 IB, 
+  J, C| Y| ' @SETERR RB,
+  CMP, W| T| AX> R| CX| 
+  J, C| N| ' @SETERR RB,
+
+=L @CONV+ 
+  XCHGX, BP| 
+  MUL, W| R| CX| 
+  XCHGX, BP| 
+  XCHGX, DI| 
+  MUL, W| R| CX| 
+  XCHGX, DI| 
+  ADD, W| T| DI> R| AX| 
+  ADC, W| T| BP> R| DX| 
+  JMPS, ' @NORMAL RB,
+
+=L @'NUM 
+  CALL, ' @GETRET RW, 
+  JMPS, ' @CONV+  RB, 
+
+=L @^NUM 
+  CALL,   ' @GETRET RW, 
+  ANDAI,  B| $1F IB, 
+  JMPS,   ' @CONV+ RB,
+
+=L @CONVERT 
+  MOVBI, AL| 10 IB, 
+  CALL, ' @GETSIGN? RW, 
+  CALL, ' @NUMINI   RW, 
+=L @CONVLP 
+  MOV, B| T| AL> D0/ X/S 
+  CALLO, R| DX| 
+  INCX, SI| 
+  J, Z| N|   ' @CONVLP  RB, 
+  RET, 
+
+: @S>NUM IO; 
+  PUSHX, BP| 
+  PUSHX, SI| 
+  XCHGX, SI| 
+  LEA, BX> D0/ X/S 
+  NOT, W| R| SI| 
+  CALL, ' @CONVERT RW, 
+  MOV, W| F| BP> /M/ ' @HINUM  X, 
+  XCHGX, SI| 
+  POPX, SI| 
+  POPX, BP| 
+  MOV, W| F| DI> D0/ /SI 
+  RET, 
+
+=P (BR INT3,  
+\ =L @TO-MAIN
+  JMP,  ' @MAIN_LP  RW,
+  
+=P (C!R+   \ 51 -
+  POPX, DI|
+  STOS, B|
+  PUSHX, DI|
+  SKIPB
+  
+=P (A!
+  XCHGX, DX|
+  LODS, W|
+  JMPS, ' (BR  RB,
+
+=P (C@A+   \ 52
+  MOV, W| T| R| DI> DX|
+  INCX, DX|
+=L @CSTR)  
+  DECX, SI| 
+  DECX, SI| 
+  MOV, W| F| D0/ AX> /SI 
+  SKIPB 
+
+=P (C@     \ 55
+  XCHGX, DI|
+  MOV, B| D0/ T| AL> /DI
+=P (W>B    \ 53
+  MOVBI, AH| 0 IB,
+  JMPS, ' (BR  RB,
+   
+=P (CSTR   \ 54
+  MOV, W| T| R| DI> AX|
+  INCX, AX|
+  JMPS, ' @CSTR) RB,
+ALIGNED  
+
+=L @FINDER ( $06EA ) 
+  POPX, DX| 
+  XOR, W| T| CX> R| CX| 
+=L @FNDLP 
+  ADD, W| T| AX> R| CX| 
+  MOV, W| T| DI> R| AX| 
+  LEA, DI> DB/ /DI 4 (SB,) 
+  MOV, B| T| CL> D0/ /DI 
+  JCXZ,      L' @EXFND RB, 
+  INCX, CX| 
+  CALLO, R| DX| 
+  XCHGX, DI| 
+  J, Z| N|   ' @FNDLP RB, 
+  MOVBI, CL| 2  IB, 
+  ADD, W| F| CX> DB/ /DI 2 (SB,) 
+  MOV, W| F| DI> D0/ /SI 
+=L @EXFND ( $0705 ) 
+  MOV, W| T| AX> R| CX| 
+  RET, 
+
+ALIGNED  
+
+: @WFIND IO; 
+  CALL, ' @FINDER RW, 
+  CMP, W| T| BX> DB/ /DI -4 (SB,) 
+  RET, 
+ALIGNED  
+
+\ EXTENDED
+
+\ : @BK DUP IO;
+\   MOVBI, AH| 0 IB,
+\   INTI, $16 IB,
+\   CMPAI, B| 0 IB,
+\   J, Z| Y| 2 (RB,)
+\   MOVBI, AH| 0 IB,
+\   RET,
+\ ALIGNED  
+\ 
+\ : @DOS IO; 
+\   INTI, 33 ( ' ~0021 ) IB, 
+\   MOV, W| F| BX> D0/ /SI 
+\   MOV, W| F| CX> DB/ /SI 2 (SB,) 
+\   MOV, W| F| DX> DB/ /SI 4 (SB,) 
+\   PUSHF, 
+\   DECX, SI| 
+\   DECX, SI| 
+\   MOV, W| F| AX> D0/ /SI 
+\   POPX, AX| 
+\   RET, 
+ALIGNED  
+
+
+\ HI PRIMITIVES
+
+: @(LIT
+: (#  @R+   
+: @NOP ;  
+: @(D#0
+: (D#0 POP XR ;   \ DOES_0 PRIMITIVE METHOD
+: @RANGE>S @1+ 
+: @OVER-  OVER
+: @- NEG SKIP
+: @2*  DUP   
+: @+ (+2/  
+: @DROP (DROP; ,<
+: @(D#1
+: (D#1 POP XR     \ DOES_1 PRIMITIVE METHOD
+: @2+ (@+; ,< 2 , 
+: @(!| EX SKIP
+: @(SET2
+: (SET2  (D#1   
+: @!  PUSH 
+: @POP!; !R+  (RDRP; 
+: @SWAP| EX
+: @SWAP PUSH  XR (POP;
+: @STR @SWAP|
+: @@+  PUSH   @R+ (POP; 
+: @(VAR2 
+: (VAR2 (D#1 ;;
+: @@    PUSH    
+: @(CON
+: (CON  @R+ 
+: @EXIT (RDRP; 
+: @(XARY  @2* POP  @+ 
+: @EXEC  @@ 
+: @EXECUTE (PUSH; ,<
+: @|DROP EX (DROP;
+: @(RNG| @RANGE>S
+: @STR|   XR POP 
+: @.TIMES @|DROP 
+: @TIMES  PUSH XR  
+: @TIMES| FOR J @EXECUTE NEXT ,< UNW >,
+: @2EXIT (2RDRP; ; UNW 
+\ : @EMIT (BE ;
+\ : @WAIT @EMIT @BK @DROP ;
+
+\ VARIABLES
+
+:  @LOCATOR  POP @(!| (VAR2 
+:  @LOXEC (JUMP ,<
+L'  @INTERP  DW,  \ FIX-ED  LOCATE ABD EXECUTE
+1K 31 U* $100 - |VALUE  @|LTIB @LTIB 
+1K 32 U*  VALUE   @ETIB
+0      |VALUE  @|H   @H  UNW  L' @ENDMEM DW,
+: @|T CALL EX @(!| (VAR2 THEN ,<
+$D800   CONST @T
+0       VALUE @ERROR
+' @T 2+ VALUE @TINT
+$F800   CONST @TBUF
+0       CONST @0
+32      CONST @BL
+: @<M> CALL @|H (SET2 THEN ,<
+$D800 CONST @MOBJ 
+
+
+:  @(@,  (D#0
+:  @~@,  ( LASTH! ) @NOP  @@ 
+:  @~,  @|H 
+:  @!+  PUSH !R+ (POP; 
+:  @,;   @(@, ;; 
+: @STR^ (CSTR  @+   \ AFTER END OF STRING
+: @ALIGN @1+  
+: @EVEN  (@&; ,< -2 ,
+: @("SKIP J POP POP @STR^ (2PUSH; 
+: @0<>;  0=   
+: @0;    IF ? @EXIT ;; 
+: @(;"   @0      \ ALWAYS ERROR  \ NOT RETURN
+: @(0"   0=   \ ONZERO ERROR
+: @(!" @("SKIP TO @ERROR @0; (COLD 
+: @|N?? EX   
+: @N??  0=  
+: @??  @(!" ,< :"?" >, ;; ,<
+
+\
+
+: @">NUM (CSTR @S>NUM  @?? ;
+: @">NUMC  @">NUM ,<   ' @BYE  DEFER @vLIT, \ TODO FIX
+\
+: @H>T  @H  @STR @|T 
+: @MPUSH  IO;
+  XCHGX, DI| 
+  LODS, W| 
+  XCHGX, CX| 
+  LODS, W| 
+=L @MOVE> 
+  XCHGX, SI| 
+  PUSHX, CX| 
+  ADD, W| T| SI> R| CX| 
+  STD, 
+  COMPS, B| 
+  REPZ, 
+  MOVS, B| 
+  CLD, 
+  POPX, CX| 
+  XCHGX, SI| 
+  MOV, B| F| CL> D0/ /DI
+  XCHGX, DI| 
+  INCX, AX| 
+  RET, 
+ALIGNED  
+
+: @TOKEN?   @|N??
+: @TOKEN  @BL  CALL  ( TOKENIZER )
+: @?C@ (DUP  
+: @C@ (C@ ;THEN
+: @WORD  CALL  
+: @S>TB! @TBUF 
+: @S>"!   IO;
+  XCHGX, DI| 
+  LODS, W| 
+  XCHGX, CX| 
+  LODS, W| 
+  MOVBI,    CH|      0  IB, 
+  ADD, W| T| DI> R| CX| 
+  INCX, DI| 
+  MOVI, B| D0/ /DI   '` IB, 
+  CALL, ' @MOVE> RW,
+  DECX, AX| 
+  RET, 
+ALIGNED  
+  
+>, THEN    
+: @PARSE  ( SOURCE ) @NOP @ETIB @|LTIB  IO; 
+  XCHGX, CX| 
+  MOV, W| T| DI> R| BX| 
+  JCXZ, 12   L' @06AD RB, 
+  SUB, W| T| DI> R| CX| 
+  CMPAI, B|  32  IB, 
+  J, Z| N|   L' @06AD RB, 
+  REPZ, 
+  SCAS, B| 
+  J, Z| Y|   L' @06AD RB, 
+  DECX, DI| 
+  INCX, CX| 
+=L @06AD 
+  MOV, W| F| DI> DB/ /SI 2 (SB,) 
+  JCXZ,      L' @06B7 RB, 
+  REP, 
+  SCAS, B| 
+  J, Z| N|   L' @06B7 RB,
+  DECX, DI| 
+=L @06B7     ( $06B7 ) 
+  SUB, W| T| DI> DB/ /SI 2 (SB,) 
+  MOV, W| F| DI> D0/ /SI 
+  XCHGX, CX| 
+  RET, 
+	  
+: @: (  @CSP! ) @NOP ,< L' @>, DA, >,
+: @:!   @NOP \ HERE  @ODD?? LASTH!  
+: @=H ( HERE )  @H                       
+: @=: @0 @TOKEN?  ( SAME? )  @NOP
+: @(=:   @?C@ @1+ @|T @MPUSH TWICE|
+: @!-    CALL  @!+ THEN
+: @2- (@+; ,< -2 ,
+
+      \ FUNCTION EVAL  & EXECUTE MACRO 
+: @|OP EX  @(XARY   @">NUM  @">NUMC  @EXEC  @~@, ,< 
+: @(MAC (D#0 @NOP
+: @SEVAL (CSTR 
+: @EVAL   @NOP  SKIP BEGIN @LOXEC   \ EVAL  @MEMTI|
+: @@EVAL  @NOP  @TOKEN  0=  UNTIL (DROP; ,< \ @EVAL   @STACK 
+
+      \   INTERPRETTER 
+:  @;`  @,;  : @,<  @LOCATOR : @INTERP @|OP @TINT @@
+: @FND IO;
+=L @@FND ( $06E0 ) 
+  CALL, ' @FINDER RW, 
+  PUSHX, SI| 
+  MOV, W| T| SI> R| BX| 
+  REPZ, 
+  COMPS, B| 
+  POPX, SI| 
+  RET, 
+ALIGNED  
+
+      \   COMPILER      
+: @>, @LOCATOR @|OP @T 
+: @CFND IO; 
+  PUSHX, AX| 
+  INC, B| D0/ /BX 
+  CALL, ' @@FND RW, 
+  DEC, B| D0/ /BX 
+  POPX, DX| 
+  JCXZ,      L' @EXFND2 RB,   
+  RET, 
+=L @EXFND2  
+  XCHGX, DX| 
+  CALL, ' @@FND RW, 
+  INCX, AX| 
+  RET,   
+ALIGNED  
+\ : @' TOKEN?  AT @FND @N?? ;
+
+=L  @ENDMEM
+12 , ' @=: , 0 , :=:" UNB 1 , 0 , 0 C, \ FIX  THE NAME
+
+
+  

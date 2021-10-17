@@ -1,0 +1,1024 @@
+ ADD, W| T| DI> /M/ 10 X, 
+ ADD, W| T| DI> R| DI| 
+ ADD, W| T| DI> R| SI| 
+ ADD, W| T| DI> R| BP| 
+ ADD, W| T| DI> R| SP| 
+ ADD, W| T| DI> R| BX| 
+ ADD, W| T| DI> R| DX| 
+ ADD, W| T| DI> R| CX| 
+ ADD, W| T| DI> R| AX| 
+ ADD, W| T| DI> DW/ /BP 12 X, 
+ ADD, W| T| DI> DW/ /BX 12 X, 
+ ADD, W| T| DI> DW/ /DI 12 X, 
+ ADD, W| T| DI> DW/ /SI 12 X, 
+ ADD, W| T| DI> DW/ P/D 12 X, 
+ ADD, W| T| DI> DW/ P/S 12 X, 
+ ADD, W| T| DI> DW/ X/D 12 X, 
+ ADD, W| T| DI> DW/ X/S 12 X, 
+ ADD, W| T| DI> DB/ /BP 12 (SB,) 
+ ADD, W| T| DI> DB/ /BX 12 (SB,) 
+ ADD, W| T| DI> DB/ /DI 12 (SB,) 
+ ADD, W| T| DI> DB/ /SI 12 (SB,) 
+ ADD, W| T| DI> DB/ P/D 12 (SB,) 
+ ADD, W| T| DI> DB/ P/S 12 (SB,) 
+ ADD, W| T| DI> DB/ X/D 12 (SB,) 
+ ADD, W| T| DI> DB/ X/S 12 (SB,) 
+ ADD, W| T| DI> D0/ /BX 
+ ADD, W| T| DI> D0/ /DI 
+ ADD, W| T| DI> D0/ /SI 
+ ADD, W| T| DI> D0/ P/D 
+ ADD, W| T| DI> D0/ P/S 
+ ADD, W| T| DI> D0/ X/D 
+ ADD, W| T| DI> D0/ X/S 
+ ADD, W| T| SI> /M/ 10 X, 
+ ADD, W| T| SI> R| DI| 
+ ADD, W| T| SI> R| SI| 
+ ADD, W| T| SI> R| BP| 
+ ADD, W| T| SI> R| SP| 
+ ADD, W| T| SI> R| BX| 
+ ADD, W| T| SI> R| DX| 
+ ADD, W| T| SI> R| CX| 
+ ADD, W| T| SI> R| AX| 
+ ADD, W| T| SI> DW/ /BP 12 X, 
+ ADD, W| T| SI> DW/ /BX 12 X, 
+ ADD, W| T| SI> DW/ /DI 12 X, 
+ ADD, W| T| SI> DW/ /SI 12 X, 
+ ADD, W| T| SI> DW/ P/D 12 X, 
+ ADD, W| T| SI> DW/ P/S 12 X, 
+ ADD, W| T| SI> DW/ X/D 12 X, 
+ ADD, W| T| SI> DW/ X/S 12 X, 
+ ADD, W| T| SI> DB/ /BP 12 (SB,) 
+ ADD, W| T| SI> DB/ /BX 12 (SB,) 
+ ADD, W| T| SI> DB/ /DI 12 (SB,) 
+ ADD, W| T| SI> DB/ /SI 12 (SB,) 
+ ADD, W| T| SI> DB/ P/D 12 (SB,) 
+ ADD, W| T| SI> DB/ P/S 12 (SB,) 
+ ADD, W| T| SI> DB/ X/D 12 (SB,) 
+ ADD, W| T| SI> DB/ X/S 12 (SB,) 
+ ADD, W| T| SI> D0/ /BX 
+ ADD, W| T| SI> D0/ /DI 
+ ADD, W| T| SI> D0/ /SI 
+ ADD, W| T| SI> D0/ P/D 
+ ADD, W| T| SI> D0/ P/S 
+ ADD, W| T| SI> D0/ X/D 
+ ADD, W| T| SI> D0/ X/S 
+ ADD, W| T| BP> /M/ 10 X, 
+ ADD, W| T| BP> R| DI| 
+ ADD, W| T| BP> R| SI| 
+ ADD, W| T| BP> R| BP| 
+ ADD, W| T| BP> R| SP| 
+ ADD, W| T| BP> R| BX| 
+ ADD, W| T| BP> R| DX| 
+ ADD, W| T| BP> R| CX| 
+ ADD, W| T| BP> R| AX| 
+ ADD, W| T| BP> DW/ /BP 12 X, 
+ ADD, W| T| BP> DW/ /BX 12 X, 
+ ADD, W| T| BP> DW/ /DI 12 X, 
+ ADD, W| T| BP> DW/ /SI 12 X, 
+ ADD, W| T| BP> DW/ P/D 12 X, 
+ ADD, W| T| BP> DW/ P/S 12 X, 
+ ADD, W| T| BP> DW/ X/D 12 X, 
+ ADD, W| T| BP> DW/ X/S 12 X, 
+ ADD, W| T| BP> DB/ /BP 12 (SB,) 
+ ADD, W| T| BP> DB/ /BX 12 (SB,) 
+ ADD, W| T| BP> DB/ /DI 12 (SB,) 
+ ADD, W| T| BP> DB/ /SI 12 (SB,) 
+ ADD, W| T| BP> DB/ P/D 12 (SB,) 
+ ADD, W| T| BP> DB/ P/S 12 (SB,) 
+ ADD, W| T| BP> DB/ X/D 12 (SB,) 
+ ADD, W| T| BP> DB/ X/S 12 (SB,) 
+ ADD, W| T| BP> D0/ /BX 
+ ADD, W| T| BP> D0/ /DI 
+ ADD, W| T| BP> D0/ /SI 
+ ADD, W| T| BP> D0/ P/D 
+ ADD, W| T| BP> D0/ P/S 
+ ADD, W| T| BP> D0/ X/D 
+ ADD, W| T| BP> D0/ X/S 
+ ADD, W| T| SP> /M/ 10 X, 
+ ADD, W| T| SP> R| DI| 
+ ADD, W| T| SP> R| SI| 
+ ADD, W| T| SP> R| BP| 
+ ADD, W| T| SP> R| SP| 
+ ADD, W| T| SP> R| BX| 
+ ADD, W| T| SP> R| DX| 
+ ADD, W| T| SP> R| CX| 
+ ADD, W| T| SP> R| AX| 
+ ADD, W| T| SP> DW/ /BP 12 X, 
+ ADD, W| T| SP> DW/ /BX 12 X, 
+ ADD, W| T| SP> DW/ /DI 12 X, 
+ ADD, W| T| SP> DW/ /SI 12 X, 
+ ADD, W| T| SP> DW/ P/D 12 X, 
+ ADD, W| T| SP> DW/ P/S 12 X, 
+ ADD, W| T| SP> DW/ X/D 12 X, 
+ ADD, W| T| SP> DW/ X/S 12 X, 
+ ADD, W| T| SP> DB/ /BP 12 (SB,) 
+ ADD, W| T| SP> DB/ /BX 12 (SB,) 
+ ADD, W| T| SP> DB/ /DI 12 (SB,) 
+ ADD, W| T| SP> DB/ /SI 12 (SB,) 
+ ADD, W| T| SP> DB/ P/D 12 (SB,) 
+ ADD, W| T| SP> DB/ P/S 12 (SB,) 
+ ADD, W| T| SP> DB/ X/D 12 (SB,) 
+ ADD, W| T| SP> DB/ X/S 12 (SB,) 
+ ADD, W| T| SP> D0/ /BX 
+ ADD, W| T| SP> D0/ /DI 
+ ADD, W| T| SP> D0/ /SI 
+ ADD, W| T| SP> D0/ P/D 
+ ADD, W| T| SP> D0/ P/S 
+ ADD, W| T| SP> D0/ X/D 
+ ADD, W| T| SP> D0/ X/S 
+ ADD, W| T| BX> /M/ 10 X, 
+ ADD, W| T| BX> R| DI| 
+ ADD, W| T| BX> R| SI| 
+ ADD, W| T| BX> R| BP| 
+ ADD, W| T| BX> R| SP| 
+ ADD, W| T| BX> R| BX| 
+ ADD, W| T| BX> R| DX| 
+ ADD, W| T| BX> R| CX| 
+ ADD, W| T| BX> R| AX| 
+ ADD, W| T| BX> DW/ /BP 12 X, 
+ ADD, W| T| BX> DW/ /BX 12 X, 
+ ADD, W| T| BX> DW/ /DI 12 X, 
+ ADD, W| T| BX> DW/ /SI 12 X, 
+ ADD, W| T| BX> DW/ P/D 12 X, 
+ ADD, W| T| BX> DW/ P/S 12 X, 
+ ADD, W| T| BX> DW/ X/D 12 X, 
+ ADD, W| T| BX> DW/ X/S 12 X, 
+ ADD, W| T| BX> DB/ /BP 12 (SB,) 
+ ADD, W| T| BX> DB/ /BX 12 (SB,) 
+ ADD, W| T| BX> DB/ /DI 12 (SB,) 
+ ADD, W| T| BX> DB/ /SI 12 (SB,) 
+ ADD, W| T| BX> DB/ P/D 12 (SB,) 
+ ADD, W| T| BX> DB/ P/S 12 (SB,) 
+ ADD, W| T| BX> DB/ X/D 12 (SB,) 
+ ADD, W| T| BX> DB/ X/S 12 (SB,) 
+ ADD, W| T| BX> D0/ /BX 
+ ADD, W| T| BX> D0/ /DI 
+ ADD, W| T| BX> D0/ /SI 
+ ADD, W| T| BX> D0/ P/D 
+ ADD, W| T| BX> D0/ P/S 
+ ADD, W| T| BX> D0/ X/D 
+ ADD, W| T| BX> D0/ X/S 
+ ADD, W| T| DX> /M/ 10 X, 
+ ADD, W| T| DX> R| DI| 
+ ADD, W| T| DX> R| SI| 
+ ADD, W| T| DX> R| BP| 
+ ADD, W| T| DX> R| SP| 
+ ADD, W| T| DX> R| BX| 
+ ADD, W| T| DX> R| DX| 
+ ADD, W| T| DX> R| CX| 
+ ADD, W| T| DX> R| AX| 
+ ADD, W| T| DX> DW/ /BP 12 X, 
+ ADD, W| T| DX> DW/ /BX 12 X, 
+ ADD, W| T| DX> DW/ /DI 12 X, 
+ ADD, W| T| DX> DW/ /SI 12 X, 
+ ADD, W| T| DX> DW/ P/D 12 X, 
+ ADD, W| T| DX> DW/ P/S 12 X, 
+ ADD, W| T| DX> DW/ X/D 12 X, 
+ ADD, W| T| DX> DW/ X/S 12 X, 
+ ADD, W| T| DX> DB/ /BP 12 (SB,) 
+ ADD, W| T| DX> DB/ /BX 12 (SB,) 
+ ADD, W| T| DX> DB/ /DI 12 (SB,) 
+ ADD, W| T| DX> DB/ /SI 12 (SB,) 
+ ADD, W| T| DX> DB/ P/D 12 (SB,) 
+ ADD, W| T| DX> DB/ P/S 12 (SB,) 
+ ADD, W| T| DX> DB/ X/D 12 (SB,) 
+ ADD, W| T| DX> DB/ X/S 12 (SB,) 
+ ADD, W| T| DX> D0/ /BX 
+ ADD, W| T| DX> D0/ /DI 
+ ADD, W| T| DX> D0/ /SI 
+ ADD, W| T| DX> D0/ P/D 
+ ADD, W| T| DX> D0/ P/S 
+ ADD, W| T| DX> D0/ X/D 
+ ADD, W| T| DX> D0/ X/S 
+ ADD, W| T| CX> /M/ 10 X, 
+ ADD, W| T| CX> R| DI| 
+ ADD, W| T| CX> R| SI| 
+ ADD, W| T| CX> R| BP| 
+ ADD, W| T| CX> R| SP| 
+ ADD, W| T| CX> R| BX| 
+ ADD, W| T| CX> R| DX| 
+ ADD, W| T| CX> R| CX| 
+ ADD, W| T| CX> R| AX| 
+ ADD, W| T| CX> DW/ /BP 12 X, 
+ ADD, W| T| CX> DW/ /BX 12 X, 
+ ADD, W| T| CX> DW/ /DI 12 X, 
+ ADD, W| T| CX> DW/ /SI 12 X, 
+ ADD, W| T| CX> DW/ P/D 12 X, 
+ ADD, W| T| CX> DW/ P/S 12 X, 
+ ADD, W| T| CX> DW/ X/D 12 X, 
+ ADD, W| T| CX> DW/ X/S 12 X, 
+ ADD, W| T| CX> DB/ /BP 12 (SB,) 
+ ADD, W| T| CX> DB/ /BX 12 (SB,) 
+ ADD, W| T| CX> DB/ /DI 12 (SB,) 
+ ADD, W| T| CX> DB/ /SI 12 (SB,) 
+ ADD, W| T| CX> DB/ P/D 12 (SB,) 
+ ADD, W| T| CX> DB/ P/S 12 (SB,) 
+ ADD, W| T| CX> DB/ X/D 12 (SB,) 
+ ADD, W| T| CX> DB/ X/S 12 (SB,) 
+ ADD, W| T| CX> D0/ /BX 
+ ADD, W| T| CX> D0/ /DI 
+ ADD, W| T| CX> D0/ /SI 
+ ADD, W| T| CX> D0/ P/D 
+ ADD, W| T| CX> D0/ P/S 
+ ADD, W| T| CX> D0/ X/D 
+ ADD, W| T| CX> D0/ X/S 
+ ADD, W| T| AX> /M/ 10 X, 
+ ADD, W| T| AX> R| DI| 
+ ADD, W| T| AX> R| SI| 
+ ADD, W| T| AX> R| BP| 
+ ADD, W| T| AX> R| SP| 
+ ADD, W| T| AX> R| BX| 
+ ADD, W| T| AX> R| DX| 
+ ADD, W| T| AX> R| CX| 
+ ADD, W| T| AX> R| AX| 
+ ADD, W| T| AX> DW/ /BP 12 X, 
+ ADD, W| T| AX> DW/ /BX 12 X, 
+ ADD, W| T| AX> DW/ /DI 12 X, 
+ ADD, W| T| AX> DW/ /SI 12 X, 
+ ADD, W| T| AX> DW/ P/D 12 X, 
+ ADD, W| T| AX> DW/ P/S 12 X, 
+ ADD, W| T| AX> DW/ X/D 12 X, 
+ ADD, W| T| AX> DW/ X/S 12 X, 
+ ADD, W| T| AX> DB/ /BP 12 (SB,) 
+ ADD, W| T| AX> DB/ /BX 12 (SB,) 
+ ADD, W| T| AX> DB/ /DI 12 (SB,) 
+ ADD, W| T| AX> DB/ /SI 12 (SB,) 
+ ADD, W| T| AX> DB/ P/D 12 (SB,) 
+ ADD, W| T| AX> DB/ P/S 12 (SB,) 
+ ADD, W| T| AX> DB/ X/D 12 (SB,) 
+ ADD, W| T| AX> DB/ X/S 12 (SB,) 
+ ADD, W| T| AX> D0/ /BX 
+ ADD, W| T| AX> D0/ /DI 
+ ADD, W| T| AX> D0/ /SI 
+ ADD, W| T| AX> D0/ P/D 
+ ADD, W| T| AX> D0/ P/S 
+ ADD, W| T| AX> D0/ X/D 
+ ADD, W| T| AX> D0/ X/S 
+ ADD, W| F| DI> /M/ 10 X, 
+ ADD, W| F| DI> R| DI| 
+ ADD, W| F| DI> R| SI| 
+ ADD, W| F| DI> R| BP| 
+ ADD, W| F| DI> R| SP| 
+ ADD, W| F| DI> R| BX| 
+ ADD, W| F| DI> R| DX| 
+ ADD, W| F| DI> R| CX| 
+ ADD, W| F| DI> R| AX| 
+ ADD, W| F| DI> DW/ /BP 12 X, 
+ ADD, W| F| DI> DW/ /BX 12 X, 
+ ADD, W| F| DI> DW/ /DI 12 X, 
+ ADD, W| F| DI> DW/ /SI 12 X, 
+ ADD, W| F| DI> DW/ P/D 12 X, 
+ ADD, W| F| DI> DW/ P/S 12 X, 
+ ADD, W| F| DI> DW/ X/D 12 X, 
+ ADD, W| F| DI> DW/ X/S 12 X, 
+ ADD, W| F| DI> DB/ /BP 12 (SB,) 
+ ADD, W| F| DI> DB/ /BX 12 (SB,) 
+ ADD, W| F| DI> DB/ /DI 12 (SB,) 
+ ADD, W| F| DI> DB/ /SI 12 (SB,) 
+ ADD, W| F| DI> DB/ P/D 12 (SB,) 
+ ADD, W| F| DI> DB/ P/S 12 (SB,) 
+ ADD, W| F| DI> DB/ X/D 12 (SB,) 
+ ADD, W| F| DI> DB/ X/S 12 (SB,) 
+ ADD, W| F| DI> D0/ /BX 
+ ADD, W| F| DI> D0/ /DI 
+ ADD, W| F| DI> D0/ /SI 
+ ADD, W| F| DI> D0/ P/D 
+ ADD, W| F| DI> D0/ P/S 
+ ADD, W| F| DI> D0/ X/D 
+ ADD, W| F| DI> D0/ X/S 
+ ADD, W| F| SI> /M/ 10 X, 
+ ADD, W| F| SI> R| DI| 
+ ADD, W| F| SI> R| SI| 
+ ADD, W| F| SI> R| BP| 
+ ADD, W| F| SI> R| SP| 
+ ADD, W| F| SI> R| BX| 
+ ADD, W| F| SI> R| DX| 
+ ADD, W| F| SI> R| CX| 
+ ADD, W| F| SI> R| AX| 
+ ADD, W| F| SI> DW/ /BP 12 X, 
+ ADD, W| F| SI> DW/ /BX 12 X, 
+ ADD, W| F| SI> DW/ /DI 12 X, 
+ ADD, W| F| SI> DW/ /SI 12 X, 
+ ADD, W| F| SI> DW/ P/D 12 X, 
+ ADD, W| F| SI> DW/ P/S 12 X, 
+ ADD, W| F| SI> DW/ X/D 12 X, 
+ ADD, W| F| SI> DW/ X/S 12 X, 
+ ADD, W| F| SI> DB/ /BP 12 (SB,) 
+ ADD, W| F| SI> DB/ /BX 12 (SB,) 
+ ADD, W| F| SI> DB/ /DI 12 (SB,) 
+ ADD, W| F| SI> DB/ /SI 12 (SB,) 
+ ADD, W| F| SI> DB/ P/D 12 (SB,) 
+ ADD, W| F| SI> DB/ P/S 12 (SB,) 
+ ADD, W| F| SI> DB/ X/D 12 (SB,) 
+ ADD, W| F| SI> DB/ X/S 12 (SB,) 
+ ADD, W| F| SI> D0/ /BX 
+ ADD, W| F| SI> D0/ /DI 
+ ADD, W| F| SI> D0/ /SI 
+ ADD, W| F| SI> D0/ P/D 
+ ADD, W| F| SI> D0/ P/S 
+ ADD, W| F| SI> D0/ X/D 
+ ADD, W| F| SI> D0/ X/S 
+ ADD, W| F| BP> /M/ 10 X, 
+ ADD, W| F| BP> R| DI| 
+ ADD, W| F| BP> R| SI| 
+ ADD, W| F| BP> R| BP| 
+ ADD, W| F| BP> R| SP| 
+ ADD, W| F| BP> R| BX| 
+ ADD, W| F| BP> R| DX| 
+ ADD, W| F| BP> R| CX| 
+ ADD, W| F| BP> R| AX| 
+ ADD, W| F| BP> DW/ /BP 12 X, 
+ ADD, W| F| BP> DW/ /BX 12 X, 
+ ADD, W| F| BP> DW/ /DI 12 X, 
+ ADD, W| F| BP> DW/ /SI 12 X, 
+ ADD, W| F| BP> DW/ P/D 12 X, 
+ ADD, W| F| BP> DW/ P/S 12 X, 
+ ADD, W| F| BP> DW/ X/D 12 X, 
+ ADD, W| F| BP> DW/ X/S 12 X, 
+ ADD, W| F| BP> DB/ /BP 12 (SB,) 
+ ADD, W| F| BP> DB/ /BX 12 (SB,) 
+ ADD, W| F| BP> DB/ /DI 12 (SB,) 
+ ADD, W| F| BP> DB/ /SI 12 (SB,) 
+ ADD, W| F| BP> DB/ P/D 12 (SB,) 
+ ADD, W| F| BP> DB/ P/S 12 (SB,) 
+ ADD, W| F| BP> DB/ X/D 12 (SB,) 
+ ADD, W| F| BP> DB/ X/S 12 (SB,) 
+ ADD, W| F| BP> D0/ /BX 
+ ADD, W| F| BP> D0/ /DI 
+ ADD, W| F| BP> D0/ /SI 
+ ADD, W| F| BP> D0/ P/D 
+ ADD, W| F| BP> D0/ P/S 
+ ADD, W| F| BP> D0/ X/D 
+ ADD, W| F| BP> D0/ X/S 
+ ADD, W| F| SP> /M/ 10 X, 
+ ADD, W| F| SP> R| DI| 
+ ADD, W| F| SP> R| SI| 
+ ADD, W| F| SP> R| BP| 
+ ADD, W| F| SP> R| SP| 
+ ADD, W| F| SP> R| BX| 
+ ADD, W| F| SP> R| DX| 
+ ADD, W| F| SP> R| CX| 
+ ADD, W| F| SP> R| AX| 
+ ADD, W| F| SP> DW/ /BP 12 X, 
+ ADD, W| F| SP> DW/ /BX 12 X, 
+ ADD, W| F| SP> DW/ /DI 12 X, 
+ ADD, W| F| SP> DW/ /SI 12 X, 
+ ADD, W| F| SP> DW/ P/D 12 X, 
+ ADD, W| F| SP> DW/ P/S 12 X, 
+ ADD, W| F| SP> DW/ X/D 12 X, 
+ ADD, W| F| SP> DW/ X/S 12 X, 
+ ADD, W| F| SP> DB/ /BP 12 (SB,) 
+ ADD, W| F| SP> DB/ /BX 12 (SB,) 
+ ADD, W| F| SP> DB/ /DI 12 (SB,) 
+ ADD, W| F| SP> DB/ /SI 12 (SB,) 
+ ADD, W| F| SP> DB/ P/D 12 (SB,) 
+ ADD, W| F| SP> DB/ P/S 12 (SB,) 
+ ADD, W| F| SP> DB/ X/D 12 (SB,) 
+ ADD, W| F| SP> DB/ X/S 12 (SB,) 
+ ADD, W| F| SP> D0/ /BX 
+ ADD, W| F| SP> D0/ /DI 
+ ADD, W| F| SP> D0/ /SI 
+ ADD, W| F| SP> D0/ P/D 
+ ADD, W| F| SP> D0/ P/S 
+ ADD, W| F| SP> D0/ X/D 
+ ADD, W| F| SP> D0/ X/S 
+ ADD, W| F| BX> /M/ 10 X, 
+ ADD, W| F| BX> R| DI| 
+ ADD, W| F| BX> R| SI| 
+ ADD, W| F| BX> R| BP| 
+ ADD, W| F| BX> R| SP| 
+ ADD, W| F| BX> R| BX| 
+ ADD, W| F| BX> R| DX| 
+ ADD, W| F| BX> R| CX| 
+ ADD, W| F| BX> R| AX| 
+ ADD, W| F| BX> DW/ /BP 12 X, 
+ ADD, W| F| BX> DW/ /BX 12 X, 
+ ADD, W| F| BX> DW/ /DI 12 X, 
+ ADD, W| F| BX> DW/ /SI 12 X, 
+ ADD, W| F| BX> DW/ P/D 12 X, 
+ ADD, W| F| BX> DW/ P/S 12 X, 
+ ADD, W| F| BX> DW/ X/D 12 X, 
+ ADD, W| F| BX> DW/ X/S 12 X, 
+ ADD, W| F| BX> DB/ /BP 12 (SB,) 
+ ADD, W| F| BX> DB/ /BX 12 (SB,) 
+ ADD, W| F| BX> DB/ /DI 12 (SB,) 
+ ADD, W| F| BX> DB/ /SI 12 (SB,) 
+ ADD, W| F| BX> DB/ P/D 12 (SB,) 
+ ADD, W| F| BX> DB/ P/S 12 (SB,) 
+ ADD, W| F| BX> DB/ X/D 12 (SB,) 
+ ADD, W| F| BX> DB/ X/S 12 (SB,) 
+ ADD, W| F| BX> D0/ /BX 
+ ADD, W| F| BX> D0/ /DI 
+ ADD, W| F| BX> D0/ /SI 
+ ADD, W| F| BX> D0/ P/D 
+ ADD, W| F| BX> D0/ P/S 
+ ADD, W| F| BX> D0/ X/D 
+ ADD, W| F| BX> D0/ X/S 
+ ADD, W| F| DX> /M/ 10 X, 
+ ADD, W| F| DX> R| DI| 
+ ADD, W| F| DX> R| SI| 
+ ADD, W| F| DX> R| BP| 
+ ADD, W| F| DX> R| SP| 
+ ADD, W| F| DX> R| BX| 
+ ADD, W| F| DX> R| DX| 
+ ADD, W| F| DX> R| CX| 
+ ADD, W| F| DX> R| AX| 
+ ADD, W| F| DX> DW/ /BP 12 X, 
+ ADD, W| F| DX> DW/ /BX 12 X, 
+ ADD, W| F| DX> DW/ /DI 12 X, 
+ ADD, W| F| DX> DW/ /SI 12 X, 
+ ADD, W| F| DX> DW/ P/D 12 X, 
+ ADD, W| F| DX> DW/ P/S 12 X, 
+ ADD, W| F| DX> DW/ X/D 12 X, 
+ ADD, W| F| DX> DW/ X/S 12 X, 
+ ADD, W| F| DX> DB/ /BP 12 (SB,) 
+ ADD, W| F| DX> DB/ /BX 12 (SB,) 
+ ADD, W| F| DX> DB/ /DI 12 (SB,) 
+ ADD, W| F| DX> DB/ /SI 12 (SB,) 
+ ADD, W| F| DX> DB/ P/D 12 (SB,) 
+ ADD, W| F| DX> DB/ P/S 12 (SB,) 
+ ADD, W| F| DX> DB/ X/D 12 (SB,) 
+ ADD, W| F| DX> DB/ X/S 12 (SB,) 
+ ADD, W| F| DX> D0/ /BX 
+ ADD, W| F| DX> D0/ /DI 
+ ADD, W| F| DX> D0/ /SI 
+ ADD, W| F| DX> D0/ P/D 
+ ADD, W| F| DX> D0/ P/S 
+ ADD, W| F| DX> D0/ X/D 
+ ADD, W| F| DX> D0/ X/S 
+ ADD, W| F| CX> /M/ 10 X, 
+ ADD, W| F| CX> R| DI| 
+ ADD, W| F| CX> R| SI| 
+ ADD, W| F| CX> R| BP| 
+ ADD, W| F| CX> R| SP| 
+ ADD, W| F| CX> R| BX| 
+ ADD, W| F| CX> R| DX| 
+ ADD, W| F| CX> R| CX| 
+ ADD, W| F| CX> R| AX| 
+ ADD, W| F| CX> DW/ /BP 12 X, 
+ ADD, W| F| CX> DW/ /BX 12 X, 
+ ADD, W| F| CX> DW/ /DI 12 X, 
+ ADD, W| F| CX> DW/ /SI 12 X, 
+ ADD, W| F| CX> DW/ P/D 12 X, 
+ ADD, W| F| CX> DW/ P/S 12 X, 
+ ADD, W| F| CX> DW/ X/D 12 X, 
+ ADD, W| F| CX> DW/ X/S 12 X, 
+ ADD, W| F| CX> DB/ /BP 12 (SB,) 
+ ADD, W| F| CX> DB/ /BX 12 (SB,) 
+ ADD, W| F| CX> DB/ /DI 12 (SB,) 
+ ADD, W| F| CX> DB/ /SI 12 (SB,) 
+ ADD, W| F| CX> DB/ P/D 12 (SB,) 
+ ADD, W| F| CX> DB/ P/S 12 (SB,) 
+ ADD, W| F| CX> DB/ X/D 12 (SB,) 
+ ADD, W| F| CX> DB/ X/S 12 (SB,) 
+ ADD, W| F| CX> D0/ /BX 
+ ADD, W| F| CX> D0/ /DI 
+ ADD, W| F| CX> D0/ /SI 
+ ADD, W| F| CX> D0/ P/D 
+ ADD, W| F| CX> D0/ P/S 
+ ADD, W| F| CX> D0/ X/D 
+ ADD, W| F| CX> D0/ X/S 
+ ADD, W| F| AX> /M/ 10 X, 
+ ADD, W| F| AX> R| DI| 
+ ADD, W| F| AX> R| SI| 
+ ADD, W| F| AX> R| BP| 
+ ADD, W| F| AX> R| SP| 
+ ADD, W| F| AX> R| BX| 
+ ADD, W| F| AX> R| DX| 
+ ADD, W| F| AX> R| CX| 
+ ADD, W| F| AX> R| AX| 
+ ADD, W| F| AX> DW/ /BP 12 X, 
+ ADD, W| F| AX> DW/ /BX 12 X, 
+ ADD, W| F| AX> DW/ /DI 12 X, 
+ ADD, W| F| AX> DW/ /SI 12 X, 
+ ADD, W| F| AX> DW/ P/D 12 X, 
+ ADD, W| F| AX> DW/ P/S 12 X, 
+ ADD, W| F| AX> DW/ X/D 12 X, 
+ ADD, W| F| AX> DW/ X/S 12 X, 
+ ADD, W| F| AX> DB/ /BP 12 (SB,) 
+ ADD, W| F| AX> DB/ /BX 12 (SB,) 
+ ADD, W| F| AX> DB/ /DI 12 (SB,) 
+ ADD, W| F| AX> DB/ /SI 12 (SB,) 
+ ADD, W| F| AX> DB/ P/D 12 (SB,) 
+ ADD, W| F| AX> DB/ P/S 12 (SB,) 
+ ADD, W| F| AX> DB/ X/D 12 (SB,) 
+ ADD, W| F| AX> DB/ X/S 12 (SB,) 
+ ADD, W| F| AX> D0/ /BX 
+ ADD, W| F| AX> D0/ /DI 
+ ADD, W| F| AX> D0/ /SI 
+ ADD, W| F| AX> D0/ P/D 
+ ADD, W| F| AX> D0/ P/S 
+ ADD, W| F| AX> D0/ X/D 
+ ADD, W| F| AX> D0/ X/S 
+ ADD, B| T| BH> /M/ 10 X, 
+ ADD, B| T| BH> R| BH| 
+ ADD, B| T| BH> R| DH| 
+ ADD, B| T| BH> R| CH| 
+ ADD, B| T| BH> R| AH| 
+ ADD, B| T| BH> R| BL| 
+ ADD, B| T| BH> R| DL| 
+ ADD, B| T| BH> R| CL| 
+ ADD, B| T| BH> R| AL| 
+ ADD, B| T| BH> DW/ /BP 12 X, 
+ ADD, B| T| BH> DW/ /BX 12 X, 
+ ADD, B| T| BH> DW/ /DI 12 X, 
+ ADD, B| T| BH> DW/ /SI 12 X, 
+ ADD, B| T| BH> DW/ P/D 12 X, 
+ ADD, B| T| BH> DW/ P/S 12 X, 
+ ADD, B| T| BH> DW/ X/D 12 X, 
+ ADD, B| T| BH> DW/ X/S 12 X, 
+ ADD, B| T| BH> DB/ /BP 12 (SB,) 
+ ADD, B| T| BH> DB/ /BX 12 (SB,) 
+ ADD, B| T| BH> DB/ /DI 12 (SB,) 
+ ADD, B| T| BH> DB/ /SI 12 (SB,) 
+ ADD, B| T| BH> DB/ P/D 12 (SB,) 
+ ADD, B| T| BH> DB/ P/S 12 (SB,) 
+ ADD, B| T| BH> DB/ X/D 12 (SB,) 
+ ADD, B| T| BH> DB/ X/S 12 (SB,) 
+ ADD, B| T| BH> D0/ /BX 
+ ADD, B| T| BH> D0/ /DI 
+ ADD, B| T| BH> D0/ /SI 
+ ADD, B| T| BH> D0/ P/D 
+ ADD, B| T| BH> D0/ P/S 
+ ADD, B| T| BH> D0/ X/D 
+ ADD, B| T| BH> D0/ X/S 
+ ADD, B| T| DH> /M/ 10 X, 
+ ADD, B| T| DH> R| BH| 
+ ADD, B| T| DH> R| DH| 
+ ADD, B| T| DH> R| CH| 
+ ADD, B| T| DH> R| AH| 
+ ADD, B| T| DH> R| BL| 
+ ADD, B| T| DH> R| DL| 
+ ADD, B| T| DH> R| CL| 
+ ADD, B| T| DH> R| AL| 
+ ADD, B| T| DH> DW/ /BP 12 X, 
+ ADD, B| T| DH> DW/ /BX 12 X, 
+ ADD, B| T| DH> DW/ /DI 12 X, 
+ ADD, B| T| DH> DW/ /SI 12 X, 
+ ADD, B| T| DH> DW/ P/D 12 X, 
+ ADD, B| T| DH> DW/ P/S 12 X, 
+ ADD, B| T| DH> DW/ X/D 12 X, 
+ ADD, B| T| DH> DW/ X/S 12 X, 
+ ADD, B| T| DH> DB/ /BP 12 (SB,) 
+ ADD, B| T| DH> DB/ /BX 12 (SB,) 
+ ADD, B| T| DH> DB/ /DI 12 (SB,) 
+ ADD, B| T| DH> DB/ /SI 12 (SB,) 
+ ADD, B| T| DH> DB/ P/D 12 (SB,) 
+ ADD, B| T| DH> DB/ P/S 12 (SB,) 
+ ADD, B| T| DH> DB/ X/D 12 (SB,) 
+ ADD, B| T| DH> DB/ X/S 12 (SB,) 
+ ADD, B| T| DH> D0/ /BX 
+ ADD, B| T| DH> D0/ /DI 
+ ADD, B| T| DH> D0/ /SI 
+ ADD, B| T| DH> D0/ P/D 
+ ADD, B| T| DH> D0/ P/S 
+ ADD, B| T| DH> D0/ X/D 
+ ADD, B| T| DH> D0/ X/S 
+ ADD, B| T| CH> /M/ 10 X, 
+ ADD, B| T| CH> R| BH| 
+ ADD, B| T| CH> R| DH| 
+ ADD, B| T| CH> R| CH| 
+ ADD, B| T| CH> R| AH| 
+ ADD, B| T| CH> R| BL| 
+ ADD, B| T| CH> R| DL| 
+ ADD, B| T| CH> R| CL| 
+ ADD, B| T| CH> R| AL| 
+ ADD, B| T| CH> DW/ /BP 12 X, 
+ ADD, B| T| CH> DW/ /BX 12 X, 
+ ADD, B| T| CH> DW/ /DI 12 X, 
+ ADD, B| T| CH> DW/ /SI 12 X, 
+ ADD, B| T| CH> DW/ P/D 12 X, 
+ ADD, B| T| CH> DW/ P/S 12 X, 
+ ADD, B| T| CH> DW/ X/D 12 X, 
+ ADD, B| T| CH> DW/ X/S 12 X, 
+ ADD, B| T| CH> DB/ /BP 12 (SB,) 
+ ADD, B| T| CH> DB/ /BX 12 (SB,) 
+ ADD, B| T| CH> DB/ /DI 12 (SB,) 
+ ADD, B| T| CH> DB/ /SI 12 (SB,) 
+ ADD, B| T| CH> DB/ P/D 12 (SB,) 
+ ADD, B| T| CH> DB/ P/S 12 (SB,) 
+ ADD, B| T| CH> DB/ X/D 12 (SB,) 
+ ADD, B| T| CH> DB/ X/S 12 (SB,) 
+ ADD, B| T| CH> D0/ /BX 
+ ADD, B| T| CH> D0/ /DI 
+ ADD, B| T| CH> D0/ /SI 
+ ADD, B| T| CH> D0/ P/D 
+ ADD, B| T| CH> D0/ P/S 
+ ADD, B| T| CH> D0/ X/D 
+ ADD, B| T| CH> D0/ X/S 
+ ADD, B| T| AH> /M/ 10 X, 
+ ADD, B| T| AH> R| BH| 
+ ADD, B| T| AH> R| DH| 
+ ADD, B| T| AH> R| CH| 
+ ADD, B| T| AH> R| AH| 
+ ADD, B| T| AH> R| BL| 
+ ADD, B| T| AH> R| DL| 
+ ADD, B| T| AH> R| CL| 
+ ADD, B| T| AH> R| AL| 
+ ADD, B| T| AH> DW/ /BP 12 X, 
+ ADD, B| T| AH> DW/ /BX 12 X, 
+ ADD, B| T| AH> DW/ /DI 12 X, 
+ ADD, B| T| AH> DW/ /SI 12 X, 
+ ADD, B| T| AH> DW/ P/D 12 X, 
+ ADD, B| T| AH> DW/ P/S 12 X, 
+ ADD, B| T| AH> DW/ X/D 12 X, 
+ ADD, B| T| AH> DW/ X/S 12 X, 
+ ADD, B| T| AH> DB/ /BP 12 (SB,) 
+ ADD, B| T| AH> DB/ /BX 12 (SB,) 
+ ADD, B| T| AH> DB/ /DI 12 (SB,) 
+ ADD, B| T| AH> DB/ /SI 12 (SB,) 
+ ADD, B| T| AH> DB/ P/D 12 (SB,) 
+ ADD, B| T| AH> DB/ P/S 12 (SB,) 
+ ADD, B| T| AH> DB/ X/D 12 (SB,) 
+ ADD, B| T| AH> DB/ X/S 12 (SB,) 
+ ADD, B| T| AH> D0/ /BX 
+ ADD, B| T| AH> D0/ /DI 
+ ADD, B| T| AH> D0/ /SI 
+ ADD, B| T| AH> D0/ P/D 
+ ADD, B| T| AH> D0/ P/S 
+ ADD, B| T| AH> D0/ X/D 
+ ADD, B| T| AH> D0/ X/S 
+ ADD, B| T| BL> /M/ 10 X, 
+ ADD, B| T| BL> R| BH| 
+ ADD, B| T| BL> R| DH| 
+ ADD, B| T| BL> R| CH| 
+ ADD, B| T| BL> R| AH| 
+ ADD, B| T| BL> R| BL| 
+ ADD, B| T| BL> R| DL| 
+ ADD, B| T| BL> R| CL| 
+ ADD, B| T| BL> R| AL| 
+ ADD, B| T| BL> DW/ /BP 12 X, 
+ ADD, B| T| BL> DW/ /BX 12 X, 
+ ADD, B| T| BL> DW/ /DI 12 X, 
+ ADD, B| T| BL> DW/ /SI 12 X, 
+ ADD, B| T| BL> DW/ P/D 12 X, 
+ ADD, B| T| BL> DW/ P/S 12 X, 
+ ADD, B| T| BL> DW/ X/D 12 X, 
+ ADD, B| T| BL> DW/ X/S 12 X, 
+ ADD, B| T| BL> DB/ /BP 12 (SB,) 
+ ADD, B| T| BL> DB/ /BX 12 (SB,) 
+ ADD, B| T| BL> DB/ /DI 12 (SB,) 
+ ADD, B| T| BL> DB/ /SI 12 (SB,) 
+ ADD, B| T| BL> DB/ P/D 12 (SB,) 
+ ADD, B| T| BL> DB/ P/S 12 (SB,) 
+ ADD, B| T| BL> DB/ X/D 12 (SB,) 
+ ADD, B| T| BL> DB/ X/S 12 (SB,) 
+ ADD, B| T| BL> D0/ /BX 
+ ADD, B| T| BL> D0/ /DI 
+ ADD, B| T| BL> D0/ /SI 
+ ADD, B| T| BL> D0/ P/D 
+ ADD, B| T| BL> D0/ P/S 
+ ADD, B| T| BL> D0/ X/D 
+ ADD, B| T| BL> D0/ X/S 
+ ADD, B| T| DL> /M/ 10 X, 
+ ADD, B| T| DL> R| BH| 
+ ADD, B| T| DL> R| DH| 
+ ADD, B| T| DL> R| CH| 
+ ADD, B| T| DL> R| AH| 
+ ADD, B| T| DL> R| BL| 
+ ADD, B| T| DL> R| DL| 
+ ADD, B| T| DL> R| CL| 
+ ADD, B| T| DL> R| AL| 
+ ADD, B| T| DL> DW/ /BP 12 X, 
+ ADD, B| T| DL> DW/ /BX 12 X, 
+ ADD, B| T| DL> DW/ /DI 12 X, 
+ ADD, B| T| DL> DW/ /SI 12 X, 
+ ADD, B| T| DL> DW/ P/D 12 X, 
+ ADD, B| T| DL> DW/ P/S 12 X, 
+ ADD, B| T| DL> DW/ X/D 12 X, 
+ ADD, B| T| DL> DW/ X/S 12 X, 
+ ADD, B| T| DL> DB/ /BP 12 (SB,) 
+ ADD, B| T| DL> DB/ /BX 12 (SB,) 
+ ADD, B| T| DL> DB/ /DI 12 (SB,) 
+ ADD, B| T| DL> DB/ /SI 12 (SB,) 
+ ADD, B| T| DL> DB/ P/D 12 (SB,) 
+ ADD, B| T| DL> DB/ P/S 12 (SB,) 
+ ADD, B| T| DL> DB/ X/D 12 (SB,) 
+ ADD, B| T| DL> DB/ X/S 12 (SB,) 
+ ADD, B| T| DL> D0/ /BX 
+ ADD, B| T| DL> D0/ /DI 
+ ADD, B| T| DL> D0/ /SI 
+ ADD, B| T| DL> D0/ P/D 
+ ADD, B| T| DL> D0/ P/S 
+ ADD, B| T| DL> D0/ X/D 
+ ADD, B| T| DL> D0/ X/S 
+ ADD, B| T| CL> /M/ 10 X, 
+ ADD, B| T| CL> R| BH| 
+ ADD, B| T| CL> R| DH| 
+ ADD, B| T| CL> R| CH| 
+ ADD, B| T| CL> R| AH| 
+ ADD, B| T| CL> R| BL| 
+ ADD, B| T| CL> R| DL| 
+ ADD, B| T| CL> R| CL| 
+ ADD, B| T| CL> R| AL| 
+ ADD, B| T| CL> DW/ /BP 12 X, 
+ ADD, B| T| CL> DW/ /BX 12 X, 
+ ADD, B| T| CL> DW/ /DI 12 X, 
+ ADD, B| T| CL> DW/ /SI 12 X, 
+ ADD, B| T| CL> DW/ P/D 12 X, 
+ ADD, B| T| CL> DW/ P/S 12 X, 
+ ADD, B| T| CL> DW/ X/D 12 X, 
+ ADD, B| T| CL> DW/ X/S 12 X, 
+ ADD, B| T| CL> DB/ /BP 12 (SB,) 
+ ADD, B| T| CL> DB/ /BX 12 (SB,) 
+ ADD, B| T| CL> DB/ /DI 12 (SB,) 
+ ADD, B| T| CL> DB/ /SI 12 (SB,) 
+ ADD, B| T| CL> DB/ P/D 12 (SB,) 
+ ADD, B| T| CL> DB/ P/S 12 (SB,) 
+ ADD, B| T| CL> DB/ X/D 12 (SB,) 
+ ADD, B| T| CL> DB/ X/S 12 (SB,) 
+ ADD, B| T| CL> D0/ /BX 
+ ADD, B| T| CL> D0/ /DI 
+ ADD, B| T| CL> D0/ /SI 
+ ADD, B| T| CL> D0/ P/D 
+ ADD, B| T| CL> D0/ P/S 
+ ADD, B| T| CL> D0/ X/D 
+ ADD, B| T| CL> D0/ X/S 
+ ADD, B| T| AL> /M/ 10 X, 
+ ADD, B| T| AL> R| BH| 
+ ADD, B| T| AL> R| DH| 
+ ADD, B| T| AL> R| CH| 
+ ADD, B| T| AL> R| AH| 
+ ADD, B| T| AL> R| BL| 
+ ADD, B| T| AL> R| DL| 
+ ADD, B| T| AL> R| CL| 
+ ADD, B| T| AL> R| AL| 
+ ADD, B| T| AL> DW/ /BP 12 X, 
+ ADD, B| T| AL> DW/ /BX 12 X, 
+ ADD, B| T| AL> DW/ /DI 12 X, 
+ ADD, B| T| AL> DW/ /SI 12 X, 
+ ADD, B| T| AL> DW/ P/D 12 X, 
+ ADD, B| T| AL> DW/ P/S 12 X, 
+ ADD, B| T| AL> DW/ X/D 12 X, 
+ ADD, B| T| AL> DW/ X/S 12 X, 
+ ADD, B| T| AL> DB/ /BP 12 (SB,) 
+ ADD, B| T| AL> DB/ /BX 12 (SB,) 
+ ADD, B| T| AL> DB/ /DI 12 (SB,) 
+ ADD, B| T| AL> DB/ /SI 12 (SB,) 
+ ADD, B| T| AL> DB/ P/D 12 (SB,) 
+ ADD, B| T| AL> DB/ P/S 12 (SB,) 
+ ADD, B| T| AL> DB/ X/D 12 (SB,) 
+ ADD, B| T| AL> DB/ X/S 12 (SB,) 
+ ADD, B| T| AL> D0/ /BX 
+ ADD, B| T| AL> D0/ /DI 
+ ADD, B| T| AL> D0/ /SI 
+ ADD, B| T| AL> D0/ P/D 
+ ADD, B| T| AL> D0/ P/S 
+ ADD, B| T| AL> D0/ X/D 
+ ADD, B| T| AL> D0/ X/S 
+ ADD, B| F| BH> /M/ 10 X, 
+ ADD, B| F| BH> R| BH| 
+ ADD, B| F| BH> R| DH| 
+ ADD, B| F| BH> R| CH| 
+ ADD, B| F| BH> R| AH| 
+ ADD, B| F| BH> R| BL| 
+ ADD, B| F| BH> R| DL| 
+ ADD, B| F| BH> R| CL| 
+ ADD, B| F| BH> R| AL| 
+ ADD, B| F| BH> DW/ /BP 12 X, 
+ ADD, B| F| BH> DW/ /BX 12 X, 
+ ADD, B| F| BH> DW/ /DI 12 X, 
+ ADD, B| F| BH> DW/ /SI 12 X, 
+ ADD, B| F| BH> DW/ P/D 12 X, 
+ ADD, B| F| BH> DW/ P/S 12 X, 
+ ADD, B| F| BH> DW/ X/D 12 X, 
+ ADD, B| F| BH> DW/ X/S 12 X, 
+ ADD, B| F| BH> DB/ /BP 12 (SB,) 
+ ADD, B| F| BH> DB/ /BX 12 (SB,) 
+ ADD, B| F| BH> DB/ /DI 12 (SB,) 
+ ADD, B| F| BH> DB/ /SI 12 (SB,) 
+ ADD, B| F| BH> DB/ P/D 12 (SB,) 
+ ADD, B| F| BH> DB/ P/S 12 (SB,) 
+ ADD, B| F| BH> DB/ X/D 12 (SB,) 
+ ADD, B| F| BH> DB/ X/S 12 (SB,) 
+ ADD, B| F| BH> D0/ /BX 
+ ADD, B| F| BH> D0/ /DI 
+ ADD, B| F| BH> D0/ /SI 
+ ADD, B| F| BH> D0/ P/D 
+ ADD, B| F| BH> D0/ P/S 
+ ADD, B| F| BH> D0/ X/D 
+ ADD, B| F| BH> D0/ X/S 
+ ADD, B| F| DH> /M/ 10 X, 
+ ADD, B| F| DH> R| BH| 
+ ADD, B| F| DH> R| DH| 
+ ADD, B| F| DH> R| CH| 
+ ADD, B| F| DH> R| AH| 
+ ADD, B| F| DH> R| BL| 
+ ADD, B| F| DH> R| DL| 
+ ADD, B| F| DH> R| CL| 
+ ADD, B| F| DH> R| AL| 
+ ADD, B| F| DH> DW/ /BP 12 X, 
+ ADD, B| F| DH> DW/ /BX 12 X, 
+ ADD, B| F| DH> DW/ /DI 12 X, 
+ ADD, B| F| DH> DW/ /SI 12 X, 
+ ADD, B| F| DH> DW/ P/D 12 X, 
+ ADD, B| F| DH> DW/ P/S 12 X, 
+ ADD, B| F| DH> DW/ X/D 12 X, 
+ ADD, B| F| DH> DW/ X/S 12 X, 
+ ADD, B| F| DH> DB/ /BP 12 (SB,) 
+ ADD, B| F| DH> DB/ /BX 12 (SB,) 
+ ADD, B| F| DH> DB/ /DI 12 (SB,) 
+ ADD, B| F| DH> DB/ /SI 12 (SB,) 
+ ADD, B| F| DH> DB/ P/D 12 (SB,) 
+ ADD, B| F| DH> DB/ P/S 12 (SB,) 
+ ADD, B| F| DH> DB/ X/D 12 (SB,) 
+ ADD, B| F| DH> DB/ X/S 12 (SB,) 
+ ADD, B| F| DH> D0/ /BX 
+ ADD, B| F| DH> D0/ /DI 
+ ADD, B| F| DH> D0/ /SI 
+ ADD, B| F| DH> D0/ P/D 
+ ADD, B| F| DH> D0/ P/S 
+ ADD, B| F| DH> D0/ X/D 
+ ADD, B| F| DH> D0/ X/S 
+ ADD, B| F| CH> /M/ 10 X, 
+ ADD, B| F| CH> R| BH| 
+ ADD, B| F| CH> R| DH| 
+ ADD, B| F| CH> R| CH| 
+ ADD, B| F| CH> R| AH| 
+ ADD, B| F| CH> R| BL| 
+ ADD, B| F| CH> R| DL| 
+ ADD, B| F| CH> R| CL| 
+ ADD, B| F| CH> R| AL| 
+ ADD, B| F| CH> DW/ /BP 12 X, 
+ ADD, B| F| CH> DW/ /BX 12 X, 
+ ADD, B| F| CH> DW/ /DI 12 X, 
+ ADD, B| F| CH> DW/ /SI 12 X, 
+ ADD, B| F| CH> DW/ P/D 12 X, 
+ ADD, B| F| CH> DW/ P/S 12 X, 
+ ADD, B| F| CH> DW/ X/D 12 X, 
+ ADD, B| F| CH> DW/ X/S 12 X, 
+ ADD, B| F| CH> DB/ /BP 12 (SB,) 
+ ADD, B| F| CH> DB/ /BX 12 (SB,) 
+ ADD, B| F| CH> DB/ /DI 12 (SB,) 
+ ADD, B| F| CH> DB/ /SI 12 (SB,) 
+ ADD, B| F| CH> DB/ P/D 12 (SB,) 
+ ADD, B| F| CH> DB/ P/S 12 (SB,) 
+ ADD, B| F| CH> DB/ X/D 12 (SB,) 
+ ADD, B| F| CH> DB/ X/S 12 (SB,) 
+ ADD, B| F| CH> D0/ /BX 
+ ADD, B| F| CH> D0/ /DI 
+ ADD, B| F| CH> D0/ /SI 
+ ADD, B| F| CH> D0/ P/D 
+ ADD, B| F| CH> D0/ P/S 
+ ADD, B| F| CH> D0/ X/D 
+ ADD, B| F| CH> D0/ X/S 
+ ADD, B| F| AH> /M/ 10 X, 
+ ADD, B| F| AH> R| BH| 
+ ADD, B| F| AH> R| DH| 
+ ADD, B| F| AH> R| CH| 
+ ADD, B| F| AH> R| AH| 
+ ADD, B| F| AH> R| BL| 
+ ADD, B| F| AH> R| DL| 
+ ADD, B| F| AH> R| CL| 
+ ADD, B| F| AH> R| AL| 
+ ADD, B| F| AH> DW/ /BP 12 X, 
+ ADD, B| F| AH> DW/ /BX 12 X, 
+ ADD, B| F| AH> DW/ /DI 12 X, 
+ ADD, B| F| AH> DW/ /SI 12 X, 
+ ADD, B| F| AH> DW/ P/D 12 X, 
+ ADD, B| F| AH> DW/ P/S 12 X, 
+ ADD, B| F| AH> DW/ X/D 12 X, 
+ ADD, B| F| AH> DW/ X/S 12 X, 
+ ADD, B| F| AH> DB/ /BP 12 (SB,) 
+ ADD, B| F| AH> DB/ /BX 12 (SB,) 
+ ADD, B| F| AH> DB/ /DI 12 (SB,) 
+ ADD, B| F| AH> DB/ /SI 12 (SB,) 
+ ADD, B| F| AH> DB/ P/D 12 (SB,) 
+ ADD, B| F| AH> DB/ P/S 12 (SB,) 
+ ADD, B| F| AH> DB/ X/D 12 (SB,) 
+ ADD, B| F| AH> DB/ X/S 12 (SB,) 
+ ADD, B| F| AH> D0/ /BX 
+ ADD, B| F| AH> D0/ /DI 
+ ADD, B| F| AH> D0/ /SI 
+ ADD, B| F| AH> D0/ P/D 
+ ADD, B| F| AH> D0/ P/S 
+ ADD, B| F| AH> D0/ X/D 
+ ADD, B| F| AH> D0/ X/S 
+ ADD, B| F| BL> /M/ 10 X, 
+ ADD, B| F| BL> R| BH| 
+ ADD, B| F| BL> R| DH| 
+ ADD, B| F| BL> R| CH| 
+ ADD, B| F| BL> R| AH| 
+ ADD, B| F| BL> R| BL| 
+ ADD, B| F| BL> R| DL| 
+ ADD, B| F| BL> R| CL| 
+ ADD, B| F| BL> R| AL| 
+ ADD, B| F| BL> DW/ /BP 12 X, 
+ ADD, B| F| BL> DW/ /BX 12 X, 
+ ADD, B| F| BL> DW/ /DI 12 X, 
+ ADD, B| F| BL> DW/ /SI 12 X, 
+ ADD, B| F| BL> DW/ P/D 12 X, 
+ ADD, B| F| BL> DW/ P/S 12 X, 
+ ADD, B| F| BL> DW/ X/D 12 X, 
+ ADD, B| F| BL> DW/ X/S 12 X, 
+ ADD, B| F| BL> DB/ /BP 12 (SB,) 
+ ADD, B| F| BL> DB/ /BX 12 (SB,) 
+ ADD, B| F| BL> DB/ /DI 12 (SB,) 
+ ADD, B| F| BL> DB/ /SI 12 (SB,) 
+ ADD, B| F| BL> DB/ P/D 12 (SB,) 
+ ADD, B| F| BL> DB/ P/S 12 (SB,) 
+ ADD, B| F| BL> DB/ X/D 12 (SB,) 
+ ADD, B| F| BL> DB/ X/S 12 (SB,) 
+ ADD, B| F| BL> D0/ /BX 
+ ADD, B| F| BL> D0/ /DI 
+ ADD, B| F| BL> D0/ /SI 
+ ADD, B| F| BL> D0/ P/D 
+ ADD, B| F| BL> D0/ P/S 
+ ADD, B| F| BL> D0/ X/D 
+ ADD, B| F| BL> D0/ X/S 
+ ADD, B| F| DL> /M/ 10 X, 
+ ADD, B| F| DL> R| BH| 
+ ADD, B| F| DL> R| DH| 
+ ADD, B| F| DL> R| CH| 
+ ADD, B| F| DL> R| AH| 
+ ADD, B| F| DL> R| BL| 
+ ADD, B| F| DL> R| DL| 
+ ADD, B| F| DL> R| CL| 
+ ADD, B| F| DL> R| AL| 
+ ADD, B| F| DL> DW/ /BP 12 X, 
+ ADD, B| F| DL> DW/ /BX 12 X, 
+ ADD, B| F| DL> DW/ /DI 12 X, 
+ ADD, B| F| DL> DW/ /SI 12 X, 
+ ADD, B| F| DL> DW/ P/D 12 X, 
+ ADD, B| F| DL> DW/ P/S 12 X, 
+ ADD, B| F| DL> DW/ X/D 12 X, 
+ ADD, B| F| DL> DW/ X/S 12 X, 
+ ADD, B| F| DL> DB/ /BP 12 (SB,) 
+ ADD, B| F| DL> DB/ /BX 12 (SB,) 
+ ADD, B| F| DL> DB/ /DI 12 (SB,) 
+ ADD, B| F| DL> DB/ /SI 12 (SB,) 
+ ADD, B| F| DL> DB/ P/D 12 (SB,) 
+ ADD, B| F| DL> DB/ P/S 12 (SB,) 
+ ADD, B| F| DL> DB/ X/D 12 (SB,) 
+ ADD, B| F| DL> DB/ X/S 12 (SB,) 
+ ADD, B| F| DL> D0/ /BX 
+ ADD, B| F| DL> D0/ /DI 
+ ADD, B| F| DL> D0/ /SI 
+ ADD, B| F| DL> D0/ P/D 
+ ADD, B| F| DL> D0/ P/S 
+ ADD, B| F| DL> D0/ X/D 
+ ADD, B| F| DL> D0/ X/S 
+ ADD, B| F| CL> /M/ 10 X, 
+ ADD, B| F| CL> R| BH| 
+ ADD, B| F| CL> R| DH| 
+ ADD, B| F| CL> R| CH| 
+ ADD, B| F| CL> R| AH| 
+ ADD, B| F| CL> R| BL| 
+ ADD, B| F| CL> R| DL| 
+ ADD, B| F| CL> R| CL| 
+ ADD, B| F| CL> R| AL| 
+ ADD, B| F| CL> DW/ /BP 12 X, 
+ ADD, B| F| CL> DW/ /BX 12 X, 
+ ADD, B| F| CL> DW/ /DI 12 X, 
+ ADD, B| F| CL> DW/ /SI 12 X, 
+ ADD, B| F| CL> DW/ P/D 12 X, 
+ ADD, B| F| CL> DW/ P/S 12 X, 
+ ADD, B| F| CL> DW/ X/D 12 X, 
+ ADD, B| F| CL> DW/ X/S 12 X, 
+ ADD, B| F| CL> DB/ /BP 12 (SB,) 
+ ADD, B| F| CL> DB/ /BX 12 (SB,) 
+ ADD, B| F| CL> DB/ /DI 12 (SB,) 
+ ADD, B| F| CL> DB/ /SI 12 (SB,) 
+ ADD, B| F| CL> DB/ P/D 12 (SB,) 
+ ADD, B| F| CL> DB/ P/S 12 (SB,) 
+ ADD, B| F| CL> DB/ X/D 12 (SB,) 
+ ADD, B| F| CL> DB/ X/S 12 (SB,) 
+ ADD, B| F| CL> D0/ /BX 
+ ADD, B| F| CL> D0/ /DI 
+ ADD, B| F| CL> D0/ /SI 
+ ADD, B| F| CL> D0/ P/D 
+ ADD, B| F| CL> D0/ P/S 
+ ADD, B| F| CL> D0/ X/D 
+ ADD, B| F| CL> D0/ X/S 
+ ADD, B| F| AL> /M/ 10 X, 
+ ADD, B| F| AL> R| BH| 
+ ADD, B| F| AL> R| DH| 
+ ADD, B| F| AL> R| CH| 
+ ADD, B| F| AL> R| AH| 
+ ADD, B| F| AL> R| BL| 
+ ADD, B| F| AL> R| DL| 
+ ADD, B| F| AL> R| CL| 
+ ADD, B| F| AL> R| AL| 
+ ADD, B| F| AL> DW/ /BP 12 X, 
+ ADD, B| F| AL> DW/ /BX 12 X, 
+ ADD, B| F| AL> DW/ /DI 12 X, 
+ ADD, B| F| AL> DW/ /SI 12 X, 
+ ADD, B| F| AL> DW/ P/D 12 X, 
+ ADD, B| F| AL> DW/ P/S 12 X, 
+ ADD, B| F| AL> DW/ X/D 12 X, 
+ ADD, B| F| AL> DW/ X/S 12 X, 
+ ADD, B| F| AL> DB/ /BP 12 (SB,) 
+ ADD, B| F| AL> DB/ /BX 12 (SB,) 
+ ADD, B| F| AL> DB/ /DI 12 (SB,) 
+ ADD, B| F| AL> DB/ /SI 12 (SB,) 
+ ADD, B| F| AL> DB/ P/D 12 (SB,) 
+ ADD, B| F| AL> DB/ P/S 12 (SB,) 
+ ADD, B| F| AL> DB/ X/D 12 (SB,) 
+ ADD, B| F| AL> DB/ X/S 12 (SB,) 
+ ADD, B| F| AL> D0/ /BX 
+ ADD, B| F| AL> D0/ /DI 
+ ADD, B| F| AL> D0/ /SI 
+ ADD, B| F| AL> D0/ P/D 
+ ADD, B| F| AL> D0/ P/S 
+ ADD, B| F| AL> D0/ X/D 
+ ADD, B| F| AL> D0/ X/S 

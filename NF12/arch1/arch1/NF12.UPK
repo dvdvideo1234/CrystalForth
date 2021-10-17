@@ -1,0 +1,144 @@
+=: _START
+,"4~J;~^@^PM~!^P~"
+=P _ABORT
+,"<~@~~>~@}~h~^Z~^Ah~m^@"
+=: _@INI
+,"^@^@"
+=: _INT16
+,"M~^Vk~h"
+=P _OSTR
+,""_^J~^M2m~^CO~AA^@~a~"~~^G~O~k~@"
+=P _IO
+,"^K~T^D^K~L^B"
+=P _IO2
+,"^K~<"
+=P _IO1
+,"^G~{~~W~"
+=P _RET
+,"k~I"
+=P _IF
+,"^K@~-~t^W^P~"
+=P _SKIP
+,"CCk~@"
+=P _2MX
+,"H["
+=P _1M
+,"H<"
+=P _BRK
+,"L~k~9i~\~^A"
+=P _NEXT
+,""_OW1~"
+=P _IFM
+,"Hxk~^P~"
+=P _JUMP
+,"^K~^_k~*"
+=: _@BEMIT
+,"^@^@"
+=P _BEMIT
+,"4~^NM~^Pk~C"
+=P _RSTP
+,""_+~W-~k~^\"
+=P _RLDP
+,""_^K~^M/~WNN^I~^D^Q~k~^P"
+=P _XR
+,"YPk~y~"
+=P _XA
+,""_U^K~o~k~^F"
+=P _2PX
+,"@["
+=P _1P
+,"@="
+=P _@4TH
+=P _RDRPX
+,"Y["
+=P _NOP
+,"^K~^OCCv~A~^At^HI~a~"
+=P _EXEC
+,"^Q~-~k~t~"
+=: _@JSR4TH
+=P _EX
+,"YS^K~Y~k~j~"
+=P _DROPX
+,"[="
+=P _NIP
+,"^G~^D"
+=P _DROP
+,"k~^E"
+=P _NFOR
+,"w~P~"
+=P _FOR
+,"^K~^_"
+=P _PUSH
+,"P-~k~\~"
+=P _J
+,""_YQWk~?~"
+=P _DUP
+,"PYk~;~"
+=P _STKP
+,"V="
+=P _OVER
+,"~4"
+=P _POP
+,"k~w~"
+=P _POPX
+,"Y[k~1~"
+=P _RDROP
+,"Y="
+=P _SWAP
+,"^G~^Dk~B~"
+=P _XOR
+,"1^Dk~"_~"
+=P _AND
+,"!^Dk~[~"
+=P _MDIV
+,"Q~$Q~P~;E~r^D+E~"
+=P _U1P
+,"~^Dk~,~"
+=P _P2DIV
+,"^A^D^K~^D"
+=P _2DIV
+,"Q~X~k~$~"
+=P _PMUL
+,"w~^D^A^@t^B^CE~"
+=P _D2DIV
+,"Q~X~Q~^\k~^V~"
+=P _ZEQ
+,"w~X~^[@~"
+=P _NOT
+,"w~P~k~^N~"
+=P _ULESS
+,")^D-~9~"
+=P _0LESS
+,"Q~`~^[@~k~^D~^E~^B^@~^B*^B0^B3^B6^B%&"
+,"$#'"^Ft^T^@~8-u^NFt^LZ~R~w~W~"
+,"w~U~Gu^AEC~NZC~^W~3~3m~=0~^P=0~"
+,"^H=0~^BHH2d~^K~H~AAh~e~~W?~^J^BQ"
+,"9~^F^@r~.~^K~y~Yu^MQ~g~^K~^U~"~~^A"_FtK~"
+,"N~b~"_<:r^F<Ar?~,^G,0r9~;A~"
+,"s5~^U~w~a~^U~^W~w~a~^W~^Cx~^Sj~k~@~h~%~~k~"
+,"m~h~_~~$^_k~f~0~^Jh~~h~^W~~^J~^@~R~"
+,"Fuy~C~"
+=: _ATOI
+,"+^AV^V~^M~^Xw~V~h~e~~^V~"^^I~<C~"
+=: _MKSTR
+,"+^A^W~-~^Q~-~5~^@^Cy~GF~^E`"
+=: _@MAKESTR
+,"^V~Q^Cq~}~&~s~$~|~Y^H~^M^V~^W~C~^P~"
+=: _MPUSH
+,"+^A^W~-~^Q~-~"
+=: _@MPUSH1
+,"h~g~"
+=P _@MPUSH2
+,"~@C~^P~"
+=: _PARS
+,"+^A^Q~^K~{~c~^L+y~<_u^Fs~.~t^BOA^I~"
+,"|^Bc~^Er~.~u^AO+|^B^I~<^Q~C~"
+=: _TFIND?
+,"^C~^A"
+=: _FIND
+,"+^A"
+=: _@FIND
+,"3I~^CA~^K~x~^M~}^D^J~^Mc~^QAV^K~s~s~&~"^"
+,"^W~uk~1~^B^AM^B^I~<^Q~C~"
+=: _CFIND
+,"+^A"~~^Gh~Y~~"~~^OC~"

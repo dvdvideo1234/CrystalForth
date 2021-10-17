@@ -1,0 +1,198 @@
+\ REDEFINITIONS ------------------------
+
+1 =: BYE          
+' (DEF =: (JUMP     
+
+\ FORWARD DEFINITIONS ------------------------
+
+=! (CON   
+=! (PNT!    
+\ =! _HERE  
+=! H;    
+=! H
+TEST? =! CSTR
+=! W>B
+
+\ HI LEVEL PRIMITIVES  ---------------------
+
+: (& @R+ AND RDROP; ; UNW
+\ : AND NAND NOT ;
+: ODD (& ,< 1 ,
+
+: RANGE>S 1+  
+: OVER- OVER 
+: - 1-
+: NOT+ NOT
+: + +2/ 
+: DROP; DROPX 
+; UNW
+
+: (D#0 POP XR 
+: NOP; 
+;  
+   
+: (D#1 POP XR 
+: 2+ 2+; 
+; UNW
+
+: (SET2 (D#1  
+: ! PUSH     
+: (SET !R+ RDROP; 
+; UNW 
+
+: (LIT @R+ ;
+
+\ : _THEN _HERE 
+\ : SWAP! PUSH SKIP 
+: (PNT! (D#1 
+: (SWAP! XR !R+ RDROP; 
+; UNW         
+
+: |2- EX 
+: 2- 2-; 
+; UNW
+
+: |, EX  
+: , H;  
+: !+ PUSH !R+  
+: (VAR POP; 
+; UNW
+
+: _MARKP  H   
+: Z, |, ,<
+  0  CONST 0
+
+: (@, (D#0  
+: @, |,  
+: @ PUSH  
+: (CON @R+ 
+: EXIT RDROP; 
+; UNW
+
+\ : 0= 1 U< ;
+
+\ VARIABLES ------------------
+ 
+    0 VALUE; H
+    0 VALUE MESSAGE
+$F800 VALUE; T
+
+: ORG! H - ,<    0 VALUE  HOFS  
+\ : T>R HOFS - ; 
+: _HERE H : R>T HOFS + ; 
+TO' H =: OBJ! 
+
+' NOP;  DEFER vERR
+' NOP;  DEFER vOK
+' NOP;  DEFER READLN
+ 
+   >, (PNT! ,<   0  DEFER @INIT     ' @INIT ' _@INI T!  
+   >, (PNT! ,<   0  DEFER FINDEX
+ 
+18  5 - 1K U*       VALUE; LTIB 
+$100 18 1K U* +     VALUE ETIB
+
+$F800 CONST TBUF  
+   32 CONST BL   
+
+' T     DEFER vTARG      
+' BEMIT VALUE @EMIT >, CALL 1+ (SET2 THEN ,<
+0 CONST CNTC 
+VAL' @EMIT =: EMIT
+
+   
+
+\ COMPILER BASIS ------------------------
+
+\ : (R#, @R+ , ; 
+\ : (GO; @R+ XR
+
+: H>STR H 
+: STR PUSH @R+ XR POP; 
+; UNW 
+
+: (|LIT,, EX  
+: (LIT,,  |, 
+: (LIT, (@, (LIT 
+;; UNW
+
+: 0<>;  0= 
+: 0;    EXIT ?; 
+;;
+
+: ((A"  (?S TO MESSAGE  0;  ABORT ; UNW 
+: |N?? EX  
+: N??  0= 
+: ??  !"?" 
+;;
+
+TEST? : EXECUTE PUSH ; 
+TEST? : DXEP| DUP : XEP| XR EXECUTE POP; ; UNW 
+TEST? : |DROP EX DROPX ; UNW
+TEST? : ..TIMES |DROP 
+TEST? : .TIMES |DROP 
+TEST? : TIMES  PUSH XR  
+TEST? : TIMES| FOR J EXECUTE NEXT DROP RDROP; ; UNW
+TEST? : SPACES TIMES| SKIP 
+TEST? : |SPC EX 
+TEST? : SPACE BL EMIT ;
+TEST? : ID. |SPC  
+TEST? : ". CSTR  
+TEST? : TYPE |DROP 
+TEST? : TYPE+ TIMES| CSTR EMIT ;
+TEST? : ((." (?S ". ;  
+TEST? : |CR EX 
+TEST? : CR ."^M^J" 0 TO CNTC ; 
+TEST? : W>BB      [ 
+TEST? : 256/ TWICE 
+TEST? : 16/ 2/ 
+TEST? : 8/ 2/ 
+TEST? : 4/ 2/ 2/  ]  DXEP| W>B ;
+TEST? : B>HH W>B [ 16/ ] DXEP| (& ,< 15 ,
+TEST? : 9>? 9 OVER U< : 7AND (& ,< 7 ,  
+TEST? : ALPHA 9>? + '0 + ;  
+TEST? : H. W>BB CALL  : B. |SPC THEN B>HH TWICE 
+TEST? : DIG. ALPHA EMIT ;;
+TEST? META CR vOK \ vOK FIXED
+
+
+
+: TOKEN?  |N??  
+: TOKEN BL 
+    CALL \ WORD
+: ?C@ DUP 
+: C@ @ 
+: W>B (& ,< 255 , >,
+    THEN
+: WORD 
+    CALL \ PARSE
+: S>TB! TBUF S>"! 
+   TEST? DUP ID.
+
+    ;THEN
+: PARSE  NOP; ETIB LTIB; (PARS 
+;
+
+: N: DUP 
+: =, |, 
+: =H _HERE 
+: =: 0 
+: =F TOKEN? 
+
+  TEST? DUP ID. 01 STATE? BREAK
+  
+: H>T H>STR  : >T T; MPUSH ; 
+: (=:  ?C@ 1+ T; MPUSH  TWICE
+: !- 2- PUSH ! POP;  ; UNW
+      
+: CSTR ?C@ U1+ ;
+: ">NUMC (|LIT,, 
+: ">NUM CSTR (NUM  ?? ;
+: AT' |2- : TO' |2- : ' TOKEN? T : LOCATE FND? @ ; 
+ 
+
+\ FIXES ----------------------------
+          
+' |N?? ' FND?   T!
+\ ' (VAR ' @BKEY  T!    
+' (VAR ' @BEMIT T!  

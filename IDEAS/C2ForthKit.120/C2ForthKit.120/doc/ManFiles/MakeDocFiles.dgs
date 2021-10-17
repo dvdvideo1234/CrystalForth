@@ -1,0 +1,22 @@
+\ Documentation control file
+
+cr
+cr .( starting )
+cr
+
++docgen  docgen_texinfo +Index
+DocOnly ManFiles/manual.man
+DocOnly ManFiles/titlepg.man
+DocOnly ../harness/c2f_core
+DocOnly ../lib/assert
+DocOnly ../lib/conio
+DocOnly ../lib/ctype
+DocOnly ../lib/stdio
+DocOnly ../lib/stdlib
+DocOnly ../lib/string
+-docgen
+
+cr
+cr .( Done )
+cr
+

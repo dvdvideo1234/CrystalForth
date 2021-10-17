@@ -1,0 +1,292 @@
+2 CONST CELL#
+\ : HIBIT 0 SWAP |DROP CALL WHILE| U1+ THEN 2/ DUP ;
+\ : HIBIT 0 SWAP [ DROP 1- ] UNTILZ| U1+ 2/ DUP ;
+: CELLS ( CELL# HIBIT TIMES| ) 2* ;
+: CELL+ 2+ ;
+: WRD, , ;
+: HERE- HERE
+: CELL- 2- ;
+: DEA' FND?? DUP CELL+ @ UNDEF? ;
+
+: SPLIT, SPLIT 
+: BB, C, C, ;
+
+0 VALUE  ISS@  ( Start of current instruction )
+VARIABLE BA-DEFAULT    0 BA-DEFAULT !
+VARIABLE BA-XT
+
+'       T =: STARTVOC 
+'   HERE  =: AS-HERE
+'   C,    =: AS-C,
+0 VALUE ISL@  ( Length of current instruction )
+
+\ \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
+: IS-A VARIABLE HERE- DOES> PUSH @ @ @R+ = EXIT ; \ CHECK TYPE
+: REMEMBER` ?CSP HERE- SWAP! CSP! ;  \ REMEMBER TYPE  
+: assemble, DUP TO ISL@ STR| : lsbyte, DUP AS-C, B/ ;
+\ : B/ 8 : >> TIMES| 2/ ; \ RSHIFT
+
+( ------------- BOOKKEEPING ---------------------- )
+: >DATA @ 2+ ;
+: >DIS  @ 6 + ;
+\ : >DIS %>BODY 5 CELLS + ;
+
+\ BI - Bits that needs fixed up
+CREATE TBI     Z, Z, Z,  \ THE BLACK BOARD IS CLEAR
+\ BY - Bits represent a commaer that is to be supplied
+TBI 1 CELLS + CONST TBY
+\ BA - State bits, bad if two consequitive bits are up
+TBI 2 CELLS + CONST TBA
+
+0 VECTOR BBB[]
+: @BBB DUP @ 4+ C@ BBB[] DUP ,<
+0 VALUE BI^             ( OR!    AND!      --      >BI  )   
+: BY^ BI^ 2+ ;          ( OR!    OR!       AND!    >BY  )
+: BA^ BI^ 3 + ;         ( OR!U   OR!U      OR!U    >BA  )
+
+: BAD? TBA  @
+: BADPAIRS? DUP 2* AND $AAAAAAAAAAAAAAAA AND ;           
+: PRED_OR  2DUP AND !28" ;  \ PRE OR CHK
+: OR!?   |@!  PRED_OR OR ;
+: CHECK32 BAD? !32" ; ( Always an error )
+: PRED_AND  2DUP OR -1 - !29"   ;  \ PRE AND CHK
+: AND!?  PUSH NOT @I PRED_AND AND POP! ;
+: OR!U |@! OR ;                               
+: AT-REST?  TBI @ 0=   TBY @ 0=  AND ;                
+: !POSTIT  AS-HERE TO ISS@ 
+: !OLDCOMMA 0 ,<
+0 VALUE OLDCOMMA@
+1 VALUE  I-ALIGNMENT ( Instruction alignment )
+: CONTAINED-IN  OVER AND = ; ( leaving it IS      )
+: CHECK26 AT-REST? 0= !26" ;  ( Error at postit time )
+: CHECK30 DUP OLDCOMMA@ < !30" DUP TO OLDCOMMA@ ;
+: RESET-BAD   BA-XT @ DUP IF PUSH ] DROP  BA-DEFAULT @ TBA ! ;
+
+\ TALLIES  ------------------------------------------------
+: !TALLY  0 TBI !  0 TBY !  RESET-BAD  !OLDCOMMA  ; !TALLY
+: TALLY:, STR TBI ! CSTR TBY ! C@ TBA OR!U ;
+: TALLY:| STR TBI AND!? CSTR TBY OR!? C@ TBA OR!U ;
+
+: |SHOW` ; \ DUP CR 2- ?ID. DUP @ H.
+ \ EX |SPC TO BK H DUP H. 6 A-L |[] BYTES. ;
+
+\ Bits  ON COMMAERS  ---------------------------------
+\ $80 (RX,) address relative to IP : CELL
+\ $40 (RB,) address relative to IP : byte  
+\ $20 SG,   Segment: WORD
+\ $10 P,    port number : byte
+\  $8 IS,   immediate byte data, obligatory size
+\  $4 IX,   immediate data : cell
+\  $4 IB,   immediate byte data
+\  $2 X,    immediate data : address/offset
+\  $2 B,    immediate byte : address/offset
+\  $1 W,    obligatory word
+
+\ Bits - BI  -------------------------------------
+\   1 OPERAND IS BYTE
+\   2 OPERAND IS CELL
+\   4 OFFSET DB|
+\   8 ADDRESS  DW|   
+\  10 Register op    
+\  20 Memory op 
+\  40 D0             
+\  80 [BP]    
+         
+\ MAKERS -------------------------------------------------
+: TB, BI^ C, ; \ ON COMPILE TIME ONLY
+IS-A IS-COMMA 
+: COMMAER CREATE  ,'  TB,    C,  ,' \ DIS-COMMA-SHOW
+      DOES> REMEMBER STR PUSH C@ BBB[] 
+: TALLY:,, CSTR CHECK30 TBY AND!? 2+ C@ TBA OR!U ;    
+      
+IS-A IS-1PI   
+: 1PI CREATE--      , TB,  1 C, 
+      DOES> REMEMBER 
+: POSTIT @+  CHECK26 !TALLY   !POSTIT CSTR  BBB[]
+   TALLY:, C@ assemble, ;
+IS-A IS-2PI
+: 2PI CREATE-- SPLIT, TB,  2 C, 
+      DOES> REMEMBER POSTIT ;
+IS-A IS-1FI   
+: 1FI CREATE--  0 BB, TB,  1 C, 
+      DOES> REMEMBER
+: FIXUP>   STR H CELL- OR!? C@ BBB[] TALLY:| CHECK32 ;
+IS-A IS-2FI   
+: 2FI CREATE-- SPLIT, TB,  2 C, 
+      DOES> REMEMBER FIXUP> ;
+IS-A `IS-END   
+: `ENDER <BUILD 
+      DOES> REMEMBER ;; ,< \ NO TAIL
+
+: IS-PI DUP IS-1PI SWAP IS-2PI   OR  ;
+: IS-FI DUP IS-1FI SWAP IS-2FI   OR  ;
+: IS-OP DUP IS-PI  OVER IS-FI    OR  SWAP IS-COMMA OR ;
+
+\ ------------- DATA STRUCTURES --------------------------
+( A row of dea's representing a disassembly )
+12 KIT: DISS    : !DISS AT DISS KIT! ;  !DISS
+: DISS-  DISS DROP ;     \ Discard last item of `DISS'
+: DISS" AT DISS KIT" ;   ( `DISS' STATE ) 
+: DISS? AT DISS KIT? ;   ( `DISS' COUNT )
+: DISS. |CR SPC DISS" STR| @+ XEP| DUP IS-COMMA
+  IF J AT DISS 6 + - . THEN WID.  ;   
+' DISS.  VECTOR DISS-VECTOR 
+
+\ ------------- TRYERS ---------------------------
+: @BBW. [ CSTR ] AHEAD   : SPHHH. XEP|  SP@  TBI SWAP
+: @HHH. [ STR ] THEN CR H. SPC STR H. (IXEC H. EX H. DROP ;
+: DB2. BI^ DUP @BBW.     : DB. SPHHH. ". DBG. ;
+
+: TRY-PI
+\ "TRY-PI1" DB.
+   DUP IS-PI 0; AT-REST? 0;
+   @BBB
+\ "TRY-PI4" DB2.
+   TALLY:, 
+\ "TRY-PI5" DB.
+: DISS+ DUP TO DISS 
+ \ DISS. 
+;
+
+: TRY-FI
+\ "TRY-FI1" DB.
+ DUP IS-FI 0; @BBB
+\ "TRY-FI3" DB2.
+ @  TBI @
+\ DBG.
+ CONTAINED-IN
+\ DBG.
+ 0;
+     BI^ 
+\ "TRY-FI4" DB2.
+     TALLY:|
+\ "TRY-FI5" DB.
+     DISS+ 
+;
+
+: BACKTRACK? 0;  : BACKTRACK DROP DISS  \"BACKTRACKING_" 
+( ."Failed_at_:" DUP WID. CR )   >DEA \ REBUILD ;
+: REBUILD  !TALLY   DISS? 0;  DISS" !DISS STR| @+ XEP| |DROP 
+: TRYER   TRY-PI TRY-FI  
+: TRY-COMMA
+\ "TRY-COMMA1" DB.
+    DUP IS-COMMA 0;
+    @BBB 
+\ "TRY-COMMA2" DB2.
+    C@  TBY @
+\ DBG.
+    CONTAINED-IN
+\ DBG.
+    0;
+    BI^ 
+\ "TRY-COMMA4" DB2.
+    TALLY:,, 
+\ "TRY-COMMA5" DB.
+    DISS+ ;
+
+: `AWORD: C: : Z, DOES> CR PUSH STARTVOC BEGIN DUP DEA?
+ WHILE (IXEC  >DEA  DUP `IS-END  UNTIL THEN POP 2DROP ; 
+
+: `|WIDI DUP EX 0; DUP WID. 
+1L OVER DEA? 1+ CNTC + U< 0; CR ; \ SHOW sift WORDS
+`AWORD: SHOW-ALL `|WIDI IS-OP    ; \ SHOW OPLIST 
+`AWORD: SHOW-PI  `|WIDI IS-PI    ; \ SHOW IT 
+`AWORD: SHOW-FI  `|WIDI IS-FI    ; \ SHOW IT 
+`AWORD: SHOW-,   `|WIDI IS-COMMA ; \ SHOW IT 
+
+: RESULT? AT-REST? DISS? AND   BAD? 0= AND ;
+: .RESULT RESULT? 0; DISS-VECTOR  DISS- REBUILD ;
+: SHOW-STEP  TRYER  .RESULT >DEA  BAD? BACKTRACK?
+    CALL WHILE| BACKTRACK THEN DUP `IS-END DISS? AND ;  
+: FSHOW "DUMP.TXT" >FILE \ SAVE SHOW: TO FILE
+: SHOW: !DISS   !TALLY DEA' DUP BEGIN SHOW-STEP  OVER
+ DISS" DROP @ - OVER `IS-END OR UNTIL DROP DROP ;
+: TBB. TBI @ H. TBY @ H. TBA @ H. ;
+
+
+HERE |VALUE `|ASP AS-POINTER@
+: >CURL DUP @ 5+ C@  ,<
+0 VALUE CURL
+M: MC<0` + 1- C@ $80 AND $80 = ;
+: MC@-S 2DUP MC<0 AHEAD XEP| AS-POINTER@ 
+: GETCODE CURL THEN
+: MC@ 0 -ROT : lsbytes <ITER| 
+: lsbyte@  C@ SWAP B* OR  ;
+: GETMASK CELL+ CURL A-L MC@ ;
+: INSTRUCTION  ISS@ ISL@ MC@ ;
+
+0 VALUE LATEST-INSTRUCTION@
+: COMPATIBLE? TBA @ OR BADPAIRS? 0= ;
+: `ADORN-ADDRESS DROP CR ;
+
+
+( ---------------- DISASSEMBLERS ------------------------ )
+0 VALUE IN-PI
+
+: DIS-PI DUP IS-PI 0;
+    AT-REST? 0;
+	>CURL CURL  TO ISL@
+\ ISL@ .    
+    @BBB GETMASK
+\ "DIS-PI4" DB2. GETCODE
+\ DUP $FF03 AND $FF03 = DUP TO IN-PI IF 
+\ OVER >DATA @ $88 = DUP TO IN-PI IF
+\ CR SP@ H. DUP H. OVER WID.
+\ OVER >DATA @ H. "PI4" DB2. THEN THEN 
+    NOT     \ CREATE OP MASK
+    AT GETCODE AND      \ APPLY TO REAL CODE
+\ IN-PI IF OVER >DATA @ DBG. DROP THEN    
+    OVER >DATA @ = 0;     \ COMPARE WITH OP-DATA
+        BI^  TALLY:,
+\ IN-PI IF  "DIS-PI.." DB2. THEN
+        DISS+ 
+\ IN-PI IF  DISS. THEN
+        DUP TO LATEST-INSTRUCTION@
+        AS-POINTER@ TO ISS@      \ OLD ADDRESS TO ISS
+: ADJUST-ADDRESS CURL `|ASP + ; 
+
+: DIS-FI
+   DUP IS-FI 0;
+   >CURL @BBB  @ TBI @ CONTAINED-IN 0;
+\ IN-PI IF "DIS-F-0.." DB2. DUP WID. THEN
+   BI^ GETMASK  INSTRUCTION AND OVER >DATA  GETMASK = 0;
+   BA^ C@  COMPATIBLE? 0;
+\ "FI2" DB2. 
+   BI^ TALLY:| 
+\ IN-PI IF "DIS-F-1.." DB2. THEN
+   DISS+ 
+\ IN-PI IF "DIS-F-2.." DB2. CR DISS. THEN
+;
+
+: DIS-COMMA DUP IS-COMMA 0;
+   >CURL @BBB C@ TBY @ CONTAINED-IN 0;   
+   BA^ C@  COMPATIBLE? 0;
+\ "DIS-COMMA1" DB2.
+   BI^ TALLY:,, 
+\ "DIS-COMMA2" DB2.
+   DISS+ ;
+
+: .DISS   DISS" STR| @+ XEP|  DUP IS-COMMA IF ? WID. 
+: .COMMA   DUP >DIS @ DUP PUSH 0<>; RDROP
+: .COMMA-STANDARD  TO GETCODE DUP U. ADJUST-ADDRESS
+   ."(_" ?ID. .")_" WID. ;
+: .COMMA-SIGNED TO GETCODE . ADJUST-ADDRESS WID. ;
+
+: DDD  : `(DISASSEMBLE)   !DISS !TALLY STARTVOC 
+: `((DISASSEMBLE)) SWAP DUP TO AS-POINTER@ PUSH \ 3 SPACES
+."(_" AS-POINTER@ H. .")__"
+    ( startdea -- ) BEGIN DIS-PI DIS-FI DIS-COMMA >DEA
+    DUP `IS-END RESULT? OR UNTIL DROP
+    RESULT? IF .DISS     \ Advances pointer past commaers
+      \ LATEST-INSTRUCTION @ >PRF @ BA-XT !
+      RDROP AS-POINTER@ ;THEN POP
+: SHOW-MEM  UNTILZ| CSTR . ."C,__" DUP I-ALIGNMENT UMOD ; 
+             
+: D-F ( : FORCED-DISASSEMBLY )
+    !DISS   !TALLY   AS-POINTER@ SWAP `((DISASSEMBLE)) DROP ;
+>, >FILE \ DUMP OUTPUT TO FILE	
+: D-S ( DISASSEMBLE-STRING ) OVER+	
+: D-R ( : DISASSEMBLE-RANGE ) SWAP |2DROP UNTIL|
+\ CR CR CR ."DISASSEMBLE-RANGE__" OVER H. ."-_" DUP H. CR
+  DUP `ADORN-ADDRESS `(DISASSEMBLE) 2DUP  1+ U< ;

@@ -1,0 +1,59 @@
+\ manual.man
+
+\ *! ###
+
+\ =========
+\ *! manual
+\ =========
+
+\ *R \input texinfo
+\ *R @setfilename            C2Forth.info
+\ *R @setcontentsaftertitlepage
+\ *R @afourpaper
+\ *R @settitle               C2Forth
+\ *R @setchapternewpage      odd
+\ *R @paragraphindent        0
+\ *R @exampleindent          0
+\ *R @finalout
+
+\ *R @tex
+\ *R \newcount\sheetno\sheetno=0
+\ *R \global\def\advancepageno{\global\advance\sheetno 1\ifnum\pageno<0\global\advance\pageno -1\else\global\advance\pageno 1\fi}
+\ *R @end tex
+
+\ *R @include titlepg
+\ *R @include c2forth
+\ *R @include limit
+\ *R @include coutput
+\ *R @include harness
+\ *R @include libs
+\ *R @include libc
+\ *R @include use
+
+((
+( *W <A HREF="c2f_core.txt">The Kernel Support Source Code</A><BR>      )
+))
+
+\ *R @unnumbered{Index}
+\ *R @*
+\ *R @printindex fn
+
+\ *R @bye
+
+\ ======
+\ *> ###
+\ ======
+
+
+\ =======
+\ *! libc
+\ *T C library
+\ =======
+\ *P C2Forth provides a minimal version of the C standard library.
+\ ** The minimal version is enough for most embedded applications.
+\ ** You can extend the the library yourself in Forth or C.
+
+\ ======
+\ *> ###
+\ ======
+

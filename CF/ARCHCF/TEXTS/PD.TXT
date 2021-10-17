@@ -1,0 +1,256 @@
+0000           ADD    [BX+SI],AL
+0101           ADD    [BX+DI],AX
+0202           ADD    AL,[BP+SI]
+0303           ADD    AX,[BP+DI]
+0404           ADD    AL,04
+050505         ADD    AX,0505
+06             PUSH   ES
+07             POP    ES
+0808           OR     [BX+SI],CL
+0909           OR     [BX+DI],CX
+0A0A           OR     CL,[BP+SI]
+0B0B           OR     CX,[BP+DI]
+0C0C           OR     AL,0C
+0D0D0D         OR     AX,0D0D
+0E             PUSH   CS
+0F             DB     0F
+1010           ADC    [BX+SI],DL
+1111           ADC    [BX+DI],DX
+1212           ADC    DL,[BP+SI]
+1313           ADC    DX,[BP+DI]
+1414           ADC    AL,14
+151515         ADC    AX,1515
+16             PUSH   SS
+17             POP    SS
+1818           SBB    [BX+SI],BL
+1919           SBB    [BX+DI],BX
+1A1A           SBB    BL,[BP+SI]
+1B1B           SBB    BX,[BP+DI]
+1C1C           SBB    AL,1C
+1D1D1D         SBB    AX,1D1D
+1E             PUSH   DS
+1F             POP    DS
+2020           AND    [BX+SI],AH
+2121           AND    [BX+DI],SP
+2222           AND    AH,[BP+SI]
+2323           AND    SP,[BP+DI]
+2424           AND    AL,24
+252525         AND    AX,2525
+26             ES:
+27             DAA
+2828           SUB    [BX+SI],CH
+2929           SUB    [BX+DI],BP
+2A2A           SUB    CH,[BP+SI]
+2B2B           SUB    BP,[BP+DI]
+2C2C           SUB    AL,2C
+2D2D2D         SUB    AX,2D2D
+2E             CS:
+2F             DAS
+3030           XOR    [BX+SI],DH
+3131           XOR    [BX+DI],SI
+3232           XOR    DH,[BP+SI]
+3333           XOR    SI,[BP+DI]
+3434           XOR    AL,34
+353535         XOR    AX,3535
+36             SS:
+37             AAA
+3838           CMP    [BX+SI],BH
+3939           CMP    [BX+DI],DI
+3A3A           CMP    BH,[BP+SI]
+3B3B           CMP    DI,[BP+DI]
+3C3C           CMP    AL,3C
+3D3D3D         CMP    AX,3D3D
+3E             DS:
+3F             AAS
+40             INCX    AX
+41             INCX    CX
+42             INCX    DX
+43             INCX    BX
+44             INCX    SP
+45             INCX    BP
+46             INCX    SI
+47             INCX    DI
+48             DECX    AX
+49             DECX    CX
+4A             DECX    DX
+4B             DECX    BX
+4C             DECX    SP
+4D             DECX    BP
+4E             DECX    SI
+4F             DECX    DI
+50             PUSHX   AX
+51             PUSHX   CX
+52             PUSHX   DX
+53             PUSHX   BX
+54             PUSHX   SP
+55             PUSHX   BP
+56             PUSHX   SI
+57             PUSHX   DI
+58             POPX    AX
+59             POPX    CX
+5A             POPX    DX
+5B             POPX    BX
+5C             POPX    SP
+5D             POPX    BP
+5E             POPX    SI
+5F             POPX    DI
+60             PUSHA
+61             POPA
+626262         BOUND  SP,[BP+SI+62]
+636363         ARPL   [BP+DI+63],SP
+64             DB     64
+65             DB     65
+66             DB     66
+67             DB     67
+686868         PUSH   6868
+6969696969     IMUL  BP,[BX+DI+69],6969
+6A6A           PUSH   006A
+6B6B6B6B       IMUL  BP,[BP+DI+6B],006B
+6C             INSB
+6D             INSW
+6E             OUTSB
+6F             OUTSW
+7070           JO     0412
+7171           JNO    041D
+7272           JC     0420
+7373           JNC    042B
+7474           JZ     042E
+7575           JNZ    0439
+7676           JNA    043C
+7777           JA     0447
+7878           JS     044A
+7979           JNS    0455
+7A7A           JP     0458
+7B7B           JNP    0463
+7C7C           JL     0466
+7D7D           JNL    0471
+7E7E           JNG    0474
+7F7F           JG     047F
+8081818181     ADD    [BX+DI+8181],81
+818182828282   ADD    [BX+DI+8282],8282
+8282838383     ADD    [BP+SI+8383],FF83
+8383838484     ADD    [BP+DI+8483],FF84
+84848484       TEST   [SI+8484],AL
+85858686       TEST   [DI+8686],AX
+86868686       XCHG   AL,[BP+8686]
+87878888       XCHG   AX,[BX+8888]
+88888888       MOV    [BX+SI+8888],CL
+89898989       MOV    [BX+DI+8989],CX
+8A8A8A8A       MOV    CL,[BP+SI+8A8A]
+8B8B8B8B       MOV    CX,[BP+DI+8B8B]
+8C8C8C8C       MOVSG  [SI+8C8C],CS
+8D8D8E8E       LEA    CX,[DI+8E8E]
+8E8E8E8E       MOVSG  CS,[BP+8E8E]
+8F             DB     8F
+90             NOP
+91             XCHGX  AX,CX
+92             XCHGX  AX,DX
+93             XCHGX  AX,BX
+94             XCHGX  AX,SP
+95             XCHGX  AX,BP
+96             XCHGX  AX,SI
+97             XCHGX  AX,DI
+98             CBW
+99             CWD
+9A9A9A9A9A     CALLF  9A9A:9A9A
+9B             WAIT
+9C             PUSHF
+9D             POPF
+9E             SAHF
+9F             LAHF
+A0A0A0         MOV    AL,[A0A0]
+A1A1A1         MOV    AX,[A1A1]
+A2A2A2         MOV    [A2A2],AL
+A3A3A3         MOV    [A3A3],AX
+A4             MOVSB
+A5             MOVSW
+A6             CMPSB
+A7             CMPSW
+A8A8           TEST   AL,A8
+A9A9A9         TEST   AX,A9A9
+AA             STOSB
+AB             STOSW
+AC             LODSB
+AD             LODSW
+AE             SCASB
+AF             SCASW
+B0B0           MOV    AL,B0
+B1B1           MOV    CL,B1
+B2B2           MOV    DL,B2
+B3B3           MOV    BL,B3
+B4B4           MOV    AH,B4
+B5B5           MOV    CH,B5
+B6B6           MOV    DH,B6
+B7B7           MOV    BH,B7
+B8B8B8         MOV    AX,B8B8
+B9B9B9         MOV    CX,B9B9
+BABABA         MOV    DX,BABA
+BBBBBB         MOV    BX,BBBB
+BCBCBC         MOV    SP,BCBC
+BDBDBD         MOV    BP,BDBD
+BEBEBE         MOV    SI,BEBE
+BFBFBF         MOV    DI,BFBF
+C0C0C0         ROL    AL,C0
+C1C1C1         ROL    CX,C1
+C2C2C2         RET      C2C2
+C3             RET
+C4             DB     C4
+C5             DB     C5
+C6C6C6         MOV    DH,C6
+C7C7C8C8       MOV    DI,C8C8
+C8C8C8C8       ENTER  C8C8,C8
+C9             LEAVE
+CACACA         RET    Far  CACA
+CB             RET    Far
+CC             INT3
+CDCD           INT    CD
+CE             INTO
+CF             IRET
+D0D0           RCL    AL,1
+D1D1           RCL    CX,1
+D2D2           RCL    DL,CL
+D3D3           RCL    BX,CL
+D4             DB     D4
+D5             DB     D5
+D6             DB     D6
+D7             XLAT
+D8D8           ESC    03,AL
+D9D9           ESC    0B,CL
+DADA           ESC    13,DL
+DBDB           ESC    1B,BL
+DCDC           ESC    23,AH
+DDDD           ESC    2B,CH
+DEDE           ESC    33,DH
+DFDF           ESC    3B,BH
+E0E0           LOOPNZ 0622
+E1E1           LOOPZ  062D
+E2E2           LOOP   0630
+E3E3           JCXZ   063B
+E4E4           IN     AL,[E4]
+E5E5           IN     AX,[E5]
+E6E6           OUT    [E6],AL
+E7E7           OUT    [E7],AX
+E8E8E8         CALL   EF5B
+E9E9E9         JMP    F065
+EAEAEAEAEA     JMPF   EAEA:EAEA
+EBEB           JMPS   0673
+EC             IN     AL,DX
+ED             IN     AX,DX
+EE             OUT    DX,AL
+EF             OUT    DX,AX
+F0             LOCK
+F1             DB     F1
+F2             REPNZ
+F3             REP
+F4             HLT
+F5             CMC
+F6F6           DIV    DH
+F7F7           DIV    DI
+F8             CLC
+F9             STC
+FA             CLI
+FB             STI
+FC             CLD
+FD             STD
+FE             DB     FE
+FF02           INC    W/[BP+SI]

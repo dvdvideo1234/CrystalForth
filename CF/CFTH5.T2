@@ -1,0 +1,723 @@
+$2FF2 OBJ $0100 ORG 
+
+  MOVBI, AH| 74 ( ' ~004A ) IB, 
+( 0100 B44A ) 
+  MOVXI, BX| 4096 ( ' ~1000 ) IX, 
+( 0102 BB0010 ) 
+  INTI, 33 ( ' ~0021 ) IB, 
+( 0105 CD21 ) 
+  CALL, 71 ( L' @0151 ) (RX,) 
+( 0107 E84700 ) 
+
+  1884 ( L' @075C ) DA, 
+( 010A 5C07 ) 
+  2240 ( L' @08C0 ) DA, 
+( 010C C008 ) 
+  1422 ( L' @058E ) DA, 
+( 010E 8E05 ) 
+
+=L @QUIT ( $0110 ) 
+  2830 ( L' @0B0E ) DA, 
+( 0110 0E0B ) 
+  359 ( L' (JUMP ) DA, 
+( 0112 6701 ) 
+  268 ( L' @010C ) DA, 
+( 0114 0C01 ) 
+
+=L @HI# ( $0116 ) 
+  784 ( L' @(CON ) DA, 
+( 0116 1003 ) 
+  0 ( L' @0000 ) DA, 
+( 0118 0000 ) 
+
+=L @1+ ( $011A ) 
+  319 ( L' (@+; ) DA, 
+( 011A 3F01 ) 
+
+=L @BYE ( $011C ) 
+  1 ( L' @0001 ) DA, 
+( 011C 0100 ) 
+
+=L @TRON ( $011E ) 
+  421 ( L' (IO; ) DA, 
+( 011E A501 ) 
+\ MOVXI, CX| -15381 ( ' ~C3EB ) IX, 
+( 0120 B9EBC3 ) 
+  185 ( ' ~00B9 ) DB, 
+( 0120 B9 ) 
+  235 ( ' ~00EB ) DB, 
+( 0121 EB ) 
+  195 ( ' ~00C3 ) DB, 
+( 0122 C3 ) 
+  XCHG, W| CX> /M/ 408 ( L' @0198 ) X, 
+( 0123 870E9801 ) 
+  RET, 
+( 0127 C3 ) 
+
+P=: (TROFF; 
+  CALL, 130 ( L' @01AD ) (RX,) 
+( 0128 E88200 ) 
+\ MOVXI, CX| 3979 ( ' ~0F8B ) IX, 
+( 012B B98B0F ) 
+  185 ( ' ~00B9 ) DB, 
+( 012B B9 ) 
+  MOV, W| T| CX> D0/ /BX 
+( 012C 8B0F ) 
+  JMPS, -13 ( L' @0123 ) (RB,) 
+( 012E EBF3 ) 
+
+P=: (2PUSH; 
+  PUSHX, AX| 
+( 0130 50 ) 
+  LODS, W| 
+( 0131 AD ) 
+
+P=: (PUSH; 
+  PUSHX, AX| 
+( 0132 50 ) 
+  NOP, 
+( 0133 90 ) 
+
+P=: (DROP; 
+  LODS, W| 
+( 0134 AD ) 
+\ CMPAI, W| 1827 ( ' ~0723 ) IX, 
+( 0135 3D2307 ) 
+  61 ( ' ~003D ) DB, 
+( 0135 3D ) 
+
+P=: (@&; 
+  AND, W| T| AX> D0/ /BX 
+( 0136 2307 ) 
+  JMPS, 93 ( L' @0197 ) (RB,) 
+( 0138 EB5D ) 
+
+P=: (2RDRP; 
+  POPX, CX| 
+( 013A 59 ) 
+  NOP, 
+( 013B 90 ) 
+
+P=: (RDRP; 
+  POPX, CX| 
+( 013C 59 ) 
+\ CMPAI, W| 1795 ( ' ~0703 ) IX, 
+( 013D 3D0307 ) 
+  61 ( ' ~003D ) DB, 
+( 013D 3D ) 
+
+P=: (@+; 
+  ADD, W| T| AX> D0/ /BX 
+( 013E 0307 ) 
+  JMPS, 85 ( L' @0197 ) (RB,) 
+( 0140 EB55 ) 
+
+P=: (IF 
+  OR, W| T| AX> R| AX| 
+( 0142 0BC0 ) 
+  J, Z| Y| 31 ( L' (FOR ) (RB,) 
+( 0144 741F ) 
+  LODS, W| 
+( 0146 AD ) 
+  NOP, 
+( 0147 90 ) 
+
+P=: (SKIP 
+  INCX, BX| 
+( 0148 43 ) 
+  INCX, BX| 
+( 0149 43 ) 
+  JMPS, 76 ( L' @0198 ) (RB,) 
+( 014A EB4C ) 
+
+P=: (NEXT 
+  POPX, CX| 
+( 014C 59 ) 
+  DECX, CX| 
+( 014D 49 ) 
+  PUSHX, CX| 
+( 014E 51 ) 
+  JMPS, 16 ( L' (IF- ) (RB,) 
+( 014F EB10 ) 
+
+=L @0151 ( $0151 ) 
+  POPX, BX| 
+( 0151 5B ) 
+  MOVXI, SP| -66 ( ' ~FFBE ) IX, 
+( 0152 BCBEFF ) 
+  MOVXI, SI| -706 ( ' ~FD3E ) IX, 
+( 0155 BE3EFD ) 
+  CALL, -48 ( L' @012B ) (RX,) 
+( 0158 E8D0FF ) 
+  JMPS, 59 ( L' @0198 ) (RB,) 
+( 015B EB3B ) 
+  JMP, 4230 ( L' @11E6 ) (RX,) 
+( 015D E98610 ) 
+
+P=: (IF- 
+  DECX, AX| 
+( 0160 48 ) 
+  J, S| Y| -27 ( L' @0148 ) (RB,) 
+( 0161 78E5 ) 
+\ CMPAI, W| -21168 ( ' ~AD50 ) IX, 
+( 0163 3D50AD ) 
+  61 ( ' ~003D ) DB, 
+( 0163 3D ) 
+
+P=: (FOR 
+  PUSHX, AX| 
+( 0164 50 ) 
+  LODS, W| 
+( 0165 AD ) 
+
+P=: (JUMP 
+  MOV, W| T| BX> D0/ /BX 
+( 0166 8B1F ) 
+  JMPS, 46 ( L' @0198 ) (RB,) 
+( 0168 EB2E ) 
+  SHL, 1| W| R| AX| 
+( 016A D1E0 ) 
+  SHL, 1| W| R| AX| 
+( 016C D1E0 ) 
+  SHL, 1| W| R| AX| 
+( 016E D1E0 ) 
+
+P=: (BARY 
+  ADD, W| T| AX> R| BX| 
+( 0170 03C3 ) 
+
+P=: (; 
+  JMPS, 35 ( L' @0197 ) (RB,) 
+( 0172 EB23 ) 
+
+P=: (POP; 
+  POPX, CX| 
+( 0174 59 ) 
+  POPX, BX| 
+( 0175 5B ) 
+  JMPS, 11 ( L' @0183 ) (RB,) 
+( 0176 EB0B ) 
+
+P=: (!R+ 
+  POPX, DI| 
+( 0178 5F ) 
+  STOS, W| 
+( 0179 AB ) 
+  PUSHX, DI| 
+( 017A 57 ) 
+  LODS, W| 
+( 017B AD ) 
+  JMPS, 26 ( L' @0198 ) (RB,) 
+( 017C EB1A ) 
+
+P=: (@R+ 
+  POPX, DI| 
+( 017E 5F ) 
+  MOV, W| T| CX> D0/ /DI 
+( 017F 8B0D ) 
+  SCAS, W| 
+( 0181 AF ) 
+  PUSHX, DI| 
+( 0182 57 ) 
+
+=L @0183 ( $0183 ) 
+  DECX, SI| 
+( 0183 4E ) 
+  DECX, SI| 
+( 0184 4E ) 
+  MOV, W| F| AX> D0/ /SI 
+( 0185 8904 ) 
+  XCHGX, CX| 
+( 0187 91 ) 
+  JMPS, 14 ( L' @0198 ) (RB,) 
+( 0188 EB0E ) 
+
+P=: (XR 
+  POPX, CX| 
+( 018A 59 ) 
+  PUSHX, AX| 
+( 018B 50 ) 
+  JMPS, -7 ( L' @0187 ) (RB,) 
+( 018C EBF9 ) 
+
+P=: (XA 
+  POPX, DI| 
+( 018E 5F ) 
+  PUSHX, DX| 
+( 018F 52 ) 
+  MOV, W| T| DX> R| DI| 
+( 0190 8BD7 ) 
+  JMPS, 4 ( L' @0198 ) (RB,) 
+( 0192 EB04 ) 
+
+P=: (EX 
+  POPX, CX| 
+( 0194 59 ) 
+  PUSHX, BX| 
+( 0195 53 ) 
+  PUSHX, CX| 
+( 0196 51 ) 
+
+=L @0197 ( $0197 ) 
+  POPX, BX| 
+( 0197 5B ) 
+
+P=: (NOP 
+
+=L @0198 ( $0198 ) 
+  MOV, W| T| CX> D0/ /BX 
+( 0198 8B0F ) 
+  INCX, BX| 
+( 019A 43 ) 
+  INCX, BX| 
+( 019B 43 ) 
+  TESTI, B| R| CL| 1 ( ' @0001 ) IB, 
+( 019C F6C101 ) 
+  J, Z| Y| -12 ( L' (EX ) (RB,) 
+( 019F 74F4 ) 
+  DECX, CX| 
+( 01A1 49 ) 
+  JMPO, R| CX| 
+( 01A2 FFE1 ) 
+
+P=: (IO; 
+  PUSHX, BX| 
+( 01A4 53 ) 
+  MOV, W| T| DX> DB/ /SI 4 (SB,) 
+( 01A5 8B5404 ) 
+  MOV, W| T| CX> DB/ /SI 2 (SB,) 
+( 01A8 8B4C02 ) 
+  MOV, W| T| BX> D0/ /SI 
+( 01AB 8B1C ) 
+
+=L @01AD ( $01AD ) 
+  POPX, DI| 
+( 01AD 5F ) 
+  CALLO, R| DI| 
+( 01AE FFD7 ) 
+  JMPS, -27 ( L' @0197 ) (RB,) 
+( 01B0 EBE5 ) 
+
+P=: (BE 
+  MOVBI, AH| 14 ( ' ~000E ) IB, 
+( 01B2 B40E ) 
+  INTI, 16 ( ' ~0010 ) IB, 
+( 01B4 CD10 ) 
+
+P=: (DROP 
+  JMPS, 1 ( L' (PUSH ) (RB,) 
+( 01B6 EB01 ) 
+
+P=: (PUSH 
+  PUSHX, AX| 
+( 01B8 50 ) 
+  LODS, W| 
+( 01B9 AD ) 
+  JMPS, -36 ( L' @0198 ) (RB,) 
+( 01BA EBDC ) 
+
+P=: (J 
+  POPX, DI| 
+( 01BC 5F ) 
+  POPX, CX| 
+( 01BD 59 ) 
+  PUSHX, CX| 
+( 01BE 51 ) 
+  PUSHX, DI| 
+( 01BF 57 ) 
+  JMPS, -63 ( L' @0183 ) (RB,) 
+( 01C0 EBC1 ) 
+
+P=: (A@ 
+  PUSHX, DX| 
+( 01C2 52 ) 
+\ CMPAI, B| 84 ( ' ~0054 ) IB, 
+( 01C3 3C54 ) 
+  60 ( ' ~003C ) DB, 
+( 01C3 3C ) 
+
+P=: (RP@ 
+  PUSHX, SP| 
+( 01C4 54 ) 
+\ CMPAI, B| 86 ( ' ~0056 ) IB, 
+( 01C5 3C56 ) 
+  60 ( ' ~003C ) DB, 
+( 01C5 3C ) 
+
+P=: (SP@ 
+  PUSHX, SI| 
+( 01C6 56 ) 
+\ CMPAI, B| 80 ( ' ~0050 ) IB, 
+( 01C7 3C50 ) 
+  60 ( ' ~003C ) DB, 
+( 01C7 3C ) 
+
+P=: (DUP 
+  PUSHX, AX| 
+( 01C8 50 ) 
+  POPX, CX| 
+( 01C9 59 ) 
+  JMPS, -73 ( L' @0183 ) (RB,) 
+( 01CA EBB7 ) 
+
+P=: (OVER 
+  PUSH, D0/ /SI 
+( 01CC FF34 ) 
+
+P=: (POP 
+  JMPS, -7 ( L' (DUP ) (RB,) 
+( 01CE EBF9 ) 
+
+P=: (U< 
+  SUB, W| F| AX> D0/ /SI 
+( 01D0 2904 ) 
+  LODS, W| 
+( 01D2 AD ) 
+\ MOVXI, CX| -7983 ( ' ~E0D1 ) IX, 
+( 01D3 B9D1E0 ) 
+  185 ( ' ~00B9 ) DB, 
+( 01D3 B9 ) 
+
+P=: (0< 
+  SHL, 1| W| R| AX| 
+( 01D4 D1E0 ) 
+  SBB, W| T| AX> R| AX| 
+( 01D6 1BC0 ) 
+  JMPS, -66 ( L' @0198 ) (RB,) 
+( 01D8 EBBE ) 
+
+P=: (-/ 
+  SHL, 1| W| D0/ /SI 
+( 01DA D124 ) 
+  RCL, 1| W| R| AX| 
+( 01DC D1D0 ) 
+  CMP, W| T| AX> R| DX| 
+( 01DE 3BC2 ) 
+  J, C| Y| 4 ( L' @01E6 ) (RB,) 
+( 01E0 7204 ) 
+  SUB, W| T| AX> R| DX| 
+( 01E2 2BC2 ) 
+
+P=: (U1+ 
+  INC, W| D0/ /SI 
+( 01E4 FF04 ) 
+
+=L @01E6 ( $01E6 ) 
+  JMPS, -80 ( L' @0198 ) (RB,) 
+( 01E6 EBB0 ) 
+
+P=: (+2/ 
+  ADD, W| F| AX> D0/ /SI 
+( 01E8 0104 ) 
+  MOV, W| T| AX> D0/ /SI 
+( 01EA 8B04 ) 
+
+P=: (2/ 
+  RCR, 1| W| R| AX| 
+( 01EC D1D8 ) 
+  JMPS, -88 ( L' @0198 ) (RB,) 
+( 01EE EBA8 ) 
+
+P=: (+* 
+  TESTI, W| D0/ /SI 1 ( ' @0001 ) IX, 
+( 01F0 F7040100 ) 
+  J, Z| Y| 2 ( L' @01F8 ) (RB,) 
+( 01F4 7402 ) 
+  ADD, W| T| AX> R| DX| 
+( 01F6 03C2 ) 
+
+P=: (D2/ 
+
+=L @01F8 ( $01F8 ) 
+  RCR, 1| W| R| AX| 
+( 01F8 D1D8 ) 
+  RCR, 1| W| D0/ /SI 
+( 01FA D11C ) 
+  JMPS, -102 ( L' @0198 ) (RB,) 
+( 01FC EB9A ) 
+
+P=: (NAND 
+  AND, W| F| AX> D0/ /SI 
+( 01FE 2104 ) 
+  LODS, W| 
+( 0200 AD ) 
+  INCX, AX| 
+( 0201 40 ) 
+
+P=: (NEG 
+  NEG, W| R| AX| 
+( 0202 F7D8 ) 
+  JMPS, -110 ( L' @0198 ) (RB,) 
+( 0204 EB92 ) 
+
+P=: (0= 
+  NEG, W| R| AX| 
+( 0206 F7D8 ) 
+  SBB, W| T| AX> R| AX| 
+( 0208 1BC0 ) 
+
+P=: (NOT 
+  JMPS, -11 ( L' @0201 ) (RB,) 
+( 020A EBF5 ) 
+  659 ( L' @0293 ) DA, 
+( 020C 9302 ) 
+  654 ( L' @028E ) DA, 
+( 020E 8E02 ) 
+  568 ( L' @0238 ) DA, 
+( 0210 3802 ) 
+  574 ( L' @023E ) DA, 
+( 0212 3E02 ) 
+  577 ( L' @0241 ) DA, 
+( 0214 4102 ) 
+  580 ( L' @0244 ) DA, 
+( 0216 4402 ) 
+    ,"%&$#'"^"
+  INCX, SI| 
+( 021E 46 ) 
+  J, Z| Y| 20 ( L' @0235 ) (RB,) 
+( 021F 7414 ) 
+  CMPI, B| D0/ X/S 45 ( ' ~002D ) IB, 
+( 0221 80382D ) 
+  J, Z| N| 14 ( L' @0234 ) (RB,) 
+( 0224 750E ) 
+  INCX, SI| 
+( 0226 46 ) 
+  J, Z| Y| 12 ( L' @0235 ) (RB,) 
+( 0227 740C ) 
+  POPX, DX| 
+( 0229 5A ) 
+  CALLO, R| DX| 
+( 022A FFD2 ) 
+  NOT, W| R| DI| 
+( 022C F7D7 ) 
+  NOT, W| R| BP| 
+( 022E F7D5 ) 
+  INCX, DI| 
+( 0230 47 ) 
+  J, Z| N| 1 ( L' @0234 ) (RB,) 
+( 0231 7501 ) 
+  INCX, BP| 
+( 0233 45 ) 
+
+=L @0234 ( $0234 ) 
+  RET, 
+( 0234 C3 ) 
+
+=L @0235 ( $0235 ) 
+  DECX, SI| 
+( 0235 4E ) 
+  POPX, DX| 
+( 0236 5A ) 
+  RET, 
+( 0237 C3 ) 
+
+=L @0238 ( $0238 ) 
+  XCHGX, DI| 
+( 0238 97 ) 
+  XOR, W| T| DI> R| DI| 
+( 0239 33FF ) 
+  XOR, W| T| BP> R| BP| 
+( 023B 33ED ) 
+\ CMPAI, W| 4272 ( ' ~10B0 ) IX, 
+( 023D 3DB010 ) 
+  61 ( ' ~003D ) DB, 
+( 023D 3D ) 
+
+=L @023E ( $023E ) 
+  MOVBI, AL| 16 ( ' ~0010 ) IB, 
+( 023E B010 ) 
+\ CMPAI, W| 2224 ( ' ~08B0 ) IX, 
+( 0240 3DB008 ) 
+  61 ( ' ~003D ) DB, 
+( 0240 3D ) 
+
+=L @0241 ( $0241 ) 
+  MOVBI, AL| 8 ( ' ~0008 ) IB, 
+( 0241 B008 ) 
+\ CMPAI, W| 688 ( ' ~02B0 ) IX, 
+( 0243 3DB002 ) 
+  61 ( ' ~003D ) DB, 
+( 0243 3D ) 
+
+=L @0244 ( $0244 ) 
+  MOVBI, AL| 2 ( ' ~0002 ) IB, 
+( 0244 B002 ) 
+  DECX, AX| 
+( 0246 48 ) 
+  DECX, AX| 
+( 0247 48 ) 
+  XOR, B| T| AH> R| AH| 
+( 0248 32E4 ) 
+  MOV, W| T| CX> R| AX| 
+( 024A 8BC8 ) 
+  INCX, CX| 
+( 024C 41 ) 
+  INCX, CX| 
+( 024D 41 ) 
+  CALL, -27 ( L' @0236 ) (RX,) 
+( 024E E8E5FF ) 
+  PUSHX, DI| 
+( 0251 57 ) 
+  MOVXI, DI| 536 ( ' ~0218 ) IX, 
+( 0252 BF1802 ) 
+  PUSHX, CX| 
+( 0255 51 ) 
+  MOVXI, CX| 6 ( ' ~0006 ) IX, 
+( 0256 B90600 ) 
+  REP, 
+( 0259 F2 ) 
+  SCAS, B| 
+( 025A AE ) 
+  MOV, W| T| DI> R| CX| 
+( 025B 8BF9 ) 
+  POPX, CX| 
+( 025D 59 ) 
+  J, Z| N| 13 ( L' @026D ) (RB,) 
+( 025E 750D ) 
+  SHL, 1| W| R| DI| 
+( 0260 D1E7 ) 
+  MOV, W| T| DX> DW/ /DI 524 ( L' @020C ) X, 
+( 0262 8B950C02 ) 
+  POPX, DI| 
+( 0266 5F ) 
+  INCX, SI| 
+( 0267 46 ) 
+  J, Z| Y| -53 ( L' @0235 ) (RB,) 
+( 0268 74CB ) 
+  DECX, SI| 
+( 026A 4E ) 
+  JMPO, R| DX| 
+( 026B FFE2 ) 
+
+=L @026D ( $026D ) 
+  POPX, DI| 
+( 026D 5F ) 
+  CMPAI, B| 58 ( ' ~003A ) IB, 
+( 026E 3C3A ) 
+  J, C| Y| 6 ( L' @0278 ) (RB,) 
+( 0270 7206 ) 
+  CMPAI, B| 65 ( ' ~0041 ) IB, 
+( 0272 3C41 ) 
+  J, C| Y| -65 ( L' @0235 ) (RB,) 
+( 0274 72BF ) 
+  SUBAI, B| 7 ( ' ~0007 ) IB, 
+( 0276 2C07 ) 
+
+=L @0278 ( $0278 ) 
+  SUBAI, B| 48 ( ' ~0030 ) IB, 
+( 0278 2C30 ) 
+  J, C| Y| -71 ( L' @0235 ) (RB,) 
+( 027A 72B9 ) 
+  CMP, W| T| AX> R| CX| 
+( 027C 3BC1 ) 
+  J, C| N| -75 ( L' @0235 ) (RB,) 
+( 027E 73B5 ) 
+  XCHGX, BP| 
+( 0280 95 ) 
+  MUL, W| R| CX| 
+( 0281 F7E1 ) 
+  XCHGX, BP| 
+( 0283 95 ) 
+  XCHGX, DI| 
+( 0284 97 ) 
+  MUL, W| R| CX| 
+( 0285 F7E1 ) 
+  XCHGX, DI| 
+( 0287 97 ) 
+  ADD, W| T| DI> R| AX| 
+( 0288 03F8 ) 
+  ADC, W| T| BP> R| DX| 
+( 028A 13EA ) 
+  JMPS, -64 ( L' @024E ) (RB,) 
+( 028C EBC0 ) 
+
+=L @028E ( $028E ) 
+  CALL, -91 ( L' @0236 ) (RX,) 
+( 028E E8A5FF ) 
+  JMPS, -19 ( L' @0280 ) (RB,) 
+( 0291 EBED ) 
+
+=L @0293 ( $0293 ) 
+  CALL, -96 ( L' @0236 ) (RX,) 
+( 0293 E8A0FF ) 
+  ANDAI, B| 31 ( ' ~001F ) IB, 
+( 0296 241F ) 
+  JMPS, -26 ( L' @0280 ) (RB,) 
+( 0298 EBE6 ) 
+  MOVBI, AL| 10 ( ' ~000A ) IB, 
+( 029A B00A ) 
+  CALL, -129 ( L' @021E ) (RX,) 
+( 029C E87FFF ) 
+  CALL, -105 ( L' @0239 ) (RX,) 
+( 029F E897FF ) 
+  MOV, B| T| AL> D0/ X/S 
+( 02A2 8A00 ) 
+  CALLO, R| DX| 
+( 02A4 FFD2 ) 
+  INCX, SI| 
+( 02A6 46 ) 
+  J, Z| N| -7 ( L' @02A2 ) (RB,) 
+( 02A7 75F9 ) 
+  RET, 
+( 02A9 C3 ) 
+
+
+=L @ATOI ( $02AA ) 
+  421 ( L' (IO; ) DA, 
+( 02AA A501 ) 
+  PUSHX, BP| 
+( 02AC 55 ) 
+  PUSHX, SI| 
+( 02AD 56 ) 
+  XCHGX, SI| 
+( 02AE 96 ) 
+  LEA, BX> D0/ X/S 
+( 02AF 8D18 ) 
+  NOT, W| R| SI| 
+( 02B1 F7D6 ) 
+  CALL, -28 ( L' @029A ) (RX,) 
+( 02B3 E8E4FF ) 
+  MOV, W| F| BP> /M/ 280 ( L' @0118 ) X, 
+( 02B6 892E1801 ) 
+  XCHGX, SI| 
+( 02BA 96 ) 
+  POPX, SI| 
+( 02BB 5E ) 
+  POPX, BP| 
+( 02BC 5D ) 
+  MOV, W| F| DI> D0/ /SI 
+( 02BD 893C ) 
+  RET, 
+( 02BF C3 ) 
+  J, LE| N| 1 ( L' @02C3 ) (RB,) 
+( 02C0 7F01 ) 
+  J, C| N| 1 ( L' @02C5 ) (RB,) 
+( 02C2 7301 ) 
+
+=L @(D#0 ( $02C4 ) 
+  IRET, 
+( 02C4 CF ) 
+
+=L @02C5 ( $02C5 ) 
+  ADD, W| F| CX> DW/ P/D 29441 ( L' @7301 ) X, 
+( 02C5 018B0173 ) 
+\ ADD, W| F| CX> R| DI| 
+( 02C9 01CF ) 
+  1 ( ' @0001 ) DB, 
+( 02C9 01 ) 
+
+=L @(D#1 ( $02CA ) 
+  IRET, 
+( 02CA CF ) 
+  ADD, W| F| CX> DW/ P/D 16129 ( L' @3F01 ) X, 
+( 02CB 018B013F ) 
+  ADD, W| F| AX> D0/ P/S 
+( 02CF 0102 ) 
+  ADD, B| F| CL> R| BH| 
+( 02D1 00CF ) 
+\ ADD, W| F| CX> DW/ P/D 16129 ( L' @3F01 ) X, 
+( 02D3 018B013F ) 
+  1 ( ' @0001 ) DB, 
+( 02D3 01 ) 
+  MOV, W| T| AX> D0/ X/D 
+( 02D4 8B01 ) 

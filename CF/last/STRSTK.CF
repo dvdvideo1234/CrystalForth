@@ -1,0 +1,17 @@
+
+FIRST |VALUE |SSP SSP  
+: `!SPTR SSP ,<  
+FIRST VALUE SPTR
+: SPFR? MOBJ + 2+ TO SPTR      
+: SPTR? SSP SPTR - ;
+
+: `SPUSH (|JUMP `!SPTR  TUCK  |SSP MPUSH !- ;
+: ">S CSTR 
+: >S DUP SPFR? 0< (IF `SPUSH 2DROP ;
+    
+: `GAF? 0; POP 2DROP D0 FIRST TO SSP >S 
+: SDROP `!SPTR  SSP @+ UM+ 
+   `GAF? FIRST OVER U<  
+   `GAF? TO SSP ;
+
+: ?SSP| SPTR? !"[SSP]" EX SDROP ;

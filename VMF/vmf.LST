@@ -1,0 +1,4385 @@
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 1
+VMF.asm
+
+
+
+      1				     locals  @@
+      2	      =	dword ptr	     pd	 equ dword ptr
+      3	      =	word  ptr	     pw	 equ word  ptr
+      4	      =	byte  ptr	     pb	 equ byte  ptr
+      5
+      6				     _DUP  MACRO
+      7					     LEA SI,[SI-2]
+      8					     MOV [SI],AX
+      9					   ENDM
+     10				     _DROP MACRO
+     11					      LODSW
+     12					   ENDM
+     13				     SJMP  MACRO  ADDRS
+     14					     jmp  SHORT	ADDRS
+     15					   ENDM
+     16				     next  MACRO
+     17					     jmp  _next
+     18					   ENDM
+     19				     PUSHREG   MACRO
+     20					     jmp  _next
+     21					   ENDM
+     22				     DROPREG   MACRO
+     23					     jmp  _next
+     24					   ENDM
+     25
+     26				     swapREG   MACRO
+     27					     jmp  _next
+     28					   ENDM
+     29				     TRACE_On	MACRO
+     30					     jmp  _next
+     31					   ENDM
+     32				     TRACE_OFF	 MACRO
+     33					     jmp  _next
+     34					   ENDM
+     35
+     36				     num   MACRO n
+     37					       dw n + n	+ 80h
+     38					   ENDM
+     39				     ;-----------------
+     40
+     41	      =0000		     qqqqq = 0
+     42	      =0000		     ppppp = qqqqq
+     43
+     44				     dstr2   macro   msg,flg
+     45				       local endstr
+     46				       db    endstr-$-1+flg
+     47				       db    msg
+     48				     endstr  label   byte
+     49				       endm
+     50
+     51				     dstr    macro   msg
+     52					  dstr2	msg,0
+     53					     endm
+     54
+     55				     nf	     macro   token
+     56				     ppppp = $
+     57				       dstr2 token,0
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 2
+VMF.asm
+
+
+
+     58				       dw    qqqqq
+     59				     qqqqq = ppppp
+     60				       endm
+     61
+     62				     nfi     macro   token
+     63				     ppppp = $
+     64				       dstr2 token,080h
+     65				       dw    qqqqq
+     66				     qqqqq = ppppp
+     67				       endm
+     68
+     69
+     70	      =0100		     FNPAGE = 100h
+     71
+     72	0000			     MyCseg  segment para  use16
+     73					     assume cs:	MyCseg,	 ds: MyCseg, ss: MyCseg
+     74
+     75					     ORG 100H
+     76
+     77	0100			     Start   Label byte
+     78
+     79	0100  59		     SUB4TH:POP	  CX
+     80	0101  53			     PUSH  BX
+     81	0102  8B D9			     MOV   BX,CX
+     82					     next
+1    83	0104  EB 26 90			     jmp  _next
+     84
+     85	0107  59		     XRET4TH:POP   CX
+     86	0108  53			     PUSH  BX
+     87	0109  8B D9			     MOV   BX,CX
+     88	010B  C3			     RET
+     89	010C  FF E3		     XFROMF: JMP   BX
+     90
+     91				     ; HEADERLESS EXECUTION CODE GOES HERE
+     92
+     93	010E  5B		     XEXIT:  POP  BX
+     94					     NEXT
+1    95	010F  EB 1B 90			     jmp  _next
+     96	0112			     _DO_next:
+     97	0112  59			     POP   CX
+     98	0113  E3 16			     JCXZ  _SKIP
+     99	0115  49			     DEC   CX
+    100	0116  51			     PUSH  CX
+    101	0117  8A 0F		     _SJUMP: MOV   CL,[BX]
+    102	0119  B5 00			     MOV   CH,0
+    103	011B  0A C9			     OR	   CL,CL
+    104	011D  79 02			     JNS   @@1
+    105	011F  B5 FF			     MOV   CH,-1
+    106	0121  03 D9		     @@1:    ADD   BX,CX
+    107					     next
+1   108	0123  EB 07 90			     jmp  _next
+    109
+    110	0126  49		     @3:     DEC  CX
+    111	0127  B5 01			     MOV  CH,FNPAGE/256
+    112					     SJMP _EX
+1   113	0129  EB 0A			     jmp  SHORT	_EX
+    114
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 3
+VMF.asm
+
+
+
+    115	012B  43		     _SKIP: INC	 BX
+    116	012C  8B 0F		     _next:  MOV  CX,[BX]
+    117	012E  43		     _ex2:   INC  BX
+    118	012F  F6 C1 01			     TEST CL,1
+    119	0132  75 F2			     JNE  @3
+    120	0134  43			     INC  BX
+    121	0135  87 CF		     _EX:    XCHG CX,DI
+    122	0137  FF 25			     jmp  pw [di]
+    123
+    124	0139  8B C8		     _IF:    MOV  CX,AX
+    125	013B  E3 DA			     JCXZ _SJUMP
+    126					     SJMP _SKIP
+1   127	013D  EB EC			     jmp  SHORT	_SKIP
+    128
+    129	013F  0B C0		     _IFM:   OR	  AX,AX
+    130	0141  79 E8			     Jns   _SKIP
+    131					     SJMP _SJUMP
+1   132	0143  EB D2			     jmp  SHORT	_SJUMP
+    133
+    134	0145  59		     _FOR?:  POP  CX
+    135	0146  49			     DEC  CX
+    136	0147  79 CE			     Jns   _SJUMP
+    137	0149  51			     PUSH CX
+    138					     SJMP _SKIP
+1   139	014A  EB DF			     jmp  SHORT	_SKIP
+    140
+    141	014C  D1 F8		     XSLS:   SAR  AX,1
+    142					     NEXT
+1   143	014E  EB DC			     jmp  _next
+    144	0150  D1 E0		     X2MUL:  SHL  AX,1
+    145					     NEXT
+1   146	0152  EB D8			     jmp  _next
+    147	0154  5A		     XUMUL:  POP  DX
+    148	0155  F7 E0			     MUL  AX
+    149	0157  52			     PUSH DX
+    150					     NEXT
+1   151	0158  EB D2			     jmp  _next
+    152
+    153	015A			     XRAT:   _DUP
+1   154	015A  8D 74 FE			     LEA SI,[SI-2]
+1   155	015D  89 04			     MOV [SI],AX
+    156	015F  58			     POP  AX
+    157	0160  50			     PUSH AX
+    158					     NEXT
+1   159	0161  EB C9			     jmp  _next
+    160	0163  59		     X_CO:   POP  CX
+    161	0164  53			     PUSH BX
+    162	0165  8B D9			     MOV  BX,CX
+    163					     next
+1   164	0167  EB C3			     jmp  _next
+    165
+    166	0169			     XPOP:   _DUP
+1   167	0169  8D 74 FE			     LEA SI,[SI-2]
+1   168	016C  89 04			     MOV [SI],AX
+    169	016E  58			     POP  AX
+    170					     NEXT
+1   171	016F  EB BB			     jmp  _next
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 4
+VMF.asm
+
+
+
+    172
+    173	0171  50		     XPUSH:  PUSH AX
+    174					     _DROP
+1   175	0172  AD			      LODSW
+    176					     NEXT
+1   177	0173  EB B7			     jmp  _next
+    178
+    179	0175  8B D0		     XDPLUS: MOV  DX,AX
+    180					     _DROP
+1   181	0177  AD			      LODSW
+    182	0178  01 44 FC			     ADD [SI-4],AX
+    183	017B  11 54 FE			     ADC [SI-2],DX
+    184					     _DROP
+1   185	017E  AD			      LODSW
+    186					     next
+1   187	017F  EB AB			     jmp  _next
+    188
+    189	0181  8B C8		     XUMSLSM:MOV  CX,AX
+    190					     _DROP
+1   191	0183  AD			      LODSW
+    192	0184  8B D0			     MOV  DX,AX
+    193					     _DROP
+1   194	0186  AD			      LODSW
+    195	0187  3B D1			     CMP  DX,CX
+    196	0189  73 02			     JNB  @@1
+    197	018B  F7 F1			     DIV  CX
+    198
+    199	018D			     @@1:    _DUP
+1   200	018D  8D 74 FE			     LEA SI,[SI-2]
+1   201	0190  89 04			     MOV [SI],AX
+    202	0192  8B C2			     MOV  AX,DX
+    203					     NEXT
+1   204	0194  EB 96			     jmp  _next
+    205
+    206	0196  D1 E0		     xTary:  shl  Ax,1
+    207	0198  03 F8		     x5ary:  ADD  DI,Ax
+    208	019A  D1 E0		     xqary:  shl  Ax,1
+    209	019C  D1 E0		     XWARY:  shl  AX,1
+    210	019E  03 C7		     XBARY:  ADD  AX,DI
+    211	01A0  40		     ADRP2:  INC  AX
+    212	01A1  E9 02AE			     JMP  ADRP1
+    213
+    214	01A4  AD		     XLIT:   LODSW
+    215					     PUSHREG
+1   216	01A5  EB 85			     jmp  _next
+    217
+    218	01A7  58		     ?NONAM1:POP  AX
+    219	01A8  5F			     POP  DI
+    220	01A9  57			     PUSH DI
+    221	01AA  AF			     SCASW
+    222	01AB  75 03			     JNE  _PSH2
+    223	01AD  58			     POP  AX
+    224	01AE  FF 35			     PUSH [DI]
+    225	01B0			     _psh2:  NEXT
+1   226	01B0  E9 FF79			     jmp  _next
+    227
+    228	01B3  AF		     ExecAt2:scasw
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 5
+VMF.asm
+
+
+
+    229	01B4  AF		     ExecAt1:scasw
+    230	01B5  AF		     ExecAt: scasw
+    231	01B6  8B 0D		     ExecAt0:MOV  cx,[DI]   ;@addr
+    232	01B8  E3 F6			     jcxz _psh2
+    233	01BA  91			     xchg ax,cx
+    234	01BB  E9 FF70			     JMP   _ex2
+    235
+    236	01BE  43		     XVBLK:  INC   BX		 ; : VBLK  DUP
+    237	01BF  74 04			     JZ	   @@1		 ;     -1 = IF DROP EXECAT EXIT	ELSE DUP
+    238	01C1  AF			     scasw		 ;	0 = IF DROP EXECAT1 EXIT ELSE
+    239	01C2  4B			     dec   BX		 ;	     EXECAT2
+    240	01C3  75 EF			     JNZ   execAt1	 ;	    THEN THEN ;
+    241	01C5  5B		     @@1:    POP   BX		 ;
+    242	01C6  EB ED			     jmp   short execAt	 ;
+    243
+    244	01C8			     xEXEC:
+    245
+    246
+    247	01C8  43		     xqcomm: inc  bx
+    248	01C9  5B			     pop  bx
+    249	01CA  74 FC			     jz	  xEXEC
+    250	01CC  EB 0B			     JMP  SHORT	XEXQCOM	 ;
+    251	01CE  0B DB		     XNONA2: OR	  BX,BX
+    252	01D0  74 DE			     JE	  _PSH2
+    253	01D2  E8 FFD2			     CALL ?NONAM1
+    254	01D5  AF		     XNONAME:SCASW		 ;
+    255	01D6  53			     PUSH BX		 ;
+    256	01D7  8B 1D			     MOV  BX,[DI]	 ;
+    257	01D9  8B 3E 0320r	     XEXQCOM:mov  di,PW	userv
+    258	01DD  8B 0E 0DA9r		     mov  cx,[UvStat]
+    259	01E1  E3 E5			     jcxz xEXEC
+    260	01E3  E8 FF1A		     xcomma: call sub4th
+    261	01E6  10D0r 0525r 10D0r	  +	     DW	HERE,TADRSP2,TOHERE,TEXIT
+    262	      0476r
+    263	01EE  58		     xmax:   pop  ax
+    264	01EF  3B D8			     cmp  bx,ax
+    265	01F1  EB 03			     jmp  short	_mm
+    266	01F3  58		     xmin:   pop  ax
+    267	01F4  3B C3			     cmp  ax,bx
+    268	01F6  7D 01		     _mm:    jGE  NEXT@@2
+    269	01F8  93			     xchg ax,bx
+    270	01F9			     NEXT@@2:next
+1   271	01F9  E9 FF30			     jmp  _next
+    272
+    273	01FC			     X_FIND:
+    274	01FC  8B D6		       MOV   DX,SI
+    275	01FE			     @@1:
+    276	01FE  5E		       pop   si
+    277	01FF  46		       inc   si
+    278	0200  75 04		       jne   @@2
+    279	0202  53		       push  bx
+    280	0203  96		       xchg  ax,si
+    281	0204  EB 2C		       jmp   short @@8
+    282	0206			     @@2:
+    283	0206  4E		       dec   si
+    284	0207  74 F5		       je    @@1
+    285	0209			     @@3:
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 6
+VMF.asm
+
+
+
+    286	0209  59		       pop   cx
+    287	020A  3B F1		       cmp   si,cx
+    288	020C  74 FB		       je    @@3
+    289	020E  51		       push  cx
+    290	020F			     @@4:
+    291	020F  8B FB		       mov   di,bx
+    292	0211  B9 001F		       mov   cx,31
+    293	0214  E8 0023		       call  _strequ1
+    294	0217  75 04		       jnz     @@5
+    295	0219  A8 20		       test    al,20h
+    296	021B  74 08		       jz      @@7
+    297	021D			     @@5:
+    298	021D  8B 34		       mov     si,[si]
+    299	021F  0B F6		       or      si,si
+    300	0221  75 EC		       jnz     @@4
+    301	0223  EB D9		       jmp     short @@1
+    302	0225			     @@7:
+    303	0225  59		       pop   cx
+    304	0226  41		       inc   cx
+    305	0227  75 FC		       jne   @@7
+    306	0229  46		       inc     si
+    307	022A  46		       inc     si
+    308	022B  56		       push  si
+    309	022C  98		       cbw
+    310	022D  F9		       stc
+    311	022E  8A C4		       mov   al,ah
+    312	0230  D1 D0		       rcl   ax,1
+    313	0232			     @@8:
+    314	0232  8B F2		       MOV   SI,DX
+    315				       SWAPREG	     ; _FIND_
+1   316	0234  E9 FEF5			     jmp  _next
+    317
+    318	0237			     _strequ:
+    319	0237  B9 00FF		       mov   cx,255
+    320	023A			     _strequ1:
+    321	023A  AC		       lodsb
+    322	023B  23 C8		       and     cx,ax
+    323	023D  3A 0D		       cmp     cl,[di]
+    324	023F  75 05		       jne     _l5
+    325	0241  47		       inc     di
+    326	0242			     _strcmp:
+    327	0242  F3> A6		       repe    cmpsb
+    328	0244  74 02		       jz      _l6
+    329	0246			     _l5:
+    330	0246  03 F1		       add     si,cx
+    331	0248			     _l6:
+    332	0248  C3		       ret
+    333
+    334	0249			     X_W:
+    335	0249  8B FB		       mov   di,bx ; _WORD ;X_W:	    ; _WORD  ;
+    336	024B  5B			   pop	 bx	       ;  mov	di,bx		 ;
+    337	024C  58			   pop	 ax	       ;  pop	bx		 ;
+    338	024D  5A			   pop	 dx	       ;  pop	ax		 ;
+    339	024E  57			   push	 di	       ;  pop	dx		 ;
+    340	024F  56			   push	 si	       ;  push	di		 ;
+    341	0250  33 F6			   xor	 si,si	       ;  push	si		 ;
+    342	0252  96			   xchg	 ax,si	       ;  xor	si,si		 ;
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 7
+VMF.asm
+
+
+
+    343	0253  47			   inc	 di	       ;  xchg	ax,si		 ;
+    344							       ;  inc	di		 ;
+    345							       ;  dec	bx		 ;
+    346							       ;readtib:		 ;
+    347							       ;  inc	bx		 ;
+    348	0254  4B			   DEC	 BX	       ;  mov	al,[si+bx]	 ;
+    349	0255  43		     @@1:  INC	 BX	       ;  cmp	al,dl		 ;
+    350	0256  8A 00			   mov	 al,[si+bx]    ;  je	readtib		 ;
+    351	0258  0A C0			   or	 al,al	       ;  or	al,al		 ;
+    352	025A  74 15			   je	 @@3	       ;  jne	wordlp		 ;
+    353	025C  3A C2			   cmp	 al,dl	       ;  inc	ah		 ;
+    354	025E  74 F5			   je	 @@1	       ;  stosb			 ;
+    355							       ;  jmp	short exword	 ;
+    356	0260  FE C4		     @@2:  inc	 ah	       ;wordlp:			 ;
+    357	0262  AA			   stosb	       ;  inc	ah		 ;
+    358	0263  43			   inc	 bx	       ;  stosb			 ;
+    359	0264  8A 00			   mov	 al,[si+bx]    ;  inc	bx		 ;
+    360	0266  0A C0			   or	 al,al	       ;  mov	al,[si+bx]	 ;
+    361	0268  74 09			   je	 @@4	       ;  cmp	al,dl		 ;
+    362							       ;  je	exword2		 ;
+    363							       ;  or	al,al		 ;
+    364	026A  3A C2			   cmp	 al,dl	       ;  jne	wordlp		 ;
+    365	026C  75 F2			   jNe	 @@2	       ;  db	0b0h		 ;
+    366	026E  43			   inc	 bX	       ;exword2:		 ;
+    367	026F  EB 02			   JMP	 SHORT @@4     ;  inc	bX		 ;
+    368	0271  FE C4		     @@3:  INC	 AH	       ;exword:			 ;
+    369	0273  B0 00		     @@4:  mov	 al,0	       ;  mov	al,0		 ;
+    370	0275  AA			   stosb	       ;  stosb			 ;
+    371	0276  5E			   pop	 si	       ;  pop	si		 ;
+    372	0277  5F			   pop	 di	       ;  pop	di		 ;
+    373	0278  57			   push	 di	       ;  push	di		 ;
+    374	0279  88 25			   mov	 [di],ah       ;  mov	[di],ah		 ;
+    375					   NEXT	 ; _WORD_      ;  NEXT	; _WORD_	 ;
+1   376	027B  E9 FEAE			     jmp  _next
+    377
+    378	027E			     XC2I:   ;
+    379	027E  8B CB		       mov   cx,bx   ; = 0
+    380	0280  5A		       pop   Dx	     ; -1
+    381	0281  5F		       pop   di	     ; base
+    382	0282  58		       pop   AX
+    383	0283  56		       PUSH  SI
+    384	0284  96		       XCHG  AX,SI
+    385	0285  46		       inc   si	     ; skip counter
+    386	0286  80 3C 2D		       cmp   byte ptr [si],'-'
+    387	0289  75 02		       jne   @@1
+    388	028B  46		       inc   si
+    389	028C  42		       inc   Dx
+    390	028D			     @@1:
+    391	028D  52		       push  Dx	     ; sign
+    392	028E  E8 003D		       call  convn
+    393	0291			     @@2:
+    394	0291  8A 44 FF		       mov   al,[si-1]
+    395	0294  3C 3A		       cmp   al,':'
+    396	0296  74 08		       je    @@3
+    397	0298  3C 2F		       cmp   al,'/'
+    398	029A  77 12		       ja    outitoc
+    399	029C  3C 2C		       cmp   al,','
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 8
+VMF.asm
+
+
+
+    400	029E  72 0E		       jb    outitoc
+    401	02A0			     @@3:
+    402	02A0  56		       PUSH  SI
+    403	02A1  E8 002A		       call  convn
+    404	02A4  89 76 00		       MOV   PW	[BP],SI
+    405	02A7  5A		       POP   DX
+    406	02A8  42		       INC   DX
+    407	02A9  29 56 00		       SUB   pw	[bp],DX	; dbl
+    408	02AC  EB E3		       jmp   short @@2
+    409	02AE			     outitoc:
+    410	02AE  4E		       dec   si
+    411	02AF  29 76 02		       sub   [bp+2],si
+    412	02B2  58		       pop   ax
+    413	02B3  5E		       pop   SI
+    414	02B4  51		       push  cx
+    415				       PUSHREG
+1   416	02B5  E9 FE74			     jmp  _next
+    417
+    418	02B8  32 E4		     digit?: xor   ah,ah
+    419	02BA  3C 39			     cmp   al,'9'
+    420	02BC  76 08			     jbe   okdig
+    421	02BE  24 DF			     and   al,0dfh
+    422	02C0  3C 41			     cmp   al,'A'
+    423	02C2  72 09			     jb	   notdig
+    424	02C4  2C 07			     sub   al,7
+    425	02C6  2C 30		     okdig:  sub   al,'0'
+    426	02C8  72 03			     jb	   notdig
+    427	02CA  3B C7			     cmp   ax,di
+    428	02CC  F5			     cmc
+    429	02CD  C3		     notdig: ret
+    430
+    431	02CE  AC		     convn:  lodsb
+    432	02CF  E8 FFE6			     call  digit?
+    433	02D2  72 F9			     jc	   notdig
+    434	02D4  50			     push  ax
+    435	02D5  E8 0008			     call  _mul
+    436	02D8  58			     pop   ax
+    437	02D9  03 C8			     ADD   CX,AX
+    438	02DB  73 F1			     JNC   CONVN
+    439	02DD  43			     INC   BX
+    440	02DE  EB EE			     jmp   short convn
+    441	02E0  91		     _mul:   xchg  ax,cx
+    442	02E1  F7 E7			     mul   di
+    443	02E3  91			     xchg  cx,ax
+    444	02E4  92			     xchg  dx,ax
+    445	02E5  93			     xchg  bx,ax
+    446	02E6  0B C0			     OR	   AX,AX
+    447	02E8  74 04			     JE	   @@1
+    448	02EA  F7 E7			     mul   di
+    449	02EC  03 D8			     add   bx,ax
+    450	02EE  C3		     @@1:    ret
+    451
+    452	02EF  AF		     setvar2:scasw
+    453	02F0  AF		     setvar1:scasw
+    454	02F1  AF		     setvar: scasw
+    455	02F2  89 1D		     setvar0:MOV   [DI],BX
+    456					     DROPREG
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 9
+VMF.asm
+
+
+
+1   457	02F4  E9 FE35			     jmp  _next
+    458	02F7  AF		     DOCON2: SCASW
+    459	02F8  AF		     DOCON1: SCASW
+    460	02F9  AF		     DOCON:  SCASW
+    461	02FA  8B 05		     DOCON0: MOV  AX,[DI]
+    462					     PUSHREG
+1   463	02FC  E9 FE2D			     jmp  _next
+    464	02FF  E8 0019		     XUVAR@@:call  doUvar
+    465	0302  8B 3D			     MOV   DI,[DI]
+    466	0304  EB F4			     jmp   short doCon0
+    467	0306  AF		     XUVAR@: scasw
+    468	0307  E8 0010		     XUVAR@0:call  doUvar1
+    469	030A  EB EE			     jmp   short doCon0
+    470	030C  AF		     XtoUVAR:SCASW
+    471	030D  E8 000B		     XtoUVR: call  doUvar
+    472	0310  EB E0			     jmp   short Setvar0
+    473	0312  E8 0006		     X@UVAR: call  doUvar
+    474	0315  97			     xchg  ax,di
+    475					     pushReg
+1   476	0316  E9 FE13			     jmp  _next
+    477	0319  AF		     doUVAR2:scasw
+    478	031A  AF		     doUVAR1:scasw
+    479	031B  8B 7D 02		     doUVAR: mov   di,[di+2]
+    480	031E  81 C7 10D0r	     DoUvar0:add   di,offset Uv0
+    481	      =MYCSEG:0320	     USERV   =	  $-2
+    482	0322  C3			     ret
+    483	0323  FA		     Wreset: cli
+    484	0324  FC			     cld
+    485	0325  5E			     pop  SI
+    486	0326  8B 3E 0320r		     MOV  DI,PW	USERV
+    487	032A  8B 2D 90 90		     mov  bp,[DI+UvR0-Uv0]
+    488	032E  8B 25 90 90		     mov  sp,[DI+UvS0-Uv0]
+    489	0332  33 DB			     xor  BX,BX
+    490	0334  FB			     sti
+    491					     NEXT
+1   492	0335  E9 FDF4			     jmp  _next
+    493
+    494	0338  58		     XMULT2: POP   AX
+    495	0339  F7 EB			     IMUL  BX
+    496	033B  50			     PUSH  AX
+    497	033C  8B DA			     MOV   BX,DX
+    498					     NEXT
+1   499	033E  E9 FDEB			     jmp  _next
+    500
+    501					     ; -----------  IO	PRIMITIVES  vvvvvvvvvvv
+    502	0341  BF 084Ar		     _HND_GT:mov  DI,offset handles
+    503	0344  8B CF		     cnt_GT0:mov  cx,di
+    504	0346  8B 3D			     mov  di,[di]
+    505	0348  D1 E7			     shl  di,1
+    506	034A  03 F9			     add  di,cx
+    507	034C  8B 05			     mov  Ax,[DI]
+    508	034E  C3			     RET
+    509
+    510	034F  AF		     _HND_AT:scasw
+    511	0350  E8 FFF1			     CALL cnt_GT0
+    512	0353  87 CF			     xchg cx,di
+    513	0355  FF 0D			     DEC  pw [di]
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 10
+VMF.asm
+
+
+
+    514					     PUSHREG
+1   515	0357  E9 FDD2			     jmp  _next
+    516
+    517	035A  83 C7 04		     _HND_TO:add  di,4
+    518	035D  FF 05			     inc  pw [di]
+    519	035F  E8 FFE2			     CALL cnt_GT0
+    520	0362  89 1D			     mov  [DI],BX
+    521					     DROPREG
+1   522	0364  E9 FDC5			     jmp  _next
+    523
+    524	0367  8B D3		     XOPEN:  MOV DX,BX
+    525	0369  B8 3D02			     MOV AX,3D02H
+    526	036C  B9			     DB	 0B9H
+    527	036D  B4 3E		     XCLOSE: MOV AH,3EH
+    528	036F  CD 21		     XDOS1:  INT 21H
+    529	0371  73 02			     JNC @@1
+    530	0373  F7 D0			     NOT AX
+    531	0375			     @@1:    SWAPREG
+1   532	0375  E9 FDB4			     jmp  _next
+    533
+    534	0378  B4 01		     XQKEY:  MOV  AH,01h
+    535	037A  CD 16			     INT  016h
+    536	037C  B0 FF			     MOV  AL,0FFH
+    537	037E  75 01			     JNE  @@1
+    538	0380  40			     INC  AX
+    539	0381  98		     @@1:    CBW
+    540					     PUSHREG
+1   541	0382  E9 FDA7			     jmp  _next
+    542
+    543	0385  B4 0B		     XQKEY2: MOV  AH,0Bh
+    544	0387  CD 21			     INT  021h
+    545	0389  98			     CBW
+    546					     PUSHREG
+1   547	038A  E9 FD9F			     jmp  _next
+    548
+    549	038D  E8 FFB1		     _key2:  CALL _hnd_GT
+    550	0390  93			     XCHG AX,BX
+    551	0391  B9 0001		     @@4:    mov  cx,1
+    552	0394  8B 3E 075Cr		     mov  DI,LASTCH
+    553	0398  BA 075Cr			     mov  dx,OFFSET LASTCH
+    554	039B  B4 3F			     mov  ah,3fh
+    555	039D  CD 21			     int  21h
+    556	039F  0B C0			     OR	  ax,Ax
+    557	03A1  74 1E			     jz	  @@2
+    558	03A3  A1 075Cr			     mov  Ax,LASTCH
+    559	03A6  3C 20			     cmp  al,' '
+    560	03A8  73 16			     jae  @@1
+    561	03AA  3C 1A			     cmp  al,1Ah
+    562	03AC  74 13			     je	  @@2
+    563	03AE  3C 0D			     cmp  al,0dh
+    564	03B0  74 0E			     je	  @@1
+    565	03B2  3C 0A			     cmp  al,0Ah
+    566	03B4  75 08			     jNe  @@3
+    567	03B6  83 FF 0D			     CMP  DI,0DH
+    568	03B9  74 D6			     JE	  @@4
+    569	03BB  B0 0D			     MOV  AL,0DH
+    570	03BD  C3			     RET
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 11
+VMF.asm
+
+
+
+    571	03BE  B0 20		     @@3:    mov  al,' '
+    572	03C0  C3		     @@1:    ret
+    573	03C1  E9 0498		     @@2:    JMP  XDROPH1
+    574
+    575				       NF 'IOV'
+1   576	      =MYCSEG:03C4	     ppppp = $
+1   577				       dstr2 'IOV',0
+2   578	03C4  03		       db    ??0000-$-1+0
+2   579	03C5  49 4F 56		       db    'IOV'
+2   580	03C8			     ??0000  label   byte
+1   581	03C8  0000		       dw    qqqqq
+1   582	      =MYCSEG:03C4	     qqqqq = ppppp
+    583	03CA  10D0r		     ioV     DW	 DOVAR
+    584	03CC  040Er		     JKEY    DW	     _key1
+    585	03CE  03FDr		     JEMIT   DW	     _emit1
+    586
+    587	03D0  E8 0CFD		     _gs_ke: CALL _DOES
+    588	03D3  10D0r 03CAr 10D0r	  +	     DW	 TTWOAT,IOV,TSTORE2,TEXIT
+    589	      0476r
+    590
+    591				      NF 'SIO'
+1   592	      =MYCSEG:03DB	     ppppp = $
+1   593				       dstr2 'SIO',0
+2   594	03DB  03		       db    ??0001-$-1+0
+2   595	03DC  53 49 4F		       db    'SIO'
+2   596	03DF			     ??0001  label   byte
+1   597	03DF  03C4r		       dw    qqqqq
+1   598	      =MYCSEG:03DB	     qqqqq = ppppp
+    599	03E1  03D0r 040Er 03FDr	     STDIO:  DW	  _gs_ke,_key1,_emit1
+    600
+    601				       NF 'FIO'
+1   602	      =MYCSEG:03E7	     ppppp = $
+1   603				       dstr2 'FIO',0
+2   604	03E7  03		       db    ??0002-$-1+0
+2   605	03E8  46 49 4F		       db    'FIO'
+2   606	03EB			     ??0002  label   byte
+1   607	03EB  03DBr		       dw    qqqqq
+1   608	      =MYCSEG:03E7	     qqqqq = ppppp
+    609	03ED  03D0r 038Dr 03FDr	     FILEIO: DW	  _gs_ke,_key2,_emit1
+    610
+    611	03F3  FF 16 03CEr	     XEMIT:  call PW [jemit]
+    612	03F7  E8 0BB8			     CALL OUTC_1P
+    613					     DROPREG
+1   614	03FA  E9 FD2F			     jmp  _next
+    615
+    616	03FD  8A D3		     _EMIT1: MOV  DL,BL
+    617	03FF  B4 02			     MOV  AH,2
+    618	0401  CD 21			     INT  021h
+    619	0403  C3		     _emit2: ret
+    620
+    621	0404  53		     XKEY:   PUSH BX
+    622	0405  FF 16 03CCr		     call PW [jkey]
+    623					     SWAPREG
+1   624	0409  E9 FD20			     jmp  _next
+    625
+    626	040C  10D0r		     _BKEY:  DW	  _CALL
+    627	040E  B4 00		     _KEY1:  MOV  AH,0
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 12
+VMF.asm
+
+
+
+    628	0410  CD 16			     INT  016h
+    629	0412  C3			     ret
+    630
+    631
+    632	0413  B5 40		     XWBLK:  MOV   CH,40H
+    633	0415  B8			     DB	   0B8H
+    634	0416  B5 3F		     XRBLK:  MOV   CH,3FH
+    635	0418  B8 0400			     MOV   AX,1024
+    636	041B  51			     PUSH  CX
+    637	041C  50			     PUSH  AX
+    638	041D  F7 E3			     MUL   BX
+    639	041F  92			     XCHG  AX,DX
+    640	0420  91			     XCHG  AX,CX
+    641	0421  8B 1E 0641r		     MOV   BX,SCRH
+    642	0425  B8 4200			     MOV   AX,4200H
+    643	0428  CD 21			     INT   21H
+    644	042A  59			     POP   CX
+    645	042B  5F			     POP   DI
+    646	042C  5A			     POP   DX
+    647	042D  72 1A			     JC	   @@1
+    648	042F  8B C7			     mov   AX,DI
+    649	0431  CD 21			     INT   21H
+    650	0433  72 14			     JC	   @@1
+    651	0435  2B C8			     sub   CX,AX
+    652	0437  74 13			     JE	   @@2
+    653	0439  87 FA			     xchg  di,dx
+    654	043B  80 FE 40			     cmp   dh,40h
+    655	043E  74 07			     je	   @@3
+    656	0440  03 F8			     add   di,ax
+    657	0442  33 C0			     xor   ax,ax
+    658	0444  F3> AA			     rep   stosb
+    659	0446  B9			     db	   0b9h
+    660	0447  B0 FD		     @@3:    MOV   Al,253
+    661	0449  A3 10D0r		     @@1:    MOV   word	ptr DERR,AX
+    662	044C			     @@2:    DROPREG
+1   663	044C  E9 FCDD			     jmp  _next
+    664					     ; -----------  IO	PRIMITIVES  ^^^^^^^^^^^^^^^
+    665
+    666	044F  58		     XADRSP1: POP  AX
+    667	0450  88 07			      MOV  [BX],AL
+    668	0452  43		     ADRP1:   INC  BX
+    669					      NEXT
+1   670	0453  E9 FCD6			     jmp  _next
+    671	0456  33 C0		     CFCH_P1: XOR  AX,AX
+    672	0458  8A 07			      MOV  AL,[BX]
+    673	045A  50			      PUSH AX
+    674	045B  EB F5			      JMP  SHORT ADRP1
+    675
+    676	045D  58		     XBYE:  POP	AX
+    677	045E  B4 4C		       MOV AH,4CH
+    678	0460  CD 21		       INT 21H
+    679
+    680				     ; CODEMARK	- END OF CODE
+    681
+    682				     ; COMPILATION WORDS
+    683
+    684				     ;--------------------vvvvvvv  CONTROL vvvvvvv--------------
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 13
+VMF.asm
+
+
+
+    685	      =MYCSEG:0462	     ppppp = $
+    686	0462  0081 03E7r 0476r	       dw    81h,qqqqq,TEXIT
+    687	      =MYCSEG:0462	     qqqqq = ppppp
+    688
+    689				       NF '0;'
+1   690	      =MYCSEG:0468	     ppppp = $
+1   691				       dstr2 '0;',0
+2   692	0468  02		       db    ??0003-$-1+0
+2   693	0469  30 3B		       db    '0;'
+2   694	046B			     ??0003  label   byte
+1   695	046B  0462r		       dw    qqqqq
+1   696	      =MYCSEG:0468	     qqqqq = ppppp
+    697	046D  10D0r		     EXIT0  DW X0EXIT
+    698
+    699				      nf 'EXIT'
+1   700	      =MYCSEG:046F	     ppppp = $
+1   701				       dstr2 'EXIT',0
+2   702	046F  04		       db    ??0004-$-1+0
+2   703	0470  45 58 49 54	       db    'EXIT'
+2   704	0474			     ??0004  label   byte
+1   705	0474  0468r		       dw    qqqqq
+1   706	      =MYCSEG:046F	     qqqqq = ppppp
+    707	0476  010Er		     texit   DW	  XEXIT	     ; EXIT
+    708
+    709				      NF ';4TH'
+1   710	      =MYCSEG:0478	     ppppp = $
+1   711				       dstr2 ';4TH',0
+2   712	0478  04		       db    ??0005-$-1+0
+2   713	0479  3B 34 54 48	       db    ';4TH'
+2   714	047D			     ??0005  label   byte
+1   715	047D  046Fr		       dw    qqqqq
+1   716	      =MYCSEG:0478	     qqqqq = ppppp
+    717	047F  0107r		     tretf   DW	  XRET4TH    ; R4TH>
+    718
+    719				      NF 'BYE'
+1   720	      =MYCSEG:0481	     ppppp = $
+1   721				       dstr2 'BYE',0
+2   722	0481  03		       db    ??0006-$-1+0
+2   723	0482  42 59 45		       db    'BYE'
+2   724	0485			     ??0006  label   byte
+1   725	0485  0478r		       dw    qqqqq
+1   726	      =MYCSEG:0481	     qqqqq = ppppp
+    727	0487  045Dr		     BYE     DW	  XBYE
+    728
+    729				      NF '(BR'
+1   730	      =MYCSEG:0489	     ppppp = $
+1   731				       dstr2 '(BR',0
+2   732	0489  03		       db    ??0007-$-1+0
+2   733	048A  28 42 52		       db    '(BR'
+2   734	048D			     ??0007  label   byte
+1   735	048D  0481r		       dw    qqqqq
+1   736	      =MYCSEG:0489	     qqqqq = ppppp
+    737	048F  10D0r		     tbran   DW	  XBRAN	     ; BRANCH
+    738
+    739				      NF '(0BR'
+1   740	      =MYCSEG:0491	     ppppp = $
+1   741				       dstr2 '(0BR',0
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 14
+VMF.asm
+
+
+
+2   742	0491  04		       db    ??0008-$-1+0
+2   743	0492  28 30 42 52	       db    '(0BR'
+2   744	0496			     ??0008  label   byte
+1   745	0496  0489r		       dw    qqqqq
+1   746	      =MYCSEG:0491	     qqqqq = ppppp
+    747	0498  10D0r		     tzbran  DW	  XZBRAN     ; 0BRANCH
+    748
+    749				      NF '(OF'
+1   750	      =MYCSEG:049A	     ppppp = $
+1   751				       dstr2 '(OF',0
+2   752	049A  03		       db    ??0009-$-1+0
+2   753	049B  28 4F 46		       db    '(OF'
+2   754	049E			     ??0009  label   byte
+1   755	049E  0491r		       dw    qqqqq
+1   756	      =MYCSEG:049A	     qqqqq = ppppp
+    757	04A0  10D0r		     tof     DW	  XOF	     ; (OF
+    758
+    759				      NF 'EX'
+1   760	      =MYCSEG:04A2	     ppppp = $
+1   761				       dstr2 'EX',0
+2   762	04A2  02		       db    ??000A-$-1+0
+2   763	04A3  45 58		       db    'EX'
+2   764	04A5			     ??000A  label   byte
+1   765	04A5  049Ar		       dw    qqqqq
+1   766	      =MYCSEG:04A2	     qqqqq = ppppp
+    767	04A7  0163r		     TRpAt   DW	  X_CO	     ; SI<>[RP]
+    768	04A9  0FC7r		     tex_tr  DW	  XEX_TR
+    769	04AB  0FD3r			     DW	  JSR_TR
+    770
+    771				      NF '(FOR'
+1   772	      =MYCSEG:04AD	     ppppp = $
+1   773				       dstr2 '(FOR',0
+2   774	04AD  04		       db    ??000B-$-1+0
+2   775	04AE  28 46 4F 52	       db    '(FOR'
+2   776	04B2			     ??000B  label   byte
+1   777	04B2  04A2r		       dw    qqqqq
+1   778	      =MYCSEG:04AD	     qqqqq = ppppp
+    779	04B4  10D0r		     tfor    DW	  XFOR	     ; (FOR
+    780
+    781				      NF '(NEXT'
+1   782	      =MYCSEG:04B6	     ppppp = $
+1   783				       dstr2 '(NEXT',0
+2   784	04B6  05		       db    ??000C-$-1+0
+2   785	04B7  28 4E 45 58 54	       db    '(NEXT'
+2   786	04BC			     ??000C  label   byte
+1   787	04BC  04ADr		       dw    qqqqq
+1   788	      =MYCSEG:04B6	     qqqqq = ppppp
+    789	04BE  10D0r		     tnext   DW	  XNEXT	     ; (NEXT
+    790
+    791				      NF '(?DO'
+1   792	      =MYCSEG:04C0	     ppppp = $
+1   793				       dstr2 '(?DO',0
+2   794	04C0  04		       db    ??000D-$-1+0
+2   795	04C1  28 3F 44 4F	       db    '(?DO'
+2   796	04C5			     ??000D  label   byte
+1   797	04C5  04B6r		       dw    qqqqq
+1   798	      =MYCSEG:04C0	     qqqqq = ppppp
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 15
+VMF.asm
+
+
+
+    799	04C7  10D0r		     T?DO	 DW   XDOP	;  (DO
+    800
+    801				      NF '(DO'
+1   802	      =MYCSEG:04C9	     ppppp = $
+1   803				       dstr2 '(DO',0
+2   804	04C9  03		       db    ??000E-$-1+0
+2   805	04CA  28 44 4F		       db    '(DO'
+2   806	04CD			     ??000E  label   byte
+1   807	04CD  04C0r		       dw    qqqqq
+1   808	      =MYCSEG:04C9	     qqqqq = ppppp
+    809	04CF  10D0r		     tdo     DW	  XDO	    ; (?DO
+    810	04D1  10D0r		     tcntDo  DW	  xcntdo     ; CntDo
+    811
+    812				      NF '(LP'
+1   813	      =MYCSEG:04D3	     ppppp = $
+1   814				       dstr2 '(LP',0
+2   815	04D3  03		       db    ??000F-$-1+0
+2   816	04D4  28 4C 50		       db    '(LP'
+2   817	04D7			     ??000F  label   byte
+1   818	04D7  04C9r		       dw    qqqqq
+1   819	      =MYCSEG:04D3	     qqqqq = ppppp
+    820	04D9  10D0r		     tloop   DW	  XLOOP	     ; (LOOP
+    821
+    822				      NF '(+LP'
+1   823	      =MYCSEG:04DB	     ppppp = $
+1   824				       dstr2 '(+LP',0
+2   825	04DB  04		       db    ??0010-$-1+0
+2   826	04DC  28 2B 4C 50	       db    '(+LP'
+2   827	04E0			     ??0010  label   byte
+1   828	04E0  04D3r		       dw    qqqqq
+1   829	      =MYCSEG:04DB	     qqqqq = ppppp
+    830	04E2  10D0r		     tploop  DW	  XPLOOP     ; (+LOOP
+    831
+    832				      NF 'LEAVE'
+1   833	      =MYCSEG:04E4	     ppppp = $
+1   834				       dstr2 'LEAVE',0
+2   835	04E4  05		       db    ??0011-$-1+0
+2   836	04E5  4C 45 41 56 45	       db    'LEAVE'
+2   837	04EA			     ??0011  label   byte
+1   838	04EA  04DBr		       dw    qqqqq
+1   839	      =MYCSEG:04E4	     qqqqq = ppppp
+    840	04EC  10D0r		     tleave  DW	  XLEAVE     ; LEAVE
+    841
+    842				      NF '4TH>'
+1   843	      =MYCSEG:04EE	     ppppp = $
+1   844				       dstr2 '4TH>',0
+2   845	04EE  04		       db    ??0012-$-1+0
+2   846	04EF  34 54 48 3E	       db    '4TH>'
+2   847	04F3			     ??0012  label   byte
+1   848	04F3  04E4r		       dw    qqqqq
+1   849	      =MYCSEG:04EE	     qqqqq = ppppp
+    850	04F5  010Cr		     tfromf  DW	  XFROMF     ; 4TH>
+    851
+    852				     ;--------------------^^^^^^^  CONTROL ^^^^^^--------------
+    853
+    854				     ;--------------------VVVVVV MEMORY	 VVVVVVVVVVVV---------------
+    855
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 16
+VMF.asm
+
+
+
+    856				      NF 'C@'
+1   857	      =MYCSEG:04F7	     ppppp = $
+1   858				       dstr2 'C@',0
+2   859	04F7  02		       db    ??0013-$-1+0
+2   860	04F8  43 40		       db    'C@'
+2   861	04FA			     ??0013  label   byte
+1   862	04FA  04EEr		       dw    qqqqq
+1   863	      =MYCSEG:04F7	     qqqqq = ppppp
+    864				      NF 'C!'
+1   865	      =MYCSEG:04FC	     ppppp = $
+1   866				       dstr2 'C!',0
+2   867	04FC  02		       db    ??0014-$-1+0
+2   868	04FD  43 21		       db    'C!'
+2   869	04FF			     ??0014  label   byte
+1   870	04FF  04F7r		       dw    qqqqq
+1   871	      =MYCSEG:04FC	     qqqqq = ppppp
+    872				      NF '@'
+1   873	      =MYCSEG:0501	     ppppp = $
+1   874				       dstr2 '@',0
+2   875	0501  01		       db    ??0015-$-1+0
+2   876	0502  40		       db    '@'
+2   877	0503			     ??0015  label   byte
+1   878	0503  04FCr		       dw    qqqqq
+1   879	      =MYCSEG:0501	     qqqqq = ppppp
+    880				      NF '!'
+1   881	      =MYCSEG:0505	     ppppp = $
+1   882				       dstr2 '!',0
+2   883	0505  01		       db    ??0016-$-1+0
+2   884	0506  21		       db    '!'
+2   885	0507			     ??0016  label   byte
+1   886	0507  0501r		       dw    qqqqq
+1   887	      =MYCSEG:0505	     qqqqq = ppppp
+    888
+    889				       NF 'C@+'	      ;	STREEM @ OPERATIONS
+1   890	      =MYCSEG:0509	     ppppp = $
+1   891				       dstr2 'C@+',0
+2   892	0509  03		       db    ??0017-$-1+0
+2   893	050A  43 40 2B		       db    'C@+'
+2   894	050D			     ??0017  label   byte
+1   895	050D  0505r		       dw    qqqqq
+1   896	      =MYCSEG:0509	     qqqqq = ppppp
+    897	050F  0456r		     TADRP1  DW	CFCH_P1
+    898
+    899				       NF '@+'	     ; STREEM @	OPERATIONS
+1   900	      =MYCSEG:0511	     ppppp = $
+1   901				       dstr2 '@+',0
+2   902	0511  02		       db    ??0018-$-1+0
+2   903	0512  40 2B		       db    '@+'
+2   904	0514			     ??0018  label   byte
+1   905	0514  0509r		       dw    qqqqq
+1   906	      =MYCSEG:0511	     qqqqq = ppppp
+    907	0516  10D0r		     TADRP2  DW	FCH_P2
+    908
+    909				       NF 'C!+'	      ;	STREEM ! OPERATIONS
+1   910	      =MYCSEG:0518	     ppppp = $
+1   911				       dstr2 'C!+',0
+2   912	0518  03		       db    ??0019-$-1+0
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 17
+VMF.asm
+
+
+
+2   913	0519  43 21 2B		       db    'C!+'
+2   914	051C			     ??0019  label   byte
+1   915	051C  0511r		       dw    qqqqq
+1   916	      =MYCSEG:0518	     qqqqq = ppppp
+    917	051E  044Fr		     TADRSP1  DW XADRSP1
+    918
+    919				       NF '!+'	     ; STREEM !	OPERATIONS
+1   920	      =MYCSEG:0520	     ppppp = $
+1   921				       dstr2 '!+',0
+2   922	0520  02		       db    ??001A-$-1+0
+2   923	0521  21 2B		       db    '!+'
+2   924	0523			     ??001A  label   byte
+1   925	0523  0518r		       dw    qqqqq
+1   926	      =MYCSEG:0520	     qqqqq = ppppp
+    927	0525  10D0r		     TADRSP2  DW XADRSP2
+    928
+    929				      NF 'UNPACK'
+1   930	      =MYCSEG:0527	     ppppp = $
+1   931				       dstr2 'UNPACK',0
+2   932	0527  06		       db    ??001B-$-1+0
+2   933	0528  55 4E 50 41 43 4B	       db    'UNPACK'
+2   934	052E			     ??001B  label   byte
+1   935	052E  0520r		       dw    qqqqq
+1   936	      =MYCSEG:0527	     qqqqq = ppppp
+    937	0530  10D0r		     TUNPACK  DW XUNPACK
+    938				      NF 'PACK'
+1   939	      =MYCSEG:0532	     ppppp = $
+1   940				       dstr2 'PACK',0
+2   941	0532  04		       db    ??001C-$-1+0
+2   942	0533  50 41 43 4B	       db    'PACK'
+2   943	0537			     ??001C  label   byte
+1   944	0537  0527r		       dw    qqqqq
+1   945	      =MYCSEG:0532	     qqqqq = ppppp
+    946	0539  10D0r		     TPACK    DW XPACK
+    947				     ;----------------^^^^^^^^^	MEMORY	^^^^^^^^^^-------------------
+    948
+    949				     ;---------------vvvvvvvv  MATH   vvvvvvvv-------------------
+    950				      NF 'NEGATE'
+1   951	      =MYCSEG:053B	     ppppp = $
+1   952				       dstr2 'NEGATE',0
+2   953	053B  06		       db    ??001D-$-1+0
+2   954	053C  4E 45 47 41 54 45	       db    'NEGATE'
+2   955	0542			     ??001D  label   byte
+1   956	0542  0532r		       dw    qqqqq
+1   957	      =MYCSEG:053B	     qqqqq = ppppp
+    958	0544  10D0r		     TNEGATE DW	  XNEGATE    ; NEGATE
+    959
+    960				      NF 'DNEGATE'
+1   961	      =MYCSEG:0546	     ppppp = $
+1   962				       dstr2 'DNEGATE',0
+2   963	0546  07		       db    ??001E-$-1+0
+2   964	0547  44 4E 45 47 41 54	45     db    'DNEGATE'
+2   965	054E			     ??001E  label   byte
+1   966	054E  053Br		       dw    qqqqq
+1   967	      =MYCSEG:0546	     qqqqq = ppppp
+    968	0550  10D0r		     tdnegat DW	  XDNEGAT    ; DNEGATE
+    969
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 18
+VMF.asm
+
+
+
+    970				       NF 'SHIFT'
+1   971	      =MYCSEG:0552	     ppppp = $
+1   972				       dstr2 'SHIFT',0
+2   973	0552  05		       db    ??001F-$-1+0
+2   974	0553  53 48 49 46 54	       db    'SHIFT'
+2   975	0558			     ??001F  label   byte
+1   976	0558  0546r		       dw    qqqqq
+1   977	      =MYCSEG:0552	     qqqqq = ppppp
+    978	055A  10D0r		       DW XSHIFT
+    979
+    980				       NF '2^'
+1   981	      =MYCSEG:055C	     ppppp = $
+1   982				       dstr2 '2^',0
+2   983	055C  02		       db    ??0020-$-1+0
+2   984	055D  32 5E		       db    '2^'
+2   985	055F			     ??0020  label   byte
+1   986	055F  0552r		       dw    qqqqq
+1   987	      =MYCSEG:055C	     qqqqq = ppppp
+    988	0561  10D0r		       DW X2PWR
+    989
+    990				       NF '/MOD'
+1   991	      =MYCSEG:0563	     ppppp = $
+1   992				       dstr2 '/MOD',0
+2   993	0563  04		       db    ??0021-$-1+0
+2   994	0564  2F 4D 4F 44	       db    '/MOD'
+2   995	0568			     ??0021  label   byte
+1   996	0568  055Cr		       dw    qqqqq
+1   997	      =MYCSEG:0563	     qqqqq = ppppp
+    998	056A  10D0r		       DW XDIVMOD
+    999
+   1000				       NF 'MOD'
+1  1001	      =MYCSEG:056C	     ppppp = $
+1  1002				       dstr2 'MOD',0
+2  1003	056C  03		       db    ??0022-$-1+0
+2  1004	056D  4D 4F 44		       db    'MOD'
+2  1005	0570			     ??0022  label   byte
+1  1006	0570  0563r		       dw    qqqqq
+1  1007	      =MYCSEG:056C	     qqqqq = ppppp
+   1008	0572  10D0r		       DW XMOD
+   1009
+   1010				       NF '/'
+1  1011	      =MYCSEG:0574	     ppppp = $
+1  1012				       dstr2 '/',0
+2  1013	0574  01		       db    ??0023-$-1+0
+2  1014	0575  2F		       db    '/'
+2  1015	0576			     ??0023  label   byte
+1  1016	0576  056Cr		       dw    qqqqq
+1  1017	      =MYCSEG:0574	     qqqqq = ppppp
+   1018	0578  10D0r		       DW XDIV
+   1019
+   1020				      NF 'M*'
+1  1021	      =MYCSEG:057A	     ppppp = $
+1  1022				       dstr2 'M*',0
+2  1023	057A  02		       db    ??0024-$-1+0
+2  1024	057B  4D 2A		       db    'M*'
+2  1025	057D			     ??0024  label   byte
+1  1026	057D  0574r		       dw    qqqqq
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 19
+VMF.asm
+
+
+
+1  1027	      =MYCSEG:057A	     qqqqq = ppppp
+   1028	057F  0338r		     TMUL DW XMULT2
+   1029
+   1030				      NF '*'
+1  1031	      =MYCSEG:0581	     ppppp = $
+1  1032				       dstr2 '*',0
+2  1033	0581  01		       db    ??0025-$-1+0
+2  1034	0582  2A		       db    '*'
+2  1035	0583			     ??0025  label   byte
+1  1036	0583  057Ar		       dw    qqqqq
+1  1037	      =MYCSEG:0581	     qqqqq = ppppp
+   1038	0585  10D0r 057Fr 0E96r	  +   DW JSR,TMUL,TDROP,TEXIT
+   1039	      0476r
+   1040
+   1041				       NF 'ABS'
+1  1042	      =MYCSEG:058D	     ppppp = $
+1  1043				       dstr2 'ABS',0
+2  1044	058D  03		       db    ??0026-$-1+0
+2  1045	058E  41 42 53		       db    'ABS'
+2  1046	0591			     ??0026  label   byte
+1  1047	0591  0581r		       dw    qqqqq
+1  1048	      =MYCSEG:058D	     qqqqq = ppppp
+   1049	0593  10D0r		       DW XABS
+   1050
+   1051				       NF 'DABS'
+1  1052	      =MYCSEG:0595	     ppppp = $
+1  1053				       dstr2 'DABS',0
+2  1054	0595  04		       db    ??0027-$-1+0
+2  1055	0596  44 41 42 53	       db    'DABS'
+2  1056	059A			     ??0027  label   byte
+1  1057	059A  058Dr		       dw    qqqqq
+1  1058	      =MYCSEG:0595	     qqqqq = ppppp
+   1059	059C  10D0r		       DW XDABS
+   1060
+   1061				      NF 'ALPHA'
+1  1062	      =MYCSEG:059E	     ppppp = $
+1  1063				       dstr2 'ALPHA',0
+2  1064	059E  05		       db    ??0028-$-1+0
+2  1065	059F  41 4C 50 48 41	       db    'ALPHA'
+2  1066	05A4			     ??0028  label   byte
+1  1067	05A4  0595r		       dw    qqqqq
+1  1068	      =MYCSEG:059E	     qqqqq = ppppp
+   1069	05A6  10D0r		      DW XALPHA
+   1070
+   1071				      NF '2/'
+1  1072	      =MYCSEG:05A8	     ppppp = $
+1  1073				       dstr2 '2/',0
+2  1074	05A8  02		       db    ??0029-$-1+0
+2  1075	05A9  32 2F		       db    '2/'
+2  1076	05AB			     ??0029  label   byte
+1  1077	05AB  059Er		       dw    qqqqq
+1  1078	      =MYCSEG:05A8	     qqqqq = ppppp
+   1079	05AD  10D0r			DW   X2SLS	; 2/
+   1080
+   1081				      NF '2*'
+1  1082	      =MYCSEG:05AF	     ppppp = $
+1  1083				       dstr2 '2*',0
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 20
+VMF.asm
+
+
+
+2  1084	05AF  02		       db    ??002A-$-1+0
+2  1085	05B0  32 2A		       db    '2*'
+2  1086	05B2			     ??002A  label   byte
+1  1087	05B2  05A8r		       dw    qqqqq
+1  1088	      =MYCSEG:05AF	     qqqqq = ppppp
+   1089	05B4  10D0r		     T2STAR  DW	  X2STAR     ; 2*
+   1090
+   1091				      NF 'UM/MOD'
+1  1092	      =MYCSEG:05B6	     ppppp = $
+1  1093				       dstr2 'UM/MOD',0
+2  1094	05B6  06		       db    ??002B-$-1+0
+2  1095	05B7  55 4D 2F 4D 4F 44	       db    'UM/MOD'
+2  1096	05BD			     ??002B  label   byte
+1  1097	05BD  05AFr		       dw    qqqqq
+1  1098	      =MYCSEG:05B6	     qqqqq = ppppp
+   1099	05BF  0181r			     DW	  XUMSLSM    ; UM/MOD
+   1100
+   1101				      NF 'UM*'
+1  1102	      =MYCSEG:05C1	     ppppp = $
+1  1103				       dstr2 'UM*',0
+2  1104	05C1  03		       db    ??002C-$-1+0
+2  1105	05C2  55 4D 2A		       db    'UM*'
+2  1106	05C5			     ??002C  label   byte
+1  1107	05C5  05B6r		       dw    qqqqq
+1  1108	      =MYCSEG:05C1	     qqqqq = ppppp
+   1109	05C7  10D0r			     DW	  XUMSTAR    ; UM*
+   1110
+   1111				      NF 'AND'
+1  1112	      =MYCSEG:05C9	     ppppp = $
+1  1113				       dstr2 'AND',0
+2  1114	05C9  03		       db    ??002D-$-1+0
+2  1115	05CA  41 4E 44		       db    'AND'
+2  1116	05CD			     ??002D  label   byte
+1  1117	05CD  05C1r		       dw    qqqqq
+1  1118	      =MYCSEG:05C9	     qqqqq = ppppp
+   1119	05CF  10D0r		     tand    DW	  XAND	     ; AND
+   1120
+   1121				      nf 'XOR'
+1  1122	      =MYCSEG:05D1	     ppppp = $
+1  1123				       dstr2 'XOR',0
+2  1124	05D1  03		       db    ??002E-$-1+0
+2  1125	05D2  58 4F 52		       db    'XOR'
+2  1126	05D5			     ??002E  label   byte
+1  1127	05D5  05C9r		       dw    qqqqq
+1  1128	      =MYCSEG:05D1	     qqqqq = ppppp
+   1129	05D7  10D0r		     txor    DW	  XXORX	     ; XOR
+   1130
+   1131				      NF 'COM'
+1  1132	      =MYCSEG:05D9	     ppppp = $
+1  1133				       dstr2 'COM',0
+2  1134	05D9  03		       db    ??002F-$-1+0
+2  1135	05DA  43 4F 4D		       db    'COM'
+2  1136	05DD			     ??002F  label   byte
+1  1137	05DD  05D1r		       dw    qqqqq
+1  1138	      =MYCSEG:05D9	     qqqqq = ppppp
+   1139	05DF  10D0r		     tNOT    DW	  xNOT	     ; NOT
+   1140
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 21
+VMF.asm
+
+
+
+   1141				      NF 'MAX'
+1  1142	      =MYCSEG:05E1	     ppppp = $
+1  1143				       dstr2 'MAX',0
+2  1144	05E1  03		       db    ??0030-$-1+0
+2  1145	05E2  4D 41 58		       db    'MAX'
+2  1146	05E5			     ??0030  label   byte
+1  1147	05E5  05D9r		       dw    qqqqq
+1  1148	      =MYCSEG:05E1	     qqqqq = ppppp
+   1149	05E7  01EEr		     tmax    DW	  xmax	     ; MAX
+   1150
+   1151				      NF 'MIN'
+1  1152	      =MYCSEG:05E9	     ppppp = $
+1  1153				       dstr2 'MIN',0
+2  1154	05E9  03		       db    ??0031-$-1+0
+2  1155	05EA  4D 49 4E		       db    'MIN'
+2  1156	05ED			     ??0031  label   byte
+1  1157	05ED  05E1r		       dw    qqqqq
+1  1158	      =MYCSEG:05E9	     qqqqq = ppppp
+   1159	05EF  01F3r		     tmin    DW	  xmin	     ; MIN
+   1160
+   1161				      NF 'LOW'
+1  1162	      =MYCSEG:05F1	     ppppp = $
+1  1163				       dstr2 'LOW',0
+2  1164	05F1  03		       db    ??0032-$-1+0
+2  1165	05F2  4C 4F 57		       db    'LOW'
+2  1166	05F5			     ??0032  label   byte
+1  1167	05F5  05E9r		       dw    qqqqq
+1  1168	      =MYCSEG:05F1	     qqqqq = ppppp
+   1169	05F7  10D0r		     TLOW    DW	XLO
+   1170				      NF 'OR'
+1  1171	      =MYCSEG:05F9	     ppppp = $
+1  1172				       dstr2 'OR',0
+2  1173	05F9  02		       db    ??0033-$-1+0
+2  1174	05FA  4F 52		       db    'OR'
+2  1175	05FC			     ??0033  label   byte
+1  1176	05FC  05F1r		       dw    qqqqq
+1  1177	      =MYCSEG:05F9	     qqqqq = ppppp
+   1178	05FE  10D0r			     DW	  XORE	     ; OR
+   1179				      NF '+'
+1  1180	      =MYCSEG:0600	     ppppp = $
+1  1181				       dstr2 '+',0
+2  1182	0600  01		       db    ??0034-$-1+0
+2  1183	0601  2B		       db    '+'
+2  1184	0602			     ??0034  label   byte
+1  1185	0602  05F9r		       dw    qqqqq
+1  1186	      =MYCSEG:0600	     qqqqq = ppppp
+   1187	0604  10D0r		     tplus   DW	  XPLUS	     ; +
+   1188				      NF 'D+'
+1  1189	      =MYCSEG:0606	     ppppp = $
+1  1190				       dstr2 'D+',0
+2  1191	0606  02		       db    ??0035-$-1+0
+2  1192	0607  44 2B		       db    'D+'
+2  1193	0609			     ??0035  label   byte
+1  1194	0609  0600r		       dw    qqqqq
+1  1195	      =MYCSEG:0606	     qqqqq = ppppp
+   1196	060B  0175r			     DW	  XDPLUS     ; D+
+   1197				      NF '-'
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 22
+VMF.asm
+
+
+
+1  1198	      =MYCSEG:060D	     ppppp = $
+1  1199				       dstr2 '-',0
+2  1200	060D  01		       db    ??0036-$-1+0
+2  1201	060E  2D		       db    '-'
+2  1202	060F			     ??0036  label   byte
+1  1203	060F  0606r		       dw    qqqqq
+1  1204	      =MYCSEG:060D	     qqqqq = ppppp
+   1205	0611  10D0r		     tsubt   DW	  XSUBT	     ; -
+   1206				      NF 'D-'
+1  1207	      =MYCSEG:0613	     ppppp = $
+1  1208				       dstr2 'D-',0
+2  1209	0613  02		       db    ??0037-$-1+0
+2  1210	0614  44 2D		       db    'D-'
+2  1211	0616			     ??0037  label   byte
+1  1212	0616  060Dr		       dw    qqqqq
+1  1213	      =MYCSEG:0613	     qqqqq = ppppp
+   1214	0618  10D0r			     DW	  XDMINUS    ; D-
+   1215				      NF '1-'
+1  1216	      =MYCSEG:061A	     ppppp = $
+1  1217				       dstr2 '1-',0
+2  1218	061A  02		       db    ??0038-$-1+0
+2  1219	061B  31 2D		       db    '1-'
+2  1220	061D			     ??0038  label   byte
+1  1221	061D  0613r		       dw    qqqqq
+1  1222	      =MYCSEG:061A	     qqqqq = ppppp
+   1223	061F  10D0r		     tonemi  DW	  XONEMI     ; 1-
+   1224				      NF '2-'
+1  1225	      =MYCSEG:0621	     ppppp = $
+1  1226				       dstr2 '2-',0
+2  1227	0621  02		       db    ??0039-$-1+0
+2  1228	0622  32 2D		       db    '2-'
+2  1229	0624			     ??0039  label   byte
+1  1230	0624  061Ar		       dw    qqqqq
+1  1231	      =MYCSEG:0621	     qqqqq = ppppp
+   1232	0626  10D0r		     ttwomi  DW	  XTWOMI     ; 2-
+   1233				      NF '1+'
+1  1234	      =MYCSEG:0628	     ppppp = $
+1  1235				       dstr2 '1+',0
+2  1236	0628  02		       db    ??003A-$-1+0
+2  1237	0629  31 2B		       db    '1+'
+2  1238	062B			     ??003A  label   byte
+1  1239	062B  0621r		       dw    qqqqq
+1  1240	      =MYCSEG:0628	     qqqqq = ppppp
+   1241	062D  0452r		     tonepl  DW	  ADRP1	    ; 1+
+   1242				      NF '2+'
+1  1243	      =MYCSEG:062F	     ppppp = $
+1  1244				       dstr2 '2+',0
+2  1245	062F  02		       db    ??003B-$-1+0
+2  1246	0630  32 2B		       db    '2+'
+2  1247	0632			     ??003B  label   byte
+1  1248	0632  0628r		       dw    qqqqq
+1  1249	      =MYCSEG:062F	     qqqqq = ppppp
+   1250	0634  01A0r		     TTWOPL  DW	  ADRP2	    ; 2+
+   1251
+   1252				     ;---------------^^^^^^^^  MATH  ^^^^^^^^^-------------------
+   1253
+   1254				     ; --------------------------IO  ------------------vvvvvvv
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 23
+VMF.asm
+
+
+
+   1255
+   1256				      NF 'SCRH'
+1  1257	      =MYCSEG:0636	     ppppp = $
+1  1258				       dstr2 'SCRH',0
+2  1259	0636  04		       db    ??003C-$-1+0
+2  1260	0637  53 43 52 48	       db    'SCRH'
+2  1261	063B			     ??003C  label   byte
+1  1262	063B  062Fr		       dw    qqqqq
+1  1263	      =MYCSEG:0636	     qqqqq = ppppp
+   1264	063D  02F8r 02F1r	      DW DOCON1,SETVAR
+   1265	0641  FFFF		     SCRH DW -1
+   1266
+   1267				       NF 'ORDER#'
+1  1268	      =MYCSEG:0643	     ppppp = $
+1  1269				       dstr2 'ORDER#',0
+2  1270	0643  06		       db    ??003D-$-1+0
+2  1271	0644  4F 52 44 45 52 23	       db    'ORDER#'
+2  1272	064A			     ??003D  label   byte
+1  1273	064A  0636r		       dw    qqqqq
+1  1274	      =MYCSEG:0643	     qqqqq = ppppp
+   1275	064C  10D0r 035Ar 034Fr	     TORDER: DW	DOVAR2,_HND_TO,_HND_AT
+   1276	0652  0001 096Er 0000 0000+	   DW  1,AFORTH+6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+   1277	      0000 0000	0000 0000 +
+   1278	      0000 0000	0000 0000 +
+   1279	      0000 0000	0000 0000 +
+   1280	      0000
+   1281
+   1282				      NF 'OPEN'
+1  1283	      =MYCSEG:0674	     ppppp = $
+1  1284				       dstr2 'OPEN',0
+2  1285	0674  04		       db    ??003E-$-1+0
+2  1286	0675  4F 50 45 4E	       db    'OPEN'
+2  1287	0679			     ??003E  label   byte
+1  1288	0679  0643r		       dw    qqqqq
+1  1289	      =MYCSEG:0674	     qqqqq = ppppp
+   1290	067B  0367r		     TOPEN DW XOPEN
+   1291	067D  10D0r 0E44r 075Ar	  +  OPENED DW JSR,ZR,TOEOF,TEXIT
+   1292	      0476r
+   1293				     ; : FOPEN HANDLES bs - 0= ?? FOPEN	DUP 0< A" OPEN ERR" ;
+   1294
+   1295				      NF 'FOPEN'
+1  1296	      =MYCSEG:0685	     ppppp = $
+1  1297				       dstr2 'FOPEN',0
+2  1298	0685  05		       db    ??003F-$-1+0
+2  1299	0686  46 4F 50 45 4E	       db    'FOPEN'
+2  1300	068B			     ??003F  label   byte
+1  1301	068B  0674r		       dw    qqqqq
+1  1302	      =MYCSEG:0685	     qqqqq = ppppp
+   1303	068D  0FD3r 09C5r 062Dr	  +  OPENF: DW	JSR_TR,TBLWORD,TONEPL,TOPEN,TDUP,TZLESS,tsabrt
+   1304	      067Br 0EB2r 0EEFr	  +
+   1305	      0B4Fr
+   1306					  dstr ' OPEN ERROR '
+1  1307					  dstr2	' OPEN ERROR ',0
+2  1308	069B  0C		       db    ??0040-$-1+0
+2  1309	069C  20 4F 50 45 4E 20	45+    db    ' OPEN ERROR '
+   1310	      52 52 4F 52 20
+2  1311	06A8			     ??0040  label   byte
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 24
+VMF.asm
+
+
+
+   1312	06A8  04A9r		      DW tex_tr
+   1313
+   1314				      NF 'CLOSE'
+1  1315	      =MYCSEG:06AA	     ppppp = $
+1  1316				       dstr2 'CLOSE',0
+2  1317	06AA  05		       db    ??0041-$-1+0
+2  1318	06AB  43 4C 4F 53 45	       db    'CLOSE'
+2  1319	06B0			     ??0041  label   byte
+1  1320	06B0  0685r		       dw    qqqqq
+1  1321	      =MYCSEG:06AA	     qqqqq = ppppp
+   1322	06B2  036Dr 06BAr	     TCLOSE: DW	XCLOSE,XCLOSED
+   1323	06B6  10D0r 085Cr	     TCLOSEF: DW  CALL_D2,XDROPH1
+   1324	06BA  E8 FA43		     XCLOSED: CALL SUB4TH
+   1325	06BD  0E3Er 075Ar 0476r		      DW MO,TOEOF,TEXIT
+   1326
+   1327					     nf	'TYPE'
+1  1328	      =MYCSEG:06C3	     ppppp = $
+1  1329				       dstr2 'TYPE',0
+2  1330	06C3  04		       db    ??0042-$-1+0
+2  1331	06C4  54 59 50 45	       db    'TYPE'
+2  1332	06C8			     ??0042  label   byte
+1  1333	06C8  06AAr		       dw    qqqqq
+1  1334	      =MYCSEG:06C3	     qqqqq = ppppp
+   1335	06CA  0FD3r 04D1r 04C7r	  +  tTYPE:  dw	  jsr_TR,tcntDo,t?do,@@2
+   1336	      06DCr
+   1337	06D2  0F15r 10D0r 0793r	  +  @@1:    dw	  ti,tcat,t?emit,tloop,@@1
+   1338	      04D9r 06D2r
+   1339	06DC  04A9r		     @@2:    dw	  tex_tr
+   1340
+   1341				      NF 'EXPECT'
+1  1342	      =MYCSEG:06DE	     ppppp = $
+1  1343				       dstr2 'EXPECT',0
+2  1344	06DE  06		       db    ??0043-$-1+0
+2  1345	06DF  45 58 50 45 43 54	       db    'EXPECT'
+2  1346	06E5			     ??0043  label   byte
+1  1347	06E5  06C3r		       dw    qqqqq
+1  1348	      =MYCSEG:06DE	     qqqqq = ppppp
+   1349	06E7  0FD3r 0EBBr 04D1r	  +  texpect:dw	  jsr_TR,TDUP2,TCNTDO,T?DO,@@22
+   1350	      04C7r 074Br
+   1351	06F1  0789r 05F7r 0EB2r	  +  @@1:    Dw	  TKEY,TLOW,TDUP,TI
+   1352	      0F15r
+   1353	06F9  10D0r 0E23r		     Dw	  TCSTORE,blc
+   1354	06FD  0EE5r 0EF6r 0498r	  +	     Dw	  TULESS,tzeq,TZBRAN,@@15
+   1355	      0711r
+   1356	0705  0F15r 10D0r 079Cr	  +	     Dw	  TI,TCAT,temit,one
+   1357	      0E52r
+   1358	070D  048Fr 0747r		     dw	  tbran,@@21
+   1359	0711  0F15r 10D0r 0E35r	  +  @@15:   Dw	  TI,TCAT,cr,tof,@@16  ; cr?
+   1360	      04A0r 0723r
+   1361	071B  0F15r 0F39r 0611r	  +	     dw	  ti,trot,tsubt,tleave ; I rot - leave
+   1362	      04ECr
+   1363	0723  0E1Ar 04A0r 0743r	     @@16:   dw	  bs,tof,@@20		  ;backsp?
+   1364	0729  0F1Er 0F15r 0611r	  +	     dw	  tover,ti,tsubt,tZbran,@@1
+   1365	      0498r 06F1r
+   1366	0733  0E1Ar 0EB2r 079Cr	  +	     dw	  bs,tdup,temit,tSPACE,temit	     ; bs blank	bs
+   1367	      0778r 079Cr
+   1368	073D  0E3Er 048Fr 0747r		     dw	  mo,tbran,@@21
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 25
+VMF.asm
+
+
+
+   1369	0743  0E96r 0E44r	     @@20:   dw	  tdrop,zr
+   1370	0747  04E2r 06F1r	     @@21:   Dw	  TpLOOP,@@1
+   1371	074B  0DB4r 0E96r 04A9r	     @@22:   Dw	  ToSpan,tdrop,tex_tr
+   1372
+   1373				       nf 'EOF?'
+1  1374	      =MYCSEG:0751	     ppppp = $
+1  1375				       dstr2 'EOF?',0
+2  1376	0751  04		       db    ??0044-$-1+0
+2  1377	0752  45 4F 46 3F	       db    'EOF?'
+2  1378	0756			     ??0044  label   byte
+1  1379	0756  06DEr		       dw    qqqqq
+1  1380	      =MYCSEG:0751	     qqqqq = ppppp
+   1381	0758  02F8r		     EOF?   dw DOCON1
+   1382	075A  02F1r		     TOEOF  dw SETVAR
+   1383	075C  0000		     LASTCH DW 0
+   1384
+   1385				      NF 'RBLK'
+1  1386	      =MYCSEG:075E	     ppppp = $
+1  1387				       dstr2 'RBLK',0
+2  1388	075E  04		       db    ??0045-$-1+0
+2  1389	075F  52 42 4C 4B	       db    'RBLK'
+2  1390	0763			     ??0045  label   byte
+1  1391	0763  0751r		       dw    qqqqq
+1  1392	      =MYCSEG:075E	     qqqqq = ppppp
+   1393	0765  0416r			   DW XRBLK
+   1394				      NF 'WBLK'
+1  1395	      =MYCSEG:0767	     ppppp = $
+1  1396				       dstr2 'WBLK',0
+2  1397	0767  04		       db    ??0046-$-1+0
+2  1398	0768  57 42 4C 4B	       db    'WBLK'
+2  1399	076C			     ??0046  label   byte
+1  1400	076C  075Er		       dw    qqqqq
+1  1401	      =MYCSEG:0767	     qqqqq = ppppp
+   1402	076E  0413r			   DW XWBLK
+   1403
+   1404				      NF 'SPACE'
+1  1405	      =MYCSEG:0770	     ppppp = $
+1  1406				       dstr2 'SPACE',0
+2  1407	0770  05		       db    ??0047-$-1+0
+2  1408	0771  53 50 41 43 45	       db    'SPACE'
+2  1409	0776			     ??0047  label   byte
+1  1410	0776  0767r		       dw    qqqqq
+1  1411	      =MYCSEG:0770	     qqqqq = ppppp
+   1412	0778  10D0r		     tSPACE  DW	  xblank     ; BLANK
+   1413
+   1414				      NF '?KEY'
+1  1415	      =MYCSEG:077A	     ppppp = $
+1  1416				       dstr2 '?KEY',0
+2  1417	077A  04		       db    ??0048-$-1+0
+2  1418	077B  3F 4B 45 59	       db    '?KEY'
+2  1419	077F			     ??0048  label   byte
+1  1420	077F  0770r		       dw    qqqqq
+1  1421	      =MYCSEG:077A	     qqqqq = ppppp
+   1422	0781  0378r		     TQKEY   DW	  XQKEY	     ; ?KEY
+   1423
+   1424				      NF 'KEY'
+1  1425	      =MYCSEG:0783	     ppppp = $
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 26
+VMF.asm
+
+
+
+1  1426				       dstr2 'KEY',0
+2  1427	0783  03		       db    ??0049-$-1+0
+2  1428	0784  4B 45 59		       db    'KEY'
+2  1429	0787			     ??0049  label   byte
+1  1430	0787  077Ar		       dw    qqqqq
+1  1431	      =MYCSEG:0783	     qqqqq = ppppp
+   1432	0789  0404r		     TKEY    DW	 XKEY
+   1433
+   1434				      NF '?EMIT'
+1  1435	      =MYCSEG:078B	     ppppp = $
+1  1436				       dstr2 '?EMIT',0
+2  1437	078B  05		       db    ??004A-$-1+0
+2  1438	078C  3F 45 4D 49 54	       db    '?EMIT'
+2  1439	0791			     ??004A  label   byte
+1  1440	0791  0783r		       dw    qqqqq
+1  1441	      =MYCSEG:078B	     qqqqq = ppppp
+   1442	0793  10D0r		     T?EMIT   DW  X?EMIT
+   1443
+   1444				      NF 'EMIT'
+1  1445	      =MYCSEG:0795	     ppppp = $
+1  1446				       dstr2 'EMIT',0
+2  1447	0795  04		       db    ??004B-$-1+0
+2  1448	0796  45 4D 49 54	       db    'EMIT'
+2  1449	079A			     ??004B  label   byte
+1  1450	079A  078Br		       dw    qqqqq
+1  1451	      =MYCSEG:0795	     qqqqq = ppppp
+   1452	079C  03F3r		     TEMIT   DW	 XEMIT
+   1453
+   1454				     ; ------------------  IO  -----------------^^^^^^^
+   1455
+   1456				     ; -------------TEXT INTERPRETTER	-------------vvvvvvvvvvv
+   1457				       nf    'C>N'
+1  1458	      =MYCSEG:079E	     ppppp = $
+1  1459				       dstr2 'C>N',0
+2  1460	079E  03		       db    ??004C-$-1+0
+2  1461	079F  43 3E 4E		       db    'C>N'
+2  1462	07A2			     ??004C  label   byte
+1  1463	07A2  0795r		       dw    qqqqq
+1  1464	      =MYCSEG:079E	     qqqqq = ppppp
+   1465	07A4  10D0r		     cfname  dw	XFNAME
+   1466
+   1467	07A6  AF		     dovoc:  scasw
+   1468	07A7  AF			     scasw
+   1469	07A8  E8 0925		       call _does
+   1470	07AB  0D75r 0476r	       dw toCont,texit
+   1471
+   1472	07AF  AF			     scasw
+   1473	07B0  AF		     doDef:  scasw
+   1474	07B1  E8 091C		       call _does
+   1475	07B4  0D65r 0476r	       dw toCurr,texit
+   1476
+   1477				       NF 'IO!'
+1  1478	      =MYCSEG:07B8	     ppppp = $
+1  1479				       dstr2 'IO!',0
+2  1480	07B8  03		       db    ??004D-$-1+0
+2  1481	07B9  49 4F 21		       db    'IO!'
+2  1482	07BC			     ??004D  label   byte
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 27
+VMF.asm
+
+
+
+1  1483	07BC  079Er		       dw    qqqqq
+1  1484	      =MYCSEG:07B8	     qqqqq = ppppp
+   1485	07BE  10D0r 0D8Br 05DFr	  +  IO? DW JSR,BLK@,TNOT,TZBRAN,IO?2,STDIO,TEXIT
+   1486	      0498r 07CCr 03E1r	  +
+   1487	      0476r
+   1488	07CC  03EDr 0476r	     IO?2 DW FILEIO,TEXIT
+   1489
+   1490				       NF 'OK?'
+1  1491	      =MYCSEG:07D0	     ppppp = $
+1  1492				       dstr2 'OK?',0
+2  1493	07D0  03		       db    ??004E-$-1+0
+2  1494	07D1  4F 4B 3F		       db    'OK?'
+2  1495	07D4			     ??004E  label   byte
+1  1496	07D4  07B8r		       dw    qqqqq
+1  1497	      =MYCSEG:07D0	     qqqqq = ppppp
+   1498	07D6  10D0r 0D8Br 0498r	  +  TOK DW JSR,BLK@,TZBRAN,TOK2,TRPAT,TCR,TEXIT
+   1499	      07E4r 04A7r 07F7r	  +
+   1500	      0476r
+   1501	07E4  10D0r		     TOK2 DW T_SDOT
+   1502					  dstr ' Ok'
+1  1503					  dstr2	' Ok',0
+2  1504	07E6  03		       db    ??004F-$-1+0
+2  1505	07E7  20 4F 6B		       db    ' Ok'
+2  1506	07EA			     ??004F  label   byte
+   1507	07EA  07F7r 04A7r 0778r	  +	  DW TCR,TRPAT,TSPACE,TEXIT
+   1508	      0476r
+   1509
+   1510				       nf 'CR'
+1  1511	      =MYCSEG:07F2	     ppppp = $
+1  1512				       dstr2 'CR',0
+2  1513	07F2  02		       db    ??0050-$-1+0
+2  1514	07F3  43 52		       db    'CR'
+2  1515	07F5			     ??0050  label   byte
+1  1516	07F5  07D0r		       dw    qqqqq
+1  1517	      =MYCSEG:07F2	     qqqqq = ppppp
+   1518	07F7  10D0r 0E35r 079Cr	  +  tCR:    dw	  jsr,cr,temit,lf,temit,ZR,TOoUTC,texit
+   1519	      0E2Cr 079Cr 0E44r	  +
+   1520	      0DCDr 0476r
+   1521
+   1522				       nf    'REFILL'
+1  1523	      =MYCSEG:0807	     ppppp = $
+1  1524				       dstr2 'REFILL',0
+2  1525	0807  06		       db    ??0051-$-1+0
+2  1526	0808  52 45 46 49 4C 4C	       db    'REFILL'
+2  1527	080E			     ??0051  label   byte
+1  1528	080E  07F2r		       dw    qqqqq
+1  1529	      =MYCSEG:0807	     qqqqq = ppppp
+   1530	0810  0FD3r 0D7Fr 0BC6r	  +  REFILL  dw	jsr_TR,tib@,Tlit,80,texpect
+   1531	      0050 06E7r
+   1532	081A  0E44r 0D99r 0D7Fr	  +	     DW	ZR,toToIn,tib@,span@,tplus,tZStor,tex_tr
+   1533	      0DB2r 0604r 10D0r	  +
+   1534	      04A9r
+   1535
+   1536				     ; : 1LINE 1 LINES +! OK?  0 TO >IN	 TIB 80	EXPECT	CO
+   1537				     ;	     0	TIB SPAN + C! TO INTERPRET ;
+   1538				       NF   '1LINE'
+1  1539	      =MYCSEG:0828	     ppppp = $
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 28
+VMF.asm
+
+
+
+1  1540				       dstr2 '1LINE',0
+2  1541	0828  05		       db    ??0052-$-1+0
+2  1542	0829  31 4C 49 4E 45	       db    '1LINE'
+2  1543	082E			     ??0052  label   byte
+1  1544	082E  0807r		       dw    qqqqq
+1  1545	      =MYCSEG:0828	     qqqqq = ppppp
+   1546	0830  10D0r 07D6r 0810r	  +  LINE1 DW JSR,TOK,REFILL,TRPAT,AINT
+   1547	      04A7r 09E6r
+   1548
+   1549				       NF 'HANDLES'
+1  1550	      =MYCSEG:083A	     ppppp = $
+1  1551				       dstr2 'HANDLES',0
+2  1552	083A  07		       db    ??0053-$-1+0
+2  1553	083B  48 41 4E 44 4C 45	53     db    'HANDLES'
+2  1554	0842			     ??0053  label   byte
+1  1555	0842  0828r		       dw    qqqqq
+1  1556	      =MYCSEG:083A	     qqqqq = ppppp
+   1557	0844  02F7r 035Ar 034Fr	     HND: DW DOCON2,_HND_TO,_HND_AT
+   1558	084A  0000 0000	0000 0000 +  handles dw	  0,0,0,0,0,0,0,0,0
+   1559	      0000 0000	0000 0000 +
+   1560	      0000
+   1561	085C  E8 F8A1		     xDROPH1:CALL SUB4TH
+   1562	085F  0844r 0498r 0879r	  +	     DW	  HND,TZBRAN,@@1,HND+4
+   1563	      0848r
+   1564	0867  06B2r 0E96r 0844r		     DW	  TCLOSE,TDROP,HND
+   1565	086D  0EF6r 0498r 0879r		     DW	  TZEQ,TZBRAN,@@1
+   1566	0873  0E44r 0D8Dr 03E1r		     DW	  ZR,TOBLK,STDIO
+   1567	0879  06B4r 047Fr	     @@1:    DW	  TCLOSE+2,TRETF
+   1568	087D  B0 0D			     MOV  al,0dh
+   1569	087F  C3			     RET
+   1570
+   1571				       NF ';TI'
+1  1572	      =MYCSEG:0880	     ppppp = $
+1  1573				       dstr2 ';TI',0
+2  1574	0880  03		       db    ??0054-$-1+0
+2  1575	0881  3B 54 49		       db    ';TI'
+2  1576	0884			     ??0054  label   byte
+1  1577	0884  083Ar		       dw    qqqqq
+1  1578	      =MYCSEG:0880	     qqqqq = ppppp
+   1579	0886  10D0r		     XINTER: DW	JSR
+   1580	0888  0E5Cr 0D8Br 0E65r	  +	     DW	TRFR,BLK@,TTOR,TOIN@,TTOR,TIB@,TTOR,TTOR,TRPAT
+   1581	      0D97r 0E65r 0D7Fr	  +
+   1582	      0E65r 0E65r 04A7r
+   1583	089A  0E5Cr 0D81r 0E5Cr	  +	     DW	TRFR,TOTIB,TRFR,TRFR,TOSTREEM,TEXIT
+   1584	      0E5Cr 093Br 0476r
+   1585
+   1586				     ; : ;RBUF ( N -- A	)  POP	 RP ROT	- RP OVER
+   1587				     ;	  TO RP	 PUSH SWAP PUSH	  CO POP TO RP ;
+   1588
+   1589				       NF ';RBUF'
+1  1590	      =MYCSEG:08A6	     ppppp = $
+1  1591				       dstr2 ';RBUF',0
+2  1592	08A6  05		       db    ??0055-$-1+0
+2  1593	08A7  3B 52 42 55 46	       db    ';RBUF'
+2  1594	08AC			     ??0055  label   byte
+1  1595	08AC  0880r		       dw    qqqqq
+1  1596	      =MYCSEG:08A6	     qqqqq = ppppp
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 29
+VMF.asm
+
+
+
+   1597	08AE  10D0r 0E5Cr 0E85r	  +  XBUF DW JSR,TPOP,TRPGT,TROT,TSUBT,TRPGT,TOVER
+   1598	      0F39r 0611r 0E85r	  +
+   1599	      0F1Er
+   1600	08BC  0E8Dr 0E65r 0F5Br	  +	  DW TRPST,TPUSH,TSWAP,TPUSH,TRPAT,TPOP,TRPST,TEXIT
+   1601	      0E65r 04A7r 0E5Cr	  +
+   1602	      0E8Dr 0476r
+   1603
+   1604				       NF 'EVAL'
+1  1605	      =MYCSEG:08CC	     ppppp = $
+1  1606				       dstr2 'EVAL',0
+2  1607	08CC  04		       db    ??0056-$-1+0
+2  1608	08CD  45 56 41 4C	       db    'EVAL'
+2  1609	08D1			     ??0056  label   byte
+1  1610	08D1  08A6r		       dw    qqqqq
+1  1611	      =MYCSEG:08CC	     qqqqq = ppppp
+   1612	08D3  10D0r 0886r 0E44r	  +  TEVAL:  DW	JSR,XINTER,ZR,TOSTREEM,ZR,TOTIB,AINT
+   1613	      093Br 0E44r 0D81r	  +
+   1614	      09E6r
+   1615
+   1616				       NF 'LOAD'
+1  1617	      =MYCSEG:08E1	     ppppp = $
+1  1618				       dstr2 'LOAD',0
+2  1619	08E1  04		       db    ??0057-$-1+0
+2  1620	08E2  4C 4F 41 44	       db    'LOAD'
+2  1621	08E6			     ??0057  label   byte
+1  1622	08E6  08CCr		       dw    qqqqq
+1  1623	      =MYCSEG:08E1	     qqqqq = ppppp
+   1624	08E8  10D0r 0886r 0E44r	  +  TLOAD:  DW	JSR,XINTER,ZR,TSWAP,TOSTREEM,AINT
+   1625	      0F5Br 093Br 09E6r
+   1626
+   1627				      NF 'NBLK'
+1  1628	      =MYCSEG:08F4	     ppppp = $
+1  1629				       dstr2 'NBLK',0
+2  1630	08F4  04		       db    ??0058-$-1+0
+2  1631	08F5  4E 42 4C 4B	       db    'NBLK'
+2  1632	08F9			     ??0058  label   byte
+1  1633	08F9  08E1r		       dw    qqqqq
+1  1634	      =MYCSEG:08F4	     qqqqq = ppppp
+   1635	08FB  01BEr 0D7Fr 0D7Fr	  +  TVBLK DW XVBLK,TIB@,TIB@,TNOP
+   1636	      0F84r
+   1637
+   1638				      nf  '?,'
+1  1639	      =MYCSEG:0903	     ppppp = $
+1  1640				       dstr2 '?,',0
+2  1641	0903  02		       db    ??0059-$-1+0
+2  1642	0904  3F 2C		       db    '?,'
+2  1643	0906			     ??0059  label   byte
+1  1644	0906  08F4r		       dw    qqqqq
+1  1645	      =MYCSEG:0903	     qqqqq = ppppp
+   1646	0908  01C8r 01CEr 01D5r	     tqcomm: dw	xqcomm,XNONA2,XNONAME
+   1647
+   1648				      NF 'EXEC'
+1  1649	      =MYCSEG:090E	     ppppp = $
+1  1650				       dstr2 'EXEC',0
+2  1651	090E  04		       db    ??005A-$-1+0
+2  1652	090F  45 58 45 43	       db    'EXEC'
+2  1653	0913			     ??005A  label   byte
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 30
+VMF.asm
+
+
+
+1  1654	0913  0903r		       dw    qqqqq
+1  1655	      =MYCSEG:090E	     qqqqq = ppppp
+   1656	0915  01C8r		     texec   DW	  XEXEC	     ; EXEC
+   1657
+   1658				      NF '?EXEC'
+1  1659	      =MYCSEG:0917	     ppppp = $
+1  1660				       dstr2 '?EXEC',0
+2  1661	0917  05		       db    ??005B-$-1+0
+2  1662	0918  3F 45 58 45 43	       db    '?EXEC'
+2  1663	091D			     ??005B  label   byte
+1  1664	091D  090Er		       dw    qqqqq
+1  1665	      =MYCSEG:0917	     qqqqq = ppppp
+   1666	091F  10D0r		     aqexec  DW	  xqexec     ; ?EXEC
+   1667	0921  10D0r 09B4r 0F31r	  +  apos0 DW JSR,TBLFIND,TQDUP,TZEQ,TSABRT,'?'*256+1,TEXIT
+   1668	      0EF6r 0B4Fr 3F01	  +
+   1669	      0476r
+   1670
+   1671				      NF 'PERFORM'
+1  1672	      =MYCSEG:092F	     ppppp = $
+1  1673				       dstr2 'PERFORM',0
+2  1674	092F  07		       db    ??005C-$-1+0
+2  1675	0930  50 45 52 46 4F 52	4D     db    'PERFORM'
+2  1676	0937			     ??005C  label   byte
+1  1677	0937  0917r		       dw    qqqqq
+1  1678	      =MYCSEG:092F	     qqqqq = ppppp
+   1679	0939  10D0r		     tperf   DW	  XPERF	     ; PERFORM
+   1680	093B  10D0r 0D8Dr 0D99r	  +  TOSTREEM  DW JSR,TOBLK,TOTOIN,TEXIT
+   1681	      0476r
+   1682
+   1683				       NF '''ERR'
+1  1684	      =MYCSEG:0943	     ppppp = $
+1  1685				       dstr2 '''ERR',0
+2  1686	0943  04		       db    ??005D-$-1+0
+2  1687	0944  27 45 52 52	       db    '''ERR'
+2  1688	0948			     ??005D  label   byte
+1  1689	0948  092Fr		       dw    qqqqq
+1  1690	      =MYCSEG:0943	     qqqqq = ppppp
+   1691	094A  01B4r 02F1r 0000	     erINI DW  ExecAt1,SETVAR,0
+   1692
+   1693				       nf 'F83'
+1  1694	      =MYCSEG:0950	     ppppp = $
+1  1695				       dstr2 'F83',0
+2  1696	0950  03		       db    ??005E-$-1+0
+2  1697	0951  46 38 33		       db    'F83'
+2  1698	0954			     ??005E  label   byte
+1  1699	0954  0943r		       dw    qqqqq
+1  1700	      =MYCSEG:0950	     qqqqq = ppppp
+   1701	0956  0FD3r 10D0r 0968r	  +  TF83  DW JSR_TR,decim,Aforth,aforth+2,tex_tr
+   1702	      096Ar 04A9r
+   1703
+   1704				       nf 'FORTH'
+1  1705	      =MYCSEG:0960	     ppppp = $
+1  1706				       dstr2 'FORTH',0
+2  1707	0960  05		       db    ??005F-$-1+0
+2  1708	0961  46 4F 52 54 48	       db    'FORTH'
+2  1709	0966			     ??005F  label   byte
+1  1710	0966  0950r		       dw    qqqqq
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 31
+VMF.asm
+
+
+
+1  1711	      =MYCSEG:0960	     qqqqq = ppppp
+   1712	0968  07A6r 07B0r 10D0r	  +  Aforth: dw	DoVoc,dodef,dovar,lastw,0
+   1713	      10A7r 0000
+   1714
+   1715				      NF ''''
+1  1716	      =MYCSEG:0972	     ppppp = $
+1  1717				       dstr2 '''',0
+2  1718	0972  01		       db    ??0060-$-1+0
+2  1719	0973  27		       db    ''''
+2  1720	0974			     ??0060  label   byte
+1  1721	0974  0960r		       dw    qqqqq
+1  1722	      =MYCSEG:0972	     qqqqq = ppppp
+   1723	0976  10D0r 0921r 0E96r	  +  apos DW JSR,APOS0,TDROP,TEXIT
+   1724	      0476r
+   1725
+   1726				      NF '(find'
+1  1727	      =MYCSEG:097E	     ppppp = $
+1  1728				       dstr2 '(find',0
+2  1729	097E  05		       db    ??0061-$-1+0
+2  1730	097F  28 66 69 6E 64	       db    '(find'
+2  1731	0984			     ??0061  label   byte
+1  1732	0984  0972r		       dw    qqqqq
+1  1733	      =MYCSEG:097E	     qqqqq = ppppp
+   1734	0986  01FCr		     T_FIND DW X_FIND
+   1735	0988  10D0r		     tfind: dw jsr
+   1736	098A  0E65r 0E3Er 064Cr	  +	DW    ttor,mo,TORDER,TWCOUNT
+   1737	      10D0r
+   1738	0992  04B4r 099Er 10D0r	  +	DW    TFOR,@@1,TWCOUNT,TFETCH,TSWAP,TNEXT
+   1739	      10D0r 0F5Br 04BEr
+   1740	099E  0E96r 0D73r 10D0r	  +  @@1: DW  TDROP,CONT@,TFETCH,trfr,t_FIND,TQCOMM+2,TEXIT
+   1741	      0E5Cr 0986r 090Ar	  +
+   1742	      0476r
+   1743
+   1744				      nf '-FIND'
+1  1745	      =MYCSEG:09AC	     ppppp = $
+1  1746				       dstr2 '-FIND',0
+2  1747	09AC  05		       db    ??0062-$-1+0
+2  1748	09AD  2D 46 49 4E 44	       db    '-FIND'
+2  1749	09B2			     ??0062  label   byte
+1  1750	09B2  097Er		       dw    qqqqq
+1  1751	      =MYCSEG:09AC	     qqqqq = ppppp
+   1752	09B4  0FD3r 09C5r 0988r	  +  tblfind DW	JSR_TR,TBLWORD,TFIND,tex_tr
+   1753	      04A9r
+   1754
+   1755				      NF 'BLWORD'
+1  1756	      =MYCSEG:09BC	     ppppp = $
+1  1757				       dstr2 'BLWORD',0
+2  1758	09BC  06		       db    ??0063-$-1+0
+2  1759	09BD  42 4C 57 4F 52 44	       db    'BLWORD'
+2  1760	09C3			     ??0063  label   byte
+1  1761	09C3  09ACr		       dw    qqqqq
+1  1762	      =MYCSEG:09BC	     qqqqq = ppppp
+   1763	09C5  10D0r 0249r 0E23r	  +  TBLWORD DW	JSR1,X_W,BLC,TWORD,TEXIT
+   1764	      09D6r 0476r
+   1765	      =MYCSEG:09C7	     T_W = TBLWORD+2
+   1766
+   1767				      NF 'WORD'
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 32
+VMF.asm
+
+
+
+1  1768	      =MYCSEG:09CF	     ppppp = $
+1  1769				       dstr2 'WORD',0
+2  1770	09CF  04		       db    ??0064-$-1+0
+2  1771	09D0  57 4F 52 44	       db    'WORD'
+2  1772	09D4			     ??0064  label   byte
+1  1773	09D4  09BCr		       dw    qqqqq
+1  1774	      =MYCSEG:09CF	     qqqqq = ppppp
+   1775	09D6  0FD3r 0D8Br 08FBr	  +  TWORD:   DW  JSR_TR,BLK@,TVBLK,TOin@,Here,t_W,toTOin,tex_tr
+   1776	      0D97r 10D0r 09C7r	  +
+   1777	      0D99r 04A9r
+   1778
+   1779	09E6  10D0r		     Aint:DW XJMP    ; TO INTERPRET
+   1780	09E8  09B4r 0F31r 0498r	  +	  dw TBLfind,TQdup,TzBRAN,@@2,tQcomm,Aint
+   1781	      09F4r 0908r 09E6r
+   1782	09F4  0AAAr 0B4Fr	     @@2  dw actoi,TSABRT
+   1783					  dstr 'Not Found'
+1  1784					  dstr2	'Not Found',0
+2  1785	09F8  09		       db    ??0065-$-1+0
+2  1786	09F9  4E 6F 74 20 46 6F	75+    db    'Not Found'
+   1787	      6E 64
+2  1788	0A02			     ??0065  label   byte
+   1789	0A02  0C09r 09E6r		  DW TZLIT,Aint
+   1790
+   1791				       NF 'CLOSALL'
+1  1792	      =MYCSEG:0A06	     ppppp = $
+1  1793				       dstr2 'CLOSALL',0
+2  1794	0A06  07		       db    ??0066-$-1+0
+2  1795	0A07  43 4C 4F 53 41 4C	4C     db    'CLOSALL'
+2  1796	0A0E			     ??0066  label   byte
+1  1797	0A0E  09CFr		       dw    qqqqq
+1  1798	      =MYCSEG:0A06	     qqqqq = ppppp
+   1799	0A10  10D0r		     ZCLOSE: DW	JSR
+   1800	0A12  0844r 0498r 0A1Er	  +  @@1    dw	HND,TZBRAN,@@2,TCLOSEF,TBRAN,@@1
+   1801	      06B6r 048Fr 0A12r
+   1802	0A1E  0476r		     @@2    DW	TEXIT
+   1803
+   1804				       nf 'ABORT'
+1  1805	      =MYCSEG:0A20	     ppppp = $
+1  1806				       dstr2 'ABORT',0
+2  1807	0A20  05		       db    ??0067-$-1+0
+2  1808	0A21  41 42 4F 52 54	       db    'ABORT'
+2  1809	0A26			     ??0067  label   byte
+1  1810	0A26  0A06r		       dw    qqqqq
+1  1811	      =MYCSEG:0A20	     qqqqq = ppppp
+   1812	0A28  0A2Ar		     ABORT:  DW	 $+2
+   1813	0A2A  E8 F8F6			     CALL WRESET
+   1814	0A2D  100Ar 0956r 0A10r	  +	    dw	_NTR,TF83,ZCLOSE,skobaL
+   1815	      10D0r
+   1816	0A35  0A9Ar 048Fr 0A35r	     FSYS2: DW	LOADKBD,TBRAN,FSYS2
+   1817
+   1818				       NF 'SEVAL'
+1  1819	      =MYCSEG:0A3B	     ppppp = $
+1  1820				       dstr2 'SEVAL',0
+2  1821	0A3B  05		       db    ??0068-$-1+0
+2  1822	0A3C  53 45 56 41 4C	       db    'SEVAL'
+2  1823	0A41			     ??0068  label   byte
+1  1824	0A41  0A20r		       dw    qqqqq
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 33
+VMF.asm
+
+
+
+1  1825	      =MYCSEG:0A3B	     qqqqq = ppppp
+   1826	0A43  10D0r 0886r 0D8Dr	  +  SEVAL  DW JSR,XINTER,TOBLK,IO?,TLIT,90,XBUF,TOTIB,OPENED
+   1827	      07BEr 0BC6r 005A	  +
+   1828	      08AEr 0D81r 067Dr
+   1829	0A55  0830r 0758r 0EEFr	  +  SEVAL2 DW LINE1,EOF?,TZLESS,TZBRAN,SEVAL2,OPENED,TEXIT
+   1830	      0498r 0A55r 067Dr	  +
+   1831	      0476r
+   1832
+   1833				       NF 'FLOAD'    ; : FLOAD FOPEN  -1 SEVAL ?IO ;
+1  1834	      =MYCSEG:0A63	     ppppp = $
+1  1835				       dstr2 'FLOAD',0
+2  1836	0A63  05		       db    ??0069-$-1+0
+2  1837	0A64  46 4C 4F 41 44	       db    'FLOAD'
+2  1838	0A69			     ??0069  label   byte
+1  1839	0A69  0A3Br		       dw    qqqqq
+1  1840	      =MYCSEG:0A63	     qqqqq = ppppp
+   1841	0A6B  10D0r 0844r 0E1Ar	  +  LOADF: DW	JSR,HND,BS,TSUBT,TZEQ,TSABRT
+   1842	      0611r 0EF6r 0B4Fr
+   1843					  dstr ' TOO MUCH FILES	'
+1  1844					  dstr2	' TOO MUCH FILES ',0
+2  1845	0A77  10		       db    ??006A-$-1+0
+2  1846	0A78  20 54 4F 4F 20 4D	55+    db    ' TOO MUCH	FILES '
+   1847	      43 48 20 46 49 4C	45+
+   1848	      53 20
+2  1849	0A88			     ??006A  label   byte
+   1850	0A88  068Dr 0846r 0E3Er	  +    DW  OPENF,HND+2,MO,SEVAL,IO?,texIt
+   1851	      0A43r 07BEr 0476r
+   1852
+   1853				       NF 'KBD'	     ;	: KBD  0 SEVAL ?IO ;
+1  1854	      =MYCSEG:0A94	     ppppp = $
+1  1855				       dstr2 'KBD',0
+2  1856	0A94  03		       db    ??006B-$-1+0
+2  1857	0A95  4B 42 44		       db    'KBD'
+2  1858	0A98			     ??006B  label   byte
+1  1859	0A98  0A63r		       dw    qqqqq
+1  1860	      =MYCSEG:0A94	     qqqqq = ppppp
+   1861	0A9A  0FD3r 0E44r 0A43r	  +  LOADKBD DW	JSR_TR,ZR,SEVAL,IO?,tex_tr
+   1862	      07BEr 04A9r
+   1863
+   1864				       nf    'NUM'
+1  1865	      =MYCSEG:0AA4	     ppppp = $
+1  1866				       dstr2 'NUM',0
+2  1867	0AA4  03		       db    ??006C-$-1+0
+2  1868	0AA5  4E 55 4D		       db    'NUM'
+2  1869	0AA8			     ??006C  label   byte
+1  1870	0AA8  0A94r		       dw    qqqqq
+1  1871	      =MYCSEG:0AA4	     qqqqq = ppppp
+   1872	0AAA  0FD3r 0EB2r 10D0r	  +  Actoi:  dw	jsr_TR,tdup,tcount,tplus,ttor
+   1873	      0604r 0E65r
+   1874	0AB4  0E06r 0E3Er 0EB2r	  +    dw  base@,mo,Tdup,ttor,zr,TC2I,TONEPL
+   1875	      0E65r 0E44r 10D0r	  +
+   1876	      062Dr
+   1877	0AC2  0498r 0AC8r 0550r	       dw    tzbran,@@1,tdnegat
+   1878	0AC8  0E5Cr 0DC0r 0E5Cr	  +   @@1: dw trfr,toDbl,tRfr,tex_tr
+   1879	      04A9r
+   1880
+   1881				     ; -------------TEXT INTERPRETTER	-------------^^^^^^
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 34
+VMF.asm
+
+
+
+   1882
+   1883				     ; ------------  COMPILER  --------------------vvvvvvvv
+   1884				       nf 'CFA'
+1  1885	      =MYCSEG:0AD0	     ppppp = $
+1  1886				       dstr2 'CFA',0
+2  1887	0AD0  03		       db    ??006D-$-1+0
+2  1888	0AD1  43 46 41		       db    'CFA'
+2  1889	0AD4			     ??006D  label   byte
+1  1890	0AD4  0AA4r		       dw    qqqqq
+1  1891	      =MYCSEG:0AD0	     qqqqq = ppppp
+   1892	0AD6  10D0r 0000	     CFA:    DW	  DOVAR,0    ; AT CFA =	CFA !
+   1893
+   1894				       nf 'H'
+1  1895	      =MYCSEG:0ADA	     ppppp = $
+1  1896				       dstr2 'H',0
+2  1897	0ADA  01		       db    ??006E-$-1+0
+2  1898	0ADB  48		       db    'H'
+2  1899	0ADC			     ??006E  label   byte
+1  1900	0ADC  0AD0r		       dw    qqqqq
+1  1901	      =MYCSEG:0ADA	     qqqqq = ppppp
+   1902	0ADE  10D0r 10D0r	     ATHERE DW DOVAR,DtoP
+   1903
+   1904				     ; : C" TO WORD 1+ C@ [',] LITERAL ; IMMEDIATE
+   1905				       NFI 'C"'
+1  1906	      =MYCSEG:0AE2	     ppppp = $
+1  1907				       dstr2 'C"',080h
+2  1908	0AE2  82		       db    ??006F-$-1+080h
+2  1909	0AE3  43 22		       db    'C"'
+2  1910	0AE5			     ??006F  label   byte
+1  1911	0AE5  0ADAr		       dw    qqqqq
+1  1912	      =MYCSEG:0AE2	     qqqqq = ppppp
+   1913	0AE7  10D0r 09C5r 062Dr	  +    DW JSR,TBLWORD,TONEPL,TCAT,LITERAL,TEXIT
+   1914	      10D0r 0BF4r 0476r
+   1915
+   1916				       NFI '['']'   ; :	['] ' ?C TO , AT , , ; IMMEDIATE
+1  1917	      =MYCSEG:0AF3	     ppppp = $
+1  1918				       dstr2 '['']',080h
+2  1919	0AF3  83		       db    ??0070-$-1+080h
+2  1920	0AF4  5B 27 5D		       db    '['']'
+2  1921	0AF7			     ??0070  label   byte
+1  1922	0AF7  0AE2r		       dw    qqqqq
+1  1923	      =MYCSEG:0AF3	     qqqqq = ppppp
+   1924	0AF9  10D0r 0976r 0BD2r	  +    DW JSR,APOS,TCOMP,TLIT,TCOMMA,TEXIT
+   1925	      0BC6r 0BC4r 0476r
+   1926
+   1927				       NF 'LINK+'	     ; : LINK+ HERE TO >< , ;
+1  1928	      =MYCSEG:0B05	     ppppp = $
+1  1929				       dstr2 'LINK+',0
+2  1930	0B05  05		       db    ??0071-$-1+0
+2  1931	0B06  4C 49 4E 4B 2B	       db    'LINK+'
+2  1932	0B0B			     ??0071  label   byte
+1  1933	0B0B  0AF3r		       dw    qqqqq
+1  1934	      =MYCSEG:0B05	     qqqqq = ppppp
+   1935	0B0D  10D0r 10D0r 10D0r	  +    DW JSR,HERE,T@SWP2,TCOMMA,TEXIT
+   1936	      0BC4r 0476r
+   1937
+   1938					NFI '"C'     ; : 'C CREATE , IMMEDIATE DOES> ?C	@ , C" " WORD ", ;
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 35
+VMF.asm
+
+
+
+1  1939	      =MYCSEG:0B17	     ppppp = $
+1  1940				       dstr2 '"C',080h
+2  1941	0B17  82		       db    ??0072-$-1+080h
+2  1942	0B18  22 43		       db    '"C'
+2  1943	0B1A			     ??0072  label   byte
+1  1944	0B1A  0B05r		       dw    qqqqq
+1  1945	      =MYCSEG:0B17	     qqqqq = ppppp
+   1946	0B1C  10D0r 0C94r 0BC4r	  +	DW JSR,ACREATE,TCOMMA,IMM,TCODESEMI
+   1947	      10D0r 0C2Br
+   1948	0B26  E8 05A7		     SCOMMA:  CALL _DOES
+   1949	0B29  10D0r 0BC4r 0B38r	  +	DW TFETCH,TCOMMA,STRCOMP,TDROP,TEXIT
+   1950	      0E96r 0476r
+   1951
+   1952					NF 'S"'
+1  1953	      =MYCSEG:0B33	     ppppp = $
+1  1954				       dstr2 'S"',0
+2  1955	0B33  02		       db    ??0073-$-1+0
+2  1956	0B34  53 22		       db    'S"'
+2  1957	0B36			     ??0073  label   byte
+1  1958	0B36  0B17r		       dw    qqqqq
+1  1959	      =MYCSEG:0B33	     qqqqq = ppppp
+   1960	0B38  10D0r 10D0r 0BC6r	  +  STRCOMP   DW JSR,HERE,TLIT,'"',TWORD,TSTRCOM,TEXIT
+   1961	      0022 09D6r 10D0r	  +
+   1962	      0476r
+   1963
+   1964					NFI 'A"'
+1  1965	      =MYCSEG:0B46	     ppppp = $
+1  1966				       dstr2 'A"',080h
+2  1967	0B46  82		       db    ??0074-$-1+080h
+2  1968	0B47  41 22		       db    'A"'
+2  1969	0B49			     ??0074  label   byte
+1  1970	0B49  0B33r		       dw    qqqqq
+1  1971	      =MYCSEG:0B46	     qqqqq = ppppp
+   1972	0B4B  0B26r 0B4Fr		DW SCOMMA,TSABRT
+   1973	0B4F  0FD3r		     tSABRT: dw	 jsr_TR
+   1974	0B51  0F6Er 0F5Br 0498r	  +	     dw	 tSKPs,tswap,tZbran,@@3,erINI
+   1975	      0B6Fr 094Ar
+   1976	0B5B  07F7r 10D0r 1097r	  +	     DW	 TCR,here,N_ID,BLK@,TOSCR,TOIN@,TOCSP
+   1977	      0D8Br 0DE5r 0D97r	  +
+   1978	      0DD9r
+   1979	0B69  10D0r 07F7r 0A28r		     DW	 tsDot,TCR,ABORT
+   1980	0B6F  0E96r 04A9r	     @@3:    Dw	 tdrop,tex_tr
+   1981
+   1982					NF '(("'
+1  1983	      =MYCSEG:0B73	     ppppp = $
+1  1984				       dstr2 '(("',0
+2  1985	0B73  03		       db    ??0075-$-1+0
+2  1986	0B74  28 28 22		       db    '(("'
+2  1987	0B77			     ??0075  label   byte
+1  1988	0B77  0B46r		       dw    qqqqq
+1  1989	      =MYCSEG:0B73	     qqqqq = ppppp
+   1990	0B79  0F6Er			    DW	tSKPs
+   1991
+   1992				       nf 'STR,'
+1  1993	      =MYCSEG:0B7B	     ppppp = $
+1  1994				       dstr2 'STR,',0
+2  1995	0B7B  04		       db    ??0076-$-1+0
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 36
+VMF.asm
+
+
+
+2  1996	0B7C  53 54 52 2C	       db    'STR,'
+2  1997	0B80			     ??0076  label   byte
+1  1998	0B80  0B73r		       dw    qqqqq
+1  1999	      =MYCSEG:0B7B	     qqqqq = ppppp
+   2000	0B82  10D0r 04B4r 0B8Cr	  +  TSTRCOMMA:	 DW JSR,TFOR,@@1,BCOMMA,TNEXT
+   2001	      10D0r 04BEr
+   2002	0B8C  0E96r 0476r	     @@1:   DW TDROP,TEXIT
+   2003
+   2004				       NF '(('	   ; : (( CREATE , , IMMEDIATE DOES> STR , AT EXEC ;
+1  2005	      =MYCSEG:0B90	     ppppp = $
+1  2006				       dstr2 '((',0
+2  2007	0B90  02		       db    ??0077-$-1+0
+2  2008	0B91  28 28		       db    '(('
+2  2009	0B93			     ??0077  label   byte
+1  2010	0B93  0B7Br		       dw    qqqqq
+1  2011	      =MYCSEG:0B90	     qqqqq = ppppp
+   2012	0B95  10D0r 0C94r 0BC4r	  +    DW JSR,ACREATE,TCOMMA,TCOMMA,IMM,TCODESEMI
+   2013	      0BC4r 10D0r 0C2Br
+   2014	0BA1  E8 052C		     DOIMMD: CALL _DOES
+   2015	0BA4  10D0r 0BC4r 0939r	  +	     DW	TSTR,TCOMMA,TPERF,TEXIT
+   2016	      0476r
+   2017
+   2018				       NF 'ALIAS'
+1  2019	      =MYCSEG:0BAC	     ppppp = $
+1  2020				       dstr2 'ALIAS',0
+2  2021	0BAC  05		       db    ??0078-$-1+0
+2  2022	0BAD  41 4C 49 41 53	       db    'ALIAS'
+2  2023	0BB2			     ??0078  label   byte
+1  2024	0BB2  0B90r		       dw    qqqqq
+1  2025	      =MYCSEG:0BAC	     qqqqq = ppppp
+   2026	0BB4  10D0r 0CC0r 0BD2r	  +  TBIND:  DW	JSR,AHEAD4,TCOMP,XNONAME,tcomma,TEXIT
+   2027	      01D5r 0BC4r 0476r
+   2028
+   2029				      NF ','
+1  2030	      =MYCSEG:0BC0	     ppppp = $
+1  2031				       dstr2 ',',0
+2  2032	0BC0  01		       db    ??0079-$-1+0
+2  2033	0BC1  2C		       db    ','
+2  2034	0BC2			     ??0079  label   byte
+1  2035	0BC2  0BACr		       dw    qqqqq
+1  2036	      =MYCSEG:0BC0	     qqqqq = ppppp
+   2037	0BC4  01E3r		     tcomma:  DW   XCOMMA     ;	,
+   2038
+   2039	0BC6  01A4r		     tlit:   DW	  XLIT	     ; LIT
+   2040
+   2041				      NF 'COMPILE'	;
+1  2042	      =MYCSEG:0BC8	     ppppp = $
+1  2043				       dstr2 'COMPILE',0
+2  2044	0BC8  07		       db    ??007A-$-1+0
+2  2045	0BC9  43 4F 4D 50 49 4C	45     db    'COMPILE'
+2  2046	0BD0			     ??007A  label   byte
+1  2047	0BD0  0BC0r		       dw    qqqqq
+1  2048	      =MYCSEG:0BC8	     qqqqq = ppppp
+   2049	0BD2  10D0r 0E6Dr 0BC4r	  +  TCOMP DW JSR,TRATPW,TCOMMA,TEXIT
+   2050	      0476r
+   2051
+   2052				      NF 'ALLOT'      ;	ALLOT
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 37
+VMF.asm
+
+
+
+1  2053	      =MYCSEG:0BDA	     ppppp = $
+1  2054				       dstr2 'ALLOT',0
+2  2055	0BDA  05		       db    ??007B-$-1+0
+2  2056	0BDB  41 4C 4C 4F 54	       db    'ALLOT'
+2  2057	0BE0			     ??007B  label   byte
+1  2058	0BE0  0BC8r		       dw    qqqqq
+1  2059	      =MYCSEG:0BDA	     qqqqq = ppppp
+   2060	0BE2  10D0r 0ADEr 10D0r	  +  tallot: DW	JSR,ATHERE,TPSTORE,TEXIT
+   2061	      0476r
+   2062
+   2063				       nfI    'LITERAL'
+1  2064	      =MYCSEG:0BEA	     ppppp = $
+1  2065				       dstr2 'LITERAL',080h
+2  2066	0BEA  87		       db    ??007C-$-1+080h
+2  2067	0BEB  4C 49 54 45 52 41	4C     db    'LITERAL'
+2  2068	0BF2			     ??007C  label   byte
+1  2069	0BF2  0BDAr		       dw    qqqqq
+1  2070	      =MYCSEG:0BEA	     qqqqq = ppppp
+   2071	0BF4  10D0r 0DA5r 046Dr	  +  literal dw	jsr,stat@,EXIT0,DOlit,texit;
+   2072	      10D0r 0476r
+   2073
+   2074				       NF '?LITERAL'
+1  2075	      =MYCSEG:0BFE	     ppppp = $
+1  2076				       dstr2 '?LITERAL',0
+2  2077	0BFE  08		       db    ??007D-$-1+0
+2  2078	0BFF  3F 4C 49 54 45 52	41+    db    '?LITERAL'
+   2079	      4C
+2  2080	0C07			     ??007D  label   byte
+1  2081	0C07  0BEAr		       dw    qqqqq
+1  2082	      =MYCSEG:0BFE	     qqqqq = ppppp
+   2083	0C09  10D0r 0DBEr 062Dr	  +  TZLIT:dw JSR,dbl@,TONEPL,tZbran,@@1
+   2084	      0498r 0C1Dr
+   2085	0C13  0DA5r 046Dr 0F5Br	  +	  dw STAT@,EXIT0,TSWAP,literal,TDUP
+   2086	      0BF4r 0EB2r
+   2087	0C1D  0E96r 0BF4r 0476r	     @@1: DW TDROP,LITERAL,texIt
+   2088
+   2089				       nf ';code'
+1  2090	      =MYCSEG:0C23	     ppppp = $
+1  2091				       dstr2 ';code',0
+2  2092	0C23  05		       db    ??007E-$-1+0
+2  2093	0C24  3B 63 6F 64 65	       db    ';code'
+2  2094	0C29			     ??007E  label   byte
+1  2095	0C29  0BFEr		       dw    qqqqq
+1  2096	      =MYCSEG:0C23	     qqqqq = ppppp
+   2097	0C2B  10D0r 0E5Cr 0AD6r	  +  tCODESEMI dw jsr,tRFR,CFA,TSTORE1,texit
+   2098	      10D0r 0476r
+   2099
+   2100	0C35  E8 0498		     RCOMMA: CALL _DOES
+   2101	0C38  10D0r 10D0r 10D0r	  +    DW TCAT,TCOMMAB,HERE,TTWOPL,TSUBT,TCOMMA,TEXIT
+   2102	      0634r 0611r 0BC4r	  +
+   2103	      0476r
+   2104
+   2105	0C46  0C35r		     TCALL DW RCOMMA
+   2106	0C48  E8		       DB 0E8H
+   2107
+   2108				       NF '?CODE'
+1  2109	      =MYCSEG:0C49	     ppppp = $
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 38
+VMF.asm
+
+
+
+1  2110				       dstr2 '?CODE',0
+2  2111	0C49  05		       db    ??007F-$-1+0
+2  2112	0C4A  3F 43 4F 44 45	       db    '?CODE'
+2  2113	0C4F			     ??007F  label   byte
+1  2114	0C4F  0C23r		       dw    qqqqq
+1  2115	      =MYCSEG:0C49	     qqqqq = ppppp
+   2116	0C51  10D0r 0C46r 10D0r	  +  CODE? DW JSR,TCALL,SKOBAR,HERE,TLIT,-3,TPLUS,TEXIT
+   2117	      10D0r 0BC6r FFFD	  +
+   2118	      0604r 0476r
+   2119
+   2120				       NF 'NM:'
+1  2121	      =MYCSEG:0C61	     ppppp = $
+1  2122				       dstr2 'NM:',0
+2  2123	0C61  03		       db    ??0080-$-1+0
+2  2124	0C62  4E 4D 3A		       db    'NM:'
+2  2125	0C65			     ??0080  label   byte
+1  2126	0C65  0C49r		       dw    qqqqq
+1  2127	      =MYCSEG:0C61	     qqqqq = ppppp
+   2128	0C67  10D0r 0544r 0BC6r	  +    DW JSR,TNEGATE,TLIT,_DOES,TPLUS,CODE?,TEXIT
+   2129	      10D0r 0604r 0C51r	  +
+   2130	      0476r
+   2131
+   2132				       NFI 'DOES>'
+1  2133	      =MYCSEG:0C75	     ppppp = $
+1  2134				       dstr2 'DOES>',080h
+2  2135	0C75  85		       db    ??0081-$-1+080h
+2  2136	0C76  44 4F 45 53 3E	       db    'DOES>'
+2  2137	0C7B			     ??0081  label   byte
+1  2138	0C7B  0C61r		       dw    qqqqq
+1  2139	      =MYCSEG:0C75	     qqqqq = ppppp
+   2140	0C7D  10D0r 0BD2r 0C2Br	  +    DW JSR,TCOMP,TCODESEMI,TLIT,_DOES,TCALL,TEXIT
+   2141	      0BC6r 10D0r 0C46r	  +
+   2142	      0476r
+   2143
+   2144				       NF 'CREATE'
+1  2145	      =MYCSEG:0C8B	     ppppp = $
+1  2146				       dstr2 'CREATE',0
+2  2147	0C8B  06		       db    ??0082-$-1+0
+2  2148	0C8C  43 52 45 41 54 45	       db    'CREATE'
+2  2149	0C92			     ??0082  label   byte
+1  2150	0C92  0C75r		       dw    qqqqq
+1  2151	      =MYCSEG:0C8B	     qqqqq = ppppp
+   2152	0C94  10D0r 10D0r 0BD2r	  +  ACREATE:dw	  JSR,AHEADER,tCOMP,DoVar,TEXIT
+   2153	      10D0r 0476r
+   2154
+   2155				       nf ':'
+1  2156	      =MYCSEG:0C9E	     ppppp = $
+1  2157				       dstr2 ':',0
+2  2158	0C9E  01		       db    ??0083-$-1+0
+2  2159	0C9F  3A		       db    ':'
+2  2160	0CA0			     ??0083  label   byte
+1  2161	0CA0  0C8Br		       dw    qqqqq
+1  2162	      =MYCSEG:0C9E	     qqqqq = ppppp
+   2163	0CA2  10D0r 10D0r 10D0r	  +  colon  dw jsr,AHEADER,asmudge,DOCOLON,TEXIT
+   2164	      10D0r 0476r
+   2165
+   2166				       nfi ';'
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 39
+VMF.asm
+
+
+
+1  2167	      =MYCSEG:0CAC	     ppppp = $
+1  2168				       dstr2 ';',080h
+2  2169	0CAC  81		       db    ??0084-$-1+080h
+2  2170	0CAD  3B		       db    ';'
+2  2171	0CAE			     ??0084  label   byte
+1  2172	0CAE  0C9Er		       dw    qqqqq
+1  2173	      =MYCSEG:0CAC	     qqqqq = ppppp
+   2174	0CB0  10D0r 10D0r 10D0r	  +  semi   dw jsr,asmudge,DOSEMI,texit
+   2175	      0476r
+   2176
+   2177				       NF 'THEAD'
+1  2178	      =MYCSEG:0CB8	     ppppp = $
+1  2179				       dstr2 'THEAD',0
+2  2180	0CB8  05		       db    ??0085-$-1+0
+2  2181	0CB9  54 48 45 41 44	       db    'THEAD'
+2  2182	0CBE			     ??0085  label   byte
+1  2183	0CBE  0CACr		       dw    qqqqq
+1  2184	      =MYCSEG:0CB8	     qqqqq = ppppp
+   2185	0CC0  10D0r		     AHEAD4: DW	  JSR ;	call sub4th
+   2186	0CC2  0D63r 10D0r 10D0r	  +	     DW	  CURR@,HERE,T@SWP2,TBLword    ; latest	bl WORD
+   2187	      09C5r
+   2188	0CCA  10D0r 0BC4r 0476r		     dw	  tstrcom,tcomma,TEXIT	 ; ! c@
+   2189
+   2190				       NF 'N>C'
+1  2191	      =MYCSEG:0CD0	     ppppp = $
+1  2192				       dstr2 'N>C',0
+2  2193	0CD0  03		       db    ??0086-$-1+0
+2  2194	0CD1  4E 3E 43		       db    'N>C'
+2  2195	0CD4			     ??0086  label   byte
+1  2196	0CD4  0CB8r		       dw    qqqqq
+1  2197	      =MYCSEG:0CD0	     qqqqq = ppppp
+   2198	0CD6  10D0r		     tnamcf  DW	XNAMCF
+   2199
+   2200				     ;-----------------------^^^^^^^  COMPILER	^^^^^^^-------------
+   2201				     ;
+   2202
+   2203				     ;
+   2204				     ;----------------------vvvvvvvv GLOBALS  vvvvvvvv------------
+   2205				       nf 'VOCLINK'
+1  2206	      =MYCSEG:0CD8	     ppppp = $
+1  2207				       dstr2 'VOCLINK',0
+2  2208	0CD8  07		       db    ??0087-$-1+0
+2  2209	0CD9  56 4F 43 4C 49 4E	4B     db    'VOCLINK'
+2  2210	0CE0			     ??0087  label   byte
+1  2211	0CE0  0CD0r		       dw    qqqqq
+1  2212	      =MYCSEG:0CD8	     qqqqq = ppppp
+   2213	0CE2  02F8r 02F1r 0970r	      DW DOCON1,SETVAR,AFORTH+8
+   2214
+   2215				       NF 'PREV'
+1  2216	      =MYCSEG:0CE8	     ppppp = $
+1  2217				       dstr2 'PREV',0
+2  2218	0CE8  04		       db    ??0088-$-1+0
+2  2219	0CE9  50 52 45 56	       db    'PREV'
+2  2220	0CED			     ??0088  label   byte
+1  2221	0CED  0CD8r		       dw    qqqqq
+1  2222	      =MYCSEG:0CE8	     qqqqq = ppppp
+   2223	0CEF  02F8r 02F1r 0000	      DW DOCON1,SETVAR,0
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 40
+VMF.asm
+
+
+
+   2224
+   2225				       NF 'USE'
+1  2226	      =MYCSEG:0CF5	     ppppp = $
+1  2227				       dstr2 'USE',0
+2  2228	0CF5  03		       db    ??0089-$-1+0
+2  2229	0CF6  55 53 45		       db    'USE'
+2  2230	0CF9			     ??0089  label   byte
+1  2231	0CF9  0CE8r		       dw    qqqqq
+1  2232	      =MYCSEG:0CF5	     qqqqq = ppppp
+   2233	0CFB  02F8r 02F1r 0000	      DW DOCON1,SETVAR,0
+   2234
+   2235				       NF 'FIRST'
+1  2236	      =MYCSEG:0D01	     ppppp = $
+1  2237				       dstr2 'FIRST',0
+2  2238	0D01  05		       db    ??008A-$-1+0
+2  2239	0D02  46 49 52 53 54	       db    'FIRST'
+2  2240	0D07			     ??008A  label   byte
+1  2241	0D07  0CF5r		       dw    qqqqq
+1  2242	      =MYCSEG:0D01	     qqqqq = ppppp
+   2243	0D09  02F8r 02F1r 10D0r	      DW DOCON1,SETVAR,FRST
+   2244
+   2245				       NF 'LIMIT'
+1  2246	      =MYCSEG:0D0F	     ppppp = $
+1  2247				       dstr2 'LIMIT',0
+2  2248	0D0F  05		       db    ??008B-$-1+0
+2  2249	0D10  4C 49 4D 49 54	       db    'LIMIT'
+2  2250	0D15			     ??008B  label   byte
+1  2251	0D15  0D01r		       dw    qqqqq
+1  2252	      =MYCSEG:0D0F	     qqqqq = ppppp
+   2253	0D17  02F8r 02F1r 0000	      DW DOCON1,SETVAR,0
+   2254
+   2255				       NF 'MTOP'
+1  2256	      =MYCSEG:0D1D	     ppppp = $
+1  2257				       dstr2 'MTOP',0
+2  2258	0D1D  04		       db    ??008C-$-1+0
+2  2259	0D1E  4D 54 4F 50	       db    'MTOP'
+2  2260	0D22			     ??008C  label   byte
+1  2261	0D22  0D0Fr		       dw    qqqqq
+1  2262	      =MYCSEG:0D1D	     qqqqq = ppppp
+   2263	0D24  02F7r 02F0r 10D0r	  +   dw DOCON2,SETVAR1,DOVAR,0
+   2264	      0000
+   2265
+   2266				       NF 'MPTR'
+1  2267	      =MYCSEG:0D2C	     ppppp = $
+1  2268				       dstr2 'MPTR',0
+2  2269	0D2C  04		       db    ??008D-$-1+0
+2  2270	0D2D  4D 50 54 52	       db    'MPTR'
+2  2271	0D31			     ??008D  label   byte
+1  2272	0D31  0D1Dr		       dw    qqqqq
+1  2273	      =MYCSEG:0D2C	     qqqqq = ppppp
+   2274	0D33  02F7r 02F0r 10D0r	  +   dw DOCON2,SETVAR1,DOVAR,0
+   2275	      0000
+   2276
+   2277				       NF 'TPTR'
+1  2278	      =MYCSEG:0D3B	     ppppp = $
+1  2279				       dstr2 'TPTR',0
+2  2280	0D3B  04		       db    ??008E-$-1+0
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 41
+VMF.asm
+
+
+
+2  2281	0D3C  54 50 54 52	       db    'TPTR'
+2  2282	0D40			     ??008E  label   byte
+1  2283	0D40  0D2Cr		       dw    qqqqq
+1  2284	      =MYCSEG:0D3B	     qqqqq = ppppp
+   2285	0D42  02F7r 02F0r 10D0r	  +   dw DOCON2,SETVAR1,DOVAR,0
+   2286	      0000
+   2287
+   2288				       NF 'SPTR'
+1  2289	      =MYCSEG:0D4A	     ppppp = $
+1  2290				       dstr2 'SPTR',0
+2  2291	0D4A  04		       db    ??008F-$-1+0
+2  2292	0D4B  53 50 54 52	       db    'SPTR'
+2  2293	0D4F			     ??008F  label   byte
+1  2294	0D4F  0D3Br		       dw    qqqqq
+1  2295	      =MYCSEG:0D4A	     qqqqq = ppppp
+   2296	0D51  02F7r 02F0r 10D0r	  +   dw DOCON2,SETVAR1,DOVAR,0
+   2297	      0000
+   2298
+   2299				       nf 'CURRENT'
+1  2300	      =MYCSEG:0D59	     ppppp = $
+1  2301				       dstr2 'CURRENT',0
+2  2302	0D59  07		       db    ??0090-$-1+0
+2  2303	0D5A  43 55 52 52 45 4E	54     db    'CURRENT'
+2  2304	0D61			     ??0090  label   byte
+1  2305	0D61  0D4Ar		       dw    qqqqq
+1  2306	      =MYCSEG:0D59	     qqqqq = ppppp
+   2307	0D63  02F8r		     CURR@   DW	DOCON1
+   2308	0D65  02F1r 096Er	     toCURR  dw	SETVAR,AFORTH+6
+   2309
+   2310				       nf 'CONTEXT'
+1  2311	      =MYCSEG:0D69	     ppppp = $
+1  2312				       dstr2 'CONTEXT',0
+2  2313	0D69  07		       db    ??0091-$-1+0
+2  2314	0D6A  43 4F 4E 54 45 58	54     db    'CONTEXT'
+2  2315	0D71			     ??0091  label   byte
+1  2316	0D71  0D59r		       dw    qqqqq
+1  2317	      =MYCSEG:0D69	     qqqqq = ppppp
+   2318	0D73  02F8r		     CONT@   dw	DOCON1
+   2319	0D75  02F1r 096Er	     toCONT  dw	SETVAR,AFORTH+6
+   2320
+   2321				       nf 'TIB'
+1  2322	      =MYCSEG:0D79	     ppppp = $
+1  2323				       dstr2 'TIB',0
+2  2324	0D79  03		       db    ??0092-$-1+0
+2  2325	0D7A  54 49 42		       db    'TIB'
+2  2326	0D7D			     ??0092  label   byte
+1  2327	0D7D  0D69r		       dw    qqqqq
+1  2328	      =MYCSEG:0D79	     qqqqq = ppppp
+   2329	0D7F  02F8r		     TIB@   dw DOCON1
+   2330	0D81  02F1r 0000	     toTIB  dw SETVAR,0
+   2331
+   2332				       nf 'BLK'
+1  2333	      =MYCSEG:0D85	     ppppp = $
+1  2334				       dstr2 'BLK',0
+2  2335	0D85  03		       db    ??0093-$-1+0
+2  2336	0D86  42 4C 4B		       db    'BLK'
+2  2337	0D89			     ??0093  label   byte
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 42
+VMF.asm
+
+
+
+1  2338	0D89  0D79r		       dw    qqqqq
+1  2339	      =MYCSEG:0D85	     qqqqq = ppppp
+   2340	0D8B  02F8r		     BLK@   dw DOCON1
+   2341	0D8D  02F1r 0000	     toBLK  dw SETVAR,0
+   2342
+   2343				       nf '>IN'
+1  2344	      =MYCSEG:0D91	     ppppp = $
+1  2345				       dstr2 '>IN',0
+2  2346	0D91  03		       db    ??0094-$-1+0
+2  2347	0D92  3E 49 4E		       db    '>IN'
+2  2348	0D95			     ??0094  label   byte
+1  2349	0D95  0D85r		       dw    qqqqq
+1  2350	      =MYCSEG:0D91	     qqqqq = ppppp
+   2351	0D97  02F8r		     TOIN@  dw DOCON1
+   2352	0D99  02F1r 0000	     toTOIN dw SETVAR,0
+   2353
+   2354				       nf 'STATE'
+1  2355	      =MYCSEG:0D9D	     ppppp = $
+1  2356				       dstr2 'STATE',0
+2  2357	0D9D  05		       db    ??0095-$-1+0
+2  2358	0D9E  53 54 41 54 45	       db    'STATE'
+2  2359	0DA3			     ??0095  label   byte
+1  2360	0DA3  0D91r		       dw    qqqqq
+1  2361	      =MYCSEG:0D9D	     qqqqq = ppppp
+   2362	0DA5  02F8r		     STAT@  dw DOCON1
+   2363	0DA7  02F1r		     toSTAT dw SETVAR
+   2364	0DA9  0000		     UvSTAT DW 0
+   2365
+   2366				       nf 'SPAN'
+1  2367	      =MYCSEG:0DAB	     ppppp = $
+1  2368				       dstr2 'SPAN',0
+2  2369	0DAB  04		       db    ??0096-$-1+0
+2  2370	0DAC  53 50 41 4E	       db    'SPAN'
+2  2371	0DB0			     ??0096  label   byte
+1  2372	0DB0  0D9Dr		       dw    qqqqq
+1  2373	      =MYCSEG:0DAB	     qqqqq = ppppp
+   2374	0DB2  02F8r		     SPAN@  dw DOCON1
+   2375	0DB4  02F1r 0000	     toSPAN dw SETVAR,0
+   2376
+   2377				       nf 'DBL'
+1  2378	      =MYCSEG:0DB8	     ppppp = $
+1  2379				       dstr2 'DBL',0
+2  2380	0DB8  03		       db    ??0097-$-1+0
+2  2381	0DB9  44 42 4C		       db    'DBL'
+2  2382	0DBC			     ??0097  label   byte
+1  2383	0DBC  0DABr		       dw    qqqqq
+1  2384	      =MYCSEG:0DB8	     qqqqq = ppppp
+   2385	0DBE  02F8r		     DBL@   dw DOCON1
+   2386	0DC0  02F1r 0000	     toDBL  dw SETVAR,0
+   2387
+   2388				       nf 'OUTC'
+1  2389	      =MYCSEG:0DC4	     ppppp = $
+1  2390				       dstr2 'OUTC',0
+2  2391	0DC4  04		       db    ??0098-$-1+0
+2  2392	0DC5  4F 55 54 43	       db    'OUTC'
+2  2393	0DC9			     ??0098  label   byte
+1  2394	0DC9  0DB8r		       dw    qqqqq
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 43
+VMF.asm
+
+
+
+1  2395	      =MYCSEG:0DC4	     qqqqq = ppppp
+   2396	0DCB  02F8r		     OUTC@   dw	DOCON1
+   2397	0DCD  02F1r 0000	     toOUTC  dw	SETVAR,0
+   2398
+   2399				       nf 'CSP'
+1  2400	      =MYCSEG:0DD1	     ppppp = $
+1  2401				       dstr2 'CSP',0
+2  2402	0DD1  03		       db    ??0099-$-1+0
+2  2403	0DD2  43 53 50		       db    'CSP'
+2  2404	0DD5			     ??0099  label   byte
+1  2405	0DD5  0DC4r		       dw    qqqqq
+1  2406	      =MYCSEG:0DD1	     qqqqq = ppppp
+   2407	0DD7  02F8r		     CSP@   dw DOCON1
+   2408	0DD9  02F1r 0000	     toCSP  dw SETVAR,0
+   2409
+   2410				       nf 'SCR'
+1  2411	      =MYCSEG:0DDD	     ppppp = $
+1  2412				       dstr2 'SCR',0
+2  2413	0DDD  03		       db    ??009A-$-1+0
+2  2414	0DDE  53 43 52		       db    'SCR'
+2  2415	0DE1			     ??009A  label   byte
+1  2416	0DE1  0DD1r		       dw    qqqqq
+1  2417	      =MYCSEG:0DDD	     qqqqq = ppppp
+   2418	0DE3  02F8r		     SCR@    dw	DOCON1
+   2419	0DE5  02F1r 0000	     toSCR   dw	SETVAR,0
+   2420
+   2421				     ;----------------------^^^^^^^^ GLOBALS  ^^^^^^^^------------
+   2422
+   2423				     ;---------------vvvvvvvv TASK VARIABLES vvvvvv-----------
+   2424				       nf 'S0'
+1  2425	      =MYCSEG:0DE9	     ppppp = $
+1  2426				       dstr2 'S0',0
+2  2427	0DE9  02		       db    ??009B-$-1+0
+2  2428	0DEA  53 30		       db    'S0'
+2  2429	0DEC			     ??009B  label   byte
+1  2430	0DEC  0DDDr		       dw    qqqqq
+1  2431	      =MYCSEG:0DE9	     qqqqq = ppppp
+   2432	0DEE  0307r		     S0@    dw XUVAR@0
+   2433	0DF0  030Dr		     toS0   dw XtoUVR
+   2434	0DF2  0000			 dw  UvS0-Uv0
+   2435
+   2436				       nf 'R0'
+1  2437	      =MYCSEG:0DF4	     ppppp = $
+1  2438				       dstr2 'R0',0
+2  2439	0DF4  02		       db    ??009C-$-1+0
+2  2440	0DF5  52 30		       db    'R0'
+2  2441	0DF7			     ??009C  label   byte
+1  2442	0DF7  0DE9r		       dw    qqqqq
+1  2443	      =MYCSEG:0DF4	     qqqqq = ppppp
+   2444	0DF9  0307r		     R0@    dw XUVAR@0
+   2445	0DFB  030Dr		     toR0   dw XtoUVR
+   2446	0DFD  0000			 dw  UvR0-Uv0
+   2447
+   2448				       nf 'BASE'
+1  2449	      =MYCSEG:0DFF	     ppppp = $
+1  2450				       dstr2 'BASE',0
+2  2451	0DFF  04		       db    ??009D-$-1+0
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 44
+VMF.asm
+
+
+
+2  2452	0E00  42 41 53 45	       db    'BASE'
+2  2453	0E04			     ??009D  label   byte
+1  2454	0E04  0DF4r		       dw    qqqqq
+1  2455	      =MYCSEG:0DFF	     qqqqq = ppppp
+   2456	0E06  0307r		     BASE@  dw XUVAR@0
+   2457	0E08  030Dr		     toBASE dw XtoUVR
+   2458	0E0A  0000			 dw  UvBASE-Uv0
+   2459
+   2460				       nf 'U0'
+1  2461	      =MYCSEG:0E0C	     ppppp = $
+1  2462				       dstr2 'U0',0
+2  2463	0E0C  02		       db    ??009E-$-1+0
+2  2464	0E0D  55 30		       db    'U0'
+2  2465	0E0F			     ??009E  label   byte
+1  2466	0E0F  0DFFr		       dw    qqqqq
+1  2467	      =MYCSEG:0E0C	     qqqqq = ppppp
+   2468	0E11  0312r			    dw X@UVAR
+   2469	0E13  0000			 dw  0
+   2470
+   2471				     ;---------------^^^^^^^^ TASK VARIABLES ^^^^^^^^---------
+   2472
+   2473
+   2474				     ;---------------vvvvvvvv CONSTANTS	vvvvvv-----------
+   2475				       nf 'bs'
+1  2476	      =MYCSEG:0E15	     ppppp = $
+1  2477				       dstr2 'bs',0
+2  2478	0E15  02		       db    ??009F-$-1+0
+2  2479	0E16  62 73		       db    'bs'
+2  2480	0E18			     ??009F  label   byte
+1  2481	0E18  0E0Cr		       dw    qqqqq
+1  2482	      =MYCSEG:0E15	     qqqqq = ppppp
+   2483	0E1A  02F9r 0008	     bs	 dw docon,8
+   2484
+   2485				       nf 'bl'
+1  2486	      =MYCSEG:0E1E	     ppppp = $
+1  2487				       dstr2 'bl',0
+2  2488	0E1E  02		       db    ??00A0-$-1+0
+2  2489	0E1F  62 6C		       db    'bl'
+2  2490	0E21			     ??00A0  label   byte
+1  2491	0E21  0E15r		       dw    qqqqq
+1  2492	      =MYCSEG:0E1E	     qqqqq = ppppp
+   2493	0E23  02F9r 0020	     blc dw docon,32
+   2494
+   2495				       nf 'lf'
+1  2496	      =MYCSEG:0E27	     ppppp = $
+1  2497				       dstr2 'lf',0
+2  2498	0E27  02		       db    ??00A1-$-1+0
+2  2499	0E28  6C 66		       db    'lf'
+2  2500	0E2A			     ??00A1  label   byte
+1  2501	0E2A  0E1Er		       dw    qqqqq
+1  2502	      =MYCSEG:0E27	     qqqqq = ppppp
+   2503	0E2C  02F9r 000A	     lf	 dw docon,0ah
+   2504
+   2505				       nf 'cr'
+1  2506	      =MYCSEG:0E30	     ppppp = $
+1  2507				       dstr2 'cr',0
+2  2508	0E30  02		       db    ??00A2-$-1+0
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 45
+VMF.asm
+
+
+
+2  2509	0E31  63 72		       db    'cr'
+2  2510	0E33			     ??00A2  label   byte
+1  2511	0E33  0E27r		       dw    qqqqq
+1  2512	      =MYCSEG:0E30	     qqqqq = ppppp
+   2513	0E35  02F9r 000D	     cr	 dw docon,0dh
+   2514
+   2515				       nf '-1'
+1  2516	      =MYCSEG:0E39	     ppppp = $
+1  2517				       dstr2 '-1',0
+2  2518	0E39  02		       db    ??00A3-$-1+0
+2  2519	0E3A  2D 31		       db    '-1'
+2  2520	0E3C			     ??00A3  label   byte
+1  2521	0E3C  0E30r		       dw    qqqqq
+1  2522	      =MYCSEG:0E39	     qqqqq = ppppp
+   2523	0E3E  10D0r		     mo	 dw   _m1
+   2524
+   2525				       nf '0'
+1  2526	      =MYCSEG:0E40	     ppppp = $
+1  2527				       dstr2 '0',0
+2  2528	0E40  01		       db    ??00A4-$-1+0
+2  2529	0E41  30		       db    '0'
+2  2530	0E42			     ??00A4  label   byte
+1  2531	0E42  0E39r		       dw    qqqqq
+1  2532	      =MYCSEG:0E40	     qqqqq = ppppp
+   2533	0E44  10D0r		     zr	    dw	_zero
+   2534
+   2535				       nf '2'
+1  2536	      =MYCSEG:0E46	     ppppp = $
+1  2537				       dstr2 '2',0
+2  2538	0E46  01		       db    ??00A5-$-1+0
+2  2539	0E47  32		       db    '2'
+2  2540	0E48			     ??00A5  label   byte
+1  2541	0E48  0E40r		       dw    qqqqq
+1  2542	      =MYCSEG:0E46	     qqqqq = ppppp
+   2543	0E4A  02F9r 0002	     two dw docon,2
+   2544
+   2545				       nf '1'
+1  2546	      =MYCSEG:0E4E	     ppppp = $
+1  2547				       dstr2 '1',0
+2  2548	0E4E  01		       db    ??00A6-$-1+0
+2  2549	0E4F  31		       db    '1'
+2  2550	0E50			     ??00A6  label   byte
+1  2551	0E50  0E46r		       dw    qqqqq
+1  2552	      =MYCSEG:0E4E	     qqqqq = ppppp
+   2553	0E52  02F9r 0001	     one dw docon,1
+   2554
+   2555				     ;---------------^^^^^^^  CONSTANTS	^^^^^^^----------
+   2556
+   2557				     ;---------------^^^^^^^  STACK ^^^^^^^----------
+   2558				      NF 'POP'
+1  2559	      =MYCSEG:0E56	     ppppp = $
+1  2560				       dstr2 'POP',0
+2  2561	0E56  03		       db    ??00A7-$-1+0
+2  2562	0E57  50 4F 50		       db    'POP'
+2  2563	0E5A			     ??00A7  label   byte
+1  2564	0E5A  0E4Er		       dw    qqqqq
+1  2565	      =MYCSEG:0E56	     qqqqq = ppppp
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 46
+VMF.asm
+
+
+
+   2566	0E5C			     TPOP:
+   2567	0E5C  10D0r		     trfr    DW	  XRFR	     ; R>
+   2568
+   2569				      NF 'PUSH'
+1  2570	      =MYCSEG:0E5E	     ppppp = $
+1  2571				       dstr2 'PUSH',0
+2  2572	0E5E  04		       db    ??00A8-$-1+0
+2  2573	0E5F  50 55 53 48	       db    'PUSH'
+2  2574	0E63			     ??00A8  label   byte
+1  2575	0E63  0E56r		       dw    qqqqq
+1  2576	      =MYCSEG:0E5E	     qqqqq = ppppp
+   2577	0E65			     TPUSH:
+   2578	0E65  10D0r		     ttor    DW	  XTOR	     ; >R
+   2579
+   2580				      NF '@R+'
+1  2581	      =MYCSEG:0E67	     ppppp = $
+1  2582				       dstr2 '@R+',0
+2  2583	0E67  03		       db    ??00A9-$-1+0
+2  2584	0E68  40 52 2B		       db    '@R+'
+2  2585	0E6B			     ??00A9  label   byte
+1  2586	0E6B  0E5Er		       dw    qqqqq
+1  2587	      =MYCSEG:0E67	     qqqqq = ppppp
+   2588	0E6D  10D0r		     TRATPW   DW XRATPW
+   2589				      NF 'C@R+'
+1  2590	      =MYCSEG:0E6F	     ppppp = $
+1  2591				       dstr2 'C@R+',0
+2  2592	0E6F  04		       db    ??00AA-$-1+0
+2  2593	0E70  43 40 52 2B	       db    'C@R+'
+2  2594	0E74			     ??00AA  label   byte
+1  2595	0E74  0E67r		       dw    qqqqq
+1  2596	      =MYCSEG:0E6F	     qqqqq = ppppp
+   2597	0E76  10D0r			     DW	XRATPB
+   2598				      NF 'R@'
+1  2599	      =MYCSEG:0E78	     ppppp = $
+1  2600				       dstr2 'R@',0
+2  2601	0E78  02		       db    ??00AB-$-1+0
+2  2602	0E79  52 40		       db    'R@'
+2  2603	0E7B			     ??00AB  label   byte
+1  2604	0E7B  0E6Fr		       dw    qqqqq
+1  2605	      =MYCSEG:0E78	     qqqqq = ppppp
+   2606	0E7D  015Ar		     trat    DW	  XRAT	     ; R@
+   2607
+   2608				      NF 'RP@'
+1  2609	      =MYCSEG:0E7F	     ppppp = $
+1  2610				       dstr2 'RP@',0
+2  2611	0E7F  03		       db    ??00AC-$-1+0
+2  2612	0E80  52 50 40		       db    'RP@'
+2  2613	0E83			     ??00AC  label   byte
+1  2614	0E83  0E78r		       dw    qqqqq
+1  2615	      =MYCSEG:0E7F	     qqqqq = ppppp
+   2616	0E85  10D0r		     tRpGt   DW	  XRPGT	     ; RP@
+   2617
+   2618				      NF 'RP!'
+1  2619	      =MYCSEG:0E87	     ppppp = $
+1  2620				       dstr2 'RP!',0
+2  2621	0E87  03		       db    ??00AD-$-1+0
+2  2622	0E88  52 50 21		       db    'RP!'
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 47
+VMF.asm
+
+
+
+2  2623	0E8B			     ??00AD  label   byte
+1  2624	0E8B  0E7Fr		       dw    qqqqq
+1  2625	      =MYCSEG:0E87	     qqqqq = ppppp
+   2626	0E8D  10D0r		     tRpSt   DW	  XRPST	     ; RP!
+   2627
+   2628				      NF 'DROP'
+1  2629	      =MYCSEG:0E8F	     ppppp = $
+1  2630				       dstr2 'DROP',0
+2  2631	0E8F  04		       db    ??00AE-$-1+0
+2  2632	0E90  44 52 4F 50	       db    'DROP'
+2  2633	0E94			     ??00AE  label   byte
+1  2634	0E94  0E87r		       dw    qqqqq
+1  2635	      =MYCSEG:0E8F	     qqqqq = ppppp
+   2636	0E96  10D0r		     tdrop   DW	  XDROP	     ; DROP
+   2637				      NF '2DROP'
+1  2638	      =MYCSEG:0E98	     ppppp = $
+1  2639				       dstr2 '2DROP',0
+2  2640	0E98  05		       db    ??00AF-$-1+0
+2  2641	0E99  32 44 52 4F 50	       db    '2DROP'
+2  2642	0E9E			     ??00AF  label   byte
+1  2643	0E9E  0E8Fr		       dw    qqqqq
+1  2644	      =MYCSEG:0E98	     qqqqq = ppppp
+   2645	0EA0  10D0r		     tdrop2  DW	  XDROP2     ; 2DROP
+   2646				      NF 'RDROP'
+1  2647	      =MYCSEG:0EA2	     ppppp = $
+1  2648				       dstr2 'RDROP',0
+2  2649	0EA2  05		       db    ??00B0-$-1+0
+2  2650	0EA3  52 44 52 4F 50	       db    'RDROP'
+2  2651	0EA8			     ??00B0  label   byte
+1  2652	0EA8  0E98r		       dw    qqqqq
+1  2653	      =MYCSEG:0EA2	     qqqqq = ppppp
+   2654	0EAA  10D0r		     TRDROP  DW	  XRDROP     ; RDROP
+   2655				      NF 'DUP'
+1  2656	      =MYCSEG:0EAC	     ppppp = $
+1  2657				       dstr2 'DUP',0
+2  2658	0EAC  03		       db    ??00B1-$-1+0
+2  2659	0EAD  44 55 50		       db    'DUP'
+2  2660	0EB0			     ??00B1  label   byte
+1  2661	0EB0  0EA2r		       dw    qqqqq
+1  2662	      =MYCSEG:0EAC	     qqqqq = ppppp
+   2663	0EB2  10D0r		     tdup    DW	  XDUP	     ; DUP
+   2664				      NF '2DUP'
+1  2665	      =MYCSEG:0EB4	     ppppp = $
+1  2666				       dstr2 '2DUP',0
+2  2667	0EB4  04		       db    ??00B2-$-1+0
+2  2668	0EB5  32 44 55 50	       db    '2DUP'
+2  2669	0EB9			     ??00B2  label   byte
+1  2670	0EB9  0EACr		       dw    qqqqq
+1  2671	      =MYCSEG:0EB4	     qqqqq = ppppp
+   2672	0EBB  10D0r		     TDUP2   DW	  XDUP2	     ; 2DUP
+   2673				      NF 'TUCK'
+1  2674	      =MYCSEG:0EBD	     ppppp = $
+1  2675				       dstr2 'TUCK',0
+2  2676	0EBD  04		       db    ??00B3-$-1+0
+2  2677	0EBE  54 55 43 4B	       db    'TUCK'
+2  2678	0EC2			     ??00B3  label   byte
+1  2679	0EC2  0EB4r		       dw    qqqqq
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 48
+VMF.asm
+
+
+
+1  2680	      =MYCSEG:0EBD	     qqqqq = ppppp
+   2681	0EC4  10D0r			     DW	  XTUCK	     ; TUCK
+   2682				       nf 'NIP'
+1  2683	      =MYCSEG:0EC6	     ppppp = $
+1  2684				       dstr2 'NIP',0
+2  2685	0EC6  03		       db    ??00B4-$-1+0
+2  2686	0EC7  4E 49 50		       db    'NIP'
+2  2687	0ECA			     ??00B4  label   byte
+1  2688	0ECA  0EBDr		       dw    qqqqq
+1  2689	      =MYCSEG:0EC6	     qqqqq = ppppp
+   2690	0ECC  10D0r		       DW XNIP
+   2691
+   2692				     ;---------------^^^^^^^  STACK ^^^^^^^----------
+   2693
+   2694
+   2695				     ;---------------vvvvvvv  LOGICAL vvvvvvv----------
+   2696
+   2697				      NF '<'
+1  2698	      =MYCSEG:0ECE	     ppppp = $
+1  2699				       dstr2 '<',0
+2  2700	0ECE  01		       db    ??00B5-$-1+0
+2  2701	0ECF  3C		       db    '<'
+2  2702	0ED0			     ??00B5  label   byte
+1  2703	0ED0  0EC6r		       dw    qqqqq
+1  2704	      =MYCSEG:0ECE	     qqqqq = ppppp
+   2705	0ED2  10D0r		     TLESS   DW	  XCHK	     ; <
+   2706	0ED4  FF 00 00			     DB	  -1,0,0
+   2707				      NF '='
+1  2708	      =MYCSEG:0ED7	     ppppp = $
+1  2709				       dstr2 '=',0
+2  2710	0ED7  01		       db    ??00B6-$-1+0
+2  2711	0ED8  3D		       db    '='
+2  2712	0ED9			     ??00B6  label   byte
+1  2713	0ED9  0ECEr		       dw    qqqqq
+1  2714	      =MYCSEG:0ED7	     qqqqq = ppppp
+   2715	0EDB  10D0r		     tequal  DW	  XCHK	     ; =
+   2716	0EDD  00 FF 00			     DB	  0,-1,0
+   2717				      NF 'U<'
+1  2718	      =MYCSEG:0EE0	     ppppp = $
+1  2719				       dstr2 'U<',0
+2  2720	0EE0  02		       db    ??00B7-$-1+0
+2  2721	0EE1  55 3C		       db    'U<'
+2  2722	0EE3			     ??00B7  label   byte
+1  2723	0EE3  0ED7r		       dw    qqqqq
+1  2724	      =MYCSEG:0EE0	     qqqqq = ppppp
+   2725	0EE5  10D0r		     TULESS  DW	  XUCHK	     ; U<
+   2726	0EE7  FF 00 00			     DB	  -1,0,0
+   2727				      NF '0<'
+1  2728	      =MYCSEG:0EEA	     ppppp = $
+1  2729				       dstr2 '0<',0
+2  2730	0EEA  02		       db    ??00B8-$-1+0
+2  2731	0EEB  30 3C		       db    '0<'
+2  2732	0EED			     ??00B8  label   byte
+1  2733	0EED  0EE0r		       dw    qqqqq
+1  2734	      =MYCSEG:0EEA	     qqqqq = ppppp
+   2735	0EEF  10D0r		     TZLESS  DW	  X0LESS     ; 0<
+   2736				      NF '0='
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 49
+VMF.asm
+
+
+
+1  2737	      =MYCSEG:0EF1	     ppppp = $
+1  2738				       dstr2 '0=',0
+2  2739	0EF1  02		       db    ??00B9-$-1+0
+2  2740	0EF2  30 3D		       db    '0='
+2  2741	0EF4			     ??00B9  label   byte
+1  2742	0EF4  0EEAr		       dw    qqqqq
+1  2743	      =MYCSEG:0EF1	     qqqqq = ppppp
+   2744	0EF6  10D0r		     TZEQ    DW	  XZCHK	     ; 0=
+   2745	0EF8  00 FF 00			     DB	  0,-1,0
+   2746				      NF '0>='
+1  2747	      =MYCSEG:0EFB	     ppppp = $
+1  2748				       dstr2 '0>=',0
+2  2749	0EFB  03		       db    ??00BA-$-1+0
+2  2750	0EFC  30 3E 3D		       db    '0>='
+2  2751	0EFF			     ??00BA  label   byte
+1  2752	0EFF  0EF1r		       dw    qqqqq
+1  2753	      =MYCSEG:0EFB	     qqqqq = ppppp
+   2754	0F01  10D0r		     TZGREQ  DW	  XZCHK	     ; 0>=
+   2755	0F03  00 FF FF			     DB	  0,-1,-1
+   2756				      NF '0<>'
+1  2757	      =MYCSEG:0F06	     ppppp = $
+1  2758				       dstr2 '0<>',0
+2  2759	0F06  03		       db    ??00BB-$-1+0
+2  2760	0F07  30 3C 3E		       db    '0<>'
+2  2761	0F0A			     ??00BB  label   byte
+1  2762	0F0A  0EFBr		       dw    qqqqq
+1  2763	      =MYCSEG:0F06	     qqqqq = ppppp
+   2764	0F0C  10D0r		     tzne    DW	  XZCHK	     ; 0<>
+   2765	0F0E  FF 00 FF			     DB	  -1,0,-1
+   2766				      NF 'I'
+1  2767	      =MYCSEG:0F11	     ppppp = $
+1  2768				       dstr2 'I',0
+2  2769	0F11  01		       db    ??00BC-$-1+0
+2  2770	0F12  49		       db    'I'
+2  2771	0F13			     ??00BC  label   byte
+1  2772	0F13  0F06r		       dw    qqqqq
+1  2773	      =MYCSEG:0F11	     qqqqq = ppppp
+   2774	0F15  10D0r		     ti	     DW	  XI	     ; I DO LOOP
+   2775				      NF 'OVER'
+1  2776	      =MYCSEG:0F17	     ppppp = $
+1  2777				       dstr2 'OVER',0
+2  2778	0F17  04		       db    ??00BD-$-1+0
+2  2779	0F18  4F 56 45 52	       db    'OVER'
+2  2780	0F1C			     ??00BD  label   byte
+1  2781	0F1C  0F11r		       dw    qqqqq
+1  2782	      =MYCSEG:0F17	     qqqqq = ppppp
+   2783	0F1E  10D0r		     tover   DW	  XOVER	     ; OVER
+   2784				      NF '2OVER'
+1  2785	      =MYCSEG:0F20	     ppppp = $
+1  2786				       dstr2 '2OVER',0
+2  2787	0F20  05		       db    ??00BE-$-1+0
+2  2788	0F21  32 4F 56 45 52	       db    '2OVER'
+2  2789	0F26			     ??00BE  label   byte
+1  2790	0F26  0F17r		       dw    qqqqq
+1  2791	      =MYCSEG:0F20	     qqqqq = ppppp
+   2792	0F28  10D0r		     TOVER2  DW	  XOVER2     ; 2OVER
+   2793				      NF '?DUP'
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 50
+VMF.asm
+
+
+
+1  2794	      =MYCSEG:0F2A	     ppppp = $
+1  2795				       dstr2 '?DUP',0
+2  2796	0F2A  04		       db    ??00BF-$-1+0
+2  2797	0F2B  3F 44 55 50	       db    '?DUP'
+2  2798	0F2F			     ??00BF  label   byte
+1  2799	0F2F  0F20r		       dw    qqqqq
+1  2800	      =MYCSEG:0F2A	     qqqqq = ppppp
+   2801	0F31  10D0r		     tqdup   DW	  XQDUP	     ; ?DUP
+   2802				      NF 'ROT'
+1  2803	      =MYCSEG:0F33	     ppppp = $
+1  2804				       dstr2 'ROT',0
+2  2805	0F33  03		       db    ??00C0-$-1+0
+2  2806	0F34  52 4F 54		       db    'ROT'
+2  2807	0F37			     ??00C0  label   byte
+1  2808	0F37  0F2Ar		       dw    qqqqq
+1  2809	      =MYCSEG:0F33	     qqqqq = ppppp
+   2810	0F39  10D0r		     trot    DW	  XROT	     ; ROT
+   2811				      NF '-ROT'
+1  2812	      =MYCSEG:0F3B	     ppppp = $
+1  2813				       dstr2 '-ROT',0
+2  2814	0F3B  04		       db    ??00C1-$-1+0
+2  2815	0F3C  2D 52 4F 54	       db    '-ROT'
+2  2816	0F40			     ??00C1  label   byte
+1  2817	0F40  0F33r		       dw    qqqqq
+1  2818	      =MYCSEG:0F3B	     qqqqq = ppppp
+   2819	0F42  10D0r		     tmrot   DW	  XMROT	     ; -ROT
+   2820				      NF 'SP@'
+1  2821	      =MYCSEG:0F44	     ppppp = $
+1  2822				       dstr2 'SP@',0
+2  2823	0F44  03		       db    ??00C2-$-1+0
+2  2824	0F45  53 50 40		       db    'SP@'
+2  2825	0F48			     ??00C2  label   byte
+1  2826	0F48  0F3Br		       dw    qqqqq
+1  2827	      =MYCSEG:0F44	     qqqqq = ppppp
+   2828	0F4A  10D0r		     TSPGT   DW	  XSPGT	     ; SP@
+   2829				      NF 'SP!'
+1  2830	      =MYCSEG:0F4C	     ppppp = $
+1  2831				       dstr2 'SP!',0
+2  2832	0F4C  03		       db    ??00C3-$-1+0
+2  2833	0F4D  53 50 21		       db    'SP!'
+2  2834	0F50			     ??00C3  label   byte
+1  2835	0F50  0F44r		       dw    qqqqq
+1  2836	      =MYCSEG:0F4C	     qqqqq = ppppp
+   2837	0F52  10D0r		     tSpSt   DW	  XSPST	     ; SP!
+   2838				      NF 'SWAP'
+1  2839	      =MYCSEG:0F54	     ppppp = $
+1  2840				       dstr2 'SWAP',0
+2  2841	0F54  04		       db    ??00C4-$-1+0
+2  2842	0F55  53 57 41 50	       db    'SWAP'
+2  2843	0F59			     ??00C4  label   byte
+1  2844	0F59  0F4Cr		       dw    qqqqq
+1  2845	      =MYCSEG:0F54	     qqqqq = ppppp
+   2846	0F5B  10D0r		     tswap   DW	  XSWAP	     ; SWAP
+   2847				      NF '2SWAP'
+1  2848	      =MYCSEG:0F5D	     ppppp = $
+1  2849				       dstr2 '2SWAP',0
+2  2850	0F5D  05		       db    ??00C5-$-1+0
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 51
+VMF.asm
+
+
+
+2  2851	0F5E  32 53 57 41 50	       db    '2SWAP'
+2  2852	0F63			     ??00C5  label   byte
+1  2853	0F63  0F54r		       dw    qqqqq
+1  2854	      =MYCSEG:0F5D	     qqqqq = ppppp
+   2855	0F65  10D0r		     tswap2  DW	  XSWAP2     ; 2SWAP
+   2856				      NF '(STR'
+1  2857	      =MYCSEG:0F67	     ppppp = $
+1  2858				       dstr2 '(STR',0
+2  2859	0F67  04		       db    ??00C6-$-1+0
+2  2860	0F68  28 53 54 52	       db    '(STR'
+2  2861	0F6C			     ??00C6  label   byte
+1  2862	0F6C  0F5Dr		       dw    qqqqq
+1  2863	      =MYCSEG:0F67	     qqqqq = ppppp
+   2864	0F6E  10D0r		     tSKPs   DW	  XSKPS	     ; (")
+   2865	0F70  10D0r		     tSKPSW  DW	  XSKPSW     ; (")
+   2866				      NF 'ORIGIN+'
+1  2867	      =MYCSEG:0F72	     ppppp = $
+1  2868				       dstr2 'ORIGIN+',0
+2  2869	0F72  07		       db    ??00C7-$-1+0
+2  2870	0F73  4F 52 49 47 49 4E	2B     db    'ORIGIN+'
+2  2871	0F7A			     ??00C7  label   byte
+1  2872	0F7A  0F67r		       dw    qqqqq
+1  2873	      =MYCSEG:0F72	     qqqqq = ppppp
+   2874	0F7C  10D0r			     DW	  @MYARY     ;DW   xorig      ;	ORIGIN+
+   2875
+   2876					     NF	'NOP'
+1  2877	      =MYCSEG:0F7E	     ppppp = $
+1  2878				       dstr2 'NOP',0
+2  2879	0F7E  03		       db    ??00C8-$-1+0
+2  2880	0F7F  4E 4F 50		       db    'NOP'
+2  2881	0F82			     ??00C8  label   byte
+1  2882	0F82  0F72r		       dw    qqqqq
+1  2883	      =MYCSEG:0F7E	     qqqqq = ppppp
+   2884	0F84  012Cr		     TNOP	 DW   _NEXT
+   2885
+   2886					 NF 'ATTR'
+1  2887	      =MYCSEG:0F86	     ppppp = $
+1  2888				       dstr2 'ATTR',0
+2  2889	0F86  04		       db    ??00C9-$-1+0
+2  2890	0F87  41 54 54 52	       db    'ATTR'
+2  2891	0F8B			     ??00C9  label   byte
+1  2892	0F8B  0F7Er		       dw    qqqqq
+1  2893	      =MYCSEG:0F86	     qqqqq = ppppp
+   2894	0F8D  10D0r			  dw	  DOVAR
+   2895	0F8F  1A		     ATTR DB 26
+   2896	0F90  00		     VPAG DB 0
+   2897	0F91  019Ar			  DW   XQARY	  ; 4* ARRAY
+   2898
+   2899				     ; ---------------	  DEBUGER  ------------------vvvvvvvvv
+   2900
+   2901	0F93  50		     OUTWORD:PUSH AX
+   2902	0F94  8A C4			     MOV  aL,aH
+   2903	0F96  E8 0001			     call OUTBYTE
+   2904	0F99  58			     pop  ax
+   2905	0F9A  50		     OUTBYTE:push ax
+   2906	0F9B  B1 04			     mov cl,4
+   2907	0F9D  D2 E8			     shr al,cl
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 52
+VMF.asm
+
+
+
+   2908	0F9F  E8 0001			     call outdig
+   2909	0FA2  58			     pop ax
+   2910	0FA3  24 0F		     outdig: and al,0fh
+   2911	0FA5  04 90			     ADD AL,090h
+   2912	0FA7  27			     DAA
+   2913	0FA8  14 40			     ADC AL,040h
+   2914	0FAA  27			     DAA
+   2915	0FAB  B9 0001		     outc:   MOV CX,1
+   2916	0FAE  B4 0E			     mov ah,0EH
+   2917	0FB0  CD 10			     INT 010h
+   2918	0FB2			     OUTC_1P:		;MOV  DI,OFFSET	toOUTC+2
+   2919							; !!! NUT USER VAR
+   2920				     ;	     CALL DOuVAR
+   2921				     ;	      INC  PW [DI]
+   2922	0FB2  FF 06 0DCFr		     INC  PW TOOUTC+2
+   2923	0FB6  C3			     RET
+   2924	0FB7  E8 FFD9		     regout: call outWord
+   2925	0FBA  B0 20		     space1: mov  al,' '
+   2926	0FBC  EB ED			     jmp short outc
+   2927	0FBE  B0 0D		     NEW_CR: MOV AL,0DH
+   2928	0FC0  E8 FFE8			     CALL OUTC
+   2929	0FC3  B0 0A			     MOV  AL,0AH
+   2930	0FC5  EB E4			     JMP SHORT OUTC
+   2931
+   2932	0FC7  E8 0106		     XEX_TR: CALL POPR
+   2933	0FCA  8B 46 00			     MOV  AX,[BP]
+   2934	0FCD  A2 0135r			     MOV  pb _ex,al
+   2935	0FD0  E9 00FD			     JMP  XRDROP
+   2936
+   2937	0FD3  A0 0135r		     JSR_TR: MOV  AL,PB	_ex
+   2938					     TRACE_OFF
+1  2939	0FD6  E9 F153			     jmp  _next
+   2940	0FD9  8D 6E FE			     LEA  BP,[BP-2]
+   2941	0FDC  89 46 00			     MOV  [BP],AX
+   2942	0FDF  E9 00EE			     JMP  JSR
+   2943
+   2944				       nf 'H.'
+1  2945	      =MYCSEG:0FE2	     ppppp = $
+1  2946				       dstr2 'H.',0
+2  2947	0FE2  02		       db    ??00CA-$-1+0
+2  2948	0FE3  48 2E		       db    'H.'
+2  2949	0FE5			     ??00CA  label   byte
+1  2950	0FE5  0F86r		       dw    qqqqq
+1  2951	      =MYCSEG:0FE2	     qqqqq = ppppp
+   2952	0FE7  0FE9r		     hdot  dw $+2
+   2953	0FE9  93		       XCHG ax,bx
+   2954	0FEA  E8 FFCA		       call regout
+   2955				       dropreg
+1  2956	0FED  E9 F13C			     jmp  _next
+   2957
+   2958				      NFI 'TRACE'
+1  2959	      =MYCSEG:0FF0	     ppppp = $
+1  2960				       dstr2 'TRACE',080h
+2  2961	0FF0  85		       db    ??00CB-$-1+080h
+2  2962	0FF1  54 52 41 43 45	       db    'TRACE'
+2  2963	0FF6			     ??00CB  label   byte
+1  2964	0FF6  0FE2r		       dw    qqqqq
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 53
+VMF.asm
+
+
+
+1  2965	      =MYCSEG:0FF0	     qqqqq = ppppp
+   2966	0FF8  10D0r 0976r 1017r	  +   DW JSR,APOS,_TR,TEXEC,_NTR,TEXIT
+   2967	      0915r 100Ar 0476r
+   2968
+   2969				      NF '-TR'
+1  2970	      =MYCSEG:1004	     ppppp = $
+1  2971				       dstr2 '-TR',0
+2  2972	1004  03		       db    ??00CC-$-1+0
+2  2973	1005  2D 54 52		       db    '-TR'
+2  2974	1008			     ??00CC  label   byte
+1  2975	1008  0FF0r		       dw    qqqqq
+1  2976	      =MYCSEG:1004	     qqqqq = ppppp
+   2977	100A  100Cr		     _NTR:  DW	$+2
+   2978					  TRACE_OFF
+1  2979	100C  E9 F11D			     jmp  _next
+   2980					  NEXT
+1  2981	100F  E9 F11A			     jmp  _next
+   2982
+   2983				      NF 'TR'
+1  2984	      =MYCSEG:1012	     ppppp = $
+1  2985				       dstr2 'TR',0
+2  2986	1012  02		       db    ??00CD-$-1+0
+2  2987	1013  54 52		       db    'TR'
+2  2988	1015			     ??00CD  label   byte
+1  2989	1015  1004r		       dw    qqqqq
+1  2990	      =MYCSEG:1012	     qqqqq = ppppp
+   2991	1017  1019r		     _TR: DW $+2
+   2992					   TRACE_ON
+1  2993	1019  E9 F110			     jmp  _next
+   2994					   NEXT
+1  2995	101C  E9 F10D			     jmp  _next
+   2996
+   2997	101F			     debugerr:
+   2998	101F  89 36 108Fr		     mov   pw saveSi,si
+   2999	1023  A3 108Br			     mov   pw saveAX,AX
+   3000					     TRACE_OFF
+1  3001	1026  E9 F103			     jmp  _next
+   3002	1029  E8 00A4			     call  j4th
+   3003	102C  0EBBr 0FE7r 0FE7r	  +	     DW	  TDUP2,HDOT,HDOT,TPUSH,TPUSH,TDUP2,HDOT,HDOT
+   3004	      0E65r 0E65r 0EBBr	  +
+   3005	      0FE7r 0FE7r
+   3006	103C  0E5Cr 0E5Cr 0F4Ar	  +	     DW	  TPOP,TPOP,TSPGT,HDOT
+   3007	      0FE7r
+   3008	1044  0E85r 0FE7r 0E7Dr	  +	     DW	  TRPGT,HDOT,TRAT,HDOT
+   3009	      0FE7r
+   3010	104C  108Dr 0EB2r		     dw	  sav_Si,tdup
+   3011	1050  0626r 0EB2r 0FE7r		     dw	  ttwomi,tdup,hdot
+   3012	1056  0F5Br 10D0r 0FE7r		     DW	  TSWAP,TFETCH,HDOT
+   3013	105C  10D0r 0FE7r 10D0r	  +	     dw	  tfetch,hdot,HERE,HDOT
+   3014	      0FE7r
+   3015	1064  1089r 10AEr		     dw	  SAV_AX,v_ID
+   3016	1068  04F5r			     dw	  tfromf
+   3017	106A  33 C0			     xor  ax,ax
+   3018	106C  CD 16			     int  16h
+   3019	106E  24 DF			     and  al,0dfh
+   3020	1070  3C 53			     cmp  al,'S'
+   3021	1072  9C			     PUSHF
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 54
+VMF.asm
+
+
+
+   3022	1073  E8 FF48			     CALL NEW_CR
+   3023					     TRACE_ON
+1  3024	1076  E9 F0B3			     jmp  _next
+   3025	1079  9D			     POPF
+   3026	107A  75 03			     jne  @@2
+   3027					     TRACE_OFF
+1  3028	107C  E9 F0AD			     jmp  _next
+   3029	107F  8B 36 108Fr	     @@2:    mov  si,saveSi
+   3030	1083  8B 3E 108Br		     mov  di,saveAX
+   3031	1087  FF 25			     jmp  [di]
+   3032
+   3033	1089  02F9r		     sav_AX  dw	  DoCon
+   3034	108B  0000		     saveAX  dw	  0
+   3035
+   3036	108D  02F9r		     sav_si  dw	  DoCon
+   3037	108F  0000		     saveSi  dw	  0
+   3038
+   3039				       nf    'ID.'
+1  3040	      =MYCSEG:1091	     ppppp = $
+1  3041				       dstr2 'ID.',0
+2  3042	1091  03		       db    ??00CE-$-1+0
+2  3043	1092  49 44 2E		       db    'ID.'
+2  3044	1095			     ??00CE  label   byte
+1  3045	1095  1012r		       dw    qqqqq
+1  3046	      =MYCSEG:1091	     qqqqq = ppppp
+   3047	1097  10D0r 10D0r 0BC6r	  +  N_ID    DW	   JSR,Tcount,Tlit,31,Tand
+   3048	      001F 05CFr
+   3049	10A1  06CAr 0778r 0476r	       DW TtYpE,Tspace,TexIt
+   3050
+   3051				       NF    '?ID.'
+1  3052	      =MYCSEG:10A7	     ppppp = $
+1  3053				       dstr2 '?ID.',0
+2  3054	10A7  04		       db    ??00CF-$-1+0
+2  3055	10A8  3F 49 44 2E	       db    '?ID.'
+2  3056	10AC			     ??00CF  label   byte
+1  3057	10AC  1091r		       dw    qqqqq
+1  3058	      =MYCSEG:10A7	     qqqqq = ppppp
+   3059	10AE  10D0r 07A4r 0F31r	  +  V_id:   dw	   jsr,cfname,TQDUP,EXIT0
+   3060	      046Dr
+   3061	10B6  061Fr 0F31r 0498r	  +    DW tonemi,TQdup,tZbran,@@3
+   3062	      10C8r
+   3063	10BE  0BC6r 10CAr 0604r	  +    dw tLIT,@@3+2,TPLUS,TFETCH,N_ID
+   3064	      10D0r 1097r
+   3065	10C8  1097r 0476r 10D0r	  +  @@3: dw N_ID,TEXIT,ADRTO,ADRAT
+   3066	      10D0r
+   3067
+   3068
+   3069	10D0			     _CALL:
+   3070	10D0			     _DOES:
+   3071	10D0			     CALL_D2:
+   3072	10D0			     DECIM:
+   3073	10D0			     DERR:
+   3074	10D0			     DOVAR:
+   3075	10D0			     DOVAR2:
+   3076	10D0			     FCH_P2:
+   3077	10D0			     HERE:
+   3078	10D0			     JSR:
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 55
+VMF.asm
+
+
+
+   3079	10D0			     JSR1:
+   3080	10D0			     SKOBAL:
+   3081	10D0			     T_SDOT:
+   3082	10D0			     TC2I:
+   3083	10D0			     TCAT:
+   3084	10D0			     TCOUNT:
+   3085	10D0			     TCSTORE:
+   3086	10D0			     TFETCH:
+   3087	10D0			     TTWOAT:
+   3088	10D0			     TWCOUNT:
+   3089	10D0			     TZSTOR:
+   3090	10D0			     UV0:
+   3091	10D0			     UVR0:
+   3092	10D0			     UVS0:
+   3093	10D0			     X?EMIT:
+   3094	10D0			     X0EXIT:
+   3095	10D0			     X2PWR:
+   3096	10D0			     X2SLS:
+   3097	10D0			     X2STAR:
+   3098	10D0			     XABS:
+   3099	10D0			     XADRSP2:
+   3100	10D0			     XALPHA:
+   3101	10D0			     XAND:
+   3102	10D0			     XBLANK:
+   3103	10D0			     XBRAN:
+   3104	10D0			     XCNTDO:
+   3105	10D0			     XDABS:
+   3106	10D0			     XDIV:
+   3107	10D0			     XDIVMOD:
+   3108	10D0			     XDMINUS:
+   3109	10D0			     XDNEGAT:
+   3110	10D0			     XDO:
+   3111	10D0			     XDOP:
+   3112				     ; XEXEC:
+   3113	10D0			     XFNAME:
+   3114	10D0			     XFOR:
+   3115	10D0			     XJMP:
+   3116	10D0			     XLEAVE:
+   3117	10D0			     XLO:
+   3118	10D0			     XLOOP:
+   3119	10D0			     XMOD:
+   3120	10D0			     XNEGATE:
+   3121	10D0			     XNEXT:
+   3122	10D0			     XNOT:
+   3123	10D0			     XOF:
+   3124	10D0			     XONEMI:
+   3125	10D0			     XORE:
+   3126	10D0			     XPACK:
+   3127	10D0			     XPERF:
+   3128	10D0			     XPLOOP:
+   3129	10D0			     XPLUS:
+   3130	10D0			     XQEXEC:
+   3131	10D0			     XSHIFT:
+   3132	10D0			     XSUBT:
+   3133	10D0			     XTWOMI:
+   3134	10D0			     XUMSTAR:
+   3135	10D0			     XUNPACK:
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 56
+VMF.asm
+
+
+
+   3136	10D0			     XXORX:
+   3137	10D0			     XZBRAN:
+   3138	10D0			     TOHERE:
+   3139	10D0			     TSTORE2:
+   3140	10D0			     T@SWP2:
+   3141	10D0			     IMM:
+   3142	10D0			     TSTRCOM:
+   3143	10D0			     TSDOT:
+   3144	10D0			     BCOMMA:
+   3145	10D0			     IMM:
+   3146	10D0			     TSTR:
+   3147	10D0			     TPSTORE:
+   3148	10D0			     DOLIT:
+   3149	10D0			     TSTORE1:
+   3150	10D0			     TCOMMAB:
+   3151	10D0			     SKOBAR:
+   3152	10D0			     AHEADER:
+   3153	10D0			     AHEADER:
+   3154	10D0			     ASMUDGE:
+   3155	10D0			     T@SWP2:
+   3156	10D0			     TSTRCOM:
+   3157	10D0			     XNAMCF:
+   3158	10D0			     FRST:
+   3159	10D0			     UVBASE:
+   3160	10D0			     _M1:
+   3161	10D0			     _ZERO:
+   3162	10D0			     XRFR:
+   3163	10D0			     XTOR:
+   3164	10D0			     XRATPW:
+   3165	10D0			     XRATPB:
+   3166	10D0			     XRPGT:
+   3167	10D0			     XRPST:
+   3168	10D0			     XDROP:
+   3169	10D0			     XDROP2:
+   3170	10D0			     XRDROP:
+   3171	10D0			     XDUP:
+   3172	10D0			     XDUP2:
+   3173	10D0			     XTUCK:
+   3174	10D0			     XNIP:
+   3175	10D0			     XCHK:
+   3176	10D0			     XCHK:
+   3177	10D0			     XUCHK:
+   3178	10D0			     X0LESS:
+   3179	10D0			     XZCHK:
+   3180	10D0			     XZCHK:
+   3181	10D0			     XZCHK:
+   3182	10D0			     XI:
+   3183	10D0			     XOVER:
+   3184	10D0			     XOVER2:
+   3185	10D0			     XQDUP:
+   3186	10D0			     XROT:
+   3187	10D0			     XMROT:
+   3188	10D0			     XSPGT:
+   3189	10D0			     XSPST:
+   3190	10D0			     XSWAP:
+   3191	10D0			     XSWAP2:
+   3192	10D0			     XSKPS:
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 57
+VMF.asm
+
+
+
+   3193	10D0			     XSKPSW:
+   3194	10D0			     @MYARY:
+   3195	10D0			     POPR:
+   3196	10D0			     XRDROP:
+   3197	10D0			     J4TH:
+   3198	10D0			     ADRTO:
+   3199	10D0			     DOCOLON:
+   3200	10D0			     DOSEMI:
+   3201	10D0			     ADRAT:
+   3202
+   3203				     ; ---------------	  DEBUGER  ------------------^^^^^^^^^^^
+   3204
+   3205	      =MYCSEG:10D0	     DtoP=$
+   3206	      =MYCSEG:10A7	     lastw = ppppp
+   3207
+   3208				     ;	     db	  tbp	   ;brkpt
+   3209	10D0			     MyCseg  ends
+   3210					     end  Start
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 58
+Symbol Table
+
+
+
+
+Symbol Name		Type   Value			   Cref	(defined at #)
+
+??0000			Byte   MYCSEG:03C8		   578	#580
+??0001			Byte   MYCSEG:03DF		   594	#596
+??0002			Byte   MYCSEG:03EB		   604	#606
+??0003			Byte   MYCSEG:046B		   692	#694
+??0004			Byte   MYCSEG:0474		   702	#704
+??0005			Byte   MYCSEG:047D		   712	#714
+??0006			Byte   MYCSEG:0485		   722	#724
+??0007			Byte   MYCSEG:048D		   732	#734
+??0008			Byte   MYCSEG:0496		   742	#744
+??0009			Byte   MYCSEG:049E		   752	#754
+??000A			Byte   MYCSEG:04A5		   762	#764
+??000B			Byte   MYCSEG:04B2		   774	#776
+??000C			Byte   MYCSEG:04BC		   784	#786
+??000D			Byte   MYCSEG:04C5		   794	#796
+??000E			Byte   MYCSEG:04CD		   804	#806
+??000F			Byte   MYCSEG:04D7		   815	#817
+??0010			Byte   MYCSEG:04E0		   825	#827
+??0011			Byte   MYCSEG:04EA		   835	#837
+??0012			Byte   MYCSEG:04F3		   845	#847
+??0013			Byte   MYCSEG:04FA		   859	#861
+??0014			Byte   MYCSEG:04FF		   867	#869
+??0015			Byte   MYCSEG:0503		   875	#877
+??0016			Byte   MYCSEG:0507		   883	#885
+??0017			Byte   MYCSEG:050D		   892	#894
+??0018			Byte   MYCSEG:0514		   902	#904
+??0019			Byte   MYCSEG:051C		   912	#914
+??001A			Byte   MYCSEG:0523		   922	#924
+??001B			Byte   MYCSEG:052E		   932	#934
+??001C			Byte   MYCSEG:0537		   941	#943
+??001D			Byte   MYCSEG:0542		   953	#955
+??001E			Byte   MYCSEG:054E		   963	#965
+??001F			Byte   MYCSEG:0558		   973	#975
+??0020			Byte   MYCSEG:055F		   983	#985
+??0021			Byte   MYCSEG:0568		   993	#995
+??0022			Byte   MYCSEG:0570		   1003	 #1005
+??0023			Byte   MYCSEG:0576		   1013	 #1015
+??0024			Byte   MYCSEG:057D		   1023	 #1025
+??0025			Byte   MYCSEG:0583		   1033	 #1035
+??0026			Byte   MYCSEG:0591		   1044	 #1046
+??0027			Byte   MYCSEG:059A		   1054	 #1056
+??0028			Byte   MYCSEG:05A4		   1064	 #1066
+??0029			Byte   MYCSEG:05AB		   1074	 #1076
+??002A			Byte   MYCSEG:05B2		   1084	 #1086
+??002B			Byte   MYCSEG:05BD		   1094	 #1096
+??002C			Byte   MYCSEG:05C5		   1104	 #1106
+??002D			Byte   MYCSEG:05CD		   1114	 #1116
+??002E			Byte   MYCSEG:05D5		   1124	 #1126
+??002F			Byte   MYCSEG:05DD		   1134	 #1136
+??0030			Byte   MYCSEG:05E5		   1144	 #1146
+??0031			Byte   MYCSEG:05ED		   1154	 #1156
+??0032			Byte   MYCSEG:05F5		   1164	 #1166
+??0033			Byte   MYCSEG:05FC		   1173	 #1175
+??0034			Byte   MYCSEG:0602		   1182	 #1184
+??0035			Byte   MYCSEG:0609		   1191	 #1193
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 59
+Symbol Table
+
+
+
+??0036			Byte   MYCSEG:060F		   1200	 #1202
+??0037			Byte   MYCSEG:0616		   1209	 #1211
+??0038			Byte   MYCSEG:061D		   1218	 #1220
+??0039			Byte   MYCSEG:0624		   1227	 #1229
+??003A			Byte   MYCSEG:062B		   1236	 #1238
+??003B			Byte   MYCSEG:0632		   1245	 #1247
+??003C			Byte   MYCSEG:063B		   1259	 #1261
+??003D			Byte   MYCSEG:064A		   1270	 #1272
+??003E			Byte   MYCSEG:0679		   1285	 #1287
+??003F			Byte   MYCSEG:068B		   1298	 #1300
+??0040			Byte   MYCSEG:06A8		   1308	 #1311
+??0041			Byte   MYCSEG:06B0		   1317	 #1319
+??0042			Byte   MYCSEG:06C8		   1330	 #1332
+??0043			Byte   MYCSEG:06E5		   1344	 #1346
+??0044			Byte   MYCSEG:0756		   1376	 #1378
+??0045			Byte   MYCSEG:0763		   1388	 #1390
+??0046			Byte   MYCSEG:076C		   1397	 #1399
+??0047			Byte   MYCSEG:0776		   1407	 #1409
+??0048			Byte   MYCSEG:077F		   1417	 #1419
+??0049			Byte   MYCSEG:0787		   1427	 #1429
+??004A			Byte   MYCSEG:0791		   1437	 #1439
+??004B			Byte   MYCSEG:079A		   1447	 #1449
+??004C			Byte   MYCSEG:07A2		   1460	 #1462
+??004D			Byte   MYCSEG:07BC		   1480	 #1482
+??004E			Byte   MYCSEG:07D4		   1493	 #1495
+??004F			Byte   MYCSEG:07EA		   1504	 #1506
+??0050			Byte   MYCSEG:07F5		   1513	 #1515
+??0051			Byte   MYCSEG:080E		   1525	 #1527
+??0052			Byte   MYCSEG:082E		   1541	 #1543
+??0053			Byte   MYCSEG:0842		   1552	 #1554
+??0054			Byte   MYCSEG:0884		   1574	 #1576
+??0055			Byte   MYCSEG:08AC		   1592	 #1594
+??0056			Byte   MYCSEG:08D1		   1607	 #1609
+??0057			Byte   MYCSEG:08E6		   1619	 #1621
+??0058			Byte   MYCSEG:08F9		   1630	 #1632
+??0059			Byte   MYCSEG:0906		   1641	 #1643
+??005A			Byte   MYCSEG:0913		   1651	 #1653
+??005B			Byte   MYCSEG:091D		   1661	 #1663
+??005C			Byte   MYCSEG:0937		   1674	 #1676
+??005D			Byte   MYCSEG:0948		   1686	 #1688
+??005E			Byte   MYCSEG:0954		   1696	 #1698
+??005F			Byte   MYCSEG:0966		   1707	 #1709
+??0060			Byte   MYCSEG:0974		   1718	 #1720
+??0061			Byte   MYCSEG:0984		   1729	 #1731
+??0062			Byte   MYCSEG:09B2		   1747	 #1749
+??0063			Byte   MYCSEG:09C3		   1758	 #1760
+??0064			Byte   MYCSEG:09D4		   1770	 #1772
+??0065			Byte   MYCSEG:0A02		   1785	 #1788
+??0066			Byte   MYCSEG:0A0E		   1794	 #1796
+??0067			Byte   MYCSEG:0A26		   1807	 #1809
+??0068			Byte   MYCSEG:0A41		   1821	 #1823
+??0069			Byte   MYCSEG:0A69		   1836	 #1838
+??006A			Byte   MYCSEG:0A88		   1845	 #1849
+??006B			Byte   MYCSEG:0A98		   1856	 #1858
+??006C			Byte   MYCSEG:0AA8		   1867	 #1869
+??006D			Byte   MYCSEG:0AD4		   1887	 #1889
+??006E			Byte   MYCSEG:0ADC		   1897	 #1899
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 60
+Symbol Table
+
+
+
+??006F			Byte   MYCSEG:0AE5		   1908	 #1910
+??0070			Byte   MYCSEG:0AF7		   1919	 #1921
+??0071			Byte   MYCSEG:0B0B		   1930	 #1932
+??0072			Byte   MYCSEG:0B1A		   1941	 #1943
+??0073			Byte   MYCSEG:0B36		   1955	 #1957
+??0074			Byte   MYCSEG:0B49		   1967	 #1969
+??0075			Byte   MYCSEG:0B77		   1985	 #1987
+??0076			Byte   MYCSEG:0B80		   1995	 #1997
+??0077			Byte   MYCSEG:0B93		   2007	 #2009
+??0078			Byte   MYCSEG:0BB2		   2021	 #2023
+??0079			Byte   MYCSEG:0BC2		   2032	 #2034
+??007A			Byte   MYCSEG:0BD0		   2044	 #2046
+??007B			Byte   MYCSEG:0BE0		   2055	 #2057
+??007C			Byte   MYCSEG:0BF2		   2066	 #2068
+??007D			Byte   MYCSEG:0C07		   2077	 #2080
+??007E			Byte   MYCSEG:0C29		   2092	 #2094
+??007F			Byte   MYCSEG:0C4F		   2111	 #2113
+??0080			Byte   MYCSEG:0C65		   2123	 #2125
+??0081			Byte   MYCSEG:0C7B		   2135	 #2137
+??0082			Byte   MYCSEG:0C92		   2147	 #2149
+??0083			Byte   MYCSEG:0CA0		   2158	 #2160
+??0084			Byte   MYCSEG:0CAE		   2169	 #2171
+??0085			Byte   MYCSEG:0CBE		   2180	 #2182
+??0086			Byte   MYCSEG:0CD4		   2193	 #2195
+??0087			Byte   MYCSEG:0CE0		   2208	 #2210
+??0088			Byte   MYCSEG:0CED		   2218	 #2220
+??0089			Byte   MYCSEG:0CF9		   2228	 #2230
+??008A			Byte   MYCSEG:0D07		   2238	 #2240
+??008B			Byte   MYCSEG:0D15		   2248	 #2250
+??008C			Byte   MYCSEG:0D22		   2258	 #2260
+??008D			Byte   MYCSEG:0D31		   2269	 #2271
+??008E			Byte   MYCSEG:0D40		   2280	 #2282
+??008F			Byte   MYCSEG:0D4F		   2291	 #2293
+??0090			Byte   MYCSEG:0D61		   2302	 #2304
+??0091			Byte   MYCSEG:0D71		   2313	 #2315
+??0092			Byte   MYCSEG:0D7D		   2324	 #2326
+??0093			Byte   MYCSEG:0D89		   2335	 #2337
+??0094			Byte   MYCSEG:0D95		   2346	 #2348
+??0095			Byte   MYCSEG:0DA3		   2357	 #2359
+??0096			Byte   MYCSEG:0DB0		   2369	 #2371
+??0097			Byte   MYCSEG:0DBC		   2380	 #2382
+??0098			Byte   MYCSEG:0DC9		   2391	 #2393
+??0099			Byte   MYCSEG:0DD5		   2402	 #2404
+??009A			Byte   MYCSEG:0DE1		   2413	 #2415
+??009B			Byte   MYCSEG:0DEC		   2427	 #2429
+??009C			Byte   MYCSEG:0DF7		   2439	 #2441
+??009D			Byte   MYCSEG:0E04		   2451	 #2453
+??009E			Byte   MYCSEG:0E0F		   2463	 #2465
+??009F			Byte   MYCSEG:0E18		   2478	 #2480
+??00A0			Byte   MYCSEG:0E21		   2488	 #2490
+??00A1			Byte   MYCSEG:0E2A		   2498	 #2500
+??00A2			Byte   MYCSEG:0E33		   2508	 #2510
+??00A3			Byte   MYCSEG:0E3C		   2518	 #2520
+??00A4			Byte   MYCSEG:0E42		   2528	 #2530
+??00A5			Byte   MYCSEG:0E48		   2538	 #2540
+??00A6			Byte   MYCSEG:0E50		   2548	 #2550
+??00A7			Byte   MYCSEG:0E5A		   2561	 #2563
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 61
+Symbol Table
+
+
+
+??00A8			Byte   MYCSEG:0E63		   2572	 #2574
+??00A9			Byte   MYCSEG:0E6B		   2583	 #2585
+??00AA			Byte   MYCSEG:0E74		   2592	 #2594
+??00AB			Byte   MYCSEG:0E7B		   2601	 #2603
+??00AC			Byte   MYCSEG:0E83		   2611	 #2613
+??00AD			Byte   MYCSEG:0E8B		   2621	 #2623
+??00AE			Byte   MYCSEG:0E94		   2631	 #2633
+??00AF			Byte   MYCSEG:0E9E		   2640	 #2642
+??00B0			Byte   MYCSEG:0EA8		   2649	 #2651
+??00B1			Byte   MYCSEG:0EB0		   2658	 #2660
+??00B2			Byte   MYCSEG:0EB9		   2667	 #2669
+??00B3			Byte   MYCSEG:0EC2		   2676	 #2678
+??00B4			Byte   MYCSEG:0ECA		   2685	 #2687
+??00B5			Byte   MYCSEG:0ED0		   2700	 #2702
+??00B6			Byte   MYCSEG:0ED9		   2710	 #2712
+??00B7			Byte   MYCSEG:0EE3		   2720	 #2722
+??00B8			Byte   MYCSEG:0EED		   2730	 #2732
+??00B9			Byte   MYCSEG:0EF4		   2739	 #2741
+??00BA			Byte   MYCSEG:0EFF		   2749	 #2751
+??00BB			Byte   MYCSEG:0F0A		   2759	 #2761
+??00BC			Byte   MYCSEG:0F13		   2769	 #2771
+??00BD			Byte   MYCSEG:0F1C		   2778	 #2780
+??00BE			Byte   MYCSEG:0F26		   2787	 #2789
+??00BF			Byte   MYCSEG:0F2F		   2796	 #2798
+??00C0			Byte   MYCSEG:0F37		   2805	 #2807
+??00C1			Byte   MYCSEG:0F40		   2814	 #2816
+??00C2			Byte   MYCSEG:0F48		   2823	 #2825
+??00C3			Byte   MYCSEG:0F50		   2832	 #2834
+??00C4			Byte   MYCSEG:0F59		   2841	 #2843
+??00C5			Byte   MYCSEG:0F63		   2850	 #2852
+??00C6			Byte   MYCSEG:0F6C		   2859	 #2861
+??00C7			Byte   MYCSEG:0F7A		   2869	 #2871
+??00C8			Byte   MYCSEG:0F82		   2879	 #2881
+??00C9			Byte   MYCSEG:0F8B		   2889	 #2891
+??00CA			Byte   MYCSEG:0FE5		   2947	 #2949
+??00CB			Byte   MYCSEG:0FF6		   2961	 #2963
+??00CC			Byte   MYCSEG:1008		   2972	 #2974
+??00CD			Byte   MYCSEG:1015		   2986	 #2988
+??00CE			Byte   MYCSEG:1095		   3042	 #3044
+??00CF			Byte   MYCSEG:10AC		   3054	 #3056
+??DATE			Text   "12/14/19"
+??FILENAME		Text   "VMF	"
+??TIME			Text   "15:47:17"
+??VERSION		Number 0314
+?NONAM1			Near   MYCSEG:01A7		   #218	 253
+@3			Near   MYCSEG:0126		   #110	 119
+@@1			Near   MYCSEG:0121		   104	#106
+@@1			Near   MYCSEG:018D		   196	#199
+@@1			Near   MYCSEG:01C5		   237	#241
+@@1			Near   MYCSEG:01FE		   #275	 284  301
+@@1			Near   MYCSEG:0255		   #349	 354
+@@1			Near   MYCSEG:028D		   387	#390
+@@1			Near   MYCSEG:02EE		   447	#450
+@@1			Near   MYCSEG:0375		   529	#531
+@@1			Near   MYCSEG:0381		   537	#539
+@@1			Near   MYCSEG:03C0		   560	564  #572
+@@1			Near   MYCSEG:0449		   647	650  #661
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 62
+Symbol Table
+
+
+
+@@1			Near   MYCSEG:06D2		   #1337  1337
+@@1			Near   MYCSEG:06F1		   #1351  1364	1370
+@@1			Near   MYCSEG:0879		   1562	 1565  #1567
+@@1			Near   MYCSEG:099E		   1738	 #1740
+@@1			Word   MYCSEG:0A12		   1800	 #1800
+@@1			Near   MYCSEG:0AC8		   1877	 #1878
+@@1			Near   MYCSEG:0B8C		   2000	 #2002
+@@1			Near   MYCSEG:0C1D		   2083	 #2087
+@@15			Near   MYCSEG:0711		   1354	 #1359
+@@16			Near   MYCSEG:0723		   1359	 #1363
+@@2			Near   MYCSEG:0206		   278	#282
+@@2			Near   MYCSEG:0260		   #356	 365
+@@2			Near   MYCSEG:0291		   #393	 408
+@@2			Near   MYCSEG:03C1		   557	562  #573
+@@2			Near   MYCSEG:044C		   652	#662
+@@2			Near   MYCSEG:06DC		   1335	 #1339
+@@2			Word   MYCSEG:09F4		   1780	 #1782
+@@2			Word   MYCSEG:0A1E		   1800	 #1802
+@@2			Near   MYCSEG:107F		   3026	 #3029
+@@20			Near   MYCSEG:0743		   1363	 #1369
+@@21			Near   MYCSEG:0747		   1358	 1368  #1370
+@@22			Near   MYCSEG:074B		   1349	 #1371
+@@3			Near   MYCSEG:0209		   #285	 288
+@@3			Near   MYCSEG:0271		   352	#368
+@@3			Near   MYCSEG:02A0		   396	#401
+@@3			Near   MYCSEG:03BE		   566	#571
+@@3			Near   MYCSEG:0447		   655	#660
+@@3			Near   MYCSEG:0B6F		   1974	 #1980
+@@3			Near   MYCSEG:10C8		   3061	 3063  #3065
+@@4			Near   MYCSEG:020F		   #290	 300
+@@4			Near   MYCSEG:0273		   361	367  #369
+@@4			Near   MYCSEG:0391		   #551	 568
+@@5			Near   MYCSEG:021D		   294	#297
+@@7			Near   MYCSEG:0225		   296	#302  305
+@@8			Near   MYCSEG:0232		   281	#313
+@CPU			Text   0101H
+@CURSEG			Text   MYCSEG			   #72
+@FILENAME		Text   VMF
+@MYARY			Near   MYCSEG:10D0		   2874	 #3194
+@WORDSIZE		Text   2			   #72
+ABORT			Near   MYCSEG:0A28		   #1812  1979
+ACREATE			Near   MYCSEG:0C94		   1946	 2012  #2152
+ACTOI			Near   MYCSEG:0AAA		   1782	 #1872
+ADRAT			Near   MYCSEG:10D0		   3065	 #3201
+ADRP1			Near   MYCSEG:0452		   212	#668  674  1241
+ADRP2			Near   MYCSEG:01A0		   #211	 1250
+ADRTO			Near   MYCSEG:10D0		   3065	 #3198
+AFORTH			Near   MYCSEG:0968		   1276	 1701  1701  #1712  2213  2308	2319
+AHEAD4			Near   MYCSEG:0CC0		   2026	 #2185
+AHEADER			Near   MYCSEG:10D0		   2152	 2163  #3152  #3153
+AINT			Near   MYCSEG:09E6		   1546	 1612  1624  #1779  1780  1789
+APOS			Word   MYCSEG:0976		   #1723  1924	2966
+APOS0			Word   MYCSEG:0921		   #1667  1723
+AQEXEC			Word   MYCSEG:091F		   #1666
+ASMUDGE			Near   MYCSEG:10D0		   2163	 2174  #3154
+ATHERE			Word   MYCSEG:0ADE		   #1902  2060
+ATTR			Byte   MYCSEG:0F8F		   #2895
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 63
+Symbol Table
+
+
+
+BASE@			Word   MYCSEG:0E06		   1874	 #2456
+BCOMMA			Near   MYCSEG:10D0		   2000	 #3144
+BLC			Word   MYCSEG:0E23		   1353	 1763  #2493
+BLK@			Word   MYCSEG:0D8B		   1485	 1498  1580  1775  1976	 #2340
+BS			Word   MYCSEG:0E1A		   1363	 1366  1841  #2483
+BYE			Word   MYCSEG:0487		   #727
+CALL_D2			Near   MYCSEG:10D0		   1323	 #3071
+CFA			Near   MYCSEG:0AD6		   #1892  2097
+CFCH_P1			Near   MYCSEG:0456		   #671	 897
+CFNAME			Word   MYCSEG:07A4		   #1465  3059
+CNT_GT0			Near   MYCSEG:0344		   #503	 511  519
+CODE?			Word   MYCSEG:0C51		   #2116  2128
+COLON			Word   MYCSEG:0CA2		   #2163
+CONT@			Word   MYCSEG:0D73		   1740	 #2318
+CONVN			Near   MYCSEG:02CE		   392	403  #431  438	440
+CR			Word   MYCSEG:0E35		   1359	 1518  #2513
+CSP@			Word   MYCSEG:0DD7		   #2407
+CURR@			Word   MYCSEG:0D63		   2186	 #2307
+DBL@			Word   MYCSEG:0DBE		   2083	 #2385
+DEBUGERR		Near   MYCSEG:101F		   #2997
+DECIM			Near   MYCSEG:10D0		   1701	 #3072
+DERR			Near   MYCSEG:10D0		   661	#3073
+DIGIT?			Near   MYCSEG:02B8		   #418	 432
+DOCOLON			Near   MYCSEG:10D0		   2163	 #3199
+DOCON			Near   MYCSEG:02F9		   #460	 2483  2493  2503  2513	 2543  2553  3033  3036
+DOCON0			Near   MYCSEG:02FA		   #461	 466  469
+DOCON1			Near   MYCSEG:02F8		   #459	 1264  1381  2213  2223	 2233  2243  2253  2307	 2318  2329  2340 +
+							   2351	 2362  2374  2385  2396	 2407  2418
+DOCON2			Near   MYCSEG:02F7		   #458	 1557  2263  2274  2285	 2296
+DODEF			Near   MYCSEG:07B0		   #1473  1712
+DOIMMD			Near   MYCSEG:0BA1		   #2014
+DOLIT			Near   MYCSEG:10D0		   2071	 #3148
+DOSEMI			Near   MYCSEG:10D0		   2174	 #3200
+DOUVAR			Near   MYCSEG:031B		   464	471  473  #479
+DOUVAR0			Near   MYCSEG:031E		   #480
+DOUVAR1			Near   MYCSEG:031A		   468	#478
+DOUVAR2			Near   MYCSEG:0319		   #477
+DOVAR			Near   MYCSEG:10D0		   583	1712  1892  1902  2152	2263  2274  2285  2296	2894  #3074
+DOVAR2			Near   MYCSEG:10D0		   1275	 #3075
+DOVOC			Near   MYCSEG:07A6		   #1467  1712
+DTOP			Number MYCSEG:10D0		   1902	 #3205
+EOF?			Word   MYCSEG:0758		   #1381  1829
+ERINI			Word   MYCSEG:094A		   #1691  1974
+EXECAT			Near   MYCSEG:01B5		   #230	 242
+EXECAT0			Near   MYCSEG:01B6		   #231
+EXECAT1			Near   MYCSEG:01B4		   #229	 240  1691
+EXECAT2			Near   MYCSEG:01B3		   #228
+EXIT0			Word   MYCSEG:046D		   #697	 2071  2085  3059
+FCH_P2			Near   MYCSEG:10D0		   907	#3076
+FILEIO			Near   MYCSEG:03ED		   #609	 1488
+FNPAGE			Number 0100			   #70	111
+FRST			Near   MYCSEG:10D0		   2243	 #3158
+FSYS2			Near   MYCSEG:0A35		   #1816  1816
+HANDLES			Word   MYCSEG:084A		   502	#1558
+HDOT			Word   MYCSEG:0FE7		   #2952  3003	3003  3003  3003  3006	3008  3008  3011  3012	3013  3013
+HERE			Near   MYCSEG:10D0		   261	1775  1935  1960  1976	2101  2116  2186  3013	#3077
+HND			Near   MYCSEG:0844		   #1557  1562	1562  1564  1800  1841	1850
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 64
+Symbol Table
+
+
+
+IMM			Near   MYCSEG:10D0		   1946	 2012  #3141  #3145
+IO?			Word   MYCSEG:07BE		   #1485  1826	1850  1861
+IO?2			Word   MYCSEG:07CC		   1485	 #1488
+IOV			Word   MYCSEG:03CA		   #583	 588
+J4TH			Near   MYCSEG:10D0		   3002	 #3197
+JEMIT			Word   MYCSEG:03CE		   #585	 611
+JKEY			Word   MYCSEG:03CC		   #584	 622
+JSR			Near   MYCSEG:10D0		   1038	 1291  1485  1498  1518	 1546  1579  1597  1612	 1624  1667  1680 +
+							   1723	 1735  1799  1826  1841	 1913  1924  1935  1946	 1960  2000  2012 +
+							   2026	 2049  2060  2071  2083	 2097  2116  2128  2140	 2152  2163  2174 +
+							   2185	 2942  2966  3047  3059	 #3078
+JSR1			Near   MYCSEG:10D0		   1763	 #3079
+JSR_TR			Near   MYCSEG:0FD3		   769	1303  1335  1349  1530	1701  1752  1775  1861	1872  1973  #2937
+LASTCH			Word   MYCSEG:075C		   552	553  558  #1383
+LASTW			Number MYCSEG:10A7		   1712	 #3206
+LF			Word   MYCSEG:0E2C		   1518	 #2503
+LINE1			Word   MYCSEG:0830		   #1546  1829
+LITERAL			Word   MYCSEG:0BF4		   1913	 #2071	2085  2087
+LOADF			Near   MYCSEG:0A6B		   #1841
+LOADKBD			Word   MYCSEG:0A9A		   1816	 #1861
+MO			Word   MYCSEG:0E3E		   1325	 1368  1736  1850  1874	 #2523
+NEW_CR			Near   MYCSEG:0FBE		   #2927  3022
+NEXT@@2			Near   MYCSEG:01F9		   268	#270
+NOTDIG			Near   MYCSEG:02CD		   423	426  #429  433
+N_ID			Word   MYCSEG:1097		   1976	 #3047	3063  3065
+OKDIG			Near   MYCSEG:02C6		   420	#425
+ONE			Word   MYCSEG:0E52		   1356	 #2553
+OPENED			Word   MYCSEG:067D		   #1291  1826	1829
+OPENF			Near   MYCSEG:068D		   #1303  1850
+OUTBYTE			Near   MYCSEG:0F9A		   2903	 #2905
+OUTC			Near   MYCSEG:0FAB		   #2915  2926	2928  2930
+OUTC@			Word   MYCSEG:0DCB		   #2396
+OUTC_1P			Near   MYCSEG:0FB2		   612	#2918
+OUTDIG			Near   MYCSEG:0FA3		   2908	 #2910
+OUTITOC			Near   MYCSEG:02AE		   398	400  #409
+OUTWORD			Near   MYCSEG:0F93		   #2901  2924
+PB			Text   byte  ptr		   #4  2934  2937
+PD			Text   dword ptr		   #2
+POPR			Near   MYCSEG:10D0		   2932	 #3195
+PPPPP			Number MYCSEG:10A7		   #42	#576  582  #592	 598  #602  608	 #685  687  #690  696  #700  706  +
+							   #710	 716  #720  726	 #730  736  #740  746  #750  756  #760	766  #772 +
+							   778	#782  788  #792	 798  #802  808	 #813  819  #823  829  #833  839  +
+							   #843	 849  #857  863	 #865  871  #873  879  #881  887  #890	896  #900 +
+							   906	#910  916  #920	 926  #930  936	 #939  945  #951  957  #961  967  +
+							   #971	 977  #981  987	 #991  997  #1001  1007	 #1011	1017  #1021  1027 +
+							   #1031  1037	#1042  1048  #1052  1058  #1062	 1068  #1072  1078  #1082 +
+							   1088	 #1092	1098  #1102  1108  #1112  1118	#1122  1128  #1132  1138  +
+							   #1142  1148	#1152  1158  #1162  1168  #1171	 1177  #1180  1186  #1189 +
+							   1195	 #1198	1204  #1207  1213  #1216  1222	#1225  1231  #1234  1240  +
+							   #1243  1249	#1257  1263  #1268  1274  #1283	 1289  #1296  1302  #1315 +
+							   1321	 #1328	1334  #1342  1348  #1374  1380	#1386  1392  #1395  1401  +
+							   #1405  1411	#1415  1421  #1425  1431  #1435	 1441  #1445  1451  #1458 +
+							   1464	 #1478	1484  #1491  1497  #1511  1517	#1523  1529  #1539  1545  +
+							   #1550  1556	#1572
+PW			Text   word  ptr		   #3  122  257	 404  407  486	513  518  611  622  2922  2998	2999
+QQQQQ			Number MYCSEG:10A7		   #41	42  581	 #582  597  #598  607  #608  686  #687	695  #696  705	  +
+							   #706	 715  #716  725	 #726  735  #736  745  #746  755  #756	765  #766 +
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 65
+Symbol Table
+
+
+
+							   777	#778  787  #788	 797  #798  807	 #808  818  #819  828  #829  838  +
+							   #839	 848  #849  862	 #863  870  #871  878  #879  886  #887	895  #896 +
+							   905	#906  915  #916	 925  #926  935	 #936  944  #945  956  #957  966  +
+							   #967	 976  #977  986	 #987  996  #997  1006	#1007  1016  #1017  1026  +
+							   #1027  1036	#1037  1047  #1048  1057  #1058	 1067  #1068  1077  #1078 +
+							   1087	 #1088	1097  #1098  1107  #1108  1117	#1118  1127  #1128  1137  +
+							   #1138  1147	#1148  1157  #1158  1167  #1168	 1176  #1177  1185  #1186 +
+							   1194	 #1195	1203  #1204  1212  #1213  1221	#1222  1230  #1231  1239  +
+							   #1240  1248	#1249  1262  #1263  1273  #1274	 1288  #1289  1301  #1302 +
+							   1320	 #1321	1333  #1334  1347  #1348  1379	#1380  1391  #1392  1400  +
+							   #1401  1410	#1411  1420  #1421  1430  #1431	 1440  #1441  1450  #1451 +
+							   1463	 #1464	1483  #1484  1496  #1497  1516	#1517  1528  #1529  1544  +
+							   #1545  1555	#1556
+R0@			Word   MYCSEG:0DF9		   #2444
+RCOMMA			Near   MYCSEG:0C35		   #2100  2105
+REFILL			Word   MYCSEG:0810		   #1530  1546
+REGOUT			Near   MYCSEG:0FB7		   #2924  2954
+S0@			Word   MYCSEG:0DEE		   #2432
+SAVEAX			Word   MYCSEG:108B		   2999	 3030  #3034
+SAVESI			Word   MYCSEG:108F		   2998	 3029  #3037
+SAV_AX			Word   MYCSEG:1089		   3015	 #3033
+SAV_SI			Word   MYCSEG:108D		   3010	 #3036
+SCOMMA			Near   MYCSEG:0B26		   #1948  1972
+SCR@			Word   MYCSEG:0DE3		   #2418
+SCRH			Word   MYCSEG:0641		   641	#1265
+SEMI			Word   MYCSEG:0CB0		   #2174
+SETVAR			Near   MYCSEG:02F1		   #454	 1264  1382  1691  2213	 2223  2233  2243  2253	 2308  2319  2330 +
+							   2341	 2352  2363  2375  2386	 2397  2408  2419
+SETVAR0			Near   MYCSEG:02F2		   #455	 472
+SETVAR1			Near   MYCSEG:02F0		   #453	 2263  2274  2285  2296
+SETVAR2			Near   MYCSEG:02EF		   #452
+SEVAL			Word   MYCSEG:0A43		   #1826  1850	1861
+SEVAL2			Word   MYCSEG:0A55		   1829	 #1829
+SKOBAL			Near   MYCSEG:10D0		   1814	 #3080
+SKOBAR			Near   MYCSEG:10D0		   2116	 #3151
+SPACE1			Near   MYCSEG:0FBA		   #2925
+SPAN@			Word   MYCSEG:0DB2		   1532	 #2374
+START			Byte   MYCSEG:0100		   #77	3210
+STAT@			Word   MYCSEG:0DA5		   2071	 2085  #2362
+STDIO			Near   MYCSEG:03E1		   #599	 1485  1566
+STRCOMP			Word   MYCSEG:0B38		   1949	 #1960
+SUB4TH			Near   MYCSEG:0100		   #79	260  1324  1561
+T2STAR			Word   MYCSEG:05B4		   #1089
+T?DO			Word   MYCSEG:04C7		   #799	 1335  1349
+T?EMIT			Word   MYCSEG:0793		   1337	 #1442
+T@SWP2			Near   MYCSEG:10D0		   1935	 2186  #3140  #3155
+TADRP1			Word   MYCSEG:050F		   #897
+TADRP2			Word   MYCSEG:0516		   #907
+TADRSP1			Word   MYCSEG:051E		   #917
+TADRSP2			Word   MYCSEG:0525		   261	#927
+TALLOT			Near   MYCSEG:0BE2		   #2060
+TAND			Word   MYCSEG:05CF		   #1119  3047
+TBIND			Near   MYCSEG:0BB4		   #2026
+TBLFIND			Word   MYCSEG:09B4		   1667	 #1752	1780
+TBLWORD			Word   MYCSEG:09C5		   1303	 1752  #1763  1765  1913  2186
+TBRAN			Word   MYCSEG:048F		   #737	 1358  1368  1800  1816
+TC2I			Near   MYCSEG:10D0		   1874	 #3082
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 66
+Symbol Table
+
+
+
+TCALL			Word   MYCSEG:0C46		   #2105  2116	2140
+TCAT			Near   MYCSEG:10D0		   1337	 1356  1359  1913  2101	 #3083
+TCLOSE			Near   MYCSEG:06B2		   #1322  1564	1567
+TCLOSEF			Near   MYCSEG:06B6		   #1323  1800
+TCNTDO			Word   MYCSEG:04D1		   #810	 1335  1349
+TCODESEMI		Word   MYCSEG:0C2B		   1946	 2012  #2097  2140
+TCOMMA			Near   MYCSEG:0BC4		   1924	 1935  1946  1949  2012	 2012  2015  2026  #2037  2049	2101  2188
+TCOMMAB			Near   MYCSEG:10D0		   2101	 #3150
+TCOMP			Word   MYCSEG:0BD2		   1924	 2026  #2049  2140  2152
+TCOUNT			Near   MYCSEG:10D0		   1872	 3047  #3084
+TCR			Near   MYCSEG:07F7		   1498	 1507  #1518  1976  1979
+TCSTORE			Near   MYCSEG:10D0		   1353	 #3085
+TDNEGAT			Word   MYCSEG:0550		   #968	 1877
+TDO			Word   MYCSEG:04CF		   #809
+TDROP			Word   MYCSEG:0E96		   1038	 1369  1371  1564  1723	 1740  1949  1980  2002	 2087  #2636
+TDROP2			Word   MYCSEG:0EA0		   #2645
+TDUP			Word   MYCSEG:0EB2		   1303	 1351  1366  1872  1874	 2085  #2663  3010  3011
+TDUP2			Word   MYCSEG:0EBB		   1349	 #2672	3003  3003
+TEMIT			Word   MYCSEG:079C		   1356	 1366  1366  #1452  1518  1518
+TEQUAL			Word   MYCSEG:0EDB		   #2715
+TEVAL			Near   MYCSEG:08D3		   #1612
+TEXEC			Word   MYCSEG:0915		   #1656  2966
+TEXIT			Word   MYCSEG:0476		   261	588  686  #707	1038  1291  1325  1470	1475  1485  1488  1498	  +
+							   1507	 1518  1583  1600  1667	 1680  1723  1740  1763	 1802  1829  1850 +
+							   1913	 1924  1935  1949  1960	 2002  2015  2026  2049	 2060  2071  2087 +
+							   2097	 2101  2116  2128  2140	 2152  2163  2174  2188	 2966  3049  3065
+TEXPECT			Near   MYCSEG:06E7		   #1349  1530
+TEX_TR			Word   MYCSEG:04A9		   #768	 1312  1339  1371  1532	 1701  1752  1775  1861	 1878  1980
+TF83			Word   MYCSEG:0956		   #1701  1814
+TFETCH			Near   MYCSEG:10D0		   1738	 1740  1949  3012  3013	 3063  #3086
+TFIND			Near   MYCSEG:0988		   #1735  1752
+TFOR			Word   MYCSEG:04B4		   #779	 1738  2000
+TFROMF			Word   MYCSEG:04F5		   #850	 3016
+TI			Word   MYCSEG:0F15		   1337	 1351  1356  1359  1361	 1364  #2774
+TIB@			Word   MYCSEG:0D7F		   1530	 1532  1580  1635  1635	 #2329
+TKEY			Word   MYCSEG:0789		   1351	 #1432
+TLEAVE			Word   MYCSEG:04EC		   #840	 1361
+TLESS			Word   MYCSEG:0ED2		   #2705
+TLIT			Near   MYCSEG:0BC6		   1530	 1826  1924  1960  #2039  2116	2128  2140  3047  3063
+TLOAD			Near   MYCSEG:08E8		   #1624
+TLOOP			Word   MYCSEG:04D9		   #820	 1337
+TLOW			Word   MYCSEG:05F7		   #1169  1351
+TMAX			Word   MYCSEG:05E7		   #1149
+TMIN			Word   MYCSEG:05EF		   #1159
+TMROT			Word   MYCSEG:0F42		   #2819
+TMUL			Word   MYCSEG:057F		   #1028  1038
+TNAMCF			Word   MYCSEG:0CD6		   #2198
+TNEGATE			Word   MYCSEG:0544		   #958	 2128
+TNEXT			Word   MYCSEG:04BE		   #789	 1738  2000
+TNOP			Word   MYCSEG:0F84		   1635	 #2884
+TNOT			Word   MYCSEG:05DF		   #1139  1485
+TOBASE			Word   MYCSEG:0E08		   #2457
+TOBLK			Word   MYCSEG:0D8D		   1566	 1680  1826  #2341
+TOCONT			Word   MYCSEG:0D75		   1470	 #2319
+TOCSP			Word   MYCSEG:0DD9		   1976	 #2408
+TOCURR			Word   MYCSEG:0D65		   1475	 #2308
+TODBL			Word   MYCSEG:0DC0		   1878	 #2386
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 67
+Symbol Table
+
+
+
+TOEOF			Word   MYCSEG:075A		   1291	 1325  #1382
+TOF			Word   MYCSEG:04A0		   #757	 1359  1363
+TOHERE			Near   MYCSEG:10D0		   261	#3138
+TOIN@			Word   MYCSEG:0D97		   1580	 1775  1976  #2351
+TOK			Word   MYCSEG:07D6		   #1498  1546
+TOK2			Word   MYCSEG:07E4		   1498	 #1501
+TONEMI			Word   MYCSEG:061F		   #1223  3061
+TONEPL			Word   MYCSEG:062D		   #1241  1303	1874  1913  2083
+TOOUTC			Word   MYCSEG:0DCD		   1518	 #2397	2922
+TOPEN			Word   MYCSEG:067B		   #1290  1303
+TOR0			Word   MYCSEG:0DFB		   #2445
+TORDER			Near   MYCSEG:064C		   #1275  1736
+TOS0			Word   MYCSEG:0DF0		   #2433
+TOSCR			Word   MYCSEG:0DE5		   1976	 #2419
+TOSPAN			Word   MYCSEG:0DB4		   1371	 #2375
+TOSTAT			Word   MYCSEG:0DA7		   #2363
+TOSTREEM		Word   MYCSEG:093B		   1583	 1612  1624  #1680
+TOTIB			Word   MYCSEG:0D81		   1583	 1612  1826  #2330
+TOTOIN			Word   MYCSEG:0D99		   1532	 1680  1775  #2352
+TOVER			Word   MYCSEG:0F1E		   1364	 1597  #2783
+TOVER2			Word   MYCSEG:0F28		   #2792
+TPACK			Word   MYCSEG:0539		   #946
+TPERF			Word   MYCSEG:0939		   #1679  2015
+TPLOOP			Word   MYCSEG:04E2		   #830	 1370
+TPLUS			Word   MYCSEG:0604		   #1187  1532	1872  2116  2128  3063
+TPOP			Near   MYCSEG:0E5C		   1597	 1600  #2566  3006  3006
+TPSTORE			Near   MYCSEG:10D0		   2060	 #3147
+TPUSH			Near   MYCSEG:0E65		   1600	 1600  #2577  3003  3003
+TQCOMM			Near   MYCSEG:0908		   #1646  1740	1780
+TQDUP			Word   MYCSEG:0F31		   1667	 1780  #2801  3059  3061
+TQKEY			Word   MYCSEG:0781		   #1422
+TRAT			Word   MYCSEG:0E7D		   #2606  3008
+TRATPW			Word   MYCSEG:0E6D		   2049	 #2588
+TRDROP			Word   MYCSEG:0EAA		   #2654
+TRETF			Word   MYCSEG:047F		   #717	 1567
+TRFR			Word   MYCSEG:0E5C		   1580	 1583  1583  1583  1740	 1878  1878  2097  #2567
+TROT			Word   MYCSEG:0F39		   1361	 1597  #2810
+TRPAT			Word   MYCSEG:04A7		   #767	 1498  1507  1546  1580	 1600
+TRPGT			Word   MYCSEG:0E85		   1597	 1597  #2616  3008
+TRPST			Word   MYCSEG:0E8D		   1600	 1600  #2626
+TSABRT			Near   MYCSEG:0B4F		   1303	 1667  1782  1841  1972	 #1973
+TSDOT			Near   MYCSEG:10D0		   1979	 #3143
+TSKPS			Word   MYCSEG:0F6E		   1974	 1990  #2864
+TSKPSW			Word   MYCSEG:0F70		   #2865
+TSPACE			Word   MYCSEG:0778		   1366	 #1412	1507  3049
+TSPGT			Word   MYCSEG:0F4A		   #2828  3006
+TSPST			Word   MYCSEG:0F52		   #2837
+TSTORE1			Near   MYCSEG:10D0		   2097	 #3149
+TSTORE2			Near   MYCSEG:10D0		   588	#3139
+TSTR			Near   MYCSEG:10D0		   2015	 #3146
+TSTRCOM			Near   MYCSEG:10D0		   1960	 2188  #3142  #3156
+TSTRCOMMA		Near   MYCSEG:0B82		   #2000
+TSUBT			Word   MYCSEG:0611		   #1205  1361	1364  1597  1841  2101
+TSWAP			Word   MYCSEG:0F5B		   1600	 1624  1738  1974  2085	 #2846	3012
+TSWAP2			Word   MYCSEG:0F65		   #2855
+TTOR			Word   MYCSEG:0E65		   1580	 1580  1580  1580  1736	 1872  1874  #2578
+TTWOAT			Near   MYCSEG:10D0		   588	#3087
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 68
+Symbol Table
+
+
+
+TTWOMI			Word   MYCSEG:0626		   #1232  3011
+TTWOPL			Word   MYCSEG:0634		   #1250  2101
+TTYPE			Near   MYCSEG:06CA		   #1335  3049
+TULESS			Word   MYCSEG:0EE5		   1354	 #2725
+TUNPACK			Word   MYCSEG:0530		   #937
+TVBLK			Word   MYCSEG:08FB		   #1635  1775
+TWCOUNT			Near   MYCSEG:10D0		   1736	 1738  #3088
+TWO			Word   MYCSEG:0E4A		   #2543
+TWORD			Near   MYCSEG:09D6		   1763	 #1775	1960
+TXOR			Word   MYCSEG:05D7		   #1129
+TZBRAN			Word   MYCSEG:0498		   #747	 1354  1364  1485  1498	 1562  1565  1780  1800	 1829  1877  1974 +
+							   2083	 3061
+TZEQ			Word   MYCSEG:0EF6		   1354	 1565  1667  1841  #2744
+TZGREQ			Word   MYCSEG:0F01		   #2754
+TZLESS			Word   MYCSEG:0EEF		   1303	 1829  #2735
+TZLIT			Near   MYCSEG:0C09		   1789	 #2083
+TZNE			Word   MYCSEG:0F0C		   #2764
+TZSTOR			Near   MYCSEG:10D0		   1532	 #3089
+T_FIND			Word   MYCSEG:0986		   #1734  1740
+T_SDOT			Near   MYCSEG:10D0		   1501	 #3081
+T_W			Number MYCSEG:09C7		   #1765  1775
+USERV			Number MYCSEG:0320		   257	#481  486
+UV0			Near   MYCSEG:10D0		   480	487  488  2434	2446  2458  #3090
+UVBASE			Near   MYCSEG:10D0		   2458	 #3159
+UVR0			Near   MYCSEG:10D0		   487	2446  #3091
+UVS0			Near   MYCSEG:10D0		   488	2434  #3092
+UVSTAT			Word   MYCSEG:0DA9		   258	#2364
+VPAG			Byte   MYCSEG:0F90		   #2896
+V_ID			Near   MYCSEG:10AE		   3015	 #3059
+WRESET			Near   MYCSEG:0323		   #483	 1813
+X0EXIT			Near   MYCSEG:10D0		   697	#3094
+X0LESS			Near   MYCSEG:10D0		   2735	 #3178
+X2MUL			Near   MYCSEG:0150		   #144
+X2PWR			Near   MYCSEG:10D0		   988	#3095
+X2SLS			Near   MYCSEG:10D0		   1079	 #3096
+X2STAR			Near   MYCSEG:10D0		   1089	 #3097
+X5ARY			Near   MYCSEG:0198		   #207
+X?EMIT			Near   MYCSEG:10D0		   1442	 #3093
+X@UVAR			Near   MYCSEG:0312		   #473	 2468
+XABS			Near   MYCSEG:10D0		   1049	 #3098
+XADRSP1			Near   MYCSEG:044F		   #666	 917
+XADRSP2			Near   MYCSEG:10D0		   927	#3099
+XALPHA			Near   MYCSEG:10D0		   1069	 #3100
+XAND			Near   MYCSEG:10D0		   1119	 #3101
+XBARY			Near   MYCSEG:019E		   #210
+XBLANK			Near   MYCSEG:10D0		   1412	 #3102
+XBRAN			Near   MYCSEG:10D0		   737	#3103
+XBUF			Word   MYCSEG:08AE		   #1597  1826
+XBYE			Near   MYCSEG:045D		   #676	 727
+XC2I			Near   MYCSEG:027E		   #378
+XCHK			Near   MYCSEG:10D0		   2705	 2715  #3175  #3176
+XCLOSE			Near   MYCSEG:036D		   #527	 1322
+XCLOSED			Near   MYCSEG:06BA		   1322	 #1324
+XCNTDO			Near   MYCSEG:10D0		   810	#3104
+XCOMMA			Near   MYCSEG:01E3		   #260	 2037
+XDABS			Near   MYCSEG:10D0		   1059	 #3105
+XDIV			Near   MYCSEG:10D0		   1018	 #3106
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 69
+Symbol Table
+
+
+
+XDIVMOD			Near   MYCSEG:10D0		   998	#3107
+XDMINUS			Near   MYCSEG:10D0		   1214	 #3108
+XDNEGAT			Near   MYCSEG:10D0		   968	#3109
+XDO			Near   MYCSEG:10D0		   809	#3110
+XDOP			Near   MYCSEG:10D0		   799	#3111
+XDOS1			Near   MYCSEG:036F		   #528
+XDPLUS			Near   MYCSEG:0175		   #179	 1196
+XDROP			Near   MYCSEG:10D0		   2636	 #3168
+XDROP2			Near   MYCSEG:10D0		   2645	 #3169
+XDROPH1			Near   MYCSEG:085C		   573	1323  #1561
+XDUP			Near   MYCSEG:10D0		   2663	 #3171
+XDUP2			Near   MYCSEG:10D0		   2672	 #3172
+XEMIT			Near   MYCSEG:03F3		   #611	 1452
+XEXEC			Near   MYCSEG:01C8		   #244	 249  259  1656
+XEXIT			Near   MYCSEG:010E		   #93	707
+XEXQCOM			Near   MYCSEG:01D9		   250	#257
+XEX_TR			Near   MYCSEG:0FC7		   768	#2932
+XFNAME			Near   MYCSEG:10D0		   1465	 #3113
+XFOR			Near   MYCSEG:10D0		   779	#3114
+XFROMF			Near   MYCSEG:010C		   #89	850
+XI			Near   MYCSEG:10D0		   2774	 #3182
+XINTER			Near   MYCSEG:0886		   #1579  1612	1624  1826
+XJMP			Near   MYCSEG:10D0		   1779	 #3115
+XKEY			Near   MYCSEG:0404		   #621	 1432
+XLEAVE			Near   MYCSEG:10D0		   840	#3116
+XLIT			Near   MYCSEG:01A4		   #214	 2039
+XLO			Near   MYCSEG:10D0		   1169	 #3117
+XLOOP			Near   MYCSEG:10D0		   820	#3118
+XMAX			Near   MYCSEG:01EE		   #263	 1149
+XMIN			Near   MYCSEG:01F3		   #266	 1159
+XMOD			Near   MYCSEG:10D0		   1008	 #3119
+XMROT			Near   MYCSEG:10D0		   2819	 #3187
+XMULT2			Near   MYCSEG:0338		   #494	 1028
+XNAMCF			Near   MYCSEG:10D0		   2198	 #3157
+XNEGATE			Near   MYCSEG:10D0		   958	#3120
+XNEXT			Near   MYCSEG:10D0		   789	#3121
+XNIP			Near   MYCSEG:10D0		   2690	 #3174
+XNONA2			Near   MYCSEG:01CE		   #251	 1646
+XNONAME			Near   MYCSEG:01D5		   #254	 1646  2026
+XNOT			Near   MYCSEG:10D0		   1139	 #3122
+XOF			Near   MYCSEG:10D0		   757	#3123
+XONEMI			Near   MYCSEG:10D0		   1223	 #3124
+XOPEN			Near   MYCSEG:0367		   #524	 1290
+XORE			Near   MYCSEG:10D0		   1178	 #3125
+XOVER			Near   MYCSEG:10D0		   2783	 #3183
+XOVER2			Near   MYCSEG:10D0		   2792	 #3184
+XPACK			Near   MYCSEG:10D0		   946	#3126
+XPERF			Near   MYCSEG:10D0		   1679	 #3127
+XPLOOP			Near   MYCSEG:10D0		   830	#3128
+XPLUS			Near   MYCSEG:10D0		   1187	 #3129
+XPOP			Near   MYCSEG:0169		   #166
+XPUSH			Near   MYCSEG:0171		   #173
+XQARY			Near   MYCSEG:019A		   #208	 2897
+XQCOMM			Near   MYCSEG:01C8		   #247	 1646
+XQDUP			Near   MYCSEG:10D0		   2801	 #3185
+XQEXEC			Near   MYCSEG:10D0		   1666	 #3130
+XQKEY			Near   MYCSEG:0378		   #534	 1422
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 70
+Symbol Table
+
+
+
+XQKEY2			Near   MYCSEG:0385		   #543
+XRAT			Near   MYCSEG:015A		   #153	 2606
+XRATPB			Near   MYCSEG:10D0		   2597	 #3165
+XRATPW			Near   MYCSEG:10D0		   2588	 #3164
+XRBLK			Near   MYCSEG:0416		   #634	 1393
+XRDROP			Near   MYCSEG:10D0		   2654	 2935  #3170  #3196
+XRET4TH			Near   MYCSEG:0107		   #85	717
+XRFR			Near   MYCSEG:10D0		   2567	 #3162
+XROT			Near   MYCSEG:10D0		   2810	 #3186
+XRPGT			Near   MYCSEG:10D0		   2616	 #3166
+XRPST			Near   MYCSEG:10D0		   2626	 #3167
+XSHIFT			Near   MYCSEG:10D0		   978	#3131
+XSKPS			Near   MYCSEG:10D0		   2864	 #3192
+XSKPSW			Near   MYCSEG:10D0		   2865	 #3193
+XSLS			Near   MYCSEG:014C		   #141
+XSPGT			Near   MYCSEG:10D0		   2828	 #3188
+XSPST			Near   MYCSEG:10D0		   2837	 #3189
+XSUBT			Near   MYCSEG:10D0		   1205	 #3132
+XSWAP			Near   MYCSEG:10D0		   2846	 #3190
+XSWAP2			Near   MYCSEG:10D0		   2855	 #3191
+XTARY			Near   MYCSEG:0196		   #206
+XTOR			Near   MYCSEG:10D0		   2578	 #3163
+XTOUVAR			Near   MYCSEG:030C		   #470
+XTOUVR			Near   MYCSEG:030D		   #471	 2433  2445  2457
+XTUCK			Near   MYCSEG:10D0		   2681	 #3173
+XTWOMI			Near   MYCSEG:10D0		   1232	 #3133
+XUCHK			Near   MYCSEG:10D0		   2725	 #3177
+XUMSLSM			Near   MYCSEG:0181		   #189	 1099
+XUMSTAR			Near   MYCSEG:10D0		   1109	 #3134
+XUMUL			Near   MYCSEG:0154		   #147
+XUNPACK			Near   MYCSEG:10D0		   937	#3135
+XUVAR@			Near   MYCSEG:0306		   #467
+XUVAR@0			Near   MYCSEG:0307		   #468	 2432  2444  2456
+XUVAR@@			Near   MYCSEG:02FF		   #464
+XVBLK			Near   MYCSEG:01BE		   #236	 1635
+XWARY			Near   MYCSEG:019C		   #209
+XWBLK			Near   MYCSEG:0413		   #632	 1402
+XXORX			Near   MYCSEG:10D0		   1129	 #3136
+XZBRAN			Near   MYCSEG:10D0		   747	#3137
+XZCHK			Near   MYCSEG:10D0		   2744	 2754  2764  #3179  #3180  #3181
+X_CO			Near   MYCSEG:0163		   #160	 767
+X_FIND			Near   MYCSEG:01FC		   #273	 1734
+X_W			Near   MYCSEG:0249		   #334	 1763
+ZCLOSE			Near   MYCSEG:0A10		   #1799  1814
+ZR			Word   MYCSEG:0E44		   1291	 1369  1518  1532  1566	 1612  1612  1624  1861	 1874  #2533
+_BKEY			Near   MYCSEG:040C		   #626
+_CALL			Near   MYCSEG:10D0		   626	#3069
+_DOES			Near   MYCSEG:10D0		   587	1469  1474  1948  2014	2100  2128  2140  #3070
+_DO_NEXT		Near   MYCSEG:0112		   #96
+_EMIT1			Near   MYCSEG:03FD		   585	599  609  #616
+_EMIT2			Near   MYCSEG:0403		   #619
+_EX			Near   MYCSEG:0135		   113	#121  2934  2937
+_EX2			Near   MYCSEG:012E		   #117	 234
+_FOR?			Near   MYCSEG:0145		   #134
+_GS_KE			Near   MYCSEG:03D0		   #587	 599  609
+_HND_AT			Near   MYCSEG:034F		   #510	 1275  1557
+_HND_GT			Near   MYCSEG:0341		   #502	 549
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 71
+Symbol Table
+
+
+
+_HND_TO			Near   MYCSEG:035A		   #517	 1275  1557
+_IF			Near   MYCSEG:0139		   #124
+_IFM			Near   MYCSEG:013F		   #129
+_KEY1			Near   MYCSEG:040E		   584	599  #627
+_KEY2			Near   MYCSEG:038D		   #549	 609
+_L5			Near   MYCSEG:0246		   324	#329
+_L6			Near   MYCSEG:0248		   328	#331
+_M1			Near   MYCSEG:10D0		   2523	 #3160
+_MM			Near   MYCSEG:01F6		   265	#268
+_MUL			Near   MYCSEG:02E0		   435	#441
+_NEXT			Near   MYCSEG:012C		   83  95  108	#116  143  146	151  159  164  171  177	 187  204  216	  +
+							   226	271  316  376  416  457	 463  476  492	499  515  522  532  541	  +
+							   547	614  624  663  670  2884  2939	2956  2979  2981  2993	2995  3001+
+							   3024	 3028
+_NTR			Near   MYCSEG:100A		   1814	 2966  #2977
+_PSH2			Near   MYCSEG:01B0		   222	#225  232  252
+_SJUMP			Near   MYCSEG:0117		   #101	 125  132  136
+_SKIP			Near   MYCSEG:012B		   98  #115  127  130  139
+_STRCMP			Near   MYCSEG:0242		   #326
+_STREQU			Near   MYCSEG:0237		   #318
+_STREQU1		Near   MYCSEG:023A		   293	#320
+_TR			Near   MYCSEG:1017		   2966	 #2991
+_ZERO			Near   MYCSEG:10D0		   2533	 #3161
+
+Macro Name						   Cref	(defined at #)
+
+DROPREG							   #22	456  521  613  662  2955
+DSTR							   #51	1306  1502  1783  1843
+DSTR2							   #44	577  593  603  691  701	 711  721  731	741  751  761  773  783	  +
+							   793	803  814  824  834  844	 858  866  874	882  891  901  911  921	  +
+							   931	940  952  962  972  982	 992  1002  1012  1022	1032  1043  1053  +
+							   1063	 1073  1083  1093  1103	 1113  1123  1133  1143	 1153  1163  1172 +
+							   1181	 1190  1199  1208  1217	 1226  1235  1244  1258	 1269  1284  1297 +
+							   1307	 1316  1329  1343  1375	 1387  1396  1406  1416	 1426  1436  1446 +
+							   1459	 1479  1492  1503  1512	 1524  1540  1551  1573	 1591  1606  1618 +
+							   1629	 1640  1650  1660  1673	 1685  1695  1706  1717	 1728  1746  1757 +
+							   1769	 1784  1793  1806  1820	 1835  1844  1855  1866	 1886  1896  1907 +
+							   1918	 1929  1940  1954  1966	 1984  1994  2006  2020	 2031  2043  2054 +
+							   2065	 2076  2091  2110  2122	 2134  2146  2157  2168	 2179  2192  2207 +
+							   2217	 2227  2237  2247  2257	 2268  2279  2290  2301	 2312  2323  2334 +
+							   2345	 2356  2368  2379  2390	 2401  2412  2426  2438	 2450  2462  2477 +
+							   2487	 2497  2507  2517  2527	 2537  2547  2560  2571	 2582  2591  2600 +
+							   2610	 2620  2630
+NEXT							   #16	82  94	107  142  145  150  158	 163  170  176	186  203  225  270+
+							   375	491  498  669  2980  2994
+NF							   #55	575  591  601  689  699	 709  719  729	739  749  759  771  781	  +
+							   791	801  812  822  832  842	 856  864  872	880  889  899  909  919	  +
+							   929	938  950  960  970  980	 990  1000  1010  1020	1030  1041  1051  +
+							   1061	 1071  1081  1091  1101	 1111  1121  1131  1141	 1151  1161  1170 +
+							   1179	 1188  1197  1206  1215	 1224  1233  1242  1256	 1267  1282  1295 +
+							   1314	 1327  1341  1373  1385	 1394  1404  1414  1424	 1434  1444  1457 +
+							   1477	 1490  1510  1522  1538	 1549  1571  1589  1604	 1616  1627  1638 +
+							   1648	 1658  1671  1683  1693	 1704  1715  1726  1744	 1755  1767  1791 +
+							   1804	 1818  1833  1853  1864	 1884  1894  1927  1952	 1982  1992  2004 +
+							   2018	 2029  2041  2052  2074	 2089  2108  2120  2144	 2155  2177  2190 +
+							   2205	 2215  2225  2235  2245	 2255  2266  2277  2288	 2299  2310  2321 +
+							   2332	 2343  2354  2366  2377	 2388  2399  2410  2424	 2436  2448  2460 +
+Turbo Assembler	 Version 3.2	    12/14/19 15:47:17	    Page 72
+Symbol Table
+
+
+
+							   2475	 2485  2495  2505  2515	 2525  2535  2545  2558	 2569  2580  2589 +
+							   2598	 2608  2618  2628  2637	 2646  2655  2664  2673	 2682  2697  2707 +
+							   2717	 2727  2736
+NFI							   #62	1905  1916  1938  1964	2063  2132  2166  2958
+NUM							   #36
+PUSHREG							   #19	215  415  462  475  514	 540  546
+SJMP							   #13	112  126  131  138
+SWAPREG							   #26	315  531  623
+TRACE_OFF						   #32	2938  2978  3000  3027
+TRACE_ON						   #29	2992  3023
+_DROP							   #10	174  180  184  190  193
+_DUP							   #6  153  166	 199
+
+Groups & Segments	Bit Size Align	Combine	Class	   Cref	(defined at #)
+
+MYCSEG			16  10D0 Para	none		   #72	73  73	73
+

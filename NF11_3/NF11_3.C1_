@@ -1,0 +1,61 @@
+$0100	 \=: 	@_START
+$0120	 \=: 	@_INIT
+
+$0138	 \=: 	@_?CRX
+$0158	 \=: 	@_CTX
+$016A	 \=: 	@_BKEY
+$0178	 \=: 	@_BEMIT
+
+$0135	 \=: 	@_RET
+$0197	 \=: 	@_IF
+$0185	 \=: 	@_JMP
+$018F	 \=: 	@_IFM
+
+$0115	 \=: 	@_ABORT
+$0127	 \=: 	@_IOD2
+$012B	 \=: 	@_IOD
+$012F	 \=: 	@_IO
+$0183	 \=: 	@_FOR
+$0189	 \=: 	@_MIF
+$0191	 \=: 	@_NEXT
+$019B	 \=: 	@_DRJMP
+$019D	 \=: 	@_DRSKIP
+$019F	 \=: 	@_SKIP
+$0122	 \=: 	@_XDROP
+$01A7	 \=: 	@_DROPX
+$0215	 \=: 	@_RDROPX
+$0213	 \=: 	@_RDROP
+$01F9	 \=: 	@_EX
+$01FB	 \=: 	@_EXECUTE
+
+$01A3	 \=: 	@_PUSH
+$01ED	 \=: 	@_POP
+$01C9	 \=: 	@_XA
+$01E5	 \=: 	@_J
+$01BF	 \=: 	@_XCHG
+$01EF	 \=: 	@_DUP
+
+$01A9	 \=: 	@_NIP
+$01AB	 \=: 	@_DROP
+$020D	 \=: 	@_PICK
+$0219	 \=: 	@_SWAP
+
+$01B3	 \=: 	@_NAND
+$021D	 \=: 	@_SDIV
+$022B	 \=: 	@_PMUL
+$0239	 \=: 	@_PLAVG
+
+$01AD	 \=: 	@_XOR
+$01B9	 \=: 	@_NEG
+$01BD	 \=: 	@_NOT
+$0244	 \=: 	@_LOW
+
+$01C3	 \=: 	@_RSTP
+$01DF	 \=: 	@_RLDP
+
+$01CF	 \=: 	@_RSKIP
+$01D3	 \=: 	@_CRSTP
+$01D7	 \=: 	@_CRLDP
+$0248	 \=: 	@_MEMCMP
+
+$0260	 \=: 	@_END

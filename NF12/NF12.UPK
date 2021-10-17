@@ -1,0 +1,127 @@
+=H _START
+,"4~J;~^@^PM~!h~G^@^\^A^\^A^\^A"
+=H _QUIT
+,"^\^Ag^A^L^A^@^@"
+=H _HIATOI
+,"^@^@"
+=H _1P
+,"?^A"
+=H _BYE
+,"^A^@"
+=H _TRON
+,"%~^A9~k~C~^G~^N^X~^AC~"
+=P _TROFF
+,"h~^B~^@9~^K~^Ok~s~"
+=P _2PUSHX
+,"P-~"
+=P _PUSHX
+,"P^P~"
+=P _DROPX
+,"-~="
+=P _AND@X
+,"#^Gk~]"
+=P _2RDRPX
+,"Y^P~"
+=P _RDRPX
+,"Y="
+=P _PLUS@X
+,"^C^Gk~U"
+=P _IF
+,"^K@~t^_"
+=P _SKIPDR
+,"-~^P~"
+=P _SKIP
+,"CCk~L"
+=P _NEXT
+,"YIQk~^P["
+=P _COLD
+,"<~>~~>~>}~h~P~~k~;i~"_^A"
+=P _IFM
+,"Hxe~="
+=P _FOR
+,"P-~"
+=P _JUMP
+,"^K~^_k~."
+=P _QARY
+,"Q~`~"
+=P _LARY
+,"Q~`~"
+=P _WARY
+,"Q~`~"
+=P _BARY
+,"^CC~"
+=P _RET
+,"k~#"
+=P _POPX
+,"Y[k~^K"
+=P _RSTP
+,""_+~W-~k~^Z"
+=P _RLDP
+,""_^K~^M/~WNN^I~^D^Q~k~^N"
+=P _XR
+,"YPk~y~"
+=P _XA
+,""_R^K~W~k~^D"
+=H _@JSR4TH
+=P _EX
+,"YS"
+=P _@4TH
+,"Q["
+=P _NOP
+,"^K~^OCCv~A~^Att~I~a~"
+=P _IO
+,"S^K~T^D^K~L^B^K~^\"_~W~k~e~"
+=P _BEMIT
+,"4~^NM~^P"
+=P _DROP
+,"k~^A"
+=P _PUSH
+,"P-~k~\~"
+=P _J
+,""_YQWk~A~"
+=P _ARP
+,"R<"
+=P _RSTKP
+,"T<"
+=P _STKP
+,"V<"
+=P _DUP
+,"PYk~7~"
+=P _OVER
+,"~4"
+=P _POP
+,"k~y~"
+=P _ULESS
+,")^D-~9~"
+=P _0LESS
+,"Q~`~^[@~k~>~"
+=P _MDIV
+,"Q~$Q~P~;B~r^D+B~"
+=P _U1P
+,"~^Dk~0~"
+=P _P2DIV
+,"^A^D^K~^D"
+=P _2DIV
+,"Q~X~k~(~"
+=P _PMUL
+,"w~^D^A^@t^B^CB~"
+=P _D2DIV
+,"Q~X~Q~^\k~^Z~"
+=P _NAND
+,"!^D-~@"
+=P _NEG
+,"w~X~k~^R~"
+=P _ZEQ
+,"w~X~^[@~"
+=P _NOT
+,"k~u~^S~^B^N~^B8^B>^BA^BD^B%&$#'"^"
+,"Ft^T^@~8-u^NFt^LZ~R~w~W~w~U~Gu"
+,"^AEC~NZC~^W~3~3m~=0~^P=0~^H=0~^B"
+,"HH2d~^K~H~AAh~e~~W?~^X^BQ9~^F^@r~"
+,".~^K~y~Yu^MQ~g~^K~^U~^L^B"_FtK~N~b~"_"
+,"<:r^F<Ar?~,^G,0r9~;A~s5~^U~w~"
+,"a~^U~^W~w~a~^W~^Cx~^Sj~k~@~h~%~~k~m~h~_~~"
+,"$^_k~f~0~^Jh~~h~^W~~^J~^@~R~Fuy~C~"
+=H _ATOI
+,"%~^AUV^V~^M~^Xw~V~h~d~~^I~.^X^A^V~"^]^I~"
+,"<C~"

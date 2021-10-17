@@ -1,0 +1,321 @@
+>, (EX 
+: `EL? BLK 0<>; 
+: \`
+: \ |LTIB (DUP 0; 1- 
+: L/ (@&; ,< -64 ,
+\ : REMARK? (VAR ,< 1 ,
+\ : \?`
+\ : \? REMARK? @ 0; (JUMP \` ,<
+MCLR ' EVAL  AT' QUIT !  \ FIX
+AT' AT' =: VAL'  
+AT' VAL' =: TO' 
+TO' `EL? TO' TOKEN? ! \ FIX
+TO' C! =: SWAPC! 
+TO' C@ =: ?C@
+TO' ?C@ =: CSTR-
+TO' C, =: C@,
+TO' SWAPC! =: C_OFF  
+AT' C_OFF  =: C_ON
+TO' :` =: :,  
+TO' :, =: ?:,
+TO' '  =: ,'
+TO' I+ =: A+L
+TO' TIMES =: .TIMES 
+TO' XEP|  =: DXEP|
+TO' DXEP| =: DXEP-|
+TO' -ROT  =: TUCK
+TO' @     =: @2
+TO' @2    =: (2CON
+TO' TYPE  =: ".
+' (BARY 2- =: (WARY
+' (WARY 2- =: (LARY
+' (LARY 2- =: (QARY
+' _DX2 6 - =: _DX
+' _DX  6 - =: _CX
+' _CX  6 - =: _BX
+' _BX  6 - =: _AX
+' _AX  6 - =: _FL
+' _FL  6 - =: 1
+' SCAN   6 - =: (WSCN
+' PRNTBL 6 - =: BREL?
+TO' CSTR   =: C@+
+AT' (VID   =: Fseek
+AT' Fseek  =: Fwrite
+AT' Fwrite =: Fread
+TO' 2* =: 4*
+TO' 4* =: H*
+TO' H* =: B*
+TO' B* =: K*
+TO' NAME> =: >DEA 
+TO' (!" =: (0"   \ ONZERO ERROR
+TO' (0" =: (?"   \ ALWAYS ERROR - NOT RETURN
+TO' STR| =: (RNG|
+TO' ID.  =: WID.
+AT' [TYPE] =: [S]
+TO' [S] =: [ID]
+VAL' [TYPE] 4+ =: [EMIT]
+VAL' !         =: POP!
+AT' ODD =: UM+
+' >, @  =: >LOCATE
+' EVAL @ =: MEMTI|
+' (|  =: (|JUMP
+HIDE (|
+
+: |THEN (EX 
+: THEN` BEGIN` 
+: SWAP! SWAP ! ;
+: <BUILD MARK>` =: ; 
+
+<M> Z,
+: 0#> D# (, (D#0 ; 
+: ."` (, (." "STR, ; 
+: A"` (, (!" "STR, ; 
+: "` (, (" "STR, ;  <M> 
+: ?` ADR' SWAP! ;
+: @' ADR' @ ;
+ 
+0#> ,<` @ADR+ >, , ; 
+?:, TO` -2 , 
+?:, AT` -4 , 
+?:, C:`  0 , 
+:, VAL` 2 ,
+: `@INT+ TO |+ TOKEN? T FND N?? TO UNDEF? VAL ADR' ; 
+: T>R HOFS - (; (@R+ 
+: EMIT| TO EMIT (XR (PUSH AT EMIT (EX (POP AT EMIT ; 
+
+0#> @ADR+ 
+: T! T>R ! ; 
+: T@ T>R @ ; 
+: TC! T>R  C! ;
+: TC@ T>R  C@ ;
+?:, TO! -2 , 
+?:, AT! -4 , 
+?:, BE! Z,
+ :, VAL! 2 , 
+ 
+0#> `@INT+ (PUSH ;  
+?:, TO -2 , 
+?:, AT -4 , 
+?:, X:` Z,
+ :, VAL 2 , 
+
+: NUP XEP| 
+: DUP (DUP ; 
+: |A (XA (A@ EXECUTE (XA (RDRP; 
+: ALLOT |H + ;  
+
+: A@ (A@ ; 
+\ : (@|; @R+ (RDROP
+: OR (NOT SWAP (NOT 
+: NAND (NAND ; 
+>, (EX 
+: UNW |DROP
+: @H- |H 
+: @- 2- 
+: @. @+ 2- ; 
+\ HERE 1+ =: BRK $CC C, $E9 C, ' (NOP 1- HERE 2+ - ,
+\ : PREFETCH TOKEN? >LT< TO LTIB ; 
+
+M: :JUMP` (JUMP; 
+'" ?M: ;;` (;" 
+M: RDROP` (RDROP;
+'" ?M: :IO;` (IO;"   
+M: IF-` (IF- MARK>;  
+M: IF` (IF MARK>;
+M: |JUMP` (|JUMP MARK>;
+M: -IF` 1+ IF-; 
+M: UNTIL` (IF <RELS; 
+M: TWICE|` CALL THEN;
+: -SP (SP@ CSP SWAP - ; 
+<M> 
+M: :#` (#;
+: ?CSP -SP A" SP?" ;
+: `PR -SP (0< A" PAIR?" ; 
+: QUAN (, (VAR3 
+: VALUE (, (SET2
+: CONST :` (, (CON , ; 
+: CREATE :` Z, ;
+: DOES>` (, (code (, (D#0 ;
+\ : ZVALUE 0 VALUE ;
+\ : #C, ">NUM C, ;
+: ]` 
+: ;THEN` |THEN 
+: ;` -SP TO ,<` (|JUMP ;;` `PR LASTH H - 2+ 0<>; 
+    LASTH @ ODD 0<>; RDROP @H- 
+: AGAIN` |, :JUMP :JUMP` 
+: AHEAD` :JUMP` MARK>` ;  <M> 
+
+: |@! @. (XR EXECUTE POP! ;
+: PAD H 324 + ; 
+: W>" PAD !- 2 
+: C!- DXEP-| C! ; \ : BB>W SWAP 1B C!- C!- @ ;
+: C>" PAD C!- 1 C!- ;
+: INC |@! 1+ ;
+: DEC |@! 1- ;
+: +!  |@! + ;
+: D,  ,  , ;
+: 2@ @2 SWAP ;
+: < - 
+: 0< (0< ; 
+: I (J ; 
+: NEG (NEG ; 
+: |NIP (EX NIP ; 
+: SP@ (SP@ ; 
+: = - (0= ;
+: AND (NAND 
+: NOT (NOT ; 
+: A-L XEP| 
+: I- (J - ; 
+: `(2?+ XEP|
+: 2DUP+ (|JUMP + 
+: 2DUP (OVER 
+: OVER (OVER ; 
+: |2DROP (EX 
+: 2DROP (DROP (DROP; 
+: ?|OVER+ (DUP (EX 
+: OVER+ (OVER + ;
+: .STR| (XR (POP
+: ..TIMES |DROP .TIMES 
+; 
+: XDROT XEP| 
+: DROT (|JUMP ROT  
+: D0 0 0 
+;
+: >RW 1- 
+: >RB HERE 1+ - ;
+: BB>W W>B B* SWAP W>B + ;
+: B/ TWICE| TWICE| 2/ 2/ ;
+: W>BB DUP W>B SWAP B/ W>B ;
+: (IXEC (J (PUSH; 
+: UNTIL| BEGIN (IXEC 
+: WHILEZ| UNTIL (RDRP;
+: WHILE| (IF EXIT 
+: UNTILZ| (IXEC  WHILE| 
+;
+: INBUF (2CON ,<  -$600 , $40 , 
+>, EOS! 
+: `CR (2RDRP; 
+; UNW
+: `bs  (DUP 0; 1- TO bs SPC TO bs ; 
+: `CH (A@ PRNTBL 0; (A@ (SKIP 
+: `tab BL (DUP EMIT `(2?+ SWAPC! 1+ 
+: `ZERO ;; 
+: `CHTAB  ("SW ,< 
+5 C, ^H C, ^I C, ^M C, ^Z C, 127 C, 
+>, `CH `bs `tab `CR TO `CR `ZERO 
+: `RDL  INBUF AHEAD 
+: READLN INBUF A+L
+ TO EMIT| C: DROP THEN
+: ACCEPT
+ |SPC (PUSH 0 BEGIN (DUP I-
+ (IF  EXIT  KEY `CHTAB AGAIN 
+; UNW 
+' `RDL ' QUIT !  \ FIX
+' `ZERO VAL! vINI \ NOW SYSTEM IS SELF CONTAINED
+' :#` TO' , ! \ FIX LIT,
+
+: BLKTI| 1K OVER TI| ;
+: RB? DUP BREL? 0= A" BREL" ;
+
+\ MEMORY
+: `? DXEP| 5+ C@ '` - 0; (J @ 1B CSP WITHIN 0;
+ (J DUP >DEA OVER- |HLD 
+: CMOVTO SWAP 
+: `CMOV |NIP TIMES| (PUSH CSTR (POP C!+ ;
+: PRUNEM MOBJ (SKIP  
+: PRUNE  HERE TO CSP  H TO HLD
+ [ |T (DROP (PUSH H HLD OVER- (POP MPUSH ]
+  T CALL WHILE| `? >DEA THEN (DUP 
+: DEA? 4+ C@ ; 
+: ONPLACE |JUMP DXEP| TWICE| NUP THEN   \ MEMORY 
+: REVERT |2DROP CALL WHILE|
+    (PUSH @I (PUSH (XR @I (J C! (POP C!+ (POP 
+	THEN 1- 2DUP (U< ; 
+0#> @ 
+: FILL -ROT .STR| NUP C!+ ; 
+?:, ERASE 0 , 
+:, BLANK  BL ,
+: >ZSTR CSTR H DXEP| CMOVTO C_OFF ; 
+: CMOVE |DROP `CMOV ;
+
+: EOS| EOS (XR (PUSH 0 TO EOS (EX (POP TO EOS ; 
+0 QUAN Fbuf 
+8 CONST NFILES  
+: `|AFILE CALL (EX (SET2 THEN ,< 
+NFILES CONST AFILE 
+: >FTOP `|AFILE 1-
+: `VALID DUP NFILES U< 0= A" HANDLE?" ; 
+: `@HANDLE AFILE ,<
+: HANDLES (WARY ,< ' Z, AFILE TIMES  
+: >FTOP| >FTOP (EX 
+: FTOP!  `@HANDLE ! 
+;
+: FTOP> [ `|AFILE `VALID 1+ ] 
+: FTOP@ `@HANDLE @ 
+;
+: IO? _FL ODD A" IO?" ; 
+: `File| >ZSTR : |IO? (EX IO? _AX _DX TO _DX2 ;
+: >POS: <BUILD SWAP C, C,  >, DOES> C@+ C@+ (PUSH 
+: GOTOXY BB>W  D0 $200 (VID ; 
+: `CRS TIMES| CR ; 
+0 24 >POS: PAGE 26  `CRS  
+: HOME D0 GOTOXY ;
+0#> @ DROT (DOS ;
+>, >FTOP| 
+: FOPEN `File| ,< 
+?:, `Fopen $3D02 ,
+>, >FTOP| 
+: FCREATE `File| ,< 
+?:, `Fcreate $3C00 ,
+ :, StdPut $200 , 
+0#> @ XDROT (DOS ; 
+: CLSD NFILES AFILE - TIMES|
+ FTOP> ,<
+:, Fclose $3E00 , 
+: ;S` : ;S EOS! EXIT ;
+: `0>gpt| 0 SWAP
+: `>gpt| XEP| TO Fbuf AT Fbuf 1 ; 
+: ERRput 2 
+: FEMIT `>gpt| Fwrite ; 
+: FGet FTOP@ (SKIP
+: StdGet 0 
+: FKEY `0>gpt| Fread [ ^Z ] _AX 0; Fbuf EXIT ;
+: @OPENI| TO FOPEN (@R+ TO KEY (XR (PUSH AT KEY
+   (EX (POP AT KEY  TO Fclose ; 
+: INCLUDE TO TOKEN? EOS| @OPENI| FGet
+ UNTIL| INBUF AT ACCEPT 
+\   CR 2DUP TYPE  \ DUMP OF INCLUDED LINES OF TEXT
+ EVAL EOS ; 
+: FTYPE TO TOKEN? TO EMIT| (BE  EOS| @OPENI| FGet
+ UNTIL| CR READLN TYPE EOS ;
+ 
+INCLUDE PIFLS.CF
+
+PRUNEM
+: TT ;  \ SAME AS MARKER IS
+\ PAGE 
+
+INCLUDE TESTER.CF
+
+_HELLO_FRIENDS_
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

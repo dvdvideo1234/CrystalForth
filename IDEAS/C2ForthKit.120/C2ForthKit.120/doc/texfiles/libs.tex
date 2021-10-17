@@ -1,0 +1,89 @@
+
+@chapter Libraries and Calling Forth
+
+@*
+Since there is no librarian tool or intermediate binary in the
+C2Forth system it is necessary for some other mechanism for
+declaring C library functions such as @strong{printf()} etc.
+@vskip 0pt
+@*
+The C2F system allows code output from the C compiler to
+reference symbols in the Forth dictionary. This means that the
+standard C libraries and user functions can be coded in Forth
+and built into the system before the C build.
+@vskip 0pt
+@*
+Supplied with the kit is a minimal implementation of some of the
+more useful standard C libs.
+@vskip 0pt
+
+@section Coding Library Functions in Forth
+
+
+@vskip -6pt
+@*
+As an example, here is the library implementation of the standard
+C library function @strong{malloc()}.
+@vskip 0pt
+@*
+First the function prototype for the C compiler is placed in the
+header file @emph{stdlib.h}. It has the form:-
+@vskip 0pt
+
+@cartouche
+@example
+   extern void *malloc( size_t s ); @end example
+@end cartouche
+@*
+In a Forth world this can be seen as:-
+@vskip 0pt
+
+@cartouche
+@example
+   : malloc        \ size_t -- void* @end example
+@end cartouche
+@*
+Therefore a suitable definition for @strong{@code{malloc}} in Forth
+would be:-
+@vskip 0pt
+
+@cartouche
+@example
+   : _malloc       \ size_t -- void*
+     allocate
+     if drop 0 then
+   ; @end example
+@end cartouche
+@*
+There are three key things to remember about Forth definitions for
+C library calls.
+@vskip 0pt
+
+@enumerate 1 
+@item Each function must have a prototype in a C header file.
+
+@item Names in Forth must have a preceeding underscore character.
+
+@item Input parameters are in reverse order to the C prototype.
+@end enumerate
+
+@section Variadic Functions
+
+
+@vskip -6pt
+@*
+Implementing a variadic function in Forth is slightly more
+complex. With a variadic function you have a fixed formal parameter
+list, followed by N other items.
+@vskip 0pt
+@*
+In Forth you know the fixed parameter list, the variadic members
+should be pulled off the data stack using PICK as required. Note
+that the Forth definition is responsible for keeping the overall
+stack effect of the C prototype for FORMAL PARAMETERS ONLY. The
+Forth definition should not @strong{@code{DROP}} the variadic members.
+@vskip 0pt
+@*
+Please examine the Forth definition for @strong{_SPRINTF()} in
+the @emph{STDIO.FTH} library file.
+@vskip 0pt

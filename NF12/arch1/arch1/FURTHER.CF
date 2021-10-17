@@ -1,0 +1,44 @@
+CR 0 H. -1 H.
+CR $1100 H. $22 H. 123 H. $1234 H. 12345 H.
+
+CR 'Z EMIT
+BYE
+BREAK : ;` BRK NOP BRK ,<` BRK : ,; BRK (@, ;; BRK ,<
+'2 EMIT
+'3 EMIT
+T 5 + C@ EMIT
+T 6 + C@ EMIT
+T 7 + C@ EMIT
+T 8 + C@ EMIT
+
+'2 2 + EMIT   32 EMIT
+'Z 2 - EMIT  
+'1 EMIT  ' H 2 - =: OBJ!
+
+'2 EMIT   32 EMIT
+'Z EMIT  
+=H GAGA ' (LIT @ , 'G , ' ;;` @ ,
+GAGA EMIT
+BREAK
+: GG1 NOP 5 NOP ;
+
+'3 EMIT
+BYE
+
+: |2- EX : 2- ,< H 2+ ,
+'3 EMIT
+: 1- (IF- ,< H 2+ , 
+'4 EMIT 
+'5 2- EMIT
+BYE
+ 
+: ,ER (D#0 STR , @ PUSH ;   
+: AT' |2- : TO' |2- ' ; 
+: (R#, @R+ , ; 
+: (GO; @R+ XR PUSH ; 
+: |DROP EX DROPX ; -2 ALLOT
+: UNW |DROP 
+: @H- |H 
+: @- PUSH @R- POP; ; UNW
+
+64 BEMIT  NOP BYE BYE

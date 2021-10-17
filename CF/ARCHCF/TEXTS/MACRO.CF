@@ -1,0 +1,125 @@
+ \ PRIMITIV'S MACROSES 
+MCLR 
+PRUNE 
+<M> Z, <M>
+M: COUNT` CSTR;
+M: MOD` UMOD;
+M: >R` PUSH;
+M: R>` POP;
+M: R@` I;
+M: :0>` (D#0;        
+M: :1>` (D#1;        
+M: :2>` (D#2; 
+M: :VAR3` (VAR3;     
+M: :SET2` (SET2;     
+M: :CON` (CON;
+M: :0"` (0";         
+M: :!"` (!";         
+M: :"` (";
+M: :code` (code;     
+M: :BARY` (BARY;     
+M: :."` (.";
+M: :QARY` (QARY;     
+M: :LARY` (LARY;     
+M: :WARY` (WARY;
+M: POP` (POP;        
+M: SP@` (SP@;        
+M: !R+` (!R+;
+M: @R+` (@R+;        
+M: XR`  (XR;         
+M: XA` (XA;
+M: SKIP` (SKIP;      
+M: +2/` (+2/;        
+M: OVER` (OVER;
+M: DUP` (DUP;        
+M: J` (J;            
+M: D2/` (D2/;   
+M: NOT` (NOT;        
+M: PUSH` (PUSH;      
+M: 0=` (0=;     
+M: +*`  (+*;         
+M: U<` (U<;          
+M: NAND` (NAND; 
+M: U1+`  (U1+;       
+M: NEG` (NEG;        
+M: 0<` (0<;      
+M: -/` (-/;          
+M: A@` (A@;          
+M: RP@` (RP@;  
+M: EX` (EX;          
+M: 2/` (2/;          
+M: DROP` (DROP;
+M: :XARY` (XARY;
+M: :VAR` (VAR; 
+'" ?M: RDROP;` (RDRP;" 
+'" ?M: 2RDROP;` (2RDRP;"
+'" ?M: DROP;` (DROP;" 
+'" ?M: TROFF;` (TROFF;" 
+M: TRICE|` CALL TWICE| THEN; 
+M: TWICE|` CALL THEN; 
+M: |` (| MARK>; 
+M: ITER|` RNG| DXEP+|;  \ ZSTR
+M: <ITER|` <RNG| TO DXEP|; 
+
+<M>  : PRBA :0> :1> :2> :IO; :0" :!" :" :." \ "PRIMITIV'S
+:VAR :VAR3 :SET2 :CON :code :BARY :QARY :LARY :WARY POP SP@ !R+
+@R+ XR XA SKIP +2/ DUP J D2/ NOT PUSH 0= +* U< NAND U1+ NEG 0< 
+-/ A@ RP@ EX 2/ DROP RDROP; DROP; TROFF; 2RDROP; RDROP TRICE| 
+TWICE| ITER| <ITER| OVER BEGIN UNTIL :JUMP ;; | THEN IF- THEN 
+-IF THEN IF THEN :XARY ,<  \ TEST PRIMITIV'S MACROSES
+FORGET PRBA    
+: :|, :` |, ;
+: QUAN :VAR3` 
+: VALUE :SET2` 
+: CONST :|, :CON` 
+; 
+: VQUAN :VAR3`
+: VECTOR :SET2` 
+: DEFER :|, :JUMP` 
+; 
+: C; ?CSP ; 
+: FIX| 1- ?C@ [ HLD C@ OR HLD C! ] |HLD 1- ;
+: POST, CSTR C, ; : <FIX H TO HLD ; : RB, HERE 1+ - : IB, C, ; 
+: CREATE-- <FIX [ T 5+ @ #'-'- = 0; EX HLD TO H |T >DEA ]
+: CREATE |UNW 
+: VARIABLE 0
+: VAR :|, :VAR` 
+; 
+: .( ') PARSE TYPE ;; 2* 2* 
+: `ARY| 2* TO 2/ :` EX |LASTH 
+: CLARYW TIMES| Z, 
+; 
+: DOES>` :code` (SKIP 
+: 0#> D# :0>` ; 
+: 1#> D# :1>` ; 
+: 2#> D# :2>` ; 
+: BARY VAL `ARY| :BARY` ; 
+: WARY `ARY| :WARY` ; 
+: LARY TO `ARY| :LARY` ; 
+: QARY AT `ARY| :QARY` ; 
+: XARY `ARY| :XARY` ; 
+: BCONST (, |C. CONST ; 
+: `DO POP ADR' ,< 
+0 VECTOR `vDO 
+: DO# `DO TOKEN? ">NUM `vDO ; 
+: ZDO `DO 0 `vDO ; 
+: DO `DO `vDO ; 
+: DO' `DO ' `vDO ; 
+: IO;` ,<` :IO;` ; 
+: 0"` :0"` "STR, ; 
+: "`  :"`  "STR, ; 
+: A"` :!"` "STR, ; 
+: ."` :."` "STR, ;  
+: WHILE` TO SWAP IF` ; 
+0#> C@, 
+: R, HERE 2+ - 
+: W, 
+: SEG, 
+: MEM, , ; 
+?:, CAL#, $E8 ,
+ :, JMP#, $E9 , 
+: CODE ALIGNED HERE 1+ =: CSP! ; 
+CODE BRK $E9CC , ' (NOP 1- R,
+: REPEAT` AGAIN` THEN` ;
+: ELSE` AHEAD` SWAP THEN` ; 
+: |VALUE :` CALL` EX` :SET2` THEN` CONST ;  <M>

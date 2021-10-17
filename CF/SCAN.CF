@@ -1,0 +1,26 @@
+CR .( SCAN )
+13 CONST EOL
+
+( ADR LEN WHAT |HOW / ADR' INDEX )
+: SCN|    A! DUP XR PUSH FOR J EXECUTE IF X: -ROT  NEXT
+: `NOSCN J SKIP  THEN : `SCN POP NOT XR DROP
+NIP POP POP + ;
+
+>, PUSH 
+: (BSC XR  CSTR  POP 
+: BSCAN  SCN|
+: C@+= CSTR A@ - ;
+: CSKIP SCN| C@+= 0= ;
+
+: ^#CHAR; DUP BL U<
+: ?DROP;  0<>;
+  DROP EXIT 
+;
+
+: MEM= SWAP 
+: TRG= SCN| CSTR A@ DUP 1+ A! C@ = ;
+: WSCAN SCN| STR A@ - ;
+: WCOMP SCN| STR A@ = ;
+: REN FND?? DUP 5+  '` SWAPC! @ =: ; 
+
+BYTE. EOL

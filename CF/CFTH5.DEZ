@@ -1,0 +1,28 @@
+0 0 PAD 1024 BLK>MEM  2DROP  \ $100  DEZOBJ   $100 DEZORG 
+PAD  DEZOBJ   $100 DEZORG  CR CR     ."\__START"  CR
+1B 12 D-S CR  VAL' @TRON DTA  CR  CR ."\__CORE_START__"
+DDF (DB,) (DB,) (DB,) 
+' @TROFF  DT  ( DDF ) (DB,)  DDD
+' (DROP;  DT ( DDF ) (DB,) 
+' (RDRP;  DT ( DDF ) (DB,) 
+' (IF-    DT DDD ( DDF ) (DB,) 
+' (A@     DT ( DDF ) (DB,) DDD ( DDF ) (DB,) DDD ( DDF ) (DB,)
+' (U< 1-  DT DDD DDD ( DDF ) (DB,) 
+' @OPTABLE  DT CR CR  ."\__NUMBER__" CR
+' @OPCHARS DTA  ' @GETSIGN?  (S,)
+' @NUMINI DT DDD DDD (DB,) DDD   (DB,) DDD  (DB,) 
+' @S>NUM  DT CR (DA,)
+' (C!R+   DT DDD DDD ( DDF ) (DB,) 
+' @CSTR)  DT DDD DDD DDD ( DDF ) (DB,)  
+' @WFIND  DT (DA,)
+\ ' @BK     DT (DA,)
+' @(LIT   DT  CR CR ."\___HI_LEVEL_ROUTINES" CR
+' @?? 2 + DTA  ' @?? 4 + (S,)
+VAL' @MPUSH DTA  ' @TOKEN? DT
+VAL' @S>"!  DTA   ' @PARSE DT  ' (DA,) 4 TIMES 
+' @:        DT  
+' @;`       DTA   CR ."\___INTERPRETTER" CR
+VAL' @FND   DTA   ' @>, DT
+' @>,       DT   CR  ."\___COMPILER" CR  ' (DA,) 4 TIMES
+\ ' @' DT  
+' @ENDMEM DT  ' (DA,) 7 TIMES \ HI FORTH

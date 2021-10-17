@@ -1,0 +1,593 @@
+
+@chapter C library
+
+@*
+C2Forth provides a minimal version of the C standard library.
+The minimal version is enough for most embedded applications.
+You can extend the the library yourself in Forth or C.
+@vskip 0pt
+
+@section ASSERT - Runtime Debugging Exception
+
+
+@vskip -6pt
+@*
+The @strong{ASSERT()} mechanism provides runtime error checking
+facilities. The parameter to @strong{ASSERT()} is a small piece
+of RT code which when evaluated to 0 at runtime causes the
+program to halt and display the original source file and
+line number.
+@vskip 0pt
+@example
+void assert( <expression> ) @end example
+@*
+If <expression> evaluates to 0 (ZERO)at runtime, cause a halt.
+@vskip 0pt
+@vskip 6pt
+@findex ___assert
+
+@example
+: ___assert     \ failedexpr line file -- @end example
+
+@vskip -2pt
+Runtime for a failed @strong{assert()}.
+
+@section CONIO - Extended Console IO functions
+
+
+@vskip -6pt
+@*
+The conio library holds functions relating to console input
+and output which, whilst useful, are not part of the ANSI/ISO
+library standards.
+@vskip 0pt
+@example
+int kbhit( void ) @end example
+@*
+Returns non-zero is a key has been pressed, otherwise
+returns 0. This is a non-blocking "peek" operation on
+stdin.
+@vskip 0pt
+@vskip 6pt
+@findex _kbhit
+
+@example
+: _kbhit        \ -- flag @end example
+
+@vskip -2pt
+Return true when a key has been pressed. Equivalent to the
+Forth word @strong{@code{KEY?}}.
+
+@section CTYPE - Character Type Query and conversion
+
+
+@vskip -6pt
+@*
+This is an implementation of the ANSI "C" library for testing
+and converting individual characters in the standard character
+form.
+@vskip 0pt
+
+@subsection C prototypes
+
+
+@vskip -4pt
+@example
+char isalpha( char t ); @end example
+@*
+Returns non-zero if the character t is either an uppercase or
+lowercase alphabetic character. ('A'..'Z' or 'a'..'z' ).
+@vskip 0pt
+@example
+char isascii( char t ); @end example
+@*
+Returns non-zero if the character t is within the 7 bit
+ASCII alphabet.
+@vskip 0pt
+@example
+char isblank( char t ); @end example
+@*
+Is the supplied character a blank?
+@vskip 0pt
+@example
+char iscntrl( char t ); @end example
+@*
+Is the supplied character a control character?
+@vskip 0pt
+@example
+char isdigit( char t ); @end example
+@*
+Is the supplied character a numeric digit?
+@vskip 0pt
+@example
+char isxdigit( char t ); @end example
+@*
+Is the supplied character a hexadecimal digit?
+@vskip 0pt
+@example
+char isgraph( char t ); @end example
+@*
+Is the supplied character a graphics character?
+@vskip 0pt
+@example
+char islower( char t ); @end example
+@*
+Is the supplied character a lower case alphabetic?
+@vskip 0pt
+@example
+char isupper( char t ); @end example
+@*
+Is the supplied character an uppercase alphabetic?
+@vskip 0pt
+@example
+char isspace( char t ); @end example
+@*
+Is the supplied character a space?
+@vskip 0pt
+@example
+char ispunct( char t ); @end example
+@*
+Is the supplied character a puncuation mark?
+@vskip 0pt
+@example
+char isprint( char t ); @end example
+@*
+Is the supplied character printable?
+@vskip 0pt
+@example
+char isalnum( char t ); @end example
+@*
+Is the supplied character an alphanumeric?
+@vskip 0pt
+@example
+char tolower( char t ); @end example
+@*
+Convert char to lower case where possible.
+@vskip 0pt
+@example
+char toupper( char t ); @end example
+@*
+Convert char to upper case where possible.
+@vskip 0pt
+
+@subsection Forth implementation
+
+
+@vskip -4pt
+@*
+Conversion and testing is controlled by a type table.
+@vskip 0pt
+
+@example
+: _U    $01 c, ; immediate          \  UpperCase
+: _L    $02 c, ; immediate          \  LowerCase
+: _N    $04 c, ; immediate          \  Numeric
+: _S    $08 c, ; immediate          \  WhiteSpace
+: _P    $10 c, ; immediate          \  Punctuation
+: _C    $20 c, ; immediate          \  Control
+: _X    $40 c, ; immediate          \  Xdigit
+: _B    $80 c, ; immediate          \  Space
+: _CS   $28 c, ; immediate          \  Control or WhiteSpace
+: _SB   $88 c, ; immediate          \  Space character
+: _UX   $41 c, ; immediate          \  Uppercase or XDigit
+: _LX   $42 c, ; immediate          \  Lowercase or XDigit
+ @end example
+
+@vskip 6pt
+@findex ctype-table
+
+@example
+create ctype-table      \ -- addr @end example
+
+@vskip -2pt
+Type table for ASCII characters.
+@vskip 6pt
+@findex [ctype]
+
+@example
+: [ctype]       \ char -- val @end example
+
+@vskip -2pt
+Return the type value of a character.
+@vskip 6pt
+@findex _isalpha
+
+@example
+: _isalpha      \ char -- flag @end example
+
+@vskip -2pt
+Returns non-zero if the character t is either an uppercase or
+lowercase alphabetic character. ('A'..'Z' or 'a'..'z' ).
+@vskip 6pt
+@findex _isascii
+
+@example
+: _isascii      \ char -- flag @end example
+
+@vskip -2pt
+Returns non-zero if the character is within the 7 bit
+ASCII alphabet.
+@vskip 6pt
+@findex _isblank
+
+@example
+: _isblank      \ char -- flag @end example
+
+@vskip -2pt
+Is the supplied character a blank?
+@vskip 6pt
+@findex _iscntrl
+
+@example
+: _iscntrl      \ char -- flag @end example
+
+@vskip -2pt
+Is the supplied character a control character?
+@vskip 6pt
+@findex _isdigit
+
+@example
+: _isdigit      \ char -- flag @end example
+
+@vskip -2pt
+Is the supplied character a numeric digit?
+@vskip 6pt
+@findex _isxdigit
+
+@example
+: _isxdigit     \ char -- flag @end example
+
+@vskip -2pt
+Is the supplied character a hexadecimal digit?
+@vskip 6pt
+@findex _isgraph
+
+@example
+: _isgraph      \ char -- flag @end example
+
+@vskip -2pt
+Is the supplied character a graphics character?
+@vskip 6pt
+@findex _islower
+
+@example
+: _islower      \ char -- flag @end example
+
+@vskip -2pt
+Is the supplied character a lower case alphabetic?
+@vskip 6pt
+@findex _isupper
+
+@example
+: _isupper      \ char -- flag @end example
+
+@vskip -2pt
+Is the supplied character an uppercase alphabetic?
+@vskip 6pt
+@findex _isspace
+
+@example
+: _isspace      \ char -- flag @end example
+
+@vskip -2pt
+Is the supplied character a space?
+@vskip 6pt
+@findex _ispunct
+
+@example
+: _ispunct      \ char -- flag @end example
+
+@vskip -2pt
+Is the supplied character a puncuation mark?
+@vskip 6pt
+@findex _isprint
+
+@example
+: _isprint      \ char -- flag @end example
+
+@vskip -2pt
+Is the supplied character printable?
+@vskip 6pt
+@findex _isalnum
+
+@example
+: _isalnum      \ char -- flag @end example
+
+@vskip -2pt
+Is the supplied character an alphanumeric?
+@vskip 6pt
+@findex _tolower
+
+@example
+: _tolower      \ char -- 'char @end example
+
+@vskip -2pt
+Convert char to lower case where possible.
+@vskip 6pt
+@findex _toupper
+
+@example
+: _toupper      \ char -- 'char @end example
+
+@vskip -2pt
+Convert char to upper case where possible.
+
+@section STDIO - Standard IO Model
+
+
+@vskip -6pt
+@*
+The standard IO model has been stripped for C2Forth. There is no
+file support, and the STDIO system relates to the debug serial
+port on the target. These functions are for DEBUG only and should
+not be used for runtime code since they affect performance. At
+runtime communication should be between the target and the host
+rather than the debug-console.
+@vskip 0pt
+@vskip 6pt
+@findex _stdout
+
+@example
+0 constant _stdout      \ -- x @end example
+
+@vskip -2pt
+The C @strong{stdout} value. Change as required by your host.
+@vskip 6pt
+@findex _stdin
+
+@example
+1 constant _stdin       \ -- x @end example
+
+@vskip -2pt
+The C @strong{stdin} value. Change as required by your host.
+@vskip 6pt
+@findex _stderr
+
+@example
+2 constant _stderr      \ -- x @end example
+
+@vskip -2pt
+The C @strong{stderr} value. Change as required by your host.
+@vskip 6pt
+@findex _puts
+
+@example
+: _puts         \ char* -- len @end example
+
+@vskip -2pt
+Write a string of text to the the debug output channel
+@example
+  int puts( const char *text ); @end example
+@vskip 6pt
+@findex _sprintf
+
+@example
+: _sprintf      \ .... fmt buff -- .... len @end example
+
+@vskip -2pt
+Write a string of text using the printf() syntax to a memory
+array.
+@example
+  int sprintf( char *b, const char *fmt, ... ); @end example
+@vskip 6pt
+@findex _printf
+
+@example
+: _printf      \ .... fmt -- .... len @end example
+
+@vskip -2pt
+Write a formated string to the debug console.
+@example
+  int printf( const char *fmt, ... ); @end example
+@vskip 6pt
+@findex _getchar
+
+@example
+: _getchar      \ -- char @end example
+
+@vskip -2pt
+Wait for and return the next key pressed.
+@example
+  int getchar( void ); @end example
+@vskip 6pt
+@findex _putchar
+
+@example
+: _putchar      \ char -- char @end example
+
+@vskip -2pt
+Transmit the character.
+@vskip 6pt
+@findex _sscanf
+
+@example
+: _sscanf        \ ????? @end example
+
+@vskip -2pt
+Not implemented.
+
+@section STDLIB - Standard Library
+
+
+@vskip -6pt
+@vskip 6pt
+@findex #exitchain
+
+@example
+#32 constant #ExitChain                 \ -- u @end example
+
+@vskip -2pt
+Maximum number of entries in the exit chain.
+@vskip 6pt
+@findex cells
+
+@example
+#ExitChain cells buffer: ExitChain      \ -- addr @end example
+
+@vskip -2pt
+Buffer for exit chain entries.
+@vskip 6pt
+@findex exitchainidx
+
+@example
+0 Value ExitChainIdx                    \ -- 0|addr @end example
+
+@vskip -2pt
+Anchor for exit chain.
+@vskip 6pt
+@findex _abort
+
+@example
+: _abort        \ -- @end example
+
+@vskip -2pt
+Terminate the current program no matter what.
+@example
+  void abort( void ); @end example
+@vskip 6pt
+@findex _exit
+
+@example
+: _exit         \ n -- @end example
+
+@vskip -2pt
+As with @strong{abort()} except with a return status code and the
+fact that an exit() is not considered abnormal termination.
+@example
+  void exit( int status ); @end example
+@vskip 6pt
+@findex _atexit
+
+@example
+: _atexit       \ xt -- ior @end example
+
+@vskip -2pt
+Specify a function which will be executed when @strong{exit()} occurs.
+@example
+  int atexit( void(*func)(void)); @end example
+@vskip 6pt
+@findex _malloc
+
+@example
+: _malloc       \ size -- ptr | 0 @end example
+
+@vskip -2pt
+Attempt to allocate S bytes of heap and return a pointer.
+@example
+  void *malloc( size_t s ); @end example
+@vskip 6pt
+@findex _free
+
+@example
+: _free         \ ptr -- @end example
+
+@vskip -2pt
+Release @strong{malloc()}ed memory.
+@example
+  void free( void *ptr ); @end example
+@vskip 6pt
+@findex _realloc
+
+@example
+: _realloc      \ size ptr -- 'ptr | 0 @end example
+
+@vskip -2pt
+Attempt to resize the allocated block P to the new size S.
+@example
+  void *realloc( void *p, size_t s ); @end example
+@vskip 6pt
+@findex _atoi
+
+@example
+: _atoi         \ s -- n @end example
+
+@vskip -2pt
+Convert an ascii string to a decimal number.
+@example
+  int atoi( const char *s ); @end example
+
+@section STRING - Simple String Tools
+
+
+@vskip -6pt
+@*
+As with all the other libraries, this one has been stripped.
+Sufficient functionality is provided for most programs and
+those functions missing can be easily written in C using the
+ones supplied.
+@vskip 0pt
+@vskip 6pt
+@findex _memset
+
+@example
+: _memset       \ size value source -- source @end example
+
+@vskip -2pt
+Set memory (bytes).
+@example
+  void *memset( void *, int c, size_t s ); @end example
+@vskip 6pt
+@findex _strlen
+
+@example
+: _strlen       \ z$ -- len @end example
+
+@vskip -2pt
+Return the length of the supplied string not including the
+zero terminator.
+@example
+  size_t strlen( const char *s ); @end example
+@vskip 6pt
+@findex _strcpy
+
+@example
+: _strcpy       \ source dest -- dest @end example
+
+@vskip -2pt
+Copy the string S to the char array at D.
+Returns the pointer to the destination.
+@example
+  char *strcpy( char *d, const char *s ); @end example
+@vskip 6pt
+@findex _memcpy
+
+@example
+: _memcpy       \ len source dest -- dest @end example
+
+@vskip -2pt
+Copy memory.
+@example
+void *memcpy( void *d, const void *s, size_t len ); @end example
+@vskip 6pt
+@findex _strtol
+
+@example
+: _strtol       \ base **endptr *s -- val @end example
+
+@vskip -2pt
+Attempt to convert the string S to a long integer using
+BASE as the radix. ENDPTR points to a CHAR* pointer which
+will hold the address of the first part of the source string
+which cannot be converted as a numeric digit.
+@example
+  long int strtol( const char *s, char **endptr, int base ); @end example
+@vskip 6pt
+@findex _memcmp
+
+@example
+: _memcmp       \ len s1 s2 -- v @end example
+
+@vskip -2pt
+Compare two blocks of memory.
+@example
+int memcmp( const void *s1, const void *s2, size_t n ); @end example
+@vskip 6pt
+@findex _strcat
+
+@example
+: _strcat       \ source dest -- dest @end example
+
+@vskip -2pt
+Append string S2 onto the char array at S1.
+@example
+  char *strcat( char *s1, const char *s2 ); @end example

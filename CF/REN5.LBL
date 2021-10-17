@@ -1,0 +1,221 @@
+REN (!R+      (!R+      
+REN (#        (#        
+REN (+*       (+*       
+REN (+2/      (+2/      
+REN (-/       (-/       
+REN (0<       (0<       
+REN (0=       (0=       
+REN (2/       (2/       
+REN (2PUSH;   (2PUSH;   
+REN (2RDRP;   (2RDRP;   
+REN (;        (;        
+REN (@&;      (@&;      
+REN (@+;      (@+;      
+REN (@R+      (@R+      
+REN (A!       (A!       
+REN (A@       (A@       
+REN (BARY     (BARY     
+REN (BE       (BE       
+REN (BR       (BR       
+REN (C!R+     (C!R+     
+REN (C@       (C@       
+REN (C@A+     (C@A+     
+REN (COLD     (COLD     
+REN (CON      (CON      
+REN (CSTR     (CSTR     
+REN (D#0      (D#0      
+REN (D#1      (D#1      
+REN (D2/      (D2/      
+REN (DROP     (DROP     
+REN (DROP;    (DROP;    
+REN (DUP      (DUP      
+REN (EX       (EX       
+REN (FOR      (FOR      
+REN (IF       (IF       
+REN (IF-      (IF-      
+REN (IO;      (IO;      
+REN (J        (J        
+REN (JUMP     (JUMP     
+REN (LARY     (LARY     
+REN (NAND     (NAND     
+REN (NEG      (NEG      
+REN (NEXT     (NEXT     
+REN (NOP      (NOP      
+REN (NOT      (NOT      
+REN (OVER     (OVER     
+REN (POP      (POP      
+REN (POP;     (POP;     
+REN (PUSH     (PUSH     
+REN (PUSH;    (PUSH;    
+REN (QARY     (QARY     
+REN (RDRP;    (RDRP;    
+REN (RP@      (RP@      
+REN (SET2     (SET2     
+REN (SKIP     (SKIP     
+REN (SP@      (SP@      
+REN (TROFF;   (TROFF;   
+REN (U1+      (U1+      
+REN (U<       (U<       
+REN (VAR2     (VAR2     
+REN (W>B      (W>B      
+REN (WARY     (WARY     
+REN (XA       (XA       
+REN (XR       (XR       
+
+HIDE @TRSWCH   
+HIDE @TROFF    
+HIDE @SKIP     
+HIDE @>DBG     
+HIDE @PUSHW    
+HIDE @XCHGW    
+HIDE @RET      
+HIDE @MAIN_LP  
+HIDE @IO       
+HIDE @01E6     
+HIDE @D2/      
+HIDE @NOT      
+HIDE @OPTABLE  
+HIDE @OPCHARS  
+HIDE @GETSIGN? 
+HIDE @0234     
+HIDE @SETERR   
+HIDE @GETRET   
+HIDE @BASE#    
+HIDE @NUMINI   
+HIDE @BASE16   
+HIDE @BASE8    
+HIDE @BASE2    
+HIDE @NORMAL   
+HIDE @?DIGIT   
+HIDE @ASC>NUM  
+HIDE @CONV+    
+HIDE @'NUM     
+HIDE @^NUM     
+HIDE @CONVERT  
+HIDE @CONVLP   
+HIDE @S>NUM    
+HIDE @CSTR)    
+HIDE @FINDER   
+HIDE @FNDLP    
+HIDE @EXFND    
+HIDE @WFIND    
+HIDE @06AD     
+HIDE @06B7     
+HIDE @INTERP   
+HIDE @@FND     
+HIDE @EXFND2   
+HIDE @ENDMEM   
+HIDE -START-   
+HIDE @DBGDEF   
+HIDE @SYSLP    
+HIDE @HINUM    
+HIDE @(VAR2         
+HIDE @(SET2         
+HIDE @(D#1          
+HIDE @(D#0          
+HIDE @(CON          
+
+REN  @QUIT     QUIT      
+REN  @HI#      HI#       
+REN  @1+       1+        
+REN  @BYE      BYE       
+REN  @TRON     TRON      
+REN  @(LIT     (LIT      
+REN  @NOP      NOP       
+REN  @RANGE>S  RANGE>S   
+REN  @OVER-    OVER-     
+REN  @-        -         
+REN  @2*       2*        
+REN  @+        +         
+REN  (D#1      (D#1      
+REN  @2+       2+        
+REN  @(!|      (!|       
+REN  @!        !         
+REN  @POP!;    POP!;     
+REN  @SWAP|    SWAP|     
+REN  @SWAP     SWAP      
+REN  @STR      STR       
+REN  @@+       @+        
+REN  @@        @         
+REN  @EXIT     EXIT      
+REN  @(XARY    (XARY     
+REN  @EXEC     EXEC      
+REN  @EXECUTE  EXECUTE   
+
+REN  @|DROP    |DROP     
+REN  @(RNG|    (RNG|     
+REN  @STR|     STR|      
+REN  @.TIMES   .TIMES    
+REN  @TIMES    TIMES     
+REN  @TIMES|   TIMES|    
+REN  @2EXIT    2EXIT     
+REN  @LOCATOR  LOCATOR   
+REN  @LOXEC    LOXEC     
+REN  @|LTIB    |LTIB     
+REN  @LTIB     LTIB      
+REN  @ETIB     ETIB      
+REN  @|H       |H        
+REN  @H        H         
+REN  @|T       |T        
+REN  @T        T         
+REN  @ERROR    ERROR     
+REN  @TINT     4TH      
+REN  @TBUF     TBUF      
+REN  @0        0         
+REN  @BL       BL        
+REN  @<M>      <M>       
+REN  @MOBJ     MOBJ      
+REN  @(@,      (@,       
+REN  @~@,      @,       
+REN  @~,       ,        
+REN  @!+       !+        
+REN  @,;       ,;        
+REN  @STR^     STR^      
+REN  @ALIGN    ALIGN     
+REN  @EVEN     EVEN      
+REN  @("SKIP   ("SKIP    
+REN  @0<>;     0<>;      
+REN  @0;       0;        
+REN  @(;"      (;"       
+REN  @(0"      (0"       
+REN  @(!"      (!"       
+REN  @|N??     |N??      
+REN  @N??      N??       
+REN  @??       ??        
+REN  @">NUM    ">NUM     
+REN  @">NUMC   ">NUMC    
+REN  @vLIT,    vLIT,     
+REN  @H>T      H>T       
+REN  @MPUSH    MPUSH     
+REN  @MOVE>    MOVE>     
+REN  @TOKEN?   TOKEN?    
+REN  @TOKEN    TOKEN     
+REN  @?C@      ?C@       
+REN  @C@       C@        
+REN  @WORD     WORD      
+REN  @S>TB!    S>TB!     
+REN  @S>"!     S>"!      
+REN  @PARSE    PARSE     
+REN  @:        :         
+REN  @:!       :!        
+REN  @=H       =H        
+REN  @(=:      (=:       
+REN  @!-       !-        
+REN  @2-       2-        
+REN  @|OP      |OP       
+REN  @(MAC     (MAC      
+REN  @SEVAL    SEVAL     
+REN  @EVAL     EVAL      
+REN  @@EVAL    @EVAL     
+REN  @;`       ;`        
+REN  @,<       ,<        
+REN  @FND      FND       
+REN  @>,       >,        
+REN  @CFND     CFND      
+
+REN  @DROP     DROP
+\ REN  @BK       BKEY     
+\ REN  @EMIT     EMIT
+\ REN  @WAIT     WAIT
+
+PRUNEM

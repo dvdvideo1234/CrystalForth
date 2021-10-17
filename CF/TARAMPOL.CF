@@ -1,0 +1,34 @@
+\ CR .( TARAMPOL.CF) 
+%2 TVAL VAL`
+%2 TTO TO` 
+%2 TAT AT` 
+\ CR 0 .
+% CALL`   
+% TWICE` 
+% ;THEN`          
+% AHEAD`  
+% BEGIN`  
+% REPEAT`  
+% AGAIN`   
+% UNTIL`  
+% WHILE`
+% IF`  
+% THEN`         
+% ;;`   
+% -IF`
+% FOR`  
+% NEXT` 
+\ % NEXT-`
+% UNTIL-` 
+% IF-` 
+\ % FOR-`          
+% [`
+% ]`  
+\ % ?` 
+% ,<` 
+\ % (`    
+% \`
+% :`  
+% ;`    \ % CSWAP>` \ % RELS<` \ %2 TEST? TEST?`
+254 =: --END--
+

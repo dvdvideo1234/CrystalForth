@@ -1,0 +1,1563 @@
+$2FF2 OBJ $0100 ORG 
+
+  MOVBI, AH| 74 ( ' ~004A ) IB, 
+( 0100 B44A ) 
+  MOVXI, BX| 4096 ( ' ~1000 ) IX, 
+( 0102 BB0010 ) 
+  INTI, 33 ( ' ~0021 ) IB, 
+( 0105 CD21 ) 
+  CALL, 71 ( L' @0151 ) (RX,) 
+( 0107 E84700 ) 
+
+  1112 ( L' @H>T ) DA, 
+( 010A 5804 ) 
+
+=L @SYSLP ( $010C ) 
+  1252 ( L' @@EVAL ) DA, 
+( 010C E404 ) 
+  284 ( L' @BYE ) DA, 
+( 010E 1C01 ) 
+
+=L @QUIT ( $0110 ) 
+  284 ( L' @BYE ) DA, 
+( 0110 1C01 ) 
+  361 ( L' (JUMP ) DA, 
+( 0112 6901 ) 
+  268 ( L' @SYSLP ) DA, 
+( 0114 0C01 ) 
+
+=L @HI# ( $0116 ) 
+  924 ( L' @(CON ) DA, 
+( 0116 9C03 ) 
+
+=L @HINUM ( $0118 ) 
+  0 ( L' @0000 ) DA, 
+( 0118 0000 ) 
+
+=L @1+ ( $011A ) 
+  321 ( L' (@+; ) DA, 
+( 011A 4101 ) 
+
+=L @BYE ( $011C ) 
+  1 ( L' @0001 ) DA, 
+( 011C 0100 ) 
+
+=L @TRON ( $011E ) 
+  421 ( L' @01A5 ) DA, 
+( 011E A501 ) 
+\ MOVXI, CX| -5191 ( ' ~EBB9 ) IX, 
+( 0120 B9B9EB ) 
+  185 ( ' ~00B9 ) DB, 
+( 0120 B9 ) 
+  185 ( ' ~00B9 ) DB, 
+( 0121 B9 ) 
+  235 ( ' ~00EB ) DB, 
+( 0122 EB ) 
+  RET, 
+( 0123 C3 ) 
+
+=L @TRSWCH ( $0124 ) 
+  XCHG, W| CX> /M/ 408 ( L' @0198 ) X, 
+( 0124 870E9801 ) 
+  RET, 
+( 0128 C3 ) 
+  NOP, 
+( 0129 90 ) 
+
+P=: (TROFF; 
+  CALL, 130 ( L' @IO ) (RX,) 
+( 012A E88200 ) 
+
+=L @TROFF ( $012D ) 
+\ MOVXI, CX| 3979 ( ' ~0F8B ) IX, 
+( 012D B98B0F ) 
+
+=L @TROFF ( $012D ) 
+  185 ( ' ~00B9 ) DB, 
+( 012D B9 ) 
+  MOV, W| T| CX> D0/ /BX 
+( 012E 8B0F ) 
+  JMPS, -14 ( L' @TRSWCH ) (RB,) 
+( 0130 EBF2 ) 
+
+P=: (2PUSH; 
+  PUSHX, AX| 
+( 0132 50 ) 
+  LODS, W| 
+( 0133 AD ) 
+
+P=: (PUSH; 
+  PUSHX, AX| 
+( 0134 50 ) 
+\ NOP, 
+( 0135 90 ) 
+  144 ( ' ~0090 ) DB, 
+( 0135 90 ) 
+
+P=: (DROP; 
+  LODS, W| 
+( 0136 AD ) 
+  CMPAI, W| 1827 ( ' ~0723 ) IX, 
+( 0137 3D2307 ) 
+  JMPS, 93 ( L' @RET ) (RB,) 
+( 013A EB5D ) 
+
+P=: (2RDRP; 
+  POPX, CX| 
+( 013C 59 ) 
+\ NOP, 
+( 013D 90 ) 
+  144 ( ' ~0090 ) DB, 
+( 013D 90 ) 
+
+P=: (RDRP; 
+  POPX, CX| 
+( 013E 59 ) 
+  CMPAI, W| 1795 ( ' ~0703 ) IX, 
+( 013F 3D0307 ) 
+  JMPS, 85 ( L' @RET ) (RB,) 
+( 0142 EB55 ) 
+
+P=: (IF 
+  OR, W| T| AX> R| AX| 
+( 0144 0BC0 ) 
+  J, Z| Y| 31 ( L' (FOR ) (RB,) 
+( 0146 741F ) 
+  LODS, W| 
+( 0148 AD ) 
+  NOP, 
+( 0149 90 ) 
+
+P=: (SKIP 
+
+=L @SKIP ( $014A ) 
+  INCX, BX| 
+( 014A 43 ) 
+  INCX, BX| 
+( 014B 43 ) 
+  JMPS, 76 ( L' @MAIN_LP ) (RB,) 
+( 014C EB4C ) 
+
+P=: (NEXT 
+  POPX, CX| 
+( 014E 59 ) 
+  DECX, CX| 
+( 014F 49 ) 
+  PUSHX, CX| 
+( 0150 51 ) 
+
+=L @0151 ( $0151 ) 
+  JMPS, 16 ( L' (IF- ) (RB,) 
+( 0151 EB10 ) 
+
+=L @INITER ( $0153 ) 
+  POPX, BX| 
+( 0153 5B ) 
+
+P=: (COLD 
+  MOVXI, SP| -66 ( ' ~FFBE ) IX, 
+( 0154 BCBEFF ) 
+  MOVXI, SI| -706 ( ' ~FD3E ) IX, 
+( 0157 BE3EFD ) 
+  CALL, -48 ( L' @TROFF ) (RX,) 
+( 015A E8D0FF ) 
+  JMPS, 59 ( L' @MAIN_LP ) (RB,) 
+( 015D EB3B ) 
+  JMP, 0 ( L' @0162 ) (RX,) 
+( 015F E90000 ) 
+
+P=: (IF- 
+
+=L @0162 ( $0162 ) 
+  DECX, AX| 
+( 0162 48 ) 
+\ J, S| Y| -27 ( L' @SKIP ) (RB,) 
+( 0163 78E5 ) 
+  120 ( ' ~0078 ) DB, 
+( 0163 78 ) 
+  INAI, W| 61 P, 
+( 0164 E53D ) 
+
+P=: (FOR 
+  PUSHX, AX| 
+( 0166 50 ) 
+  LODS, W| 
+( 0167 AD ) 
+
+P=: (JUMP 
+  MOV, W| T| BX> D0/ /BX 
+( 0168 8B1F ) 
+  JMPS, 46 ( L' @MAIN_LP ) (RB,) 
+( 016A EB2E ) 
+
+P=: (QARY 
+  SHL, 1| W| R| AX| 
+( 016C D1E0 ) 
+
+P=: (LARY 
+  SHL, 1| W| R| AX| 
+( 016E D1E0 ) 
+
+P=: (WARY 
+  SHL, 1| W| R| AX| 
+( 0170 D1E0 ) 
+
+P=: (BARY 
+  ADD, W| T| AX> R| BX| 
+( 0172 03C3 ) 
+
+P=: (; 
+  JMPS, 35 ( L' @RET ) (RB,) 
+( 0174 EB23 ) 
+
+P=: (POP; 
+  POPX, CX| 
+( 0176 59 ) 
+  POPX, BX| 
+( 0177 5B ) 
+  JMPS, 11 ( L' @PUSHW ) (RB,) 
+( 0178 EB0B ) 
+
+P=: (!R+ 
+  POPX, DI| 
+( 017A 5F ) 
+  STOS, W| 
+( 017B AB ) 
+  PUSHX, DI| 
+( 017C 57 ) 
+  LODS, W| 
+( 017D AD ) 
+  JMPS, 26 ( L' @MAIN_LP ) (RB,) 
+( 017E EB1A ) 
+
+P=: (@R+ 
+  POPX, DI| 
+( 0180 5F ) 
+  MOV, W| T| CX> D0/ /DI 
+( 0181 8B0D ) 
+  SCAS, W| 
+( 0183 AF ) 
+  PUSHX, DI| 
+( 0184 57 ) 
+
+=L @PUSHW ( $0185 ) 
+  DECX, SI| 
+( 0185 4E ) 
+  DECX, SI| 
+( 0186 4E ) 
+  MOV, W| F| AX> D0/ /SI 
+( 0187 8904 ) 
+
+=L @XCHGW ( $0189 ) 
+  XCHGX, CX| 
+( 0189 91 ) 
+  JMPS, 14 ( L' @MAIN_LP ) (RB,) 
+( 018A EB0E ) 
+
+P=: (XR 
+  POPX, CX| 
+( 018C 59 ) 
+  PUSHX, AX| 
+( 018D 50 ) 
+  JMPS, -7 ( L' @XCHGW ) (RB,) 
+( 018E EBF9 ) 
+
+P=: (XA 
+  POPX, DI| 
+( 0190 5F ) 
+  PUSHX, DX| 
+( 0191 52 ) 
+  MOV, W| T| DX> R| DI| 
+( 0192 8BD7 ) 
+  JMPS, 4 ( L' @MAIN_LP ) (RB,) 
+( 0194 EB04 ) 
+
+P=: (EX 
+  POPX, CX| 
+( 0196 59 ) 
+  PUSHX, BX| 
+( 0197 53 ) 
+
+=L @0198 ( $0198 ) 
+  PUSHX, CX| 
+( 0198 51 ) 
+
+=L @RET ( $0199 ) 
+  POPX, BX| 
+( 0199 5B ) 
+
+P=: (NOP 
+
+=L @MAIN_LP ( $019A ) 
+  MOV, W| T| CX> D0/ /BX 
+( 019A 8B0F ) 
+  INCX, BX| 
+( 019C 43 ) 
+  INCX, BX| 
+( 019D 43 ) 
+  TESTI, B| R| CL| 1 ( ' @0001 ) IB, 
+( 019E F6C101 ) 
+  J, Z| Y| -12 ( L' (EX ) (RB,) 
+( 01A1 74F4 ) 
+  DECX, CX| 
+( 01A3 49 ) 
+  JMPO, R| CX| 
+( 01A4 FFE1 ) 
+
+P=: (IO; 
+  PUSHX, BX| 
+( 01A6 53 ) 
+  MOV, W| T| DX> DB/ /SI 4 (SB,) 
+( 01A7 8B5404 ) 
+  MOV, W| T| CX> DB/ /SI 2 (SB,) 
+( 01AA 8B4C02 ) 
+  MOV, W| T| BX> D0/ /SI 
+( 01AD 8B1C ) 
+
+=L @IO ( $01AF ) 
+  POPX, DI| 
+( 01AF 5F ) 
+  CALLO, R| DI| 
+( 01B0 FFD7 ) 
+  JMPS, -27 ( L' @RET ) (RB,) 
+( 01B2 EBE5 ) 
+
+P=: (BE 
+  MOVBI, AH| 14 ( ' ~000E ) IB, 
+( 01B4 B40E ) 
+  INTI, 16 ( ' ~0010 ) IB, 
+( 01B6 CD10 ) 
+
+P=: (DROP 
+  JMPS, 1 ( L' (PUSH ) (RB,) 
+( 01B8 EB01 ) 
+
+P=: (PUSH 
+  PUSHX, AX| 
+( 01BA 50 ) 
+  LODS, W| 
+( 01BB AD ) 
+  JMPS, -36 ( L' @MAIN_LP ) (RB,) 
+( 01BC EBDC ) 
+
+P=: (J 
+  POPX, DI| 
+( 01BE 5F ) 
+  POPX, CX| 
+( 01BF 59 ) 
+  PUSHX, CX| 
+( 01C0 51 ) 
+  PUSHX, DI| 
+( 01C1 57 ) 
+  JMPS, -63 ( L' @PUSHW ) (RB,) 
+( 01C2 EBC1 ) 
+
+P=: (A@ 
+\ PUSHX, DX| 
+( 01C4 52 ) 
+
+P=: (A@ 
+  82 ( ' ~0052 ) DB, 
+( 01C4 52 ) 
+  CMPAI, B| 84 ( ' ~0054 ) IB, 
+( 01C5 3C54 ) 
+\ CMPAI, B| 86 ( ' ~0056 ) IB, 
+( 01C7 3C56 ) 
+  60 ( ' ~003C ) DB, 
+( 01C7 3C ) 
+
+P=: (SP@ 
+  PUSHX, SI| 
+( 01C8 56 ) 
+\ CMPAI, B| 80 ( ' ~0050 ) IB, 
+( 01C9 3C50 ) 
+  60 ( ' ~003C ) DB, 
+( 01C9 3C ) 
+
+P=: (DUP 
+  PUSHX, AX| 
+( 01CA 50 ) 
+  POPX, CX| 
+( 01CB 59 ) 
+  JMPS, -73 ( L' @PUSHW ) (RB,) 
+( 01CC EBB7 ) 
+
+P=: (OVER 
+  PUSH, D0/ /SI 
+( 01CE FF34 ) 
+
+P=: (POP 
+  JMPS, -7 ( L' (DUP ) (RB,) 
+( 01D0 EBF9 ) 
+
+P=: (U< 
+  SUB, W| F| AX> D0/ /SI 
+( 01D2 2904 ) 
+\ LODS, W| 
+( 01D4 AD ) 
+  173 ( ' ~00AD ) DB, 
+( 01D4 AD ) 
+  MOVXI, CX| -7983 ( ' ~E0D1 ) IX, 
+( 01D5 B9D1E0 ) 
+  SBB, W| T| AX> R| AX| 
+( 01D8 1BC0 ) 
+  JMPS, -66 ( L' @MAIN_LP ) (RB,) 
+( 01DA EBBE ) 
+
+P=: (-/ 
+  SHL, 1| W| D0/ /SI 
+( 01DC D124 ) 
+  RCL, 1| W| R| AX| 
+( 01DE D1D0 ) 
+  CMP, W| T| AX> R| DX| 
+( 01E0 3BC2 ) 
+  J, C| Y| 4 ( L' @01E6 ) (RB,) 
+( 01E2 7204 ) 
+  SUB, W| T| AX> R| DX| 
+( 01E4 2BC2 ) 
+
+P=: (U1+ 
+  INC, W| D0/ /SI 
+( 01E6 FF04 ) 
+
+=L @01E6 ( $01E8 ) 
+  JMPS, -80 ( L' @MAIN_LP ) (RB,) 
+( 01E8 EBB0 ) 
+
+P=: (+2/ 
+  ADD, W| F| AX> D0/ /SI 
+( 01EA 0104 ) 
+  MOV, W| T| AX> D0/ /SI 
+( 01EC 8B04 ) 
+
+P=: (2/ 
+  RCR, 1| W| R| AX| 
+( 01EE D1D8 ) 
+  JMPS, -88 ( L' @MAIN_LP ) (RB,) 
+( 01F0 EBA8 ) 
+
+P=: (+* 
+  TESTI, W| D0/ /SI 1 ( ' @0001 ) IX, 
+( 01F2 F7040100 ) 
+  J, Z| Y| 2 ( L' @D2/ ) (RB,) 
+( 01F6 7402 ) 
+  ADD, W| T| AX> R| DX| 
+( 01F8 03C2 ) 
+
+P=: (D2/ 
+
+=L @D2/ ( $01FA ) 
+  RCR, 1| W| R| AX| 
+( 01FA D1D8 ) 
+  RCR, 1| W| D0/ /SI 
+( 01FC D11C ) 
+  JMPS, -102 ( L' @MAIN_LP ) (RB,) 
+( 01FE EB9A ) 
+
+P=: (NAND 
+  AND, W| F| AX> D0/ /SI 
+( 0200 2104 ) 
+  LODS, W| 
+( 0202 AD ) 
+
+=L @NOT ( $0203 ) 
+  INCX, AX| 
+( 0203 40 ) 
+
+P=: (NEG 
+  NEG, W| R| AX| 
+( 0204 F7D8 ) 
+  JMPS, -110 ( L' @MAIN_LP ) (RB,) 
+( 0206 EB92 ) 
+
+P=: (0= 
+  NEG, W| R| AX| 
+( 0208 F7D8 ) 
+  SBB, W| T| AX> R| AX| 
+( 020A 1BC0 ) 
+
+P=: (NOT 
+  -2581 ( L' @F5EB ) DA, 
+( 020C EBF5 ) 
+
+=L @OPTABLE ( $020E ) 
+  659 ( L' @0293 ) DA, 
+( 020E 9302 ) 
+  654 ( L' @028E ) DA, 
+( 0210 8E02 ) 
+  568 ( L' @GETRET ) DA, 
+( 0212 3802 ) 
+  574 ( L' @023E ) DA, 
+( 0214 3E02 ) 
+  577 ( L' @0241 ) DA, 
+( 0216 4102 ) 
+    ,"D^B%&$#"
+  DAA, 
+( 021E 27 ) 
+  POPX, SI| 
+( 021F 5E ) 
+
+=L @GETSIGN? ( $0220 ) 
+  INCX, SI| 
+( 0220 46 ) 
+  J, Z| Y| 20 ( L' @SETERR ) (RB,) 
+( 0221 7414 ) 
+  CMPI, B| D0/ X/S 45 ( ' ~002D ) IB, 
+( 0223 80382D ) 
+  J, Z| N| 14 ( L' @0234 ) (RB,) 
+( 0226 750E ) 
+  INCX, SI| 
+( 0228 46 ) 
+  J, Z| Y| 12 ( L' @SETERR ) (RB,) 
+( 0229 740C ) 
+  POPX, DX| 
+( 022B 5A ) 
+  CALLO, R| DX| 
+( 022C FFD2 ) 
+  NOT, W| R| DI| 
+( 022E F7D7 ) 
+  NOT, W| R| BP| 
+( 0230 F7D5 ) 
+  INCX, DI| 
+( 0232 47 ) 
+  J, Z| N| 1 ( L' @0234 ) (RB,) 
+( 0233 7501 ) 
+  INCX, BP| 
+( 0235 45 ) 
+
+=L @0234 ( $0236 ) 
+  RET, 
+( 0236 C3 ) 
+
+=L @SETERR ( $0237 ) 
+  DECX, SI| 
+( 0237 4E ) 
+
+=L @GETRET ( $0238 ) 
+  POPX, DX| 
+( 0238 5A ) 
+  RET, 
+( 0239 C3 ) 
+
+=L @BASE# ( $023A ) 
+  XCHGX, DI| 
+( 023A 97 ) 
+
+=L @NUMINI ( $023B ) 
+  XOR, W| T| DI> R| DI| 
+( 023B 33FF ) 
+\ XOR, W| T| BP> R| BP| 
+( 023D 33ED ) 
+  51 ( ' ~0033 ) DB, 
+( 023D 33 ) 
+
+=L @023E ( $023E ) 
+  INAD, W| 
+( 023E ED ) 
+\ CMPAI, W| 4272 ( ' ~10B0 ) IX, 
+( 023F 3DB010 ) 
+  61 ( ' ~003D ) DB, 
+( 023F 3D ) 
+
+=L @BASE16 ( $0240 ) 
+  MOVBI, AL| 16 ( ' ~0010 ) IB, 
+( 0240 B010 ) 
+\ CMPAI, W| 2224 ( ' ~08B0 ) IX, 
+( 0242 3DB008 ) 
+  61 ( ' ~003D ) DB, 
+( 0242 3D ) 
+
+=L @BASE8 ( $0243 ) 
+  MOVBI, AL| 8 ( ' ~0008 ) IB, 
+( 0243 B008 ) 
+  CMPAI, W| 688 ( ' ~02B0 ) IX, 
+( 0245 3DB002 ) 
+  DECX, AX| 
+( 0248 48 ) 
+  DECX, AX| 
+( 0249 48 ) 
+  XOR, B| T| AH> R| AH| 
+( 024A 32E4 ) 
+  MOV, W| T| CX> R| AX| 
+( 024C 8BC8 ) 
+  INCX, CX| 
+( 024E 41 ) 
+  INCX, CX| 
+( 024F 41 ) 
+
+=L @NORMAL ( $0250 ) 
+  CALL, -27 ( L' @GETRET ) (RX,) 
+( 0250 E8E5FF ) 
+  PUSHX, DI| 
+( 0253 57 ) 
+  MOVXI, DI| 536 ( ' ~0218 ) IX, 
+( 0254 BF1802 ) 
+  PUSHX, CX| 
+( 0257 51 ) 
+  MOVXI, CX| 6 ( ' ~0006 ) IX, 
+( 0258 B90600 ) 
+  REP, 
+( 025B F2 ) 
+  SCAS, B| 
+( 025C AE ) 
+  MOV, W| T| DI> R| CX| 
+( 025D 8BF9 ) 
+  POPX, CX| 
+( 025F 59 ) 
+  J, Z| N| 13 ( L' @?DIGIT ) (RB,) 
+( 0260 750D ) 
+  SHL, 1| W| R| DI| 
+( 0262 D1E7 ) 
+  MOV, W| T| DX> DW/ /DI 526 ( L' @OPTABLE ) X, 
+( 0264 8B950E02 ) 
+  POPX, DI| 
+( 0268 5F ) 
+  INCX, SI| 
+( 0269 46 ) 
+  J, Z| Y| -53 ( L' @SETERR ) (RB,) 
+( 026A 74CB ) 
+  DECX, SI| 
+( 026C 4E ) 
+  JMPO, R| DX| 
+( 026D FFE2 ) 
+
+=L @?DIGIT ( $026F ) 
+  POPX, DI| 
+( 026F 5F ) 
+  CMPAI, B| 58 ( ' ~003A ) IB, 
+( 0270 3C3A ) 
+  J, C| Y| 6 ( L' @ASC>NUM ) (RB,) 
+( 0272 7206 ) 
+  CMPAI, B| 65 ( ' ~0041 ) IB, 
+( 0274 3C41 ) 
+  J, C| Y| -65 ( L' @SETERR ) (RB,) 
+( 0276 72BF ) 
+  SUBAI, B| 7 ( ' ~0007 ) IB, 
+( 0278 2C07 ) 
+
+=L @ASC>NUM ( $027A ) 
+  SUBAI, B| 48 ( ' ~0030 ) IB, 
+( 027A 2C30 ) 
+  J, C| Y| -71 ( L' @SETERR ) (RB,) 
+( 027C 72B9 ) 
+  CMP, W| T| AX> R| CX| 
+( 027E 3BC1 ) 
+  J, C| N| -75 ( L' @SETERR ) (RB,) 
+( 0280 73B5 ) 
+
+=L @CONV+ ( $0282 ) 
+  XCHGX, BP| 
+( 0282 95 ) 
+  MUL, W| R| CX| 
+( 0283 F7E1 ) 
+  XCHGX, BP| 
+( 0285 95 ) 
+  XCHGX, DI| 
+( 0286 97 ) 
+  MUL, W| R| CX| 
+( 0287 F7E1 ) 
+  XCHGX, DI| 
+( 0289 97 ) 
+  ADD, W| T| DI> R| AX| 
+( 028A 03F8 ) 
+  ADC, W| T| BP> R| DX| 
+( 028C 13EA ) 
+
+=L @028E ( $028E ) 
+  JMPS, -64 ( L' @NORMAL ) (RB,) 
+( 028E EBC0 ) 
+
+=L @'NUM ( $0290 ) 
+  CALL, -91 ( L' @GETRET ) (RX,) 
+( 0290 E8A5FF ) 
+
+=L @0293 ( $0293 ) 
+  JMPS, -19 ( L' @CONV+ ) (RB,) 
+( 0293 EBED ) 
+
+=L @^NUM ( $0295 ) 
+  CALL, -96 ( L' @GETRET ) (RX,) 
+( 0295 E8A0FF ) 
+  ANDAI, B| 31 ( ' ~001F ) IB, 
+( 0298 241F ) 
+  JMPS, -26 ( L' @CONV+ ) (RB,) 
+( 029A EBE6 ) 
+
+=L @CONVERT ( $029C ) 
+  MOVBI, AL| 10 ( ' ~000A ) IB, 
+( 029C B00A ) 
+  CALL, -129 ( L' @GETSIGN? ) (RX,) 
+( 029E E87FFF ) 
+  CALL, -105 ( L' @NUMINI ) (RX,) 
+( 02A1 E897FF ) 
+
+=L @CONVLP ( $02A4 ) 
+  MOV, B| T| AL> D0/ X/S 
+( 02A4 8A00 ) 
+  CALLO, R| DX| 
+( 02A6 FFD2 ) 
+  INCX, SI| 
+( 02A8 46 ) 
+  J, Z| N| -7 ( L' @CONVLP ) (RB,) 
+( 02A9 75F9 ) 
+
+  -22589 ( L' @A7C3 ) DA, 
+( 02AB C3A7 ) 
+  ADD, W| F| DX> DB/ /DI 86 (SB,) 
+( 02AD 015556 ) 
+  XCHGX, SI| 
+( 02B0 96 ) 
+  LEA, BX> D0/ X/S 
+( 02B1 8D18 ) 
+  NOT, W| R| SI| 
+( 02B3 F7D6 ) 
+  CALL, -28 ( L' @CONVERT ) (RX,) 
+( 02B5 E8E4FF ) 
+  MOV, W| F| BP> /M/ 280 ( L' @HINUM ) X, 
+( 02B8 892E1801 ) 
+  XCHGX, SI| 
+( 02BC 96 ) 
+  POPX, SI| 
+( 02BD 5E ) 
+  POPX, BP| 
+( 02BE 5D ) 
+  MOV, W| F| DI> D0/ /SI 
+( 02BF 893C ) 
+  RET, 
+( 02C1 C3 ) 
+
+P=: (BR 
+  INT3, 
+( 02C2 CC ) 
+  JMP, -300 ( L' @MAIN_LP ) (RX,) 
+( 02C3 E9D4FE ) 
+
+P=: (C!R+ 
+  POPX, DI| 
+( 02C6 5F ) 
+\ STOS, B| 
+( 02C7 AA ) 
+  170 ( ' ~00AA ) DB, 
+( 02C7 AA ) 
+  PUSHX, DI| 
+( 02C8 57 ) 
+  CMPAI, B| 146 ( ' ~0092 ) IB, 
+( 02C9 3C92 ) 
+  LODS, W| 
+( 02CB AD ) 
+  JMPS, -11 ( L' (BR ) (RB,) 
+( 02CC EBF5 ) 
+
+P=: (C@A+ 
+  MOV, W| T| DI> R| DX| 
+( 02CE 8BFA ) 
+  INCX, DX| 
+( 02D0 42 ) 
+
+=L @CSTR) ( $02D1 ) 
+  DECX, SI| 
+( 02D1 4E ) 
+  DECX, SI| 
+( 02D2 4E ) 
+\ MOV, W| F| AX> D0/ /SI 
+( 02D3 8904 ) 
+  137 ( ' ~0089 ) DB, 
+( 02D3 89 ) 
+  ADDAI, B| 60 ( ' ~003C ) IB, 
+( 02D4 043C ) 
+
+P=: (C@ 
+  XCHGX, DI| 
+( 02D6 97 ) 
+  MOV, B| T| AL> D0/ /DI 
+( 02D7 8A05 ) 
+  NOP, 
+( 02D9 90 ) 
+
+P=: (W>B 
+  MOVBI, AH| 0 ( ' @0000 ) IB, 
+( 02DA B400 ) 
+  JMPS, -27 ( L' (BR ) (RB,) 
+( 02DC EBE5 ) 
+
+P=: (CSTR 
+  MOV, W| T| DI> R| AX| 
+( 02DE 8BF8 ) 
+  INCX, AX| 
+( 02E0 40 ) 
+  JMPS, -18 ( L' @CSTR) ) (RB,) 
+( 02E1 EBEE ) 
+  NOP, 
+( 02E3 90 ) 
+
+
+=L @MPUSH ( $02E4 ) 
+  423 ( L' (IO; ) DA, 
+( 02E4 A701 ) 
+  XCHGX, DI| 
+( 02E6 97 ) 
+  LODS, W| 
+( 02E7 AD ) 
+  XCHGX, CX| 
+( 02E8 91 ) 
+  LODS, W| 
+( 02E9 AD ) 
+
+=L @MOVE> ( $02EA ) 
+  XCHGX, SI| 
+( 02EA 96 ) 
+  PUSHX, CX| 
+( 02EB 51 ) 
+  ADD, W| T| SI> R| CX| 
+( 02EC 03F1 ) 
+  STD, 
+( 02EE FD ) 
+  COMPS, B| 
+( 02EF A6 ) 
+  REPZ, 
+( 02F0 F3 ) 
+  MOVS, B| 
+( 02F1 A4 ) 
+  CLD, 
+( 02F2 FC ) 
+  POPX, CX| 
+( 02F3 59 ) 
+  XCHGX, SI| 
+( 02F4 96 ) 
+  XCHGX, DI| 
+( 02F5 97 ) 
+  INCX, AX| 
+( 02F6 40 ) 
+  RET, 
+( 02F7 C3 ) 
+
+
+=L @S>"! ( $02F8 ) 
+  423 ( L' (IO; ) DA, 
+( 02F8 A701 ) 
+  XCHGX, DI| 
+( 02FA 97 ) 
+  LODS, W| 
+( 02FB AD ) 
+  XCHGX, CX| 
+( 02FC 91 ) 
+  LODS, W| 
+( 02FD AD ) 
+  MOVBI, CH| 0 ( ' @0000 ) IB, 
+( 02FE B500 ) 
+  ADD, W| T| DI> R| CX| 
+( 0300 03F9 ) 
+  INCX, DI| 
+( 0302 47 ) 
+  MOVI, B| D0/ /DI 96 ( ' ~0060 ) IB, 
+( 0303 C60560 ) 
+  CALL, -31 ( L' @MOVE> ) (RX,) 
+( 0306 E8E1FF ) 
+  MOV, B| F| CL> D0/ /DI 
+( 0309 880D ) 
+  DECX, AX| 
+( 030B 48 ) 
+  RET, 
+( 030C C3 ) 
+  NOP, 
+( 030D 90 ) 
+
+
+=L @PARS ( $030E ) 
+  423 ( L' (IO; ) DA, 
+( 030E A701 ) 
+  XCHGX, CX| 
+( 0310 91 ) 
+  MOV, W| T| DI> R| BX| 
+( 0311 8BFB ) 
+  JCXZ, 12 ( L' @06AD ) (RB,) 
+( 0313 E30C ) 
+  SUB, W| T| DI> R| CX| 
+( 0315 2BF9 ) 
+  CMPAI, B| 32 ( ' ~0020 ) IB, 
+( 0317 3C20 ) 
+  J, Z| N| 6 ( L' @06AD ) (RB,) 
+( 0319 7506 ) 
+  REPZ, 
+( 031B F3 ) 
+  SCAS, B| 
+( 031C AE ) 
+  J, Z| Y| 2 ( L' @06AD ) (RB,) 
+( 031D 7402 ) 
+  DECX, DI| 
+( 031F 4F ) 
+  INCX, CX| 
+( 0320 41 ) 
+
+=L @06AD ( $0321 ) 
+  MOV, W| F| DI> DB/ /SI 2 (SB,) 
+( 0321 897C02 ) 
+  JCXZ, 5 ( L' @06B7 ) (RB,) 
+( 0324 E305 ) 
+  REP, 
+( 0326 F2 ) 
+  SCAS, B| 
+( 0327 AE ) 
+  J, Z| N| 1 ( L' @06B7 ) (RB,) 
+( 0328 7501 ) 
+  DECX, DI| 
+( 032A 4F ) 
+
+=L @06B7 ( $032B ) 
+  SUB, W| T| DI> DB/ /SI 2 (SB,) 
+( 032B 2B7C02 ) 
+  MOV, W| F| DI> D0/ /SI 
+( 032E 893C ) 
+  XCHGX, CX| 
+( 0330 91 ) 
+  RET, 
+( 0331 C3 ) 
+
+=L @FINDER ( $0332 ) 
+  POPX, DX| 
+( 0332 5A ) 
+  XOR, W| T| CX> R| CX| 
+( 0333 33C9 ) 
+
+=L @FNDLP ( $0335 ) 
+  ADD, W| T| AX> R| CX| 
+( 0335 03C1 ) 
+  MOV, W| T| DI> R| AX| 
+( 0337 8BF8 ) 
+  LEA, DI> DB/ /DI 4 (SB,) 
+( 0339 8D7D04 ) 
+  MOV, B| T| CL> D0/ /DI 
+( 033C 8A0D ) 
+  JCXZ, 13 ( L' @EXFND ) (RB,) 
+( 033E E30D ) 
+  INCX, CX| 
+( 0340 41 ) 
+  CALLO, R| DX| 
+( 0341 FFD2 ) 
+  XCHGX, DI| 
+( 0343 97 ) 
+  J, Z| N| -17 ( L' @FNDLP ) (RB,) 
+( 0344 75EF ) 
+  MOVBI, CL| 2 ( ' ~0002 ) IB, 
+( 0346 B102 ) 
+  ADD, W| F| CX> DB/ /DI 2 (SB,) 
+( 0348 014D02 ) 
+  MOV, W| F| DI> D0/ /SI 
+( 034B 893C ) 
+
+=L @EXFND ( $034D ) 
+  MOV, W| T| AX> R| CX| 
+( 034D 8BC1 ) 
+  RET, 
+( 034F C3 ) 
+
+
+=L @FND ( $0350 ) 
+  423 ( L' (IO; ) DA, 
+( 0350 A701 ) 
+
+=L @@FND ( $0352 ) 
+  CALL, -35 ( L' @FINDER ) (RX,) 
+( 0352 E8DDFF ) 
+  PUSHX, SI| 
+( 0355 56 ) 
+  MOV, W| T| SI> R| BX| 
+( 0356 8BF3 ) 
+  REPZ, 
+( 0358 F3 ) 
+  COMPS, B| 
+( 0359 A6 ) 
+
+  -15522 ( ' ~C35E ) DW, 
+( 035A 5EC3 ) 
+
+=L @CFND ( $035C ) 
+  COMPS, W| 
+( 035C A7 ) 
+  ADD, W| F| DI> R| SI| 
+( 035D 01FE ) 
+  POPS, ES| 
+( 035F 07 ) 
+  CALL, -17 ( L' @@FND ) (RX,) 
+( 0360 E8EFFF ) 
+  DEC, B| D0/ /BX 
+( 0363 FE0F ) 
+
+  -22589 ( ' @A7C3 ) DW, 
+( 0365 C3A7 ) 
+  ADD, W| F| BP> R| AX| 
+( 0367 01E8 ) 
+    199 ( ' ~00C7 ) DB, 
+( 0369 C7 ) 
+    255 ( ' ~00FF ) DB, 
+( 036A FF ) 
+  CMP, W| T| BX> DB/ /DI -4 (SB,) 
+( 036B 3B5DFC ) 
+
+
+\   HI LEVEL ROUTINES
+  -28477 ( L' @90C3 ) DA, 
+( 036E C390 ) 
+  385 ( L' (@R+ ) DA, 
+( 0370 8101 ) 
+
+=L @NOP ( $0372 ) 
+  373 ( L' (; ) DA, 
+( 0372 7501 ) 
+
+=L @(D#0 ( $0374 ) 
+  465 ( L' (POP ) DA, 
+( 0374 D101 ) 
+  397 ( L' (XR ) DA, 
+( 0376 8D01 ) 
+  373 ( L' (; ) DA, 
+( 0378 7501 ) 
+
+=L @2* ( $037A ) 
+  459 ( L' (DUP ) DA, 
+( 037A CB01 ) 
+
+=L @+ ( $037C ) 
+  491 ( L' (+2/ ) DA, 
+( 037C EB01 ) 
+  311 ( L' (DROP; ) DA, 
+( 037E 3701 ) 
+
+=L @(D#1 ( $0380 ) 
+  465 ( L' (POP ) DA, 
+( 0380 D101 ) 
+  397 ( L' (XR ) DA, 
+( 0382 8D01 ) 
+
+=L @2+ ( $0384 ) 
+  321 ( L' (@+; ) DA, 
+( 0384 4101 ) 
+  2 ( L' ~0002 ) DA, 
+( 0386 0200 ) 
+
+=L @(D#2 ( $0388 ) 
+  465 ( L' (POP ) DA, 
+( 0388 D101 ) 
+  397 ( L' (XR ) DA, 
+( 038A 8D01 ) 
+
+=L @4+ ( $038C ) 
+  321 ( L' (@+; ) DA, 
+( 038C 4101 ) 
+  4 ( L' @0004 ) DA, 
+( 038E 0400 ) 
+
+=L @(SET2 ( $0390 ) 
+  896 ( L' @(D#1 ) DA, 
+( 0390 8003 ) 
+
+=L @! ( $0392 ) 
+  443 ( L' (PUSH ) DA, 
+( 0392 BB01 ) 
+  379 ( L' (!R+ ) DA, 
+( 0394 7B01 ) 
+  319 ( L' (RDRP; ) DA, 
+( 0396 3F01 ) 
+
+=L @(CON3 ( $0398 ) 
+  904 ( L' @(D#2 ) DA, 
+( 0398 8803 ) 
+
+=L @@ ( $039A ) 
+  443 ( L' (PUSH ) DA, 
+( 039A BB01 ) 
+
+=L @(CON ( $039C ) 
+  385 ( L' (@R+ ) DA, 
+( 039C 8101 ) 
+
+=L @EXIT ( $039E ) 
+  319 ( L' (RDRP; ) DA, 
+( 039E 3F01 ) 
+
+=L @(XARY ( $03A0 ) 
+  890 ( L' @2* ) DA, 
+( 03A0 7A03 ) 
+  465 ( L' (POP ) DA, 
+( 03A2 D101 ) 
+  892 ( L' @+ ) DA, 
+( 03A4 7C03 ) 
+
+=L @EXEC ( $03A6 ) 
+  922 ( L' @@ ) DA, 
+( 03A6 9A03 ) 
+
+=L @EXECUTE ( $03A8 ) 
+  309 ( L' (PUSH; ) DA, 
+( 03A8 3501 ) 
+
+=L @!STATE ( $03AA ) 
+  948 ( L' @STATE@ ) DA, 
+( 03AA B403 ) 
+  397 ( L' (XR ) DA, 
+( 03AC 8D01 ) 
+  936 ( L' @EXECUTE ) DA, 
+( 03AE A803 ) 
+
+=L @LOCATOR ( $03B0 ) 
+  465 ( L' (POP ) DA, 
+( 03B0 D101 ) 
+  331 ( L' (SKIP ) DA, 
+( 03B2 4B01 ) 
+
+=L @STATE@ ( $03B4 ) 
+  920 ( L' @(CON3 ) DA, 
+( 03B4 9803 ) 
+  912 ( L' @(SET2 ) DA, 
+( 03B6 9003 ) 
+
+=L @LOXEC ( $03B8 ) 
+  361 ( L' (JUMP ) DA, 
+( 03B8 6901 ) 
+  1192 ( L' @INTERP ) DA, 
+( 03BA A804 ) 
+
+=L @|#,, ( $03BC ) 
+  361 ( L' (JUMP ) DA, 
+( 03BC 6901 ) 
+  712 ( L' @02C8 ) DA, 
+( 03BE C802 ) 
+
+=L @|LTIB ( $03C0 ) 
+  966 ( L' @LTIB ) DA, 
+( 03C0 C603 ) 
+  407 ( L' (EX ) DA, 
+( 03C2 9701 ) 
+  912 ( L' @(SET2 ) DA, 
+( 03C4 9003 ) 
+
+=L @LTIB ( $03C6 ) 
+  924 ( L' @(CON ) DA, 
+( 03C6 9C03 ) 
+  31488 ( L' @7B00 ) DA, 
+( 03C8 007B ) 
+  912 ( L' @(SET2 ) DA, 
+( 03CA 9003 ) 
+
+=L @ETIB ( $03CC ) 
+  924 ( L' @(CON ) DA, 
+( 03CC 9C03 ) 
+  -32768 ( L' @8000 ) DA, 
+( 03CE 0080 ) 
+
+=L @|H ( $03D0 ) 
+  982 ( L' @H ) DA, 
+( 03D0 D603 ) 
+  407 ( L' (EX ) DA, 
+( 03D2 9701 ) 
+  912 ( L' @(SET2 ) DA, 
+( 03D4 9003 ) 
+
+=L @H ( $03D6 ) 
+  924 ( L' @(CON ) DA, 
+( 03D6 9C03 ) 
+  1264 ( L' @04F0 ) DA, 
+( 03D8 F004 ) 
+
+=L @|T ( $03DA ) 
+  992 ( L' @T ) DA, 
+( 03DA E003 ) 
+  407 ( L' (EX ) DA, 
+( 03DC 9701 ) 
+  912 ( L' @(SET2 ) DA, 
+( 03DE 9003 ) 
+
+=L @T ( $03E0 ) 
+  924 ( L' @(CON ) DA, 
+( 03E0 9C03 ) 
+  -10240 ( L' @D800 ) DA, 
+( 03E2 00D8 ) 
+  912 ( L' @(SET2 ) DA, 
+( 03E4 9003 ) 
+
+=L @ERROR ( $03E6 ) 
+  924 ( L' @(CON ) DA, 
+( 03E6 9C03 ) 
+  0 ( L' @0000 ) DA, 
+( 03E8 0000 ) 
+  912 ( L' @(SET2 ) DA, 
+( 03EA 9003 ) 
+
+=L @TINT ( $03EC ) 
+  924 ( L' @(CON ) DA, 
+( 03EC 9C03 ) 
+  994 ( L' @03E2 ) DA, 
+( 03EE E203 ) 
+
+=L @TBUF ( $03F0 ) 
+  924 ( L' @(CON ) DA, 
+( 03F0 9C03 ) 
+  -2048 ( L' @F800 ) DA, 
+( 03F2 00F8 ) 
+
+=L @(@, ( $03F4 ) 
+  884 ( L' @(D#0 ) DA, 
+( 03F4 7403 ) 
+
+=L @~@, ( $03F6 ) 
+  411 ( L' (NOP ) DA, 
+( 03F6 9B01 ) 
+  922 ( L' @@ ) DA, 
+( 03F8 9A03 ) 
+
+=L @~, ( $03FA ) 
+  1012 ( L' @(@, ) DA, 
+( 03FA F403 ) 
+
+=L @!+ ( $03FC ) 
+  443 ( L' (PUSH ) DA, 
+( 03FC BB01 ) 
+  379 ( L' (!R+ ) DA, 
+( 03FE 7B01 ) 
+  465 ( L' (POP ) DA, 
+( 0400 D101 ) 
+  373 ( L' (; ) DA, 
+( 0402 7501 ) 
+
+=L @,; ( $0404 ) 
+  1012 ( L' @(@, ) DA, 
+( 0404 F403 ) 
+  373 ( L' (; ) DA, 
+( 0406 7501 ) 
+
+=L @(LIT, ( $0408 ) 
+  1012 ( L' @(@, ) DA, 
+( 0408 F403 ) 
+  880 ( L' (LIT ) DA, 
+( 040A 7003 ) 
+
+=L @>DEA ( $040C ) 
+  908 ( L' @4+ ) DA, 
+( 040C 8C03 ) 
+
+=L @NAME> ( $040E ) 
+  735 ( L' (CSTR ) DA, 
+( 040E DF02 ) 
+  361 ( L' (JUMP ) DA, 
+( 0410 6901 ) 
+  892 ( L' @+ ) DA, 
+( 0412 7C03 ) 
+
+=L @ALIGN ( $0414 ) 
+  282 ( L' @1+ ) DA, 
+( 0414 1A01 ) 
+
+=L @EVEN ( $0416 ) 
+  313 ( L' (@&; ) DA, 
+( 0416 3901 ) 
+  -2 ( L' @FFFE ) DA, 
+( 0418 FEFF ) 
+
+=L @("SKIP ( $041A ) 
+  447 ( L' (J ) DA, 
+( 041A BF01 ) 
+  465 ( L' (POP ) DA, 
+( 041C D101 ) 
+  465 ( L' (POP ) DA, 
+( 041E D101 ) 
+  1038 ( L' @NAME> ) DA, 
+( 0420 0E04 ) 
+  1044 ( L' @ALIGN ) DA, 
+( 0422 1404 ) 
+  307 ( L' (2PUSH; ) DA, 
+( 0424 3301 ) 
+
+=L @0<>; ( $0426 ) 
+  521 ( L' (0= ) DA, 
+( 0426 0902 ) 
+
+=L @0; ( $0428 ) 
+  325 ( L' (IF ) DA, 
+( 0428 4501 ) 
+  926 ( L' @EXIT ) DA, 
+( 042A 9E03 ) 
+  373 ( L' (; ) DA, 
+( 042C 7501 ) 
+
+=L @(?" ( $042E ) 
+  1084 ( L' @043C ) DA, 
+( 042E 3C04 ) 
+
+=L @(0" ( $0430 ) 
+  521 ( L' (0= ) DA, 
+( 0430 0902 ) 
+
+=L @((A" ( $0432 ) 
+  970 ( L' @03CA ) DA, 
+( 0432 CA03 ) 
+  996 ( L' @03E4 ) DA, 
+( 0434 E403 ) 
+  1064 ( L' @0; ) DA, 
+( 0436 2804 ) 
+  341 ( L' (COLD ) DA, 
+( 0438 5501 ) 
+
+=L @@((A" ( $043A ) 
+  1190 ( L' @,< ) DA, 
+( 043A A604 ) 
+
+=L @043C ( $043C ) 
+  284 ( L' @BYE ) DA, 
+( 043C 1C01 ) 
+  272 ( L' @QUIT ) DA, 
+( 043E 1001 ) 
+
+=L @">NUM ( $0440 ) 
+  735 ( L' (CSTR ) DA, 
+( 0440 DF02 ) 
+  684 ( L' @ATOI ) DA, 
+( 0442 AC02 ) 
+
+=L @?? ( $0444 ) 
+  1074 ( L' @((A" ) DA, 
+( 0444 3204 ) 
+  16129 ( L' @3F01 ) DA, 
+( 0446 013F ) 
+  373 ( L' (; ) DA, 
+( 0448 7501 ) 
+
+=L @">NUMC ( $044A ) 
+  1088 ( L' @">NUM ) DA, 
+( 044A 4004 ) 
+  361 ( L' (JUMP ) DA, 
+( 044C 6901 ) 
+  956 ( L' @|#,, ) DA, 
+( 044E BC03 ) 
+
+=L @STR ( $0450 ) 
+  443 ( L' (PUSH ) DA, 
+( 0450 BB01 ) 
+  385 ( L' (@R+ ) DA, 
+( 0452 8101 ) 
+  397 ( L' (XR ) DA, 
+( 0454 8D01 ) 
+  375 ( L' (POP; ) DA, 
+( 0456 7701 ) 
+
+=L @H>T ( $0458 ) 
+  982 ( L' @H ) DA, 
+( 0458 D603 ) 
+  1104 ( L' @STR ) DA, 
+( 045A 5004 ) 
+  986 ( L' @|T ) DA, 
+( 045C DA03 ) 
+  361 ( L' (JUMP ) DA, 
+( 045E 6901 ) 
+  740 ( L' @MPUSH ) DA, 
+( 0460 E402 ) 
+
+=L @TOKEN ( $0462 ) 
+  704 ( L' @02C0 ) DA, 
+( 0462 C002 ) 
+  32 ( L' ~0020 ) DA, 
+( 0464 2000 ) 
+  1134 ( L' @WORD ) DA, 
+( 0466 6E04 ) 
+
+=L @?C@ ( $0468 ) 
+  459 ( L' (DUP ) DA, 
+( 0468 CB01 ) 
+
+=L @C@ ( $046A ) 
+  727 ( L' (C@ ) DA, 
+( 046A D702 ) 
+  373 ( L' (; ) DA, 
+( 046C 7501 ) 
+
+=L @WORD ( $046E ) 
+  1142 ( L' @PARSE ) DA, 
+( 046E 7604 ) 
+
+=L @S>TB! ( $0470 ) 
+  1008 ( L' @TBUF ) DA, 
+( 0470 F003 ) 
+  361 ( L' (JUMP ) DA, 
+( 0472 6901 ) 
+  760 ( L' @S>"! ) DA, 
+( 0474 F802 ) 
+
+=L @PARSE ( $0476 ) 
+  411 ( L' (NOP ) DA, 
+( 0476 9B01 ) 
+  972 ( L' @ETIB ) DA, 
+( 0478 CC03 ) 
+  960 ( L' @|LTIB ) DA, 
+( 047A C003 ) 
+  361 ( L' (JUMP ) DA, 
+( 047C 6901 ) 
+  782 ( L' @PARS ) DA, 
+( 047E 0E03 ) 
+
+=L @TOKEN? ( $0480 ) 
+  1122 ( L' @TOKEN ) DA, 
+( 0480 6204 ) 
+
+=L @N?? ( $0482 ) 
+  521 ( L' (0= ) DA, 
+( 0482 0902 ) 
+  361 ( L' (JUMP ) DA, 
+( 0484 6901 ) 
+  1092 ( L' @?? ) DA, 
+( 0486 4404 ) 
+
+=L @:! ( $0488 ) 
+  411 ( L' (NOP ) DA, 
+( 0488 9B01 ) 
+
+=L @=H ( $048A ) 
+  982 ( L' @H ) DA, 
+( 048A D603 ) 
+
+=L @=: ( $048C ) 
+  1084 ( L' @043C ) DA, 
+( 048C 3C04 ) 
+  1152 ( L' @TOKEN? ) DA, 
+( 048E 8004 ) 
+  411 ( L' (NOP ) DA, 
+( 0490 9B01 ) 
+
+=L @(=: ( $0492 ) 
+  1128 ( L' @?C@ ) DA, 
+( 0492 6804 ) 
+  282 ( L' @1+ ) DA, 
+( 0494 1A01 ) 
+  986 ( L' @|T ) DA, 
+( 0496 DA03 ) 
+  740 ( L' @MPUSH ) DA, 
+( 0498 E402 ) 
+  1180 ( L' @!- ) DA, 
+( 049A 9C04 ) 
+
+=L @!- ( $049C ) 
+  1184 ( L' @2- ) DA, 
+( 049C A004 ) 
+  1020 ( L' @!+ ) DA, 
+( 049E FC03 ) 
+
+=L @2- ( $04A0 ) 
+  321 ( L' (@+; ) DA, 
+( 04A0 4101 ) 
+  -2 ( L' @FFFE ) DA, 
+( 04A2 FEFF ) 
+
+=L @;` ( $04A4 ) 
+  1028 ( L' @,; ) DA, 
+( 04A4 0404 ) 
+
+=L @,< ( $04A6 ) 
+  944 ( L' @LOCATOR ) DA, 
+( 04A6 B003 ) 
+
+=L @INTERP ( $04A8 ) 
+  1004 ( L' @TINT ) DA, 
+( 04A8 EC03 ) 
+  922 ( L' @@ ) DA, 
+( 04AA 9A03 ) 
+  848 ( L' @FND ) DA, 
+( 04AC 5003 ) 
+
+=L @[]OPER ( $04AE ) 
+  928 ( L' @(XARY ) DA, 
+( 04AE A003 ) 
+  1088 ( L' @">NUM ) DA, 
+( 04B0 4004 ) 
+  1098 ( L' @">NUMC ) DA, 
+( 04B2 4A04 ) 
+  934 ( L' @EXEC ) DA, 
+( 04B4 A603 ) 
+  1014 ( L' @~@, ) DA, 
+( 04B6 F603 ) 
+
+=L @: ( $04B8 ) 
+  411 ( L' (NOP ) DA, 
+( 04B8 9B01 ) 
+  1160 ( L' @:! ) DA, 
+( 04BA 8804 ) 
+
+=L @>, ( $04BC ) 
+  944 ( L' @LOCATOR ) DA, 
+( 04BC B003 ) 
+  992 ( L' @T ) DA, 
+( 04BE E003 ) 
+  860 ( L' @CFND ) DA, 
+( 04C0 5C03 ) 
+  459 ( L' (DUP ) DA, 
+( 04C2 CB01 ) 
+  521 ( L' (0= ) DA, 
+( 04C4 0902 ) 
+  325 ( L' (IF ) DA, 
+( 04C6 4501 ) 
+  1234 ( L' @04D2 ) DA, 
+( 04C8 D204 ) 
+  441 ( L' (DROP ) DA, 
+( 04CA B901 ) 
+  992 ( L' @T ) DA, 
+( 04CC E003 ) 
+  848 ( L' @FND ) DA, 
+( 04CE 5003 ) 
+  282 ( L' @1+ ) DA, 
+( 04D0 1A01 ) 
+
+=L @04D2 ( $04D2 ) 
+  361 ( L' (JUMP ) DA, 
+( 04D2 6901 ) 
+  1198 ( L' @[]OPER ) DA, 
+( 04D4 AE04 ) 
+
+=L @(MAC ( $04D6 ) 
+  884 ( L' @(D#0 ) DA, 
+( 04D6 7403 ) 
+  938 ( L' @!STATE ) DA, 
+( 04D8 AA03 ) 
+  1212 ( L' @>, ) DA, 
+( 04DA BC04 ) 
+
+=L @SEVAL ( $04DC ) 
+  735 ( L' (CSTR ) DA, 
+( 04DC DF02 ) 
+
+=L @EVAL ( $04DE ) 
+  882 ( L' @NOP ) DA, 
+( 04DE 7203 ) 
+  331 ( L' (SKIP ) DA, 
+( 04E0 4B01 ) 
+  952 ( L' @LOXEC ) DA, 
+( 04E2 B803 ) 
+
+=L @@EVAL ( $04E4 ) 
+  882 ( L' @NOP ) DA, 
+( 04E4 7203 ) 
+  1122 ( L' @TOKEN ) DA, 
+( 04E6 6204 ) 
+  521 ( L' (0= ) DA, 
+( 04E8 0902 ) 
+  325 ( L' (IF ) DA, 
+( 04EA 4501 ) 
+  1250 ( L' @04E2 ) DA, 
+( 04EC E204 ) 
+  311 ( L' (DROP; ) DA, 
+( 04EE 3701 ) 
+
+=L @04F0 ( $04F0 ) 
+  12 ( L' @000C ) DA, 
+( 04F0 0C00 ) 
+  1164 ( L' @=: ) DA, 
+( 04F2 8C04 ) 
+  0 ( L' @0000 ) DA, 
+( 04F4 0000 ) 
+  15618 ( L' @3D02 ) DA, 
+( 04F6 023D ) 
+  314 ( L' @013A ) DA, 
+( 04F8 3A01 ) 
+  0 ( L' @0000 ) DA, 
+( 04FA 0000 ) 
+  0 ( L' @0000 ) DA, 
+( 04FC 0000 ) 
+  0 ( L' @0000 ) DA, 
+( 04FE 0000 ) 
+

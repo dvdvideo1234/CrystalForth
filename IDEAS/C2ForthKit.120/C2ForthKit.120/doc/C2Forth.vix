@@ -1,0 +1,145 @@
+\entry {\code {!!firstpage!!}}{6}
+\initial {"}
+\entry {\code {"c"}}{17}
+\entry {\code {"forth"}}{17}
+\initial {#}
+\entry {\code {#exitchain}}{24}
+\entry {\code {#include}}{17}
+\entry {\code {#included}}{17}
+\initial {$}
+\entry {\code {$>stream}}{13}
+\entry {\code {$addlitfw}}{15}
+\initial {'}
+\entry {\code {'literal'}}{11}
+\initial {(}
+\entry {\code {(label)}}{14}
+\initial {.}
+\entry {\code {.dword}}{12}
+\entry {\code {.f}}{15}
+\entry {\code {.fw}}{15}
+\entry {\code {.l}}{14}
+\entry {\code {.label}}{14}
+\initial {<}
+\entry {\code {<periodic-resolve>}}{11}
+\initial {>}
+\entry {\code {>name-store}}{16}
+\entry {\code {>pos}}{12}
+\initial {?}
+\entry {\code {?compile-pause}}{12}
+\initial {[}
+\entry {\code {[ctype]}}{23}
+\entry {\code {[eof]}}{17}
+\entry {\code {[literal]}}{11}
+\initial {_}
+\entry {\code {___assert}}{21}
+\entry {\code {_abort}}{24}
+\entry {\code {_atexit}}{25}
+\entry {\code {_atoi}}{25}
+\entry {\code {_exit}}{24}
+\entry {\code {_free}}{25}
+\entry {\code {_getchar}}{24}
+\entry {\code {_isalnum}}{23}
+\entry {\code {_isalpha}}{23}
+\entry {\code {_isascii}}{23}
+\entry {\code {_isblank}}{23}
+\entry {\code {_iscntrl}}{23}
+\entry {\code {_isdigit}}{23}
+\entry {\code {_isgraph}}{23}
+\entry {\code {_islower}}{23}
+\entry {\code {_isprint}}{23}
+\entry {\code {_ispunct}}{23}
+\entry {\code {_isspace}}{23}
+\entry {\code {_isupper}}{23}
+\entry {\code {_isxdigit}}{23}
+\entry {\code {_kbhit}}{21}
+\entry {\code {_malloc}}{25}
+\entry {\code {_memcmp}}{25}
+\entry {\code {_memcpy}}{25}
+\entry {\code {_memset}}{25}
+\entry {\code {_printf}}{24}
+\entry {\code {_putchar}}{24}
+\entry {\code {_puts}}{24}
+\entry {\code {_realloc}}{25}
+\entry {\code {_sprintf}}{24}
+\entry {\code {_sscanf}}{24}
+\entry {\code {_stderr}}{24}
+\entry {\code {_stdin}}{24}
+\entry {\code {_stdout}}{24}
+\entry {\code {_strcat}}{25}
+\entry {\code {_strcpy}}{25}
+\entry {\code {_strlen}}{25}
+\entry {\code {_strtol}}{25}
+\entry {\code {_tolower}}{23}
+\entry {\code {_toupper}}{23}
+\entry {\code {_vm_depth}}{17}
+\entry {\code {_vm_pick}}{17}
+\entry {\code {_vm_va_depth}}{17}
+\initial {A}
+\entry {\code {addlabel}}{14}
+\entry {\code {allot&erase}}{12}
+\initial {C}
+\entry {\code {c-build-start-dp}}{17}
+\entry {\code {c@s}}{12}
+\entry {\code {cells}}{24}
+\entry {\code {char>cell}}{12}
+\entry {\code {cksum}}{12}
+\entry {\code {codestream}}{13}
+\entry {\code {commaaddr}}{16}
+\entry {\code {compileaddrlit}}{16}
+\entry {\code {compilebranch}}{16}
+\entry {\code {compilecall}}{16}
+\entry {\code {compilecondbranch}}{16}
+\entry {\code {compilejump}}{16}
+\entry {\code {constant-xt?}}{11}
+\entry {\code {ctype-table}}{23}
+\initial {D}
+\entry {\code {destroyfwchain}}{15}
+\entry {\code {destroylabelchain}}{14}
+\initial {E}
+\entry {\code {evalstream}}{13}
+\entry {\code {exitchainidx}}{24}
+\entry {\code {exportlbl}}{14}
+\entry {\code {exportpublics}}{14}
+\entry {\code {extern}}{17}
+\initial {F}
+\entry {\code {ff_cell}}{15}
+\entry {\code {findlabel}}{14}
+\entry {\code {findresolvedlabel}}{14}
+\entry {\code {flabel}}{16}
+\entry {\code {flush-opt}}{11}
+\entry {\code {fwchain}}{15}
+\initial {G}
+\entry {\code {garbagecollectfw}}{15}
+\entry {\code {garbagecollectlbl}}{14}
+\entry {\code {get-parent-cfa}}{11}
+\initial {H}
+\entry {\code {h>stream}}{13}
+\initial {I}
+\entry {\code {icompare}}{12}
+\initial {L}
+\entry {\code {label}}{16}
+\entry {\code {labelchain}}{14}
+\entry {\code {lp@}}{11}
+\initial {N}
+\entry {\code {name-store}}{15}
+\entry {\code {newlabel}}{14}
+\entry {\code {nonamegap}}{11}
+\initial {P}
+\entry {\code {parsenumericoffset}}{16}
+\entry {\code {patchlabel}}{14}
+\entry {\code {periodic-resolve?}}{11}
+\entry {\code {public}}{16}
+\initial {R}
+\entry {\code {removelocallabels}}{14}
+\entry {\code {resetstream}}{13}
+\entry {\code {resolve}}{15}
+\entry {\code {resolvefw}}{15}
+\initial {S}
+\entry {\code {set-comp-pause-range}}{12}
+\entry {\code {size-of-machine-call}}{11}
+\initial {U}
+\entry {\code {upc}}{12}
+\initial {Z}
+\entry {\code {zcount}}{12}
+\entry {\code {zstrlen}}{12}
+

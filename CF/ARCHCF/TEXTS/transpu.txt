@@ -1,0 +1,40 @@
+Mnemonic    Description 
+J   Jump – add immediate operand to instruction pointer 
+LDLP    Load Local Pointer – load a Workspace-relative pointer onto the top of the register stack 
+PFIX    Prefix – general way to increase lower nibble of following primary instruction 
+LDNL    Load non-local – load a value offset from address at top of stack 
+LDC     Load constant – load constant operand onto the top of the register stack 
+LDNLP   Load Non-local pointer – load address, offset from top of stack 
+NFIX    Negative prefix – general way to negate (and possibly increase) lower nibble 
+LDL     Load Local – load value offset from Workspace 
+ADC     Add Constant – add constant operand to top of register stack 
+CALL    Subroutine call – push instruction pointer and jump 
+CJ      Conditional jump – depending on value at top of register stack 
+AJW     Adjust workspace – add operand to workspace pointer 
+EQC     Equals constant – test if top of register stack equals constant operand 
+STL     Store local – store at constant offset from workspace 
+STNL    Store non-local – store at address offset from top of stack 
+OPR     Operate – general way to extend instruction set 
+
+All these instructions take a constant, representing an offset or an arithmetic constant. If this constant was less than 16, all these instructions coded to one byte. 
+
+
+The first 16 'secondary' zero-operand instructions (using the OPR primary instruction) were: 
+Mnemonic    Description 
+
+REV     Reverse – swap two top items of register stack 
+LB  Load byte 
+BSUB    Byte subscript 
+ENDP    End process 
+DIFF    Difference 
+ADD     Add 
+GCALL   General Call – swap top of stack and instruction pointer 
+IN      Input – receive message 
+PROD    Product 
+GT      Greater Than – the only comparison instruction 
+WSUB    Word subscript 
+OUT     Output – send message 
+SUB     Subtract 
+STARTP  Start process 
+OUTBYTE     Output byte – send one-byte message 
+OUTWORD     Output word – send one-word message 

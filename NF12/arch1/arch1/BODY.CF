@@ -1,0 +1,90 @@
+
+      
+      \   INTERPRETTER 
+      
+' ">NUM CONST A">NUM 
+
+: TARG,< AT FINDEX 
+
+  TEST? $11 STATE? BREAK
+  
+: `INTER T FND 
+
+  TEST? $12 STATE? BREAK
+  
+  A">NUM ?; @ ;
+  
+  TEST? DUP `LASTW? ! $13 STATE? BREAK
+
+ 
+ 
+      \   COMPILER
+      
+' , CONST ADR, 
+' ">NUMC CONST A">NUM,  
+   
+: TARG: NOP =H  
+: TARG>, TO FINDEX
+
+  TEST?  $21 STATE? BREAK
+
+    vTARG CFND
+    
+  TEST?  $22 STATE? BREAK
+    
+    IF @ DUP ODD
+
+  TEST?  $23 STATE? BREAK
+
+    ADR, ?; NOP ;THEN  vTARG FND
+
+  TEST?  $23 STATE? BREAK
+
+    A">NUM, ?;
+
+  TEST?  $24 STATE? BREAK
+
+ @ ADR, ;      
+ 
+\ : TARG;  NOP TARG,<  : ,; (@, ;;
+
+      \ LAST WORDS 
+
+
+: (MAC (D#0  
+: SEVAL CSTR 
+: EVAL NOP 
+
+  TEST? CR ."EVAL" $30 STATE? BREAK
+  
+: @EVAL TOKEN
+
+  TEST? $31 STATE? BREAK
+  
+      DROP; ?;
+      
+  TEST? DUP ID. $32 STATE? BREAK
+  
+      FINDEX  (EXEC 
+      
+  TEST? $33 STATE? BREAK
+  
+ RECURSE ;
+
+: INIZ H>T
+
+  TEST? CR ."TEST" $41 STATE? BREAK
+  
+      CALL  AHEAD CSWAP>  
+      THEN
+      
+  TEST? $42 STATE? BREAK
+  
+        TO @INIT vERR           
+: QUIT TARG,< 
+: `QUIT READLN 
+: `MAIN     THEN
+
+  TEST? $43 STATE? BREAK
+  
+        EVAL vOK  `QUIT ;

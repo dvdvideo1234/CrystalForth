@@ -1,0 +1,380 @@
+
+@chapter Forth Style Output from Compiler
+
+@*
+This section describes the format of the compiler output which is
+to be built on a Forth System. In many ways the output is Forth
+but with certain necessary extensions. The local variable format
+may vary between versions of the C compiler and Forth target.
+@vskip 0pt
+
+@section Simple C program
+
+
+@vskip -6pt
+@*
+
+@vskip 0pt
+
+@cartouche
+@example
+void main( void )
+@{
+        int a;
+        a = 0;
+        while( a < 26 )
+        @{
+                putchar( a+65 );
+                a++;
+        @}
+        printf(("\n"));
+@} @end example
+@end cartouche
+@vskip 6.0in
+
+@section Output from the C to Forth Compiler
+
+
+@vskip -6pt
+
+@cartouche
+@example
+PUBLIC _main
+FLABEL _main
+:NONAME
+
+        MAKELVS [ #0 w, #1 w, ]
+        #0
+
+        [ #-4 lv, ]
+        !
+        CompileBranch @@3
+LABEL  @@2
+
+        [ #-4 lv, ]
+        @@
+        #65
+        +
+        CompileCall _putchar
+        drop
+        #1
+
+        [ #-4 lv, ]
+        +!
+LABEL  @@3
+
+        [ #-4 lv, ]
+        @@
+        #26
+        <
+        CompileCondBranch @@2
+        CompileAddrLit @@5 #0
+        CompileCall _printf
+        drop
+LABEL  @@1
+
+        RELLVS
+; drop
+
+EXTERN _printf
+EXTERN _putchar
+LABEL  @@5
+                $0A c,
+                $00 c, @end example
+@end cartouche
+
+@section Binary Generated on VFX Forth
+
+
+@vskip -6pt
+
+@cartouche
+@example
+Target    Assembler/Binary Data Compiled               Correlation To
+Address                                                Original C Source
+
+
+00469ED6  call    MAKELVS                              void main( void )
+00469EDB    Inline data16: 0000                        @{
+00469EDD    Inline data16: 0001                          int a;
+
+00469EDF  mov     dword Ptr [edi+-04], 00000000          a = 0;
+
+00469EE6  call    LIT                                    while ( a<26 )
+00469EEB    Inline data32: 00469F14 ( Label @@3 )
+00469EEF  push    ebx
+00469EF0  mov     ebx, [ebp]
+00469EF3  lea     ebp, [ebp+04]
+00469EF6  ret
+
+Label @@2  mov     edx, [Edi+-04]                         putchar( a+65 )
+00469EFA  add     edx, 41
+00469EFD  lea     ebp, [ebp+-04]
+00469F00  mov     [ebp], ebx
+00469F03  mov     ebx, edx
+00469F05  call    _PUTCHAR
+00469F0A  add     [edi+-04], 01                          a++;
+00469F0E  mov     ebx, [ebp]
+00469F11  lea     ebp, [edp+04]
+
+Label @@3  cmp     [edi+-04], 1a                          .... Test code for
+00469F18  jnl/ge  00469F24                               .... WHILE clause
+00469F1E  push    00469EF7 ( Label @@2 )
+00469F23  ret
+
+00469F24  call    LIT                                    printf("\n");
+00469F29    Inline data32: 00469F3E ( Label @@5 )
+00469F2D  call    _PRINTF
+00469F32  mov     ebx, [ebp]
+00469F35  lea     ebp, [ebp+04]
+
+00469F38  call    RELLVS                               @}
+00469F3D  ret
+
+Label @@5    Inline data8: 0                            .... String Literal
+00469F3F    Inline data8: 0 @end example
+@end cartouche
+@*
+The output is largely Forth code with some non-standard
+words being used. These "strange" definitions are Forth compiler
+directives built in a harness file on top of the Forth Kernel by
+exploiting Forth's ease of extensibility.
+@vskip 0pt
+@*
+The compiler aids are split into 4 groups: Label handling, Control
+flow, data address literals and local frame access. Both the flow
+control directives and the data address literal directives support
+forward referencing by name and offset.
+@vskip 0pt
+@*
+Most "traditional" C compilers produce code from top to bottom and
+assume a back-end assembler which can do 2 pass compilation. The
+Forth system cannot easily be coerced into a dual pass compiler
+so any attempt to reference an unresolved label adds a record into
+a forward reference chain, and generates a form of binary whereby
+the address can be patched up later. For this reason there are
+"magic" compiler directives for anything which may be formed by
+using a label which could be forward references.
+@vskip 0pt
+
+@section Code Generation Extensions
+
+
+@vskip -6pt
+@*
+The following definitions are used to provide required compilation
+behaviour not standard in Forth. All definitions for data addresses
+and flow control are @strong{@code{IMMEDIATE}}.
+@vskip 0pt
+@*
+For details of how to implement these directives as well as formal
+stack comments and operation descriptions, please see the section
+describing the current reference harness.
+@vskip 0pt
+
+@subsection Label Creation
+
+
+@vskip -4pt
+@*
+There are four compiler directives which create and modify labels.
+All branch targets and data addresses have a label.
+@vskip 0pt
+
+
+@table @code
+@item PUBLIC
+Parses a <name> and creates a label entry with no
+ specified type or address.
+
+@end table
+
+
+
+@table @code
+@item EXTERN
+Currently not used since C2F assumes all labels are
+ global and anything not found in the current C source
+ will be searched for in the Forth dictionary.
+
+@end table
+
+
+
+@table @code
+@item FLABEL
+Used to define an address for a function entry point.
+ FLABEL will either patch the address and type of an
+ already defined PUBLIC label (creating a public function
+ label), or will create a new code label for the current
+ address. Note that the address stored by FLABEL is not
+ the current value of HERE, but the value HERE will be at
+ after executing a :NONAME. IE, the label address stored
+ will be the XT of the following headerless code.
+
+@end table
+
+
+
+@table @code
+@item LABEL
+Behaves as FLABEL for internal branch targets and
+ data addresses. The value stored will be the value of
+ HERE. Therefore LABEL cannot be used for function entry
+ points.
+
+@end table
+
+
+@subsection Local Frame Access
+
+
+@vskip -4pt
+@*
+Local frame access is performed by exploiting the implementation
+of local variables which is common to all MPE targets. For the
+purposes of the C2F compiler we need three definitions:
+@vskip 0pt
+
+
+@table @code
+@item MAKELVS
+This definition builds a local frame of a specified size
+ and moves any parameters from the data stack into the
+ local frame. The frame itself is usually created by
+ "dropping" the return stack pointer.
+ MAKELVS is always followed by a 32 bit number where the
+ high 16 bits represent the number of arguments and the
+ low 16 bits represent the size in bytes of the local
+ data space.
+
+@end table
+
+
+
+@table @code
+@item RELLVS
+This definition will release the last allocated locals
+ frame and restore the return stack pointer.
+
+@end table
+
+
+
+@table @code
+@item LV,
+An internal definition which when executed will take
+ a literal frame offset value and compile the code
+ necessary to put the address of the local frame + offset
+ onto the data stack at runtime.
+
+@end table
+
+@*
+The local variable format used was designed during the SENDIT
+and PRACTICAL projects. The frame is built on the return stack.
+@vskip 0pt
+
+@cartouche
+@example
+argn
+...        paramteters
+arg1
+----
+previous return stack pointer (RSP)
+previous locals pointer (LP)
+---- new LP points to old LP
+uninitialised locals
+---- new RSP points here @end example
+@end cartouche
+@*
+In an environment with interrupts, the code laid or performed
+by @strong{@code{RELLVS}} must restore LP before RSP.
+@vskip 0pt
+
+@subsection Data Address Literals
+
+
+@vskip -4pt
+@*
+There are two definitions which are used whenever a data address
+literal reference needs to be compiled.
+@vskip 0pt
+
+
+@table @code
+@item CompileAddrLit
+Compiles code which will place the address of
+ the label specified on the top of the data stack
+ at runtime.
+
+@end table
+
+
+
+@table @code
+@item CommaAddrLit
+Places the address of the specified label into
+ the next cell in the dictionary.
+
+@end table
+
+@*
+Both these directives have the same argument syntax. The first
+token is the label name, and the second token is a signed 32bit
+offset literal. Forward referencing is built into these two
+compilers such that, if the label has allready been resolved the
+address is used directly either as a literal or via @strong{@code{,}}
+(comma). If the label has not yet been defined or resolved
+then code generation is completed assuming a value of 0 and
+a forward reference entry is generated for later resolution.
+Any generated code which requires a forward reference should
+be built in such a way that it can have its value changed
+later. This is implementation specific.
+@vskip 0pt
+
+@subsection Control Flow
+
+
+@vskip -4pt
+@*
+There are three definitions which are used to perform branches.
+@vskip 0pt
+
+
+@table @code
+@item CompileCall
+Lay code to CALL the address represented by
+ the given label. If the address is allready
+ known, this is a COMPILE, otherwise some code is
+ compiled whereby the XT is built into the
+ dictionary as a CELL which can be updated when
+ the address for the label has been resolved.
+
+@end table
+
+
+
+@table @code
+@item CompileBranch
+Similar to CompileCall except it behaves as an
+ assembler JUMP instruction. There is no direct
+ Forth equivilant to this operation, on a number
+ of systems it can be acheived by performing
+ calling a definition which performs >R. This is
+ very implementation specific but common.
+
+@end table
+
+
+
+@table @code
+@item CompileCondBranch
+Compiles code to perform a branch if
+ top-of-stack is non-zero. Some systems may have
+ the word ?BRAN for this operation, other more
+ ANS compliant targets can define this as using
+ POSTPONE IF POSTPONE COMPILEBRANCH POSTPONE THEN
+
+@end table
+

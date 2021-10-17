@@ -1,0 +1,940 @@
+
+@chapter VFX Forth Runtime Harness
+
+@*
+@emph{C2F_CORE.FTH} provides a reference source for the Forth compiler
+support harness required to use C2F on the MPE VFX Forth Kernels.
+@vskip 0pt
+@*
+This harness provides all the directives which occur in the
+compiler output source to control forward referencing etc.
+@vskip 0pt
+@*
+Documentation here is in source-code order and should be used as
+a roadmap when reading the reference code.
+@vskip 0pt
+
+@section Misc Configurations
+
+
+@vskip -6pt
+@vskip 6pt
+@findex <periodic-resolve>
+
+@example
+variable <periodic-resolve>     \ -- addr @end example
+
+@vskip -2pt
+This variable is used to force the system to attempt to resolve
+pending forward references each time the PUBLIC directive is
+encountered. Performing this extra pass on the resolve (rather than
+the default setting of only resolving at the end of a source) will
+reduce the amount of heap memory used at compile time, but will
+increase compilation time.
+@vskip 6pt
+@findex periodic-resolve?
+
+@example
+: periodic-resolve?     \ -- flag @end example
+
+@vskip -2pt
+Returns TRUE if periodic address resolution is required.
+
+@section CPU Specific Tools
+
+
+@vskip -6pt
+@*
+These words and utilities are used to generate target code. They
+are isolated here since the required settings and actions may
+vary from host to host.
+@vskip 0pt
+@*
+These primitives assume an MPE VFX Forth target.
+@vskip 0pt
+@vskip 6pt
+@findex size-of-machine-call
+
+@example
+5 constant size-of-machine-call @end example
+
+@vskip -2pt
+The size in address-units of a target call instruction. Primarily
+used by 'literal'
+@vskip 6pt
+@findex get-parent-cfa
+
+@example
+: get-parent-cfa        \ xt -- addr:32 @end example
+
+@vskip -2pt
+When passed the xt of a definition which is a child of a defining
+word, this returns the xt of the runtime action's(parent. Used
+in the CONSTANT-XT? definition.
+@vskip 6pt
+@findex nonamegap
+
+@example
+: NonameGap     \ loc -- xt @end example
+
+@vskip -2pt
+This primitive will return the XT that would be generated if
+:NONAME was invoked whilst HERE was at loc. It is used by the
+system to record function entry points.
+@vskip 6pt
+@findex lp@@
+
+@example
+code lp@@        \ -- *lp @end example
+
+@vskip -2pt
+This definition returns the local frame pointer. The format of the
+local frame is defined in the MPE Locals Section of this text.
+@vskip 6pt
+@findex flush-opt
+
+@example
+: flush-opt     \ -- @end example
+
+@vskip -2pt
+This directive forces the MPE code optimiser to flush any pending
+code trees.
+@vskip 6pt
+@findex [literal]
+
+@example
+: [literal]     \ n -- ; @end example
+
+@vskip -2pt
+This directive lays down the target code necessary to generate the
+literal value N at runtime.
+@vskip 6pt
+@findex 'literal'
+
+@example
+: 'literal'     \ dp n -- @end example
+
+@vskip -2pt
+This directive can change the literal value compiled by [literal]
+when HERE was at DP. It is used to resolve forward referenced
+data address literals.
+@vskip 6pt
+@findex constant-xt?
+
+@example
+: CONSTANT-XT?          \ xt -- flag @end example
+
+@vskip -2pt
+Return TRUE if XT is a child of CONSTANT. Used when CONSTANTS are
+defined for addresses.
+
+@section Multitasking and PAUSE
+
+
+@vskip -6pt
+@*
+The code in this section can be used with Forth systems that
+have a cooperative multitasker called by the word @strong{@code{PAUSE}}.
+When the C2F compiler lays a call to a known XT via
+@strong{@code{COMPILECALL}} this code is used. If the current value of
+@strong{@code{HERE}} is between the variables @strong{@code{COMP-PAUSE-START}}
+and @strong{@code{COMP-PAUSE-END}}, a call to the @strong{@code{PAUSE}} is
+compiled before the normal call.
+@vskip 0pt
+@*
+This arrangement allows you to specifiy a range of the
+dictionary for which target calls will cause a schedule
+operation. By default the range is 0 - 0 which turns @strong{@code{PAUSE}}
+generation off. The best settings are usually between the end
+of the normal Forth kernel and the start of the C compiled
+source. This will make calls to the larger library definitions
+have a @strong{@code{PAUSE}} but calls to the kernel primitives will not.
+@vskip 0pt
+@vskip 6pt
+@findex set-comp-pause-range
+
+@example
+: Set-Comp-Pause-Range  \ start end -- @end example
+
+@vskip -2pt
+This definition sets the range of addresses in the dictionary
+for which a compiled word will be preceeded by @strong{@code{PAUSE}}.
+@vskip 6pt
+@findex ?compile-pause
+
+@example
+: ?compile-pause        \ where -- @end example
+
+@vskip -2pt
+Compiles a @strong{@code{PAUSE}} if the specified address is within the
+range set by @strong{@code{SET-COMP-PAUSE-RANGE}}. Note that if there
+is no multitasker present, nothing is compiled by this definition.
+
+@section Tools
+
+
+@vskip -6pt
+@vskip 6pt
+@findex cksum
+
+@example
+: cksum         \ addr len -- cksum @end example
+
+@vskip -2pt
+The INET Check sum algorithm. Used to provide a checksum of
+generated code to ensure delivery.
+@vskip 6pt
+@findex icompare
+
+@example
+: icompare      \ c-addr1 u1 c-addr2 u2 -- flag @end example
+
+@vskip -2pt
+Case insensitive version of the ANS word @strong{@code{COMPARE}}.
+@vskip 6pt
+@findex upc
+
+@example
+: upc           \ v -- 'v @end example
+
+@vskip -2pt
+Perform where possible an upper case character conversion.
+@vskip 6pt
+@findex zstrlen
+
+@example
+: zstrlen       \ addr -- len @end example
+
+@vskip -2pt
+Given a pointer to a zero-terminated string this will return the
+character length excluding the terminator.
+@vskip 6pt
+@findex zcount
+
+@example
+: zcount        \ zaddr -- zaddr len @end example
+
+@vskip -2pt
+A zero terminated string version of COUNT.
+@vskip 6pt
+@findex >pos
+
+@example
+: >pos          \ n -- @end example
+
+@vskip -2pt
+Used in diagnostic display. Move the cursor X position to column N.
+@vskip 6pt
+@findex .dword
+
+@example
+: .dword        \ n -- @end example
+
+@vskip -2pt
+Used in diagnostic display. Show the value N as an unsigned
+32 bit hexadecimal.
+@vskip 6pt
+@findex c@@s
+
+@example
+: c@@s           \ addr -- cell @end example
+
+@vskip -2pt
+Fetch character from ADDR and sign extend to a CELL.
+@vskip 6pt
+@findex allot&erase
+
+@example
+: allot&erase   \ n -- @end example
+
+@vskip -2pt
+Allot N bytes from the dictionary and pre-erase it.
+@vskip 6pt
+@findex char>cell
+
+@example
+: char>cell             \ signed-byte -- signed-int @end example
+
+@vskip -2pt
+Sign extend the supplied character to a CELL.
+
+@section Code Stream Handlers
+
+
+@vskip -6pt
+@*
+The @strong{codestream} is an area into which strings are built to
+@strong{@code{EVALUATE}} in order to perform compilation.
+@vskip 0pt
+@vskip 6pt
+@findex codestream
+
+@example
+256 buffer: CodeStream @end example
+
+@vskip -2pt
+The temporary buffer into which a string is built.
+@vskip 6pt
+@findex resetstream
+
+@example
+: ResetStream           \ -- @end example
+
+@vskip -2pt
+Re-initialises the @strong{@code{CodeStream}} buffer to zero length.
+@vskip 6pt
+@findex evalstream
+
+@example
+: EvalStream            \ -- @end example
+
+@vskip -2pt
+Perform an @strong{@code{EVALUATE}} on the code stream.
+@vskip 6pt
+@findex $>stream
+
+@example
+: $>stream              \ c-addr u -- @end example
+
+@vskip -2pt
+Append a string to the code stream buffer.
+@vskip 6pt
+@findex h>stream
+
+@example
+: h>stream              \ n -- @end example
+
+@vskip -2pt
+Add a string to the end of the code stream buffer which represents
+the hexadecimal number N. The number text is preceeded by a $
+character as per MPE practice.
+
+@section LABEL Chain Handlers
+
+
+@vskip -6pt
+@*
+During compilation of a converted C source file, all labels defined
+are kept in a linked list. Each list entry holds the name of the
+label, the address of the labels target if known and a set of flags
+which describe the label useage. All data pointers and branch
+targets have a corresponding label.
+@vskip 0pt
+@*
+Label Struct Format - all entries are 1 cell and in order )
+@vskip 0pt
+
+
+@table @code
+@item LBL.link
+link, pointer to next label record in list or NULL
+
+@end table
+
+
+
+@table @code
+@item LBL.*name
+Pointer to label name which is a counted string
+
+@end table
+
+
+
+@table @code
+@item LBL.flags
+Flags, describe the label type, see Flags
+
+@end table
+
+
+
+@table @code
+@item LBL.address
+Address, the target address the label equates to
+
+@end table
+
+@*
+Label Flags consists of one or more of:
+@vskip 0pt
+
+
+@table @code
+@item LF_PUBLIC
+Label scope is global.
+
+@end table
+
+
+
+@table @code
+@item LF_ADDRESSVALID
+The Address field of the label structure is valid.
+
+@end table
+
+
+
+@table @code
+@item LF_DATALABEL
+The label represents an internal address. This
+ is either a data pointer, or a function local label.
+
+@end table
+
+
+
+@table @code
+@item LF_CODELABEL
+The label represents a function entry point.
+
+@end table
+
+
+
+@table @code
+@item LF_DELETE
+Used internally. The label is marked for deletion
+
+@end table
+
+@vskip 6pt
+@findex labelchain
+
+@example
+0 Value LabelChain @end example
+
+@vskip -2pt
+Either NULL or a pointer to the first label structure.
+@vskip 6pt
+@findex .label
+
+@example
+: .label                \ *LABEL -- @end example
+
+@vskip -2pt
+Given a pointer to a label structure this definition will output
+a human readable dump of the label information.
+@vskip 6pt
+@findex .l
+
+@example
+: .l                    \ -- @end example
+
+@vskip -2pt
+Lists all currently defined labels and their attributes. The
+output for each label will be the name, address and flags status as
+according to the header displayed on screen.
+@vskip 6pt
+@findex destroylabelchain
+
+@example
+: DestroyLabelChain     \ -- @end example
+
+@vskip -2pt
+Destroy the entire current label chain.
+@vskip 6pt
+@findex addlabel
+
+@example
+: AddLabel              \ c-addr u flags address -- @end example
+
+@vskip -2pt
+Add a new label entry using the name flags and address supplied.
+@vskip 6pt
+@findex findlabel
+
+@example
+: FindLabel     \ c-addr u -- *LABEL | NULL @end example
+
+@vskip -2pt
+Look for a label given a name. Returns either a label structure
+pointer or NULL if the label was not found. Please note that under
+VFX Forth label names are not case sensitive.
+@vskip 6pt
+@findex findresolvedlabel
+
+@example
+: FindResolvedLabel     \ c-addr u -- c-addr u 0 | address true @end example
+
+@vskip -2pt
+Similar to FindLabel except only a label which has a valid address
+is accepted. On success the label address and TRUE is returned, if
+the label does not exist or has not yet been resolved the original
+name and namelen parameters are returned with a FALSE flag.
+@vskip 6pt
+@findex garbagecollectlbl
+
+@example
+: GarbageCollectLBL     \ -- @end example
+
+@vskip -2pt
+Walks the label list removing and deallocating any structures
+marked for delete.
+@vskip 6pt
+@findex exportlbl
+
+@example
+: ExportLBL             \ *lbl -- @end example
+
+@vskip -2pt
+Exports a label from a label chain structure supplied into the
+current Forth definitions wordlist. Code labels are built by
+generating a : definition of the same name which will pass the
+compiled codes address to @strong{@code{EXECUTE}}. Non-Code labels are
+built as @strong{@code{CONSTANT}}s.
+@vskip 6pt
+@findex patchlabel
+
+@example
+: PatchLabel            \ address iflag *LABEL -- @end example
+
+@vskip -2pt
+Modify the supplied label structure to use the supplied address
+and combine the supplied flags with the existing ones. This is
+used to resolve a label which had no valid address when defined.
+A fatal error has occured if any attempt is made to patch a label
+which already has a valid target address.
+@vskip 6pt
+@findex newlabel
+
+@example
+: NewLabel              \ address iflag c-addr u -- @end example
+
+@vskip -2pt
+This definition is similar to @strong{@code{AddLabel}} except the @strong{@code{LF_ADDRESSVALID}}
+flag is automatically added. Used as a shortcut for those times
+when a known address label is to be added.
+@vskip 6pt
+@findex (label)
+
+@example
+: (label)               \ address iflag "name" -- @end example
+
+@vskip -2pt
+The internal factor used to create most labels. A label name is
+parsed from the input buffer and if it exists the address and @emph{iflag}
+are passed to @strong{@code{PatchLabel}}. If the label does not
+exist it is created by @strong{@code{NewLabel}}.
+@vskip 6pt
+@findex removelocallabels
+
+@example
+: RemoveLocalLabels     \ -- @end example
+
+@vskip -2pt
+Destroys the local label list by marking each entry for deletion
+and then calling calling @strong{@code{GarbageCollectLBL}}.
+@vskip 6pt
+@findex exportpublics
+
+@example
+: ExportPublics         \ -- @end example
+
+@vskip -2pt
+Exports all public labels to the Forth namespace. Works by calling
+@strong{@code{EXPORTLBL}} for each local label entry with the public attribute and
+then marking it for delete.
+
+@section Forward Reference Chain Handlers
+
+
+@vskip -6pt
+@*
+Address literals and branch targets are referenced by symbol name
+during compilation. Since C generated code may forward reference
+such symbols a chain of unresolved targets is kept during the "C"
+build. Each entry in the chain holds the symbol name, a numeric
+offset to apply to the symbol, the dictionary pointer for the
+target code to patch and the type of patch to apply.
+@vskip 0pt
+@vskip 6pt
+@findex ff_cell
+
+@example
+$00000001 constant FF_CELL      \ -- x @end example
+
+@vskip -2pt
+This flag when set in the FW.flags field indicates the target code
+to be patched is a CELL, otherwise the code to be patched is the
+literal code as generated by [literal].
+@*
+The FW(Forward reference struct has the following fields:
+@vskip 0pt
+
+
+@table @code
+@item FW.link
+link, pointer to next record in list or NULL
+
+@end table
+
+
+
+@table @code
+@item FW.*name
+Pointer to label name which is a counted string. A zero
+ in this field indicates invalid FW and the records is
+ removed on the next garbage collect.
+
+@end table
+
+
+
+@table @code
+@item FW.here
+Target dictionary location to perform patch operation.
+
+@end table
+
+
+
+@table @code
+@item FW.offset
+Offset to apply to address of symbol in *name before
+ patching dictionary.
+
+@end table
+
+
+
+@table @code
+@item FW.flags
+Flags, describe the patch type. Either 0 or FF_CELL.
+
+@end table
+
+@vskip 6pt
+@findex fwchain
+
+@example
+0 Value FWChain \ -- addr|0 @end example
+
+@vskip -2pt
+Either NULL or pointer to the first forward reference record.
+@vskip 6pt
+@findex .fw
+
+@example
+: .fw                   \ *FW -- @end example
+
+@vskip -2pt
+Given a pointer to a FW structure display it in human readable
+form.
+@vskip 6pt
+@findex .f
+
+@example
+: .f                    \ -- @end example
+
+@vskip -2pt
+Display list of all pending forward references, their target
+location and type of patch to apply.
+@vskip 6pt
+@findex destroyfwchain
+
+@example
+: DestroyFWChain        \ -- @end example
+
+@vskip -2pt
+Destroy the entire forward reference chain.
+@vskip 6pt
+@findex $addlitfw
+
+@example
+: $AddLitFW             \ c-addr u -- *FW @end example
+
+@vskip -2pt
+Add a new forward reference record for symbol whose name is
+passed as @emph{C-ADDR U}. Returns a pointer to the record to
+allow the addresses and flags to be set by the caller.
+@vskip 6pt
+@findex resolve
+
+@example
+: Resolve               \ *FW -- res? @end example
+
+@vskip -2pt
+If possible resolve the forward reference whose structure is at
+@emph{*FW}. Returns TRUE if the reference was found or false if the
+name does not exist or the address has not been resolved yet.
+@vskip 6pt
+@findex garbagecollectfw
+
+@example
+: GarbageCollectFW      \ -- @end example
+
+@vskip -2pt
+Destroy any forward reference records with the FW.*name field
+at zero.
+@vskip 6pt
+@findex resolvefw
+
+@example
+: ResolveFW             \ -- @end example
+
+@vskip -2pt
+Attempt to resolve all forward references and delete any which
+have succesfully been resolved.
+
+@section Compilers
+
+
+@vskip -6pt
+@*
+Provides the harness definitions for the compilation of address
+literals and branches. Each compilation directive will attempt
+to resolve the required address and generate optimial code, for
+an unresolved address and forward reference is generated and some
+less optimal but patchable code is generated.
+@vskip 0pt
+@vskip 6pt
+@findex name-store
+
+@example
+#256 buffer: name-store \ -- addr @end example
+
+@vskip -2pt
+A buffer to store the first token after a directive, i.e. the target
+label name. Performed since VFX parses text at @strong{@code{HERE}} which will
+be corrupted during code generation.
+@vskip 6pt
+@findex >name-store
+
+@example
+: >name-store           \ c-addr u -- 'c-addr u @end example
+
+@vskip -2pt
+Copy the string @emph{C-ADDR U} to the name-store buffer for use later.
+@vskip 6pt
+@findex parsenumericoffset
+
+@example
+: ParseNumericOffset    \ "offset" -- val @end example
+
+@vskip -2pt
+Parse the next token from the input stream and attempt to convert
+to a signed numeric offset. @strong{@code{ABORT}}s if the next token is not
+numeric. This is used to parse and set the address offset as
+specified by directives such as @strong{@code{COMMAADDRLIT}}.
+@vskip 6pt
+@findex commaaddr
+
+@example
+: CommaAddr             \ "symbol" "offset" -- @end example
+
+@vskip -2pt
+Generate code to place the address of "symbol" with "offset" into
+the dictionary as a CELL via comma. If the address is already
+known it is simply passed to comma, otherwise a 0 value is compiled
+and a FF_CELL forward reference added to the FW chain.
+@vskip 6pt
+@findex compileaddrlit
+
+@example
+: CompileAddrLit        \ "symbol" "offset" -- @end example
+
+@vskip -2pt
+Similar to @strong{@code{CommaAddr}} except rather than laying the data as a CELL
+in the dictionary the runtime code for a literal is compiled.
+As with @strong{@code{CommaAddr}} if the label is resolved the literal is used
+directly (as though it was present in the source) otherwise a
+patchable literal is compiled via @strong{@code{[LITERAL]}} and a forward reference
+is added.
+@vskip 6pt
+@findex compilecall
+
+@example
+: CompileCall           \ "symbol" -- @end example
+
+@vskip -2pt
+Compile a call to the address named "symbol". If the address is
+known it is passed to @strong{@code{COMPILE,}} otherwise  "symbol" is treated as
+with @strong{@code{COMPILEADDRLIT}} and a call to the Forth @strong{@code{EXECUTE}} is compiled
+afterwards. Also note that when compiling a resolved symbol the
+target address is passed to @strong{@code{?COMPILE-PAUSE}} as documented above in
+the section on multitasking.
+@vskip 6pt
+@findex compilejump
+
+@example
+: CompileJump           \ -- @end example
+
+@vskip -2pt
+Compile code into target to perform a JUMP to the address in TOS.
+@vskip 6pt
+@findex compilebranch
+
+@example
+: CompileBranch         \ "symbol" -- @end example
+
+@vskip -2pt
+Compile a jump the address reference by "symbol". This is acheived
+by compiling a literal as with CompileAddrLit and then calling
+@strong{@code{COMPILEJUMP}} to lay the branch code.
+@vskip 6pt
+@findex compilecondbranch
+
+@example
+: CompileCondBranch     \ "symbol" -- @end example
+
+@vskip -2pt
+Lays code for a conditional variant of @strong{@code{COMPILEBRANCH}}. The normal
+method of achieving this is to postpone IF COMPILEBRANCH THEN.
+
+@section Label Definitions
+
+
+@vskip -6pt
+@*
+These definitions form part of the language extensions as used by
+the output from the c2forth translator. They each record a specific
+kind of label.
+@vskip 0pt
+@vskip 6pt
+@findex flabel
+
+@example
+: FLabel                \ "name" -- @end example
+
+@vskip -2pt
+Adds a new code-entry point label. The actual address represented
+is the target XT address which will be returned if @strong{@code{:NONAME}} is
+invoked at the current value of @strong{@code{HERE}}. If the label already exists
+it has the @strong{@code{LF_CODELABEL}} flag added to its current incarnation.
+@vskip 6pt
+@findex label
+
+@example
+: Label                 \ "name" -- @end example
+
+@vskip -2pt
+Adds a new non-entry point label. These labels are either reference
+points within a definition, e.g. branch targets, or are pointers to
+data items. As with @strong{@code{FLabel}}, an existing label is patched. This time
+with the @strong{@code{LF_DATALABEL}} flag.
+@vskip 6pt
+@findex public
+
+@example
+: Public                \ "name" -- @end example
+
+@vskip -2pt
+Add a new label of type @strong{@code{LF_PUBLIC}}. This operation allways adds a
+new label, and does not specify a type. It will usually be immediately
+followed by a @strong{@code{FLABEL}} or @strong{@code{LABEL}} directive to specify type.
+@vskip 6pt
+@findex extern
+
+@example
+: Extern                \ "name" -- @end example
+
+@vskip -2pt
+@strong{@code{EXTERN <label>}} will eventually be used to mark external labels.
+Currently C2F ignores these directives and everything is treated as
+global.
+
+@section Variadic Function Support
+
+
+@vskip -6pt
+@*
+The calling method for variadic functions involves placing the
+known stack depth into the first local variable, building a frame
+with the specified parameters and using an equivalent to Forth's
+@strong{@code{PICK}} instruction to grab the variadic parameters. These three
+definitions are used at runtime to support variadics.
+@vskip 0pt
+@vskip 6pt
+@findex _vm_va_depth
+
+@example
+: _vm_va_depth          \ -- i @end example
+
+@vskip -2pt
+Return the contents of the first local variable.)
+@vskip 6pt
+@findex _vm_depth
+
+@example
+: _VM_depth             \ -- n @end example
+
+@vskip -2pt
+Return data stack depth. A sanity check, how far down the data
+stack can a variadic function safely perform @strong{@code{PICK}}.)
+@vskip 6pt
+@findex _vm_pick
+
+@example
+: _VM_pick              \ n -- c @end example
+
+@vskip -2pt
+An alias for @strong{@code{PICK}} to complete the isolation layer.
+
+@section Outer Harness
+
+
+@vskip -6pt
+@*
+The definitions used to control the compilation of C files within
+a Forth interpreter.
+@vskip 0pt
+@vskip 6pt
+@findex c-build-start-dp
+
+@example
+variable        c-build-start-dp @end example
+
+@vskip -2pt
+A variable which records the value of HERE when C compile mode
+is enabled. Simply used to report the size of generated target code
+on completion.
+@vskip 6pt
+@findex [eof]
+
+@example
+: [EOF]                 \ -- @end example
+
+@vskip -2pt
+This definition is invoked at the end of each individual source
+include during a C build. It resolves forward references where
+possible, deletes the source-file local labels and exports public
+symbols to the Forth namespace.
+@vskip 6pt
+@findex "c"
+
+@example
+: "C"                   \ -- @end example
+
+@vskip -2pt
+Begin "C" source code build. Records start HERE position and ensures
+the local label and forward reference chain are clear.
+@vskip 6pt
+@findex "forth"
+
+@example
+: "FORTH"               \ -- @end example
+
+@vskip -2pt
+End a "C" source code build. Reports unresolved forward references
+and size/checksum of generated code.
+@vskip 6pt
+@findex #included
+
+@example
+: #included             \ c-addr u -- @end example
+
+@vskip -2pt
+A version of the ANS word @strong{@code{INCLUDED}} which automatically
+calls @strong{@code{[EOF]}} on completion. Used to include each
+individual C file between the @strong{@code{"C"}} and @strong{@code{"FORTH"}}
+directives.
+@vskip 6pt
+@findex #include
+
+@example
+: #include              \ "name" -- @end example
+
+@vskip -2pt
+A version of the ANS INCLUDE word. Performs as #INCLUDED.

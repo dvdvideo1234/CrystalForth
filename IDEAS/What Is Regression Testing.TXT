@@ -1,0 +1,86 @@
+What Is Regression Testing? Considerations for Agile Environments
+Continuous Testing
+DevOps
+
+By Eran Kinsbruner
+What Is Regression Testing?
+
+    Regression testing is software testing used to confirm that recent changes, either to the program or code, didn’t negatively impact the existing features of the software.
+
+As software features are released at record pace, regression testing has become even more crucial. New updates are useless if they break other program features. Companies must make sure their software is performing at peak potential with every single update they release.  
+
+It can be tough to keep up with all the requirements changes, feedback from production, and the timing of new software iterations. It’s difficult to stay up to date — and more importantly, to appropriately adapt your regression testing. That’s why you need an effective strategy for continuous regression testing.  
+The Benefits of Regression Testing 
+
+Regression testing is an essential piece of the testing lifecycle and DevOps process. 
+
+    Agile regression testing helps find major defects after an update and soon enough so that it can be fixed with minimal impact on customers. 
+
+    It creates a risk mitigation strategy so that companies can stay ahead of the curve with changes and fix problems before they really become issues. 
+
+    It modifies code for new features so that the software can still meet any requirements or business flows without causing problems. 
+
+Management of Regression Test Engineering 
+
+When it comes to management of your regression test engineering, there are a few must-ask questions and key considerations to keep in mind: 
+
+    Which test cases are certified and which aren’t? This will help you determine which to include in your regression suite. Check out this free on-demand webinar that will guide you to know exactly which tests to automate.  
+
+    What does your execution schedule for the regression suite look like? Think about whether it will be beneficial to do this weekly, daily, or by some other schedule. 
+
+    Will all regression tests in the regression suite be executed from the main CI engine? Or are there others executed from a different scheduler? 
+
+    What triggers regression suite maintenance and improvements? Are there certain events that inspire maintenance? 
+
+    Are you continuously analyzing the value of your tests? Find out which are flaky, which aren’t producing the value you need, etc. Adapt to what you determine your regression testing needs. 
+
+    Be advised that one round of regression testing isn’t enough. Performing continuous testing is how you’ll get the most out of your regression testing, and it should be a process incorporated into overall DevOps. 
+
+Best Practices for Regression Testing in Agile
+
+Your regression testing can vary in scope, time windows, platform coverage, and objectives. It’s important to understand the differences in these scopes if you’re running sprint-level regression tests or full regression testing cycles. 
+
+Stay up to date with your regression suites. Keep in mind both the high-value functional and the non-functional scenarios. Always maintain the high-priority, high-value test cases in your suite. Ensure that your entire team is aligned to which test cases are top priority.   
+
+If a test is difficult to automate or scale, you’re risking the whole cycle and are better off leaving it out. If a test is not able to be automated, strongly consider leaving it out of the regression suite. 
+
+Change is a constant, especially in web and mobile software development. This means you must have a process to stay aware of necessary modifications, whether it’s changes in features or Agile requirements. Communication among developers and testers is essential so that changes do not fall through the cracks.  
+
+ROI is important, even in regression testing. Teams should always keep track of the ROI of executions. Make sure that regression suite reports are transparent, and that you can see the real results of test executions over time. Compare and track what the differences are when processes and tests are run on different platforms. We also recommend assigning grades to test scenarios, so that you’re ensuring you’re properly prioritizing. 
+Automated Regression Testing and Continuous Testing Drive Quality Results 
+
+It’s clear that regression testing is a must for DevOps. For teams looking to successfully integrate regression, test automation is the key component. When setting up test automation, the focus needs to be on developing robust scenarios, high coverage, and near-zero test maintenance.  
+
+In the world of web and mobile software development, there will always be new features, platforms, and bug fixes, so regression testing needs to be able to maneuver expertly despite a constantly changing environment. 
+
+If you’re looking to improve your ROI on your regression suite, you need to practice continuous testing. Developing a robust strategy, as outlined above, can help you do this. As your product evolves, so too should your regression testing. The more you evolve, study, and improve on your testing, the more you will get out of it. 
+
+The good news is, with Perfecto, you don’t have to invent a complete solution for regression testing, test automation, and continuous testing. Try Perfecto’s all-in-one cloud-based platform. See how easy it is to create, execute, and analyze tests in our lab. Explore for 240 free minutes, test real user conditions, and get detailed analytics.  
+
+Try Perfecto
+
+ 
+Related Content
+
+    What Is Test Automation?
+    What Is Continuous Testing? 
+    Automated Testing vs. Manual Testing vs. Continuous Testing
+
+    tweet
+    share
+    share
+    mail
+
+Eran Kinsbruner
+Eran Kinsbruner
+
+Chief Evangelist, Perfecto
+
+Eran Kinsbruner is the Chief Evangelist at Perfecto and Author of the Digital Quality Handbook and Continuous Testing for DevOps Professionals books. He is formerly the CTO for mobile testing and Texas Instruments project manager at Matrix, Eran has been in testing since 1999 with experience that includes managing teams at ADT, Sun Microsystems, General Electric, and NeuStar. You can find Eran on Facebook, Twitter @ek121268, LinkedIn, and on his professional continuous testing blog at http://continuoustesting.blog/.
+
+
+
+        
+          
+        
+        

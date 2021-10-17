@@ -1,0 +1,79 @@
+MPE C to Forth Compiler - Release.c2fth.txt
+=======================
+
+Copyright (c) 1998, 2003, 2007, 2012
+MicroProcessor Engineering
+133 Hill Lane
+Southampton SO15 5AF
+England
+
+tel: +44 (0)23 8063 1441
+fax: +44 (0)23 8033 9691
+net: mpe@mpeforth.com
+     tech-support@mpeforth.com
+web: www.mpeforth.com
+
+From North America, our telephone and fax numbers are:
+  011 44 23 8063 1441
+  011 44 23 8033 9691
+
+
+This software is released free of charge for non-commercial use.
+For commercial use, a licence must be obtained from MPE. The
+commercial use license includes technical support and periodic
+upgrades.
+
+For non-commercial use, this is an officially unsupported product,
+but we'll help if we have the time and inclination. Enquiries and
+comments should be sent to:
+  sfp@mpeforth.com
+
+Please return contributions and updates to MPE for
+incorporation in later releases.
+
+
+3 January 2013
+==============
+
+23 December 2012 - v1.20
+================
+Tested compiler execution under Windows XP and Win7/64.
+Rebuilding the C toolchain requires Visual C++ 6.0 and
+Windows XP.
+
+Overhauled the harness code (see harness/*) for VFX Forth v4.6.
+
+Updated some of examples in
+  tests/
+to use .bld files for VFX Forth v4.6. See
+  tests/banner.bld
+for an example.
+
+Changed the code generator to output ARSHIFT instead of >>N for
+the arithmetic right shift operation. See
+  src/fcc/fthcode.c.
+
+Reverted to the option B locals generation - see
+  src/fcc/fthcode.c.
+
+
+Contents of distribution:
+=========================
+
+\BIN                    C compiler binaries
+        CPP             C Preprocessor
+        FCC             C Compiler
+        OMAKE           Make utility
+        C2FPOST         Parsing utility to take FCC output and pad it
+                        into a form which can be safely TFTP'd in 512byte
+                        packets.
+\DOC                    C2F Distribution documentation. See C2Forth.pdf
+\DOC\LIBC               Documentation on sample C library implementation.
+\HARNESS                C2F Forth Target Harness, reference source.
+                        See C2Forth.pdf for details.
+\INCLUDE                C Header files for sample C library implementation.
+\LIB                    Forth source for C library functions.
+\SRC                    C source code for tools.
+\TESTS                  Some simple test programs and a suitable makefile
+
+
