@@ -64,7 +64,7 @@ APT- _SKIP     =: SKIP    \ V
 APT- _EX       =: EX      \ V
 APT- _FOR      =: (FOR    \ V
 APT- _MIF      =: (-IF    \ V
-\ APT- _SKIP?    =: SKIP?   \ V
+APT- _SKIP?    =: SKIP?   \ V
 APT- _0X       =: 0;         
                
 \ LOGIC        
@@ -127,7 +127,6 @@ APT- _ABORT0?  =: ((0"
 APT- _ABORT?   =: ((A"     
 
 \ SPECIAL      
-APT- _BP       =: (BRK    \ V
 APT- _ABORT    =: ABORT   \ V
 APT- _QUIT     =: QUIT    \ V
 APT- _@EXEC    =: @EXEC   \ V
@@ -141,6 +140,7 @@ APT- _COLON    =: TARG:   \ :
 APT- _RPAR     =: >,     
 
 \ DEBUG  
+APT- _BP       =: (BRK    \ V
 APT- _BPDBG    =: @DO_DBG      
 APT- _TROFF    =: TROFF    
 ' TROFF        =: TR-`    
@@ -181,6 +181,8 @@ APT- _TIB      =: TIB
 APT- _TBUF     =: TBUF
 APT- _FIRST    =: FIRST
 APT- _0        =: 0
+APT- _ONE      =: ONE
+APT- _BYE      =: BYE
 
 \ VALUES
 APT- _ETIB     =: ETIB

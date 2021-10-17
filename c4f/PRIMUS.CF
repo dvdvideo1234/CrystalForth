@@ -30,8 +30,8 @@ ZDO VALUE 5 TIMES _FL _AX _BX _CX _DX \ _DX2
 : |C. EX EMIT ; 
 : |SPC EX      
 : SPC  |C. ,<     32  CONST BL
-: `bsb CALL SPC THEN
-: `BS  |C. ,<      8  CONST  bs       
+: `bs  DUP 0; 1- CALL SPC THEN 
+       |C. ,<      8  CONST  bs       
 : `LF  |C. ,<     10  CONST  lf       
 : `CR  |C. ,<     13  CONST  cr 
 : `C-  |C. ,<     '-  CONST  c- 
@@ -48,11 +48,10 @@ ZDO VALUE 5 TIMES _FL _AX _BX _CX _DX \ _DX2
 : EOS! bs ,<    
 0 VALUE EOS 
 
+: 1L& `MASK| ,<
   64  CONST 1L
 >, `MASK| ,<
 1024  CONST 1K
-   1  CONST   `1
-  ' `1 2+  =: BYE
    -1 CONST TRUE
 ' `FIB CONST FIB  
  
@@ -67,15 +66,15 @@ ZDO VALUE 5 TIMES _FL _AX _BX _CX _DX \ _DX2
 : |SWAP EX SWAP ;
 : @+ PUSH @R+ POP; 
 : 2@ |SWAP
-: @2 @+ @ 
-: NOP;  ;
+: @2 @+ @ ;
+\ : NOP;  ;
 
 : I J ;
 : ("SW ("SKIP B?" 1+ 
 : (XARY 2* POP + @ PUSH;
 : IXEC J
 : EXECUTE PUSH; 
-:  `RW IXEC ! IXEC `1 
+:  `RW IXEC ! IXEC ONE
 : EXIT RDROP;
 : S1- U1+
 : 1-; 1- ; 
@@ -155,19 +154,12 @@ ZDO VALUE 5 TIMES _FL _AX _BX _CX _DX \ _DX2
 : CR TO cr TO lf 0 TO CNTC ;
 : `OK ."_ok" CR .">>_"  ;;  
 : `. EMT! KEY! CR TBUF ID. NOP ID. CR ; \ ERRA
-: `WITHSTK @R+ @R+ WITHIN 0= ;
+\ : `WITHSTK @R+ @R+ WITHIN 0= ;
 : `STACK TR-|
-  RP@    `WITHSTK `R_BTM  `R_TOP  !"RSTK?" 
-  SP@ 2- `WITHSTK `S_BTM  `S_TOP  !"DSTK?"
+  RP@    AT WITHIN `R_BTM  `R_TOP  0= !"RSTK?" 
+  SP@ 2- AT WITHIN `S_BTM  `S_TOP  0= !"DSTK?"
   vPIN
   ;; 
-: |[] ."[" EX ."]" ;;
-: [ID] CSTR      
-: [S] |SPC |DROP     
-: [TYPE] |[] TIMES| CSTR DUP |C. BL U< 0; DROP '. ;; 
-
-: SAME? TFND 0; 4+ [ID] TBUF ; 
-
 
 \ NUMBERS ---------------------------
 
@@ -175,8 +167,9 @@ ZDO VALUE 5 TIMES _FL _AX _BX _CX _DX \ _DX2
 : (UM/ |SWAP TWICE TWICE -/ -/ -/ -/ ;
 : UMOD U/MOD DROP;
 : UM/MOD U/MOD XEP| (UM/ ; \ ( UD U - U UD )
+
 : 9>? 9 SKIP
-: OPT? `1 OVER U<  (@&; ,< 7 , 
+: OPT? ONE OVER U<  (@&; ,< 7 , 
 HERE >, (D#0 @  
 : BASE! 2- W>B 2+ ,<
   10 VALUE BASE 
@@ -211,8 +204,6 @@ N: `DECI 10 , N: `BIN 2 , N: `HEX 16 ,  DROP
 : #,, TR-| 
   (LIT, , ;  \ 68C
 
-: UNITS? U/MOD SWAP  0; 1+ ; 
-
 : S6 (| CALL XEP| XEP| XEP| THEN 
 : S3 |SPC CALL TWICE THEN ROT DUP 
 : H. W>BB CALL 
@@ -220,65 +211,28 @@ N: `DECI 10 , N: `BIN 2 , N: `HEX 16 ,  DROP
 : DIG. |C. 
 : ALPHA 9>? + (@+; ,< '0 ,   \ FOR NUMOUT 
 
-\ IO  -------------------------------------
+: . DUP 0< IF NEG TO c- THEN
+: U. lf BASE! |SPC 
+: `U.  BASE U/MOD  SKIP? RECURSE DIG. ;
 
-\ INTS DOS, FILES & VIDEO
+>, EOS! : `CR2 RDROP RDROP; 
+: `CH A@ AT WITHIN ,< 32 , 240 , >, 0; A@ SKIP 
+: `tab BL DUP A! EMIT 2DUP + A@ SWAP! 1+ ; 
+: `CHTAB ("SW ,< 5 C, ^H C, ^I C, ^M C, ^Z C, 127 C, 
+>, `CH `bs `tab `CR2  TO `CR2 NOOP 
+ |SPC : ACCEPT PUSH 0 BEGIN KEY `CHTAB DUP I = UNTIL EXIT ;
 
-: >ZSTR CSTR TO S! DUP >NAME OFF 1+ ; \ TO S TBUF
-: `fsk 1K TUCK UM* SCRH EX SCRH 
-: IO? _FL ODD !"IO?" ;;
-: `File| >ZSTR EX IO? _AX ;
-: XDROT XEP| 
-: DROT |ROT  
-: D0 0 0 ;
-HERE >, (D#0 C@ (INT# TO _FL TO _AX TO _BX TO _CX TO _DX ;
-N: (DOS  $21 ,  
-=, (VID  $10 , 
-: THRU (RNG| ?XEP+| 
-: LOAD TR-| 1K OVER TI| VAL EVAL ; 
-HERE >, (D#0 @ DROT (DOS ;
-\ >, >FTOP| 
-: FOPEN `File| ,< 
-N: Fopen $3D02 ,
-\ >, >FTOP| 
-: FCREATE `File| ,< 
-N: Fcreate $3C00 ,
-: LineIn OVER ! DUP [ 1+ CSTR ] ,<
-N: `LineIn2 $A00 ,
-=, StdPut   $200 , 
-
-\ COMPILER
->, EX  
-: _MARK H   
-: Z, 0 , ;      
-: |, EX 
-: `<RELS_ , 
-: LASTH! H ,<
-0 VALUE LASTH
-: |LASTH EX LASTH! ; 
-
-: `HOFS
-  CALL XR PUSH CALL EX POP THEN  (SET2 THEN ,<
-0 CONST HOFS 
-: _BEGIN |LASTH  
-: HERE H  
-: R>T HOFS + ; 
-: UNTIL| BEGIN IXEC 
-: WHILEZ| UNTIL RDROP ;
-: WHILE| (IF EXIT 
-: UNTILZ| IXEC  WHILE| ;
-: ,' |, 
+: ,' (| , 
 : ' FND?
 : @DEF? @2 
 : UNDEF? ODD !"UNDEF?" ;;
 : ADR' '  TO ODD ODDH? ; 
 
 \ INCLUDE XTEND.CF \ HERE .  TEST11 3292
-: CHARS (RNG| ?XEP+| |SPC DUP B. EMIT ;
-\ INCLUDE INITER.CF
-INCLUDE NUMOUT.CF
+\ INCLUDE NUMOUT.CF
 INCLUDE DEBUG.CF 
-\ INCLUDE WORDS1.CF
+INCLUDE WORDS1.CF
+\ INCLUDE INITER.CF
  
 ' @INI VAL' @INIT T!
 \ ' `INTERP VAL' LOXEC T! \ TARGET FORTH INITIAL STATE
@@ -286,16 +240,16 @@ INCLUDE DEBUG.CF
 ' ">NUM  ' `NUMBER  T!   \ FIX @NUMBER
 '  `.     ' `ERR    T!   \ FIX ERROR.
 ' MEMTI|  ' `TIZ    T!   \ FIX EVAL 
-\ ' `STACK  ' @EVAL   T!   \ FIX @EVAL 
-' LineIn  ' @ACPT   T!
-\ '  `OK    ' @OK     T!   \ FIX  vOK.
-\ ' `SOURCE ' `PARSE  T!   \ FIX PARSE
+' `STACK  ' @EVAL   T!   \ FIX @EVAL 
+TO' ACCEPT  ' @ACPT T!
+'  `OK    ' @OK     T!   \ FIX  vOK.
+' `SOURCE ' `PARSE  T!   \ FIX PARSE
+'  (;,    ' @SEMICO T!   \ FIX ALIGNED
 \ '  SAME?  ' @SAME   T!   \ FIX (=:
 \ '  HERE   ' HODD    T!   \ FIX HODD
 \ '  HODD   ' `HERE   T!   \ FIX H=:
 \ '  CSP!   ' TARG:   T!   \ FIX TARG:
 \ '  |LASTH ' ALIGNED T!   \ FIX ALIGNED
-'  (;,    ' @SEMICO T!   \ FIX ALIGNED
 \ AT' |SAFE! AT' SEVAL T!   \ FIX MAC
 \ '  FIX VAL' H       T!   \ NEW H 
 

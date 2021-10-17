@@ -1,7 +1,6 @@
 HERE    VAL' H T!             \ TARGET FORTH HEAP
 
 THIDE (DEF      
-APT-   `1     =:  1
 \ THIDE (TARY     
 \ THIDE (5ARY     
 \ THIDE (LARY   
@@ -16,11 +15,11 @@ APT2  TARG,<      ,<`
 APT2  TARG;       ;`
 APT-  ((."    =:  (."        
 APT-  (("     =:  ("
-APT2  _BEGIN      BEGIN`     
-APT2  _MARK       [`
-APT-  `<RELS_ =:  <RELS`     
-'    [`       =:  CALL`
-'    [`       =:  MARK>`
+\ APT2  _BEGIN      BEGIN`     
+\ APT2  _MARK       [`
+\ APT-  `<RELS_ =:  <RELS`     
+\ '    [`       =:  CALL`
+\ '    [`       =:  MARK>`
 
 WORD_THE_ONE =:  THIDE =:     \ WORD THE ONE
 

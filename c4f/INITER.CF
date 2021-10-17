@@ -1,68 +1,51 @@
 \ : FIX @R+ @R+ ! ;
-: `1ST H>T       \ LOADER OF INITIAL DICTIONARY == TEST-0
-  \ REINIT ;;
-  CR CR CR (BRK
-  
-  \ TESTS
-  CR CR CR T. ."RESTART_!"
-  
-\ 01. TEST [ID]
- CR "123456" [ID]  "BYE" [ID] "_BYE_" [ID]  (BRK
-  
-\ 02. TEST H.
-\  CR "123456"  "BYE"  "_BYE_" (BRK
-\    H.  H.  H.  CR (BRK
 
-\ 03. TEST BYE
-\ CR ."_BYE_"  BYE  (BRK
 
-  
-\ 1.  "=:" TO FIND  -- THE ONLY WORD
-\ CR   "=:" DUP ID. FND? (BRK 
-\  DUP WID. (BRK
+\ IO  -------------------------------------
 
-\ 2.  "1=:" NOT TO FIND  -- 
-\ CR   "1=:" DUP ID. FND? (BRK 
-\ DUP ID. (BRK
- 
-\ 3.  CONVERT "STR" TO NUM
-\ CR  "123"  DUP ID. CSTR ATOI (BRK 
-\ DUP  (BRK
- 
-\ 4.  CONVERT "-STR" TO NUM
-\ CR  "-123"  DUP ID. CSTR ATOI (BRK 
-\ DUP  (BRK
- 
-\ 5.  CONVERT "-STR" TO NUM AND EXECUTE (=:
-\ CR  "-123" DUP ID. CSTR ATOI DROP T (BRK
-\ CR  0 "GAGA" DUP ID. (=:   CR T DUP WID. (BRK
- 
-\ 6.  PARSE "STR" TO WORDS
-\ CR  "_-123_=:_GAGA_792_=:_BYE__BYE_" DUP ".
-\ CR
-\ CSTR A+L TO LTIB TO ETIB CR TOKEN? [ID] TOKEN? [ID]
-\ TOKEN? [ID] TOKEN? [ID] TOKEN? [ID] TOKEN? [ID]
-\ TOKEN? [ID] LTIB DUP H. CR (BRK
- 
-\ 7.  TEST "-  <>
-\ CR   "BYE" DUP H. "_BYE_" DUP H.
-\ OVER [ID] DUP [ID] CR (BRK "- 
- 
-\ 8.  TEST "-  =
-\ CR   "BYE" DUP H. "BYE" DUP H.
-\ OVER [ID] DUP [ID] CR (BRK "- 
- 
- 
-\ 9.  TEST  @EVAL !!!
- CR  (LIT BYE 0 "BYE" (=: T WID. (BRK 
- "_BYE_"  CSTR A+L TO LTIB TO ETIB  @EVAL
- 
- CR CR ."NOT-FOUND" (BRK  BYE
- 
+\ INTS DOS, FILES & VIDEO
 
-   "_-123_=:_GAGA_792_=:_BYE__BYE_" DUP ". 
-   CSTR A+L TO LTIB TO ETIB  @EVAL
-   
- CR ."FOUND" 1
-   (BRK
- QUIT ;
+: >ZSTR CSTR TO S! DUP >NAME OFF 1+ ; \ TO S TBUF
+: `fsk 1K TUCK UM* SCRH EX SCRH 
+: IO? _FL ODD !"IO?" ;;
+: `File| >ZSTR EX IO? _AX ;
+: XDROT XEP| 
+: DROT |ROT  
+: D0 0 0 ;
+HERE >, (D#0 C@ (INT# TO _FL TO _AX TO _BX TO _CX TO _DX ;
+N: (DOS  $21 ,  
+=, (VID  $10 , 
+: THRU (RNG| ?XEP+| 
+: LOAD TR-| 1K OVER TI| VAL EVAL ; 
+HERE >, (D#0 @ DROT (DOS ;
+\ >, >FTOP| 
+: FOPEN `File| ,< 
+N: Fopen $3D02 ,
+\ >, >FTOP| 
+: FCREATE `File| ,< 
+N: Fcreate $3C00 ,
+: LineIn OVER ! DUP [ 1+ CSTR ] ,<
+N: `LineIn2 $A00 ,
+=, StdPut   $200 , 
+
+\ COMPILER
+>, EX  
+: _MARK H   
+: Z, 0 , ;      
+: |, EX 
+: `<RELS_ , 
+: LASTH! H ,<
+0 VALUE LASTH
+: |LASTH EX LASTH! ; 
+
+: `HOFS
+  CALL XR PUSH CALL EX POP THEN  (SET2 THEN ,<
+0 CONST HOFS 
+: _BEGIN |LASTH  
+: HERE H  
+: R>T HOFS + ; 
+: UNTIL| BEGIN IXEC 
+: WHILEZ| UNTIL RDROP ;
+: WHILE| (IF EXIT 
+: UNTILZ| IXEC  WHILE| ;
+: CHARS (RNG| ?XEP+| |SPC DUP B. EMIT ;

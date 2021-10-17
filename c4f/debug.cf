@@ -1,13 +1,20 @@
 \ DEBUGERR  ------
+: |[] ."[" EX ."]" ;;
+: [ID] CSTR      
+: [S] |SPC |DROP     
+: [TYPE] |[] TIMES| CSTR DUP |C. BL U< 0; DROP '. ;; 
+: UNITS? U/MOD SWAP  0; 1+ ; 
+: SAME? TFND 0; 4+ [ID] TBUF ; 
+
 : `BD |SPC STR| CSTR B. ; 
 : DUMP 1H UNITS? STR| 
 : DU CR DUP H. SPC 1H 2DUP `BD [TYPE] ; 
 : PINZ 0 
-: PIN I CR H. HERE H. B. SP@ H. S6
+: PIN I CR H. H H. B. SP@ H. S6
  T H. T @ H. T. TBUF ID. BK DROP ;
 : |TBUF!. @R+ PIN EX PINZ ;;
 ' |TBUF!.  VAL' vDBG T!
-' PINZ     VAL' vPIN T!   \ WHEN NEED TO CHECK PARSING
+\ ' PINZ     VAL' vPIN T!   \ WHEN NEED TO CHECK PARSING
 
 : `WID. ID. WID. ; 
 : JID. J 
@@ -33,7 +40,7 @@ WFIND IF "TO" `WID. ;THEN 2+ WFIND IF "AT" `WID. ;THEN 4 -
 0 VALUE  `DBGA        \ EMIT TO_METHOD CHANGED
 : `DBGIN A@ TO `DBGA  TO EMIT @ TO `DBGEmt  EMT! CR ; 
 : R3 POP POP POP J H. PUSH J H. PUSH J H. PUSH ; 
-: `DBG SPC  S3 HERE H. T H. `DBGA H. SPC  ;
+: `DBG SPC  S3 H H. T H. `DBGA H. SPC  ;
 : DBG. `DBGIN R3 `DBG JID. BK DROP
 : `DBGOUT `DBGEmt  AT EMIT  `DBGA A! ;
 

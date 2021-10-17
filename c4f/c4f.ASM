@@ -113,6 +113,7 @@ L_ _COLONC             ; :`
 LL_ _RPAR,TO_+_FIND
   DW _IFND,_TBUF,_DEC,_IF,@PX
   CONST_  _ONE,1
+  _BYE = $-2
   
 @PX DW _CFND
 LL_ _2PX,_2P
@@ -566,7 +567,7 @@ P_ _SKIP
   LODSW
   N_
 
-L_ _SKIP?
+P_ _SKIP?
   Z?      TOP
   JZ      @IF1
   N_
@@ -633,7 +634,9 @@ P_ _J               ; ( J
   POP     W
   PUSH    W
   JMPS    @_J
-       
+
+ALIGN_ 0
+  DW      _RLDP,_RLDP
 L_ _WITHIN
   DW _OVERM,_PUSH,_SUB,_POP 
 L_ _ULESS
