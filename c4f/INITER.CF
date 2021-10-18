@@ -1,51 +1,43 @@
-\ : FIX @R+ @R+ ! ;
+' @INI VAL' @INIT T!
+\ ' `INTERP VAL' LOXEC T! \ TARGET FORTH INITIAL STATE
+' ">NUMC ' `COMPNUM T!   \ FIX @COMPNUM
+' ">NUM  ' `NUMBER  T!   \ FIX @NUMBER
+'  `.     ' `ERR    T!   \ FIX ERROR.
+' MEMTI|  ' `TIZ    T!   \ FIX EVAL 
+' `STACK  ' @EVAL   T!   \ FIX @EVAL 
+TO' ACCEPT  ' @ACPT T!
+'  `OK    ' @OK     T!   \ FIX  vOK.
+' `SOURCE ' `PARSE  T!   \ FIX PARSE
+'  (;,    ' @SEMICO T!   \ FIX ALIGNED
+\ '  SAME?  ' @SAME   T!   \ FIX (=:
+\ '  HERE   ' HODD    T!   \ FIX HODD
+\ '  HODD   ' `HERE   T!   \ FIX H=:
+\ '  CSP!   ' TARG:   T!   \ FIX TARG:
+\ '  |LASTH ' ALIGNED T!   \ FIX ALIGNED
+\ AT' |SAFE! AT' SEVAL T!   \ FIX MAC
+\ '  FIX VAL' H       T!   \ NEW H 
 
+HERE    VAL' H T!             \ TARGET FORTH HEAP
 
-\ IO  -------------------------------------
+          THIDE             :` 
+' _HENTRY THIDE _HENTRY =:  :`         
+          THIDE             ;`
+' TARG;   THIDE TARG;   =:  ;`
+          THIDE             ,<`  
+' TARG,<  THIDE TARG,<  =:  ,<`        
+' ((A"    THIDE ((A"    =:  (!"
+' (LIT    THIDE (LIT    =:  (# 
+' TARG:   THIDE TARG:   =:  :          
+' ((."    THIDE ((."    =:  (."        
+' (("     THIDE (("     =:  ("
 
-\ INTS DOS, FILES & VIDEO
+\ ' _ENTRY  =: LASTW    \ WORD THE ONE
 
-: >ZSTR CSTR TO S! DUP >NAME OFF 1+ ; \ TO S TBUF
-: `fsk 1K TUCK UM* SCRH EX SCRH 
-: IO? _FL ODD !"IO?" ;;
-: `File| >ZSTR EX IO? _AX ;
-: XDROT XEP| 
-: DROT |ROT  
-: D0 0 0 ;
-HERE >, (D#0 C@ (INT# TO _FL TO _AX TO _BX TO _CX TO _DX ;
-N: (DOS  $21 ,  
-=, (VID  $10 , 
-: THRU (RNG| ?XEP+| 
-: LOAD TR-| 1K OVER TI| VAL EVAL ; 
-HERE >, (D#0 @ DROT (DOS ;
-\ >, >FTOP| 
-: FOPEN `File| ,< 
-N: Fopen $3D02 ,
-\ >, >FTOP| 
-: FCREATE `File| ,< 
-N: Fcreate $3C00 ,
-: LineIn OVER ! DUP [ 1+ CSTR ] ,<
-N: `LineIn2 $A00 ,
-=, StdPut   $200 , 
+WORD_THE_ONE _ENTRY     \ WORD THE ONE
 
-\ COMPILER
->, EX  
-: _MARK H   
-: Z, 0 , ;      
-: |, EX 
-: `<RELS_ , 
-: LASTH! H ,<
-0 VALUE LASTH
-: |LASTH EX LASTH! ; 
+STAT? H           \ STATISTICS & ALIGNING TO 1K
+     
+TSAVE PIF.COM     \ SAVE RESULT
+      \ PREPARE NEW WORDS TO BE ASSIGNED 
+	  
 
-: `HOFS
-  CALL XR PUSH CALL EX POP THEN  (SET2 THEN ,<
-0 CONST HOFS 
-: _BEGIN |LASTH  
-: HERE H  
-: R>T HOFS + ; 
-: UNTIL| BEGIN IXEC 
-: WHILEZ| UNTIL RDROP ;
-: WHILE| (IF EXIT 
-: UNTILZ| IXEC  WHILE| ;
-: CHARS (RNG| ?XEP+| |SPC DUP B. EMIT ;

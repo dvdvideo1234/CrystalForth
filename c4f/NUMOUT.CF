@@ -14,14 +14,14 @@
 : C!I J 
 : C! PUSH C!R+ RDROP; 
 : # BASE  U/MOD SWAP  ALPHA HOLD ; 
-: U. 0 
+\ : U. 0 
 : U.RS |SPC 
 : U.R lf 
 : U.R# <#>| 
 : `u. 31 AND XEP| 
 : S# UNTILZ| # DUP 
 ;
-: . 0 
+\ : . 0 
 : .RS |SPC 
 : .R lf 
 : .R# <#>| SWAP `6 SWAP `u. 

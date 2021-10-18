@@ -1,28 +1,28 @@
-HERE    VAL' H T!             \ TARGET FORTH HEAP
-
-THIDE (DEF      
+\ THIDE (DEF      
 \ THIDE (TARY     
 \ THIDE (5ARY     
 \ THIDE (LARY   
 \ THIDE (WARY        
-THIDE CALL`      
+\ THIDE CALL`      
 
-APT-  ((A"    =:  (!"
-APT2  TARG:!      :`         
-APT-  (LIT    =:  (# 
-APT-  TARG:   =:  :          
-APT2  TARG,<      ,<`        
-APT2  TARG;       ;`
-APT-  ((."    =:  (."        
-APT-  (("     =:  ("
+\ APT-  ((A"    =:  (!"
+\ APT2  TARG:!      :`         
+\ APT-  (LIT    =:  (# 
+\ APT-  TARG:   =:  :          
+\ APT2  TARG,<      ,<`        
+\ APT2  TARG;       ;`
+\ APT-  ((."    =:  (."        
+\ APT-  (("     =:  ("
 \ APT2  _BEGIN      BEGIN`     
 \ APT2  _MARK       [`
 \ APT-  `<RELS_ =:  <RELS`     
 \ '    [`       =:  CALL`
 \ '    [`       =:  MARK>`
+\ CR ."1234567890-" CR
 
-WORD_THE_ONE =:  THIDE =:     \ WORD THE ONE
+WORD_THE_ONE _ENTRY     \ WORD THE ONE
 
+CR ."1234567890-=" CR
 STAT? H           \ STATISTICS & ALIGNING TO 1K
      
 TSAVE PIF.COM     \ SAVE RESULT

@@ -69,10 +69,6 @@
 ; 
 META CR vOK \ vOK FIXED
 
-\ : @DBG
-\  2DUP H. H. PUSH PUSH 2DUP H. H. POP POP SP@ H. 
-\  POP DUP PUSH H. @R H. H H. ;
-
 1024 CONST 1K
 : XY? 1K LTIB - ;
 : In1K   (@&; ,< 1K 1- ,

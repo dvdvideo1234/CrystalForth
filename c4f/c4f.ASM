@@ -101,8 +101,8 @@ L_ _EVAL                   ; EVAL
 ;  DW _TRONM?
 _@TIZ  DW _NOP          ; FIX WITH TI
 L_ _@Eval
-@EV  DW _NOP,_TOKEN,_IF,@ADDX  ; FIX WITH STK?
-  DW _FIND,_OPER,_@EXEC,_JUMP,@EV
+@EV  DW _NOP,_TOKEN,_IF,@ADDX,_FIND  ; FIX WITH STK?
+_@OPER  DW _NOP,_OPER,_@EXEC,_JUMP,@EV
 
 ; ============== COMPILER ===================
 
@@ -111,21 +111,14 @@ L_ _COLON             ; :
 L_ _COLONC             ; :`
   DW _HENTRY
 LL_ _RPAR,TO_+_FIND
-  DW _IFND,_TBUF,_DEC,_IF,@PX
-  CONST_  _ONE,1
-  _BYE = $-2
-  
-@PX DW _CFND
-LL_ _2PX,_2P
-LL_ _NOOP,_RET
+  DW _TBUF,_INC,_CFND,_TBUF,_DEC,_SKIP?,_RET,_CFND,_2P,_RET
 
 L_ _TO_NAME
   DW _4P
 L_ _AFT_NAME
-  DW _CSTR,_ADD,_RET
+  DW _CSTR,_ADD
+LL_ _NOOP,_RET
   
-L_ _IFND
-  DW _TBUF,_INC
 L_ _CFND
   DW _T,_TO_NAME
 LL_ _FND,__PAR         

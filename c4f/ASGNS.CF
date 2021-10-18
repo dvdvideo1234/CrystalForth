@@ -30,7 +30,6 @@ APT- _ADD      =: +
 APT- _4P       =: 4+         
 APT- _2P       =: 2+         
 APT- _1P       =: 1+         
-APT- _2PX      =: 2+;         
 APT- _U1P      =: U1+         
 APT- _2DIV     =: 2/      \ V
 APT- _D2DIV    =: D2/     \ V
@@ -181,8 +180,6 @@ APT- _TIB      =: TIB
 APT- _TBUF     =: TBUF
 APT- _FIRST    =: FIRST
 APT- _0        =: 0
-APT- _ONE      =: ONE
-APT- _BYE      =: BYE
 
 \ VALUES
 APT- _ETIB     =: ETIB
@@ -198,26 +195,26 @@ APT- _FIND     =: FIND
 
 \ VOCABULARY    
 APT- _POSTENT  =: ==:      
-APT- _ENTRY    =: =:      
+\ APT- _ENTRY    =: =:      
 APT- _ENTRYZ   =: (=:      
-APT- _HENTRY   =: TARG:!  \ H=:     
-APT- _IFND     =: IFND       
-APT- _CFND     =: CFND    \ V
+\ APT- _HENTRY   =: TARG:!  \ H=:     
 APT- _FND      =: FND     \ V
 APT- _WFND     =: WFND    \ V  
 APT- _WFIND    =: WFIND    \ V  
+\ APT- _CFND     =: CFND    \ V
 
 \ USED
 APT- _@_INI    =: @INI      
 APT- _@_DBG    =: @DBG   \ V
 APT- _@_ACCEPT =: @ACPT   
+APT- _@SAME    =: @SAME
+APT- _@HERE    =: @HERE
+APT- _@OPER    =: @OPER  
 APT- _@_ERR    =: `ERR    
 APT- _@R_BTM   =: `R_BTM
 APT- _@R_TOP   =: `R_TOP
 APT- _@S_BTM   =: `S_BTM
 APT- _@S_TOP   =: `S_TOP
-APT- _@SAME    =: @SAME
-APT- _@HERE    =: `HERE
 APT- _SEMICO   =: TARG;
 APT- _@FIB     =: `FIB
 APT- _@TIZ     =: `TIZ

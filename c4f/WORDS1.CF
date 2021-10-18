@@ -1,3 +1,55 @@
+\ : FIX @R+ @R+ ! ;
+
+
+\ IO  -------------------------------------
+
+\ INTS DOS, FILES & VIDEO
+
+: >ZSTR CSTR TO S! DUP >NAME OFF 1+ ; \ TO S TBUF
+: `fsk 1K TUCK UM* SCRH EX SCRH 
+: IO? _FL ODD !"IO?" ;;
+: `File| >ZSTR EX IO? _AX ;
+: XDROT XEP| 
+: DROT |ROT  
+: D0 0 0 ;
+HERE >, (D#0 C@ (INT# TO _FL TO _AX TO _BX TO _CX TO _DX ;
+N: (DOS  $21 ,  
+=, (VID  $10 , 
+: THRU (RNG| ?XEP+| 
+: LOAD TR-| 1K OVER TI| VAL EVAL ; 
+HERE >, (D#0 @ DROT (DOS ;
+\ >, >FTOP| 
+: FOPEN `File| ,< 
+N: Fopen $3D02 ,
+\ >, >FTOP| 
+: FCREATE `File| ,< 
+N: Fcreate $3C00 ,
+: LineIn OVER ! DUP [ 1+ CSTR ] ,<
+N: `LineIn2 $A00 ,
+=, StdPut   $200 , 
+
+\ COMPILER
+>, EX  
+: _MARK H   
+: Z, 0 , ;      
+: |, EX 
+: `<RELS_ , 
+: LASTH! H ,<
+0 VALUE LASTH
+: |LASTH EX LASTH! ; 
+
+: `HOFS
+  CALL XR PUSH CALL EX POP THEN  (SET2 THEN ,<
+0 CONST HOFS 
+: _BEGIN |LASTH  
+: HERE H  
+: R>T HOFS + ; 
+: UNTIL| BEGIN IXEC 
+: WHILEZ| UNTIL RDROP ;
+: WHILE| (IF EXIT 
+: UNTILZ| IXEC  WHILE| ;
+: CHARS (RNG| ?XEP+| |SPC DUP B. EMIT ;
+
 : DEA? DUP 4+ C@ ;
 : vague? DUP 2+ @ ODD ;
 : EOS| EOS XR PUSH 0 TO EOS EX POP TO EOS ; 

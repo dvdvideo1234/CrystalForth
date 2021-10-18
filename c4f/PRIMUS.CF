@@ -6,7 +6,8 @@
 \ =============   VARIABLES  ==============
 
 0  QUAN  CNTC
-0 VALUE  BLK  
+: ZBLK 0      ,<  0 VALUE  BLK  
+: BLK>SCR BLK ,<  0 VALUE  SCR
 0  DEFER BLOCK
 
 : MCLR (LIT `MACADR  ,<    
@@ -28,13 +29,16 @@ ZDO VALUE 5 TIMES _FL _AX _BX _CX _DX \ _DX2
 \ =============   CONSTANTS  ==============
 
 : |C. EX EMIT ; 
-: |SPC EX      
+: |SPC EX 
 : SPC  |C. ,<     32  CONST BL
 : `bs  DUP 0; 1- CALL SPC THEN 
        |C. ,<      8  CONST  bs       
 : `LF  |C. ,<     10  CONST  lf       
 : `CR  |C. ,<     13  CONST  cr 
 : `C-  |C. ,<     '-  CONST  c- 
+1  CONST  ONE
+  ' ONE 2- =: BYE 
+  
 
 : `MASK| EX 1- 
 : AND NAND NOT ;
@@ -114,6 +118,7 @@ ZDO VALUE 5 TIMES _FL _AX _BX _CX _DX \ _DX2
 : TIMES PUSH XR  
 : TIMES| (FOR CALL BEGIN J EXECUTE THEN (NEXT RELS<
  RDROP RDROP; 
+\ : SPACES TIMES| SPC ;    
 : ODDH? !"ODDH?" ;;
 : HODD H (| ODDH?  DUP \ H TO FIX HERE 
 : ODD (@&; ,< 1 , 
@@ -149,11 +154,15 @@ ZDO VALUE 5 TIMES _FL _AX _BX _CX _DX \ _DX2
 : TYPE STR| CSTR EMIT ; 
 : ((." ("SKIP  ". ;;  
 
+: XY? 1K LTIB - ;
 : ?|CR 0; 
 : |CR EX 
 : CR TO cr TO lf 0 TO CNTC ;
 : `OK ."_ok" CR .">>_"  ;;  
-: `. EMT! KEY! CR TBUF ID. NOP ID. CR ; \ ERRA
+: `. EMT! KEY! CR TBUF ID. NOP ID. CR BLK 0;  \ ERRA
+  BLK>SCR ZBLK XY? 
+: >XY TO 1K ,< 0 VALUE XY
+
 \ : `WITHSTK @R+ @R+ WITHIN 0= ;
 : `STACK TR-|
   RP@    AT WITHIN `R_BTM  `R_TOP  0= !"RSTK?" 
@@ -230,29 +239,10 @@ N: `DECI 10 , N: `BIN 2 , N: `HEX 16 ,  DROP
 
 \ INCLUDE XTEND.CF \ HERE .  TEST11 3292
 \ INCLUDE NUMOUT.CF
-INCLUDE DEBUG.CF 
-INCLUDE WORDS1.CF
+ INCLUDE DEBUG.CF 
+\ INCLUDE WORDS1.CF
 \ INCLUDE INITER.CF
  
-' @INI VAL' @INIT T!
-\ ' `INTERP VAL' LOXEC T! \ TARGET FORTH INITIAL STATE
-' ">NUMC ' `COMPNUM T!   \ FIX @COMPNUM
-' ">NUM  ' `NUMBER  T!   \ FIX @NUMBER
-'  `.     ' `ERR    T!   \ FIX ERROR.
-' MEMTI|  ' `TIZ    T!   \ FIX EVAL 
-' `STACK  ' @EVAL   T!   \ FIX @EVAL 
-TO' ACCEPT  ' @ACPT T!
-'  `OK    ' @OK     T!   \ FIX  vOK.
-' `SOURCE ' `PARSE  T!   \ FIX PARSE
-'  (;,    ' @SEMICO T!   \ FIX ALIGNED
-\ '  SAME?  ' @SAME   T!   \ FIX (=:
-\ '  HERE   ' HODD    T!   \ FIX HODD
-\ '  HODD   ' `HERE   T!   \ FIX H=:
-\ '  CSP!   ' TARG:   T!   \ FIX TARG:
-\ '  |LASTH ' ALIGNED T!   \ FIX ALIGNED
-\ AT' |SAFE! AT' SEVAL T!   \ FIX MAC
-\ '  FIX VAL' H       T!   \ NEW H 
-
 \ L_ _STR?
 \   DW _AFT_NAME,_1M,_C@,_RET
 \ : "? DUP ?C@ + C@ TO = ,< '" , >, ;;
