@@ -17,16 +17,12 @@ APT- _SDIV     =: -/      \
 APT- _NAND     =: NAND    \ 
 
 \ MATH
-APT- _RANGES   =: RANGE>S        
 APT- _HW_B     =: HW>B        
 APT- _W_B      =: W>B        
-APT- _OVERM    =: OVER-      
 APT- _2M       =: 2-         
 APT- _1M       =: 1-         
 APT- _2MUL     =: 2*       
 APT- _ZERO     =: 0&       
-APT- _SUB      =: -        
-APT- _ADD      =: +        
 APT- _4P       =: 4+         
 APT- _2P       =: 2+         
 APT- _1P       =: 1+         
@@ -42,7 +38,7 @@ APT- _RPLD     =: RP@     \ V
 APT- _SPLD     =: SP@     \ V
                
 \ STACK        
-APT- _ADDX     =: .;
+APT- _EVALX    =: .;
 APT- _DROPX    =: DROP;   \ V
 APT- _NIP      =: NIP     \ V
 APT- _OVER     =: OVER    \ V
@@ -65,6 +61,7 @@ APT- _FOR      =: (FOR    \ V
 APT- _MIF      =: (-IF    \ V
 APT- _SKIP?    =: SKIP?   \ V
 APT- _0X       =: 0;         
+APT- _N0X      =: 0<>;         
                
 \ LOGIC        
 APT- _XOR      =: XOR     \ V
@@ -73,7 +70,6 @@ APT- _ZEQ      =: 0=      \ V
 APT- _NEQ      =: <>      \ V
 APT- _0LESS    =: 0<      \ V
 APT- _ULESS    =: U<      
-APT- _WITHIN   =: WITHIN     
                
 \ MEMORY       
 APT- _MAKESTR  =: S!    
@@ -166,8 +162,6 @@ APT- _WORD     =: WORD
 APT- _SEVAL    =: SEVAL      
 APT- _EVAL     =: EVAL       
 APT- _@EVAL    =: @EVAL      
-APT- _TO_NAME  =: >DEA      
-APT- _AFT_NAME =: >NAME     
                
 \ IO           
 APT- _BE       =: BE      \ V BIOS EMIT
@@ -201,7 +195,7 @@ APT- _ENTRYZ   =: (=:
 APT- _FND      =: FND     \ V
 APT- _WFND     =: WFND    \ V  
 APT- _WFIND    =: WFIND    \ V  
-\ APT- _CFND     =: CFND    \ V
+APT- _CFND     =: CFND    \ V
 
 \ USED
 APT- _@_INI    =: @INI      
@@ -210,7 +204,7 @@ APT- _@_ACCEPT =: @ACPT
 APT- _@SAME    =: @SAME
 APT- _@HERE    =: @HERE
 APT- _@OPER    =: @OPER  
-APT- _@_ERR    =: `ERR    
+APT- _@_ERR    =: @ERR    
 APT- _@R_BTM   =: `R_BTM
 APT- _@R_TOP   =: `R_TOP
 APT- _@S_BTM   =: `S_BTM

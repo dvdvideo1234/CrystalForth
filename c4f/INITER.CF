@@ -2,7 +2,7 @@
 \ ' `INTERP VAL' LOXEC T! \ TARGET FORTH INITIAL STATE
 ' ">NUMC ' `COMPNUM T!   \ FIX @COMPNUM
 ' ">NUM  ' `NUMBER  T!   \ FIX @NUMBER
-'  `.     ' `ERR    T!   \ FIX ERROR.
+'  `.     ' @ERR    T!   \ FIX ERROR.
 ' MEMTI|  ' `TIZ    T!   \ FIX EVAL 
 ' `STACK  ' @EVAL   T!   \ FIX @EVAL 
 TO' ACCEPT  ' @ACPT T!
@@ -19,6 +19,9 @@ TO' ACCEPT  ' @ACPT T!
 
 HERE    VAL' H T!             \ TARGET FORTH HEAP
 
+THIDE (DEF
+THIDE (D#0
+
           THIDE             :` 
 ' _HENTRY THIDE _HENTRY =:  :`         
           THIDE             ;`
@@ -30,6 +33,10 @@ HERE    VAL' H T!             \ TARGET FORTH HEAP
 ' TARG:   THIDE TARG:   =:  :          
 ' ((."    THIDE ((."    =:  (."        
 ' (("     THIDE (("     =:  ("
+          THIDE             TO` 
+' FTO`    THIDE FTO`    =:  TO`
+          THIDE             AT` 
+' FAT`    THIDE FAT`    =:  AT` 
 
 \ ' _ENTRY  =: LASTW    \ WORD THE ONE
 

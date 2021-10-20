@@ -37,7 +37,7 @@ ZDO VALUE 5 TIMES _FL _AX _BX _CX _DX \ _DX2
 : `CR  |C. ,<     13  CONST  cr 
 : `C-  |C. ,<     '-  CONST  c- 
 1  CONST  ONE
-  ' ONE 2- =: BYE 
+HERE 2- =: BYE 
   
 
 : `MASK| EX 1- 
@@ -65,11 +65,23 @@ ZDO VALUE 5 TIMES _FL _AX _BX _CX _DX \ _DX2
   
 \ ============ PRIMITIVE METHODS ===============
 
+: RANGE>S 1+
+: OVER- OVER
+: - NEG
+: + +2/ DROP;
+ 
+: T> T
+: DEA> 4+ 
+: NAME> CSTR +  ;
+' T> ' CFND T!
+
+: WITHIN OVER- PUSH - POP U< ;
+  
 : |DROP EX DROP;
 : |NIP EX NIP ;   
 : |SWAP EX SWAP ;
+: @ISTR J |SWAP
 : @+ PUSH @R+ POP; 
-: 2@ |SWAP
 : @2 @+ @ ;
 \ : NOP;  ;
 
@@ -86,8 +98,8 @@ ZDO VALUE 5 TIMES _FL _AX _BX _CX _DX \ _DX2
 : ?XEP-| 1-
 : ?XEP| DUP     THEN
 : XEP| XR EXECUTE POP;
-: I@ J @ (; @R+ SWAP
-: |SAFE! XR I@ PUSH J ! EX POP POP!;
+: I@ J @ (; @R+ @R+
+: |SAFE! XR I@ PUSH SWAP J ! EXECUTE POP POP!;
 : |ROT EX
 : ROT -ROT -ROT ;
 : TUCK DUP -ROT ;
@@ -163,12 +175,10 @@ ZDO VALUE 5 TIMES _FL _AX _BX _CX _DX \ _DX2
   BLK>SCR ZBLK XY? 
 : >XY TO 1K ,< 0 VALUE XY
 
-\ : `WITHSTK @R+ @R+ WITHIN 0= ;
-: `STACK TR-|
-  RP@    AT WITHIN `R_BTM  `R_TOP  0= !"RSTK?" 
-  SP@ 2- AT WITHIN `S_BTM  `S_TOP  0= !"DSTK?"
-  vPIN
-  ;; 
+: `WITHSTK @R+ @R+ WITHIN 0= (JUMP AT ((;" ,<
+: `RP `WITHSTK `R_BTM  `R_TOP ,< 5 C, ,"RSTK?"
+: `SP `WITHSTK `S_BTM  `S_TOP ,< 5 C, ,"DSTK?"
+: `STACK TR-| RP@  `RP   SP@ 2- `SP    vPIN  ;; 
 
 \ NUMBERS ---------------------------
 
@@ -225,7 +235,7 @@ N: `DECI 10 , N: `BIN 2 , N: `HEX 16 ,  DROP
 : `U.  BASE U/MOD  SKIP? RECURSE DIG. ;
 
 >, EOS! : `CR2 RDROP RDROP; 
-: `CH A@ AT WITHIN ,< 32 , 240 , >, 0; A@ SKIP 
+: `CH A@ (## ,< 32 , 240 , >, WITHIN 0; A@ SKIP 
 : `tab BL DUP A! EMIT 2DUP + A@ SWAP! 1+ ; 
 : `CHTAB ("SW ,< 5 C, ^H C, ^I C, ^M C, ^Z C, 127 C, 
 >, `CH `bs `tab `CR2  TO `CR2 NOOP 
@@ -235,7 +245,29 @@ N: `DECI 10 , N: `BIN 2 , N: `HEX 16 ,  DROP
 : ' FND?
 : @DEF? @2 
 : UNDEF? ODD !"UNDEF?" ;;
+HERE >, (D#0
+: `ADR+  @ (| + 
 : ADR' '  TO ODD ODDH? ; 
+N: TO' -2 ,  N: AT' -4 , N: VAL' 2 , DROP
+HERE >, (D#0 `ADR+ PUSH; ,<
+N: TO -2 ,   N: AT -4 , N: X:` 0 , DROP 
+HERE >, (D#0 `ADR+ , ;
+N: FTO` -2 ,  N: FAT` -4 ,  DROP 
+ 
+
+: @I J @ ;
+>, (D#1 PUSH 
+: >PUSH @ISTR 2- SWAP @2 WITHIN 0= !"FULL?" @I !- POP!;
+: >POP  @ISTR    SWAP @2 WITHIN 0= !"EMPTY?"  @I @+ POP!;
+ (VAR3 AT >PUSH 
+: HNDLS >POP ,< HERE 23 2* + , HERE 4 + , HERE 21 2* + ,
+40 ALLOT
+: STKINI DUP PUSH 4+ @ POP!;
+: STKSZ  DUP PUSH 4+ @ POP @ - 2/ ;
+: HTOP AT HNDLS @ @ ;
+
+0 VAR VAR1
+: TESTV AT |SAFE! ,< 20 , ' VAR1 2+ , >, : V. VAR1 @ . ;
 
 \ INCLUDE XTEND.CF \ HERE .  TEST11 3292
 \ INCLUDE NUMOUT.CF

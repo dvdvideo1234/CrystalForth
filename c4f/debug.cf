@@ -6,7 +6,7 @@
 : UNITS? U/MOD SWAP  0; 1+ ; 
 : SAME? TFND 0; 4+ [ID] TBUF ; 
 
-: VLIST T BEGIN DUP 4+ C@ WHILE SPC DUP @ H. 4+ DUP ID. >NAME
+: VLIST T BEGIN DUP 4+ C@ WHILE SPC DUP @ H. 4+ DUP ID. NAME>
   KEY ^[ = UNTIL THEN DROP;
   
 : `BD |SPC STR| CSTR B. ; 
@@ -22,8 +22,10 @@
 : `WID. ID. WID. ; 
 : JID. J 
 : @ID. DUP H. STR DUP H. SWAP @ H. 
-: ?ID. WFIND IF WID. ;THEN 2- WFIND IF "VAL" `WID. ;THEN 4+ 
-WFIND IF "TO" `WID. ;THEN 2+ WFIND IF "AT" `WID. ;THEN 4 -
+: ?ID. WFIND IF WID. ;THEN
+ 2+  WFIND IF "TO"  `WID. ;THEN
+ 2+  WFIND IF "AT"  `WID. ;THEN
+ 6 - WFIND IF "VAL" `WID. ;THEN  2+
 : $. ."$" H. ; 
 0 VALUE `ADR2 
 : `" (WSCN ,< 7 , 

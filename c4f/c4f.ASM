@@ -101,8 +101,11 @@ L_ _EVAL                   ; EVAL
 ;  DW _TRONM?
 _@TIZ  DW _NOP          ; FIX WITH TI
 L_ _@Eval
-@EV  DW _NOP,_TOKEN,_IF,@ADDX,_FIND  ; FIX WITH STK?
+@EV  DW _NOP,_TOKEN,_IF,_EVALX,_FIND  ; FIX WITH STK?
 _@OPER  DW _NOP,_OPER,_@EXEC,_JUMP,@EV
+
+LL_ _XDROP,_EX
+LL_ _EVALX,_DROPX
 
 ; ============== COMPILER ===================
 
@@ -111,16 +114,11 @@ L_ _COLON             ; :
 L_ _COLONC             ; :`
   DW _HENTRY
 LL_ _RPAR,TO_+_FIND
-  DW _TBUF,_INC,_CFND,_TBUF,_DEC,_SKIP?,_RET,_CFND,_2P,_RET
-
-L_ _TO_NAME
-  DW _4P
-L_ _AFT_NAME
-  DW _CSTR,_ADD
+  DW _TBUF,_INC,_CFND,_TBUF,_DEC,_SKIP?,_RET,_CFND,_2P
 LL_ _NOOP,_RET
-  
+
 L_ _CFND
-  DW _T,_TO_NAME
+  DW _NOP
 LL_ _FND,__PAR         
   CALL  @METHOD
   repe  cmpsb
@@ -180,13 +178,17 @@ LL_ _??,_ABORT?
   NAM_ "?"
   DW _RET
 
-L_ _ALLERR
-  DW _0
 L_ _ABORT0?                  ; (A'
   DW _ZEQ
 L_ _ABORT?                  ; (A'
-  DW _ASTR,_SWAP,_IF,@ADDX
+  DW _ASTR,_PUSH  
+  DW _IF,_ABORTX
+L_ _ALLERR
+  DW _POP
 _@_ERR DW _NOP,_ABORT
+L_ _N0X
+  DW _0X
+_ABORTX DW _RDROPX
 
 ; -------------- MATH ------------------
 
@@ -195,13 +197,6 @@ L_ _DLIT
 L_ _LIT
   DW _RLDP,_RET
   
-LL_ _RANGES,_1P
-LL_ _OVERM,_OVER
-LL_ _SUB,_NEG
-LL_ _ADD,_PLAVG
-L_ _ADDX
-@ADDX DW  _DROPX
- 
 LL_ _@COMMA,_LD
 LL_ _COMMA,_HX
 L_ _STP
@@ -628,18 +623,11 @@ P_ _J               ; ( J
   PUSH    W
   JMPS    @_J
 
-ALIGN_ 0
-  DW      _RLDP,_RLDP
-L_ _WITHIN
-  DW _OVERM,_PUSH,_SUB,_POP 
 L_ _ULESS
   DW __ADROPX
   SUB   TOP,W
   JMPS  @FLAG
 
-;    DW    _RLDP
-;L_ _EQ
-;    DW    _XOR,__ARET
 P_ _ZEQ
     NEG     TOP
     cmc

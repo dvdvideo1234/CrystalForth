@@ -5,7 +5,8 @@
 
 \ INTS DOS, FILES & VIDEO
 
-: >ZSTR CSTR TO S! DUP >NAME OFF 1+ ; \ TO S TBUF
+: >ZSTR CSTR 
+: S>ZSTR TO S! DUP >NAME OFF 1+ ; \ TO S TBUF
 : `fsk 1K TUCK UM* SCRH EX SCRH 
 : IO? _FL ODD !"IO?" ;;
 : `File| >ZSTR EX IO? _AX ;
