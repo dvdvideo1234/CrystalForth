@@ -5,14 +5,13 @@
 '  `.     ' @ERR    T!   \ FIX ERROR.
 ' MEMTI|  ' `TIZ    T!   \ FIX EVAL 
 ' `STACK  ' @EVAL   T!   \ FIX @EVAL 
-TO' ACCEPT  ' @ACPT T!
+TO' ACCEPT ' `@ACPT T!
 '  `OK    ' @OK     T!   \ FIX  vOK.
 ' `SOURCE ' `PARSE  T!   \ FIX PARSE
 '  (;,    ' @SEMICO T!   \ FIX ALIGNED
-\ '  SAME?  ' @SAME   T!   \ FIX (=:
 \ '  HERE   ' HODD    T!   \ FIX HODD
 \ '  HODD   ' `HERE   T!   \ FIX H=:
-\ '  CSP!   ' TARG:   T!   \ FIX TARG:
+'  <CLR>   ' TARG:   T!   \ FIX TARG:
 \ '  |LASTH ' ALIGNED T!   \ FIX ALIGNED
 \ AT' |SAFE! AT' SEVAL T!   \ FIX MAC
 \ '  FIX VAL' H       T!   \ NEW H 

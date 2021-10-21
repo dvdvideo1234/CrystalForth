@@ -1,10 +1,11 @@
 \ DEBUGERR  ------
 : |[] ."[" EX ."]" ;;
 : [ID] CSTR      
-: [S] |SPC |DROP     
+: [S] |SPC DROP|     
 : [TYPE] |[] TIMES| CSTR DUP |C. BL U< 0; DROP '. ;; 
 : UNITS? U/MOD SWAP  0; 1+ ; 
 : SAME? TFND 0; 4+ [ID] TBUF ; 
+ '  SAME?  ' @SAME   T!   \ FIX (=:
 
 : VLIST T BEGIN DUP 4+ C@ WHILE SPC DUP @ H. 4+ DUP ID. NAME>
   KEY ^[ = UNTIL THEN DROP;

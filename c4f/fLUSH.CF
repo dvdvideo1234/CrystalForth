@@ -8,8 +8,6 @@
 : `@BUFS  `PREV ,< 
     4 WARY `BUFS 
 
-: WBLK `RWPOS Fwrite IO? ;
-: RBLK `RWPOS Fread  IO? ; 
 : `@BUF `PREV 1K* FIRST + ; 
 : UPDATE  `@FBUFS ON ; 
 : -BUF `@BUFS ON 

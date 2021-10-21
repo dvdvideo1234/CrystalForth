@@ -10,15 +10,16 @@ MADR = 65535-15 ;
 
 Start   Label byte
 
-BUF_ @TIB,114        ;  130
-BUF_ _@FIB,130        ; 130
+BUF_ _@TIB,66        ;  82
+BUF_ @FIB,66        ; 66
+BUF_ @CMD,130        ; 130
 BUF_ @TBUF,258       ;  256
-BUF_ _@R_TOP,10      ;  512 B FSTACK
+BUF_ _@R_TOP,40      ;  512 B FSTACK
 BUF_ _@R_BTM,512     ;  512 B FSTACK
 BUF_ _@S_TOP,16      ;  512 B DSTACK
 BUF_ _@S_BTM,512     ;  512 B DSTACK
 BUF_ _@MACTOP,16     ; 4096 B = 4 BUFFERS * 1024 B
-BUF_ _@MACADR,2512   ; 4096 B = 4 BUFFERS * 1024 B
+BUF_ _@MACADR,2464   ; 4096 B = 4 BUFFERS * 1024 B
 BUF_ @VOCTOP,4096    ; 4096 B = 4 BUFFERS * 1024 B
 
         org 100h
@@ -36,7 +37,7 @@ P_ _QUIT
   MOV     RSP,_@R_TOP
   CALL  @RET
   DW    _INIT
-@MAINLP DW _TIB,_TBL
+@MAINLP DW _DLIT,_@TIB,80
 _@_ACCEPT  DW _NOP,_EVAL
 _@_OK  DW _NOP,_JUMP,@MAINLP
 
@@ -49,8 +50,8 @@ _@NUMBER  DW 0
 _@COMPNUM DW 0
    DW _@COMMA,0,0   ;  FOR COMMENT
 
-  CONST_  _TBL,80H
-  CONST_  _TIB,@TIB
+  CONST_  _CMD,@CMD
+  CONST_  _FIB,@FIB
   CONST_  _TBUF,@TBUF
   CONST_  _FIRST,@VOCTOP
 ;  CONST_  _BL,32
@@ -80,9 +81,8 @@ _@COMPNUM DW 0
 
 LL_ _REINIT,to_+_INIT
 _@_INI:
-   DW  _UPDICT
-   DW  _DLIT,8*1024,22*1024,_POSTX,_EVAL
-   ;DW  _DLIT,8*1024,0,_POSTX,_EVAL
+   DW  _UPDICT,_LIT,80H,_CSTR,_CMD,_MAKESTR,_DROP
+   DW  _DLIT,8*1024+100H,22*1024,_POSTX,_EVAL
 LL_ _REINIT2,to_+_INIT
 _@_ABINI  DW _NOP,_SKIP
 
@@ -94,13 +94,12 @@ LL_ _LPAR,TO_+_FIND             ; [`
 @LPAR DW _VT,_FND,_RET         
 
 LL_ _MAC,_DZ0               ; _MAC
-;      DW AT_+ _FIND
-;  DW _SKIP,_RPAR+2      ; FIX SKIP WITH |SAVE!
+_@MAC  DW _NOP,VAL_+_RPAR,VAL_+ _FIND ; EXECUTE MACROSES ONLY IN COMP MODE
 LL_ _SEVAL,_CSTR            ; EVAL
 L_ _EVAL                   ; EVAL
-;  DW _TRONM?
 _@TIZ  DW _NOP          ; FIX WITH TI
 L_ _@Eval
+;  DW _TRONM?
 @EV  DW _NOP,_TOKEN,_IF,_EVALX,_FIND  ; FIX WITH STK?
 _@OPER  DW _NOP,_OPER,_@EXEC,_JUMP,@EV
 
@@ -182,13 +181,13 @@ L_ _ABORT0?                  ; (A'
   DW _ZEQ
 L_ _ABORT?                  ; (A'
   DW _ASTR,_PUSH  
-  DW _IF,_ABORTX
+  DW _IF,_EXIT
 L_ _ALLERR
   DW _POP
 _@_ERR DW _NOP,_ABORT
 L_ _N0X
   DW _0X
-_ABORTX DW _RDROPX
+_EXIT DW _RDROPX
 
 ; -------------- MATH ------------------
 
@@ -229,6 +228,11 @@ P_ _HW_B
   MOV   TOPL,TOPH
 P_ _W_B
   CLR   TOPH
+  JMPS  @NOP3
+  
+P_ _LDSTA       ; @!A
+  MOV     DI,AR
+  XCHG    TOP,[DI]
   JMPS  @NOP3
 
 P_ _4P

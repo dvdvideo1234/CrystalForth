@@ -21,7 +21,7 @@
 : KEY! (LIT BK (SET2 (VAR
 : KEY BK ;;
 
-ZDO VALUE 5 TIMES _FL _AX _BX _CX _DX \ _DX2
+ZDO VALUE 6 TIMES _FL _AX _BX _CX _DX HOFS
  -1 VALUE SCRH
  
 : |HLD CALL EX (SET2 THEN ,<       0 CONST HLD
@@ -39,6 +39,7 @@ ZDO VALUE 5 TIMES _FL _AX _BX _CX _DX \ _DX2
 1  CONST  ONE
 HERE 2- =: BYE 
   
+: EOS! bs (SET2 ,<                  0 VAR EOS 
 
 : `MASK| EX 1- 
 : AND NAND NOT ;
@@ -49,21 +50,23 @@ HERE 2- =: BYE
 >, `MASK| ,<
  16 CONST 1H
 
-: EOS! bs ,<    
-0 VALUE EOS 
-
+' `TIB CONST TIB
 : 1L& `MASK| ,<
   64  CONST 1L
 >, `MASK| ,<
 1024  CONST 1K
    -1 CONST TRUE
-' `FIB CONST FIB  
  
 : ON  TRUE SKIP
 : OFF 0 
 : SWAP! SWAP ! ;   
   
 \ ============ PRIMITIVE METHODS ===============
+
+: SWAP| EX SWAP ;
+: @ISTR J SWAP|
+: @+ PUSH @R+ POP; 
+: @2 @+ @ ;
 
 : RANGE>S 1+
 : OVER- OVER
@@ -75,14 +78,13 @@ HERE 2- =: BYE
 : NAME> CSTR +  ;
 ' T> ' CFND T!
 
+HERE >, (D#0 @2 
 : WITHIN OVER- PUSH - POP U< ;
+\ N: `BREL? -128 , 128 , 
+=, PRNTBL 32 , 240 ,
   
-: |DROP EX DROP;
-: |NIP EX NIP ;   
-: |SWAP EX SWAP ;
-: @ISTR J |SWAP
-: @+ PUSH @R+ POP; 
-: @2 @+ @ ;
+: DROP| EX DROP;
+: NIP| EX NIP ;   
 \ : NOP;  ;
 
 : I J ;
@@ -90,20 +92,22 @@ HERE 2- =: BYE
 : (XARY 2* POP + @ PUSH;
 : IXEC J
 : EXECUTE PUSH; 
-:  `RW IXEC ! IXEC ONE
-: EXIT RDROP;
 : S1- U1+
 : 1-; 1- ; 
+: EOSZ DROP|
+: EOS? EOS
+: @0<>? A! 0 @!A ;
 : ?XEP+| DUP 1+ AHEAD 
 : ?XEP-| 1-
 : ?XEP| DUP     THEN
-: XEP| XR EXECUTE POP;
-: I@ J @ (; @R+ @R+
-: |SAFE! XR I@ PUSH SWAP J ! EXECUTE POP POP!;
+: XEP| XR EXECUTE POP; @R+ @R+
+: |SAFE! A! @!A XA PUSH A@ EXECUTE POP POP!;
 : |ROT EX
 : ROT -ROT -ROT ;
+AT' |SAFE! ' `_MAC  T!
+
 : TUCK DUP -ROT ;
-: W>BB |SWAP
+: W>BB SWAP|
 : SPLIT DUP W>B XEP| HW>B ;
 : 2DUP OVER OVER ;
 : 2DROP DROP DROP ;
@@ -122,11 +126,15 @@ HERE 2- =: BYE
 : A+L XEP| 
 : I+ J + ; 
 : 31& (@&; ,< 31 ,  
+: @I J @ ;
+: |@! XR @I EXECUTE POP!;
+: +!  |@! + ;
+: XOR! |@! XOR ;
 : (<RNG| RANGE>S A+L SKIP
 : (RNG| RANGE>S  SKIP
 : ASTR| A!
 : STR| XR POP    
-: .TIMES |DROP   
+: .TIMES DROP|   
 : TIMES PUSH XR  
 : TIMES| (FOR CALL BEGIN J EXECUTE THEN (NEXT RELS<
  RDROP RDROP; 
@@ -159,6 +167,12 @@ HERE 2- =: BYE
 : `", WORD ?C@ N?? 
 : ", CSTR v", DUP C, 
 : S, STR| CSTR C, ; 
+: M: ';  
+: ?M: AT |SAFE! ,< 0 , VAL' HOFS , >,
+   CALL TARG:C `(MAC `", THEN 
+: <M> MOBJ   |H TO MOBJ ;   
+
+
 : T. T   
 : WID.  4+ 
 : ID. |SPC 
@@ -182,8 +196,8 @@ HERE 2- =: BYE
 
 \ NUMBERS ---------------------------
 
-: U/ |NIP    : U/MOD A! 0 
-: (UM/ |SWAP TWICE TWICE -/ -/ -/ -/ ;
+: U/ NIP|    : U/MOD A! 0 
+: (UM/ SWAP| TWICE TWICE -/ -/ -/ -/ ;
 : UMOD U/MOD DROP;
 : UM/MOD U/MOD XEP| (UM/ ; \ ( UD U - U UD )
 
@@ -193,9 +207,10 @@ HERE >, (D#0 @
 : BASE! 2- W>B 2+ ,<
   10 VALUE BASE 
 N: `DECI 10 , N: `BIN 2 , N: `HEX 16 ,  DROP
+
 : `BLOCK [ 1B + ]
 : 1K* 1K
-: U* |DROP 
+: U* DROP|
 : UM* A! 0 TWICE TWICE +* +* +* +* ;
 ' `BLOCK VAL' BLOCK T!
 
@@ -215,7 +230,7 @@ N: `DECI 10 , N: `BIN 2 , N: `HEX 16 ,  DROP
 : 1+; 1+ ; 
 : `-? OPT? 0; OVER C@ c- = 0; S1- EX XEP| NEG ;
 : "># CSTR
-: S># `DECI 0 -ROT DUP (IF 1-; `-?  |NIP 
+: S># `DECI 0 -ROT DUP (IF 1-; `-?  NIP| 
 : CONV  `DIGICHK FOR PUSH C@R+ J 1+ A! @STATE POP 
     A@ (IF `CONV; NEXT 1+ ;
 : ">NUM  TR-| "># ?? ;  \  vDBG ,< 4 , >,
@@ -235,7 +250,7 @@ N: `DECI 10 , N: `BIN 2 , N: `HEX 16 ,  DROP
 : `U.  BASE U/MOD  SKIP? RECURSE DIG. ;
 
 >, EOS! : `CR2 RDROP RDROP; 
-: `CH A@ (## ,< 32 , 240 , >, WITHIN 0; A@ SKIP 
+: `CH A@ PRNTBL 0; A@ SKIP 
 : `tab BL DUP A! EMIT 2DUP + A@ SWAP! 1+ ; 
 : `CHTAB ("SW ,< 5 C, ^H C, ^I C, ^M C, ^Z C, 127 C, 
 >, `CH `bs `tab `CR2  TO `CR2 NOOP 
@@ -252,26 +267,99 @@ N: TO' -2 ,  N: AT' -4 , N: VAL' 2 , DROP
 HERE >, (D#0 `ADR+ PUSH; ,<
 N: TO -2 ,   N: AT -4 , N: X:` 0 , DROP 
 HERE >, (D#0 `ADR+ , ;
-N: FTO` -2 ,  N: FAT` -4 ,  DROP 
+N: FTO` -2 ,  N: FAT` -4 , N: FVAL` 2 ,  DROP 
  
 
-: @I J @ ;
 >, (D#1 PUSH 
 : >PUSH @ISTR 2- SWAP @2 WITHIN 0= !"FULL?" @I !- POP!;
 : >POP  @ISTR    SWAP @2 WITHIN 0= !"EMPTY?"  @I @+ POP!;
  (VAR3 AT >PUSH 
-: HNDLS >POP ,< HERE 23 2* + , HERE 4 + , HERE 21 2* + ,
-40 ALLOT
+: HNDLS >POP ,< 168 , 128 , 168 ,
+\ 40 ALLOT
 : STKINI DUP PUSH 4+ @ POP!;
-: STKSZ  DUP PUSH 4+ @ POP @ - 2/ ;
+ (VAR3 AT >PUSH 
+: STK> >POP ,< 208 , 168 , 208 ,
+: STKSZ  DUP PUSH 4+ @ POP @ - 2/ (;
+ (VAR3 AT >PUSH 
+: STK< >POP ,< 248 , 208 , 248 ,
 : HTOP AT HNDLS @ @ ;
+: <CLR> AT STK> STKINI  AT STK< STKINI ;
+: <MORE?> AT STK> STKSZ  AT STK< STKSZ + ;
 
-0 VAR VAR1
-: TESTV AT |SAFE! ,< 20 , ' VAR1 2+ , >, : V. VAR1 @ . ;
+
+\ : .T (LIT _ENTRY WFIND DROP DEA> DEA> ; END OF WORDLIST
+
+\ IO  -------------------------------------
+
+: >ZSTR CSTR 
+: S>ZSTR TO S! DUP NAME> OFF 1+ ; \ TO S TBUF
+
+\ INTS DOS, FILES & VIDEO
+
+: `fsk 1K TUCK UM* SCRH EX SCRH 
+: IO? _FL ODD !"IO?" ;;
+: `File| >ZSTR EX IO? _AX ;
+: XDROT XEP| 
+: DROT |ROT  
+: D0 0 0 ;
+HERE >, (D#0 C@ (INT# TO _FL TO _AX TO _BX TO _CX TO _DX ;
+N: (DOS  $21 ,  
+=, (VID  $10 , 
+
+: THRU (RNG| ?XEP+| 
+: LOAD TR-| 1K OVER TI| VAL @EVAL ; 
+
+: `FTOP| TO HNDLS HNDLS EX TO HNDLS ;
+:  `RW IXEC ! IXEC ONE RDROP; ,<
+HERE >, (D#0 @ DROT (DOS ;
+>, `FTOP| 
+: FOPEN `File| ,< 
+N: Fopen $3D02 ,
+>, `FTOP| 
+: FCREATE `File| ,< 
+N: Fcreate $3C00 ,
+\ : LineIn OVER ! DUP [ 1+ CSTR ] ,<
+\ N: `LineIn2 $A00 ,
+=, StdPut   $200 ,  \ 
+
+HERE >, (D#0 @ (DOS ;
+>, `RW  (VAR3 ,< N: Fread  $3F00 , 0 ,
+>, `RW  (VAR3 ,< N: Fwrite $4000 , 0 , 
+: `RWPOS `fsk ,<
+=, Fseek  $4200 ,
+
+HERE >, (D#0 @ XDROT (DOS ; 
+N: Fsize $4202 , 
+N: Fpos $4201 , 
+N: Fcut $4000 , 
+: ACLEAR <CLR>
+: CLSD AT HNDLS STKSZ TIMES| \ CLOSES ALL FILES 
+: HCLOSE HNDLS ,<
+=, Fclose $3E00 , 
+
+: StdGet 0 
+: FKEY  ^Z AT Fread ROT Fread TO Fread @ ;
+: ERRput 2  
+: FEMIT SWAP AT Fwrite ROT Fwrite ;
+: FGet HTOP FKEY ;
+
+: WBLK `RWPOS Fwrite IO? ;
+: RBLK `RWPOS Fread  IO? ; 
+
+: @OPENI| TOKEN? TO FOPEN EOSZ @R+ (LIT KEY |SAFE! ;
+: INCLUDE  @OPENI| FGet
+ SKIP BEGIN EVAL  TIB 1L ACCEPT EOS? UNTIL EVAL  HCLOSE ;
+: FTYPE @OPENI| FGet  AT |SAFE! BE EMIT
+  BEGIN  CR FIB 1L ACCEPT EOS? UNTIL  HCLOSE ;
+
+\ 0 VAR VAR1  \ TESTING |SAFE!
+\ : TESTV AT |SAFE! ,< 20 , ' VAR1 2+ , >, : V. VAR1 @ . ;
 
 \ INCLUDE XTEND.CF \ HERE .  TEST11 3292
 \ INCLUDE NUMOUT.CF
- INCLUDE DEBUG.CF 
+ INCLUDE DEBUG.CF  \ 530
+ INCLUDE UPACK.CF  \ 230 B
+ 
 \ INCLUDE WORDS1.CF
 \ INCLUDE INITER.CF
  

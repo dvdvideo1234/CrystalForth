@@ -1,34 +1,6 @@
 \ : FIX @R+ @R+ ! ;
 
 
-\ IO  -------------------------------------
-
-\ INTS DOS, FILES & VIDEO
-
-: >ZSTR CSTR 
-: S>ZSTR TO S! DUP >NAME OFF 1+ ; \ TO S TBUF
-: `fsk 1K TUCK UM* SCRH EX SCRH 
-: IO? _FL ODD !"IO?" ;;
-: `File| >ZSTR EX IO? _AX ;
-: XDROT XEP| 
-: DROT |ROT  
-: D0 0 0 ;
-HERE >, (D#0 C@ (INT# TO _FL TO _AX TO _BX TO _CX TO _DX ;
-N: (DOS  $21 ,  
-=, (VID  $10 , 
-: THRU (RNG| ?XEP+| 
-: LOAD TR-| 1K OVER TI| VAL EVAL ; 
-HERE >, (D#0 @ DROT (DOS ;
-\ >, >FTOP| 
-: FOPEN `File| ,< 
-N: Fopen $3D02 ,
-\ >, >FTOP| 
-: FCREATE `File| ,< 
-N: Fcreate $3C00 ,
-: LineIn OVER ! DUP [ 1+ CSTR ] ,<
-N: `LineIn2 $A00 ,
-=, StdPut   $200 , 
-
 \ COMPILER
 >, EX  
 : _MARK H   
@@ -39,9 +11,6 @@ N: `LineIn2 $A00 ,
 0 VALUE LASTH
 : |LASTH EX LASTH! ; 
 
-: `HOFS
-  CALL XR PUSH CALL EX POP THEN  (SET2 THEN ,<
-0 CONST HOFS 
 : _BEGIN |LASTH  
 : HERE H  
 : R>T HOFS + ; 
@@ -54,7 +23,7 @@ N: `LineIn2 $A00 ,
 : DEA? DUP 4+ C@ ;
 : vague? DUP 2+ @ ODD ;
 : EOS| EOS XR PUSH 0 TO EOS EX POP TO EOS ; 
-: /LINE? 0= 0; |CR BK 27 = 0; EOS! ;
+: /LINE? 0<>; |CR BK 27 = 0; EOS! ;
 0 VALUE CSP
 \ : U1+ XEP| 1+ ;
 : `NAME. XEP| J VAL DEA? 1+ CNTC + 74 U< /LINE?

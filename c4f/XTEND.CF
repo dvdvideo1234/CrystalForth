@@ -8,8 +8,6 @@
 
 
 \ : STR  |SWAP
-: |@! XR I@ EXECUTE POP!;
-: +!  |@! + ;
 
 \ ERROR PRIMITIVES  --------------------- 
 
@@ -30,9 +28,6 @@ N: ERASE 0 ,  =, BLANK 32 ,
 : CSP! SP@ (SET2   
 : CSP (CON ;; 
 
-: M: ';  
-: ?M: 0 `HOFS CALL TARG:! `(MAC `", THEN 
-: <M> MOBJ   |H TO MOBJ ;   
 : D# HERE >, CSP!       
 : |LASTH EX LASTH! ; 
  
@@ -67,19 +62,6 @@ HERE >, (D#0 @ (DOS ;
 >, `RW  (VAR3 ,< N: Fwrite $4000 , 0 , 
 : `RWPOS `fsk ,<
 =, Fseek  $4200 ,
-
-: StdGet 0 
-: FKEY  -1 AT Fread ROT Fread TO Fread @ ;
-: ERRput 2  
-: FEMIT SWAP AT Fwrite ROT Fwrite ;
-
-HERE >, (D#0 @ XDROT (DOS ; 
-\ : CLSD NFILES AFILE - TIMES|
-\  FTOP> ,<
-N: Fsize $4202 , 
-N: Fpos $4201 , 
-N: Fcut $4000 , 
-=, Fclose $3E00 , 
 
 \ HERE .  TEST10 2616
 
