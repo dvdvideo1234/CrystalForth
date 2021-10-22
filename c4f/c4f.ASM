@@ -109,7 +109,7 @@ LL_ _EVALX,_DROPX
 ; ============== COMPILER ===================
 
 L_ _COLON             ; :
-  DW _NOP
+  DW _NOP             ; TO FIX WITH <CLR>
 L_ _COLONC             ; :`
   DW _HENTRY
 LL_ _RPAR,TO_+_FIND
@@ -225,9 +225,9 @@ L_ _DC@
 P_ _C@
   MOV   TOPH,[TOP]
 P_ _HW_B
-  MOV   TOPL,TOPH
-P_ _W_B
-  CLR   TOPH
+  CLR   TOPL
+P_ _H_L
+  XCHG  TOPL,TOPH
   JMPS  @NOP3
   
 P_ _LDSTA       ; @!A
@@ -237,21 +237,21 @@ P_ _LDSTA       ; @!A
 
 P_ _4P
   INC     TOP
+  SKIPB
+P_ _1P
+  SKIPA
   INC     TOP
 P_ _2P
   INC     TOP
-@1P:
   INC     TOP
   JMPS    @NOP3
-P_ _1P
-  JMPS    @1P
+P_ _1M
+  SKIPA
+  NOP
 P_ _2M
   DEC     TOP
-@1M:
   DEC     TOP
   JMPS    @NOP3
-P_ _1M
-  JMPS    @1M
   
 P_ _TARY 
   SHL     TOP,1

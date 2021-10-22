@@ -18,7 +18,7 @@ APT- _NAND      =: NAND    \
                 
 \ MATH          
 APT- _HW_B      =: HW>B        
-APT- _W_B       =: W>B        
+APT- _H_L       =: ><        
 APT- _2M        =: 2-         
 APT- _1M        =: 1-         
 APT- _2MUL      =: 2*       
@@ -204,7 +204,7 @@ APT- _@_INI     =: @INI
 APT- _@_DBG     =: @DBG   \ V
 APT- _@_ACCEPT  =: `@ACPT   
 APT- _@SAME     =: @SAME
-APT- _@HERE     =: @HERE
+APT- _@HERE     =: `HERE
 APT- _@OPER     =: @OPER  
 APT- _@_ERR     =: @ERR    
 APT- _SEMICO    =: TARG;
@@ -219,8 +219,8 @@ APT- _@NUMBER   =: `NUMBER
 APT- _@PARSE    =: `PARSE
 APT- _@MAC      =: `_MAC 
 APT- _@TIB      =: `TIB  
+APT- _@_ABINI   =: `@ABINI  
                 
 \ TO FIX        
-APT- _@_ABINI   =: @ABINI  
 
   

@@ -3,6 +3,11 @@
 '  (JUMP   =:  (DEF
 \ =! |LASTH
  
+: RANGE>S 1+
+: OVER- OVER
+: - NEG
+: + +2/ DROP; ,<
+ 
 \ =============   VARIABLES  ==============
 
 0  QUAN  CNTC
@@ -26,6 +31,19 @@ ZDO VALUE 6 TIMES _FL _AX _BX _CX _DX HOFS
  
 : |HLD CALL EX (SET2 THEN ,<       0 CONST HLD
 
+\ COMPILER
+>, EX  
+: _MARK H   
+: Z, 0 , ;      
+: |, EX 
+: `<RELS_ , 
+: LASTH! H ,<
+0 VALUE LASTH
+: |LASTH EX LASTH! ; 
+: _BEGIN |LASTH  
+: HERE H  
+: R>T HOFS + ; 
+
 \ =============   CONSTANTS  ==============
 
 : |C. EX EMIT ; 
@@ -39,28 +57,32 @@ ZDO VALUE 6 TIMES _FL _AX _BX _CX _DX HOFS
 1  CONST  ONE
 HERE 2- =: BYE 
   
-: EOS! bs (SET2 ,<                  0 VAR EOS 
+: EOS! bs (SET2 ,<   0 VAR EOS 
 
 : `MASK| EX 1- 
 : AND NAND NOT ;
->, `MASK| ,<
+>, `MASK| ,<  \ USED IN fLUSH.CF
   4 CONST NBUFS    
->, `MASK| ,<
+: W>B `MASK| ,<
 256 CONST 1B
->, `MASK| ,<
+\ >, `MASK| ,<
  16 CONST 1H
 
 ' `TIB CONST TIB
-: 1L& `MASK| ,<
+\ : 1L& `MASK| ,<
   64  CONST 1L
->, `MASK| ,<
-1024  CONST 1K
+
    -1 CONST TRUE
- 
 : ON  TRUE SKIP
 : OFF 0 
-: SWAP! SWAP ! ;   
-  
+: SWAP! SWAP ! (;   EX 
+: `EL? BLK 0<>; 
+: `\ |LTIB DUP 0; 1- 
+: L/ (@&; ,< -64 ,
+
+>, `MASK| ,<  \ USED
+1024  CONST 1K
+ 
 \ ============ PRIMITIVE METHODS ===============
 
 : SWAP| EX SWAP ;
@@ -68,15 +90,9 @@ HERE 2- =: BYE
 : @+ PUSH @R+ POP; 
 : @2 @+ @ ;
 
-: RANGE>S 1+
-: OVER- OVER
-: - NEG
-: + +2/ DROP;
- 
 : T> T
 : DEA> 4+ 
 : NAME> CSTR +  ;
-' T> ' CFND T!
 
 HERE >, (D#0 @2 
 : WITHIN OVER- PUSH - POP U< ;
@@ -104,13 +120,11 @@ HERE >, (D#0 @2
 : |SAFE! A! @!A XA PUSH A@ EXECUTE POP POP!;
 : |ROT EX
 : ROT -ROT -ROT ;
-AT' |SAFE! ' `_MAC  T!
 
 : TUCK DUP -ROT ;
 : W>BB SWAP|
 : SPLIT DUP W>B XEP| HW>B ;
 : 2DUP OVER OVER ;
-: 2DROP DROP DROP ;
 
 \ : WITHIN OVER- PUSH - POP U< ;
 
@@ -138,7 +152,7 @@ AT' |SAFE! ' `_MAC  T!
 : TIMES PUSH XR  
 : TIMES| (FOR CALL BEGIN J EXECUTE THEN (NEXT RELS<
  RDROP RDROP; 
-\ : SPACES TIMES| SPC ;    
+: SPACES TIMES| SPC ;    
 : ODDH? !"ODDH?" ;;
 : HODD H (| ODDH?  DUP \ H TO FIX HERE 
 : ODD (@&; ,< 1 , 
@@ -245,8 +259,10 @@ N: `DECI 10 , N: `BIN 2 , N: `HEX 16 ,  DROP
 : DIG. |C. 
 : ALPHA 9>? + (@+; ,< '0 ,   \ FOR NUMOUT 
 
-: . DUP 0< IF NEG TO c- THEN
-: U. lf BASE! |SPC 
+: . DUP 0< IF NEG TO c- THEN  
+: U. `DECI SKIP 
+: .H `HEX SKIP
+: .B `BIN |SPC 
 : `U.  BASE U/MOD  SKIP? RECURSE DIG. ;
 
 >, EOS! : `CR2 RDROP RDROP; 
@@ -256,7 +272,7 @@ N: `DECI 10 , N: `BIN 2 , N: `HEX 16 ,  DROP
 >, `CH `bs `tab `CR2  TO `CR2 NOOP 
  |SPC : ACCEPT PUSH 0 BEGIN KEY `CHTAB DUP I = UNTIL EXIT ;
 
-: ,' (| , 
+: ,' |, 
 : ' FND?
 : @DEF? @2 
 : UNDEF? ODD !"UNDEF?" ;;
@@ -286,19 +302,26 @@ N: FTO` -2 ,  N: FAT` -4 , N: FVAL` 2 ,  DROP
 : <CLR> AT STK> STKINI  AT STK< STKINI ;
 : <MORE?> AT STK> STKSZ  AT STK< STKSZ + ;
 
-
+: DEA? DUP 4+ C@ ;
+: CMOVE SWAP  : S>M A! FOR CSTR XA C!R+ XA NEXT
+: 2DROP DROP DROP;  : S+! XEP| TUCK J STR + S>M J +! ;
+: EDICT T SKIP BEGIN DEA> DEA? 0= UNTIL ;
+: `ADDNAME? J @ H U< 0; J 4+ 1+ C@ '` <> 0;
+ J DUP DEA> J - H S+! DROP ;
+: PRUNE  [ TO T H STR + OFF H ++ H>T ] EDICT XEP|   H DUP OFF
+ T BEGIN DEA? WHILE PUSH `ADDNAME? POP DEA> REPEAT DROP ;
 \ : .T (LIT _ENTRY WFIND DROP DEA> DEA> ; END OF WORDLIST
 
 \ IO  -------------------------------------
 
-: >ZSTR CSTR 
-: S>ZSTR TO S! DUP NAME> OFF 1+ ; \ TO S TBUF
+: ">Z CSTR 
+: S>Z TO S! DUP NAME> OFF 1+ ; \ TO S TBUF
 
 \ INTS DOS, FILES & VIDEO
 
 : `fsk 1K TUCK UM* SCRH EX SCRH 
 : IO? _FL ODD !"IO?" ;;
-: `File| >ZSTR EX IO? _AX ;
+: `File| ">Z EX IO? _AX ;
 : XDROT XEP| 
 : DROT |ROT  
 : D0 0 0 ;
@@ -332,8 +355,8 @@ HERE >, (D#0 @ XDROT (DOS ;
 N: Fsize $4202 , 
 N: Fpos $4201 , 
 N: Fcut $4000 , 
-: ACLEAR <CLR>
-: CLSD AT HNDLS STKSZ TIMES| \ CLOSES ALL FILES 
+: `ALLCLR <CLR>
+: `CLSD AT HNDLS STKSZ TIMES| \ CLOSES ALL FILES 
 : HCLOSE HNDLS ,<
 =, Fclose $3E00 , 
 
@@ -347,8 +370,8 @@ N: Fcut $4000 ,
 : RBLK `RWPOS Fread  IO? ; 
 
 : @OPENI| TOKEN? TO FOPEN EOSZ @R+ (LIT KEY |SAFE! ;
-: INCLUDE  @OPENI| FGet
- SKIP BEGIN EVAL  TIB 1L ACCEPT EOS? UNTIL EVAL  HCLOSE ;
+: INCLUDE  @OPENI| FGet   SKIP BEGIN EVAL
+CR TIB 1L ACCEPT EOS? UNTIL EVAL  HCLOSE ;
 : FTYPE @OPENI| FGet  AT |SAFE! BE EMIT
   BEGIN  CR FIB 1L ACCEPT EOS? UNTIL  HCLOSE ;
 
