@@ -141,8 +141,7 @@ HERE >, (D#0 @2
 : I+ J + ; 
 : 31& (@&; ,< 31 ,  
 : @I J @ ;
-: |@! XR @I EXECUTE POP!;
-: +!  |@! + ;
+: |@! XR PUSH J @ EX POP!;
 : XOR! |@! XOR ;
 : (<RNG| RANGE>S A+L SKIP
 : (RNG| RANGE>S  SKIP
@@ -304,13 +303,13 @@ N: FTO` -2 ,  N: FAT` -4 , N: FVAL` 2 ,  DROP
 
 : DEA? DUP 4+ C@ ;
 : CMOVE SWAP  : S>M A! FOR CSTR XA C!R+ XA NEXT
-: 2DROP DROP DROP;  : S+! XEP| TUCK J STR + S>M J +! ;
-: EDICT T SKIP BEGIN DEA> DEA? 0= UNTIL ;
-: `ADDNAME? J @ H U< 0; J 4+ 1+ C@ '` <> 0;
- J DUP DEA> J - H S+! DROP ;
-: PRUNE  [ TO T H STR + OFF H ++ H>T ] EDICT XEP|   H DUP OFF
- T BEGIN DEA? WHILE PUSH `ADDNAME? POP DEA> REPEAT DROP ;
-\ : .T (LIT _ENTRY WFIND DROP DEA> DEA> ; END OF WORDLIST
+: 2DROP DROP DROP;  
+: S+! XEP| TUCK J STR + S>M J 
+: +!  |@! + ;
+>, BEGIN  PUSH J EXECUTE POP DEA> : LST| DEA? (IF EXIT AGAIN
+: EDICT T LST| ;;
+: PRUNE H DUP OFF T EDICT TO T [ H>T 2DROP ] LST|
+ J @ H U< 0; J 4+ 1+ C@ '` <> 0; J DUP DEA> J - ROT S+! ;;
 
 \ IO  -------------------------------------
 
