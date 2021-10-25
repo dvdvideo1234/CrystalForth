@@ -12,7 +12,9 @@ Start   Label byte
 
 BUF_ _@TIB,66        ;  82
 BUF_ @FIB,66        ; 66
-BUF_ @CMD,130        ; 130
+BUF_ _@BCK,50        ; 50
+BUF_ _@FWD,40        ; 40
+BUF_ _@FLS,40        ; 40
 BUF_ @TBUF,258       ;  256
 BUF_ _@R_TOP,40      ;  512 B FSTACK
 BUF_ _@R_BTM,512     ;  512 B FSTACK
@@ -38,7 +40,7 @@ P_ _QUIT
   CALL  @RET
   DW    _INIT
 @MAINLP DW _DLIT,_@TIB,80
-_@_ACCEPT  DW _NOP,_EVAL
+_@_ACCEPT  DW _NOP,_NOP         ; _EVAL
 _@_OK  DW _NOP,_JUMP,@MAINLP
 
 ;-------------- VARIABLES ----------------
@@ -50,7 +52,7 @@ _@NUMBER  DW 0
 _@COMPNUM DW 0
    DW _@COMMA,0,0   ;  FOR COMMENT
 
-  CONST_  _CMD,@CMD
+  CONST_  _MSB,128
   CONST_  _FIB,@FIB
   CONST_  _TBUF,@TBUF
   CONST_  _FIRST,@VOCTOP
@@ -72,49 +74,47 @@ _@COMPNUM DW 0
   VECTOR_  _VDBG,_NOOP
   VECTOR_  _VPIN,_NOOP
 
-  POINT_   _INIT,_@_INI
+  POINT_   _INIT,_NOOP    ; _@_INI
   
   DW __VAR3
-  POINT_   _FIND,@LPAR
+  POINT_   _FIND,_NOOP    ; @LPAR
     
 ; ---------- INIT INTERPRETTER ----------------
 
-LL_ _REINIT,to_+_INIT
-_@_INI:
-   DW  _UPDICT,_LIT,80H,_CSTR,_CMD,_MAKESTR,_DROP
-   DW  _DLIT,8*1024+100H,22*1024,_POSTX,_EVAL
-LL_ _REINIT2,to_+_INIT
-_@_ABINI  DW _NOP,_SKIP
+;_@_INI:
+;   DW  _UPDICT
+;    DW _MSB,_POSTX,_SEVAL,to_+_INIT
+;_@_ABINI  DW _NOP,_SKIP
+;
+;; ============   INTERPRETTER   ==============
+;
+;L_ _SEMICO
+;_@SEMICO DW _NOP  ;  DW _TRON
+;LL_ _LPAR,TO_+_FIND             ; [`
+;@LPAR DW _VT,_FND,_RET         
 
-; ============   INTERPRETTER   ==============
-
-L_ _SEMICO
-_@SEMICO DW _NOP  ;  DW _TRON
-LL_ _LPAR,TO_+_FIND             ; [`
-@LPAR DW _VT,_FND,_RET         
-
-LL_ _MAC,_DZ0               ; _MAC
-_@MAC  DW _NOP,VAL_+_RPAR,VAL_+ _FIND ; EXECUTE MACROSES ONLY IN COMP MODE
-LL_ _SEVAL,_CSTR            ; EVAL
-L_ _EVAL                   ; EVAL
-_@TIZ  DW _NOP          ; FIX WITH TI
-L_ _@Eval
-;  DW _TRONM?
-@EV  DW _NOP,_TOKEN,_IF,_EVALX,_FIND  ; FIX WITH STK?
-_@OPER  DW _NOP,_OPER,_@EXEC,_JUMP,@EV
-
-LL_ _XDROP,_EX
-LL_ _EVALX,_DROPX
+;LL_ _MAC,_DZ0               ; _MAC
+;_@MAC  DW _NOP,VAL_+_RPAR,VAL_+ _FIND ; EXECUTE MACROSES ONLY IN COMP MODE
+;LL_ _SEVAL,_CSTR            ; EVAL
+;L_ _EVAL                   ; EVAL
+;_@TIZ  DW _NOP          ; FIX WITH TI
+;L_ _@Eval
+;;  DW _TRONM?
+;@EV  DW _NOP,_TOKEN,_IF,_EVALX,_FIND  ; FIX WITH STK?
+;_@OPER  DW _NOP,_OPER,_@EXEC,_JUMP,@EV
+;
+;LL_ _XDROP,_EX
+;LL_ _EVALX,_DROPX
 
 ; ============== COMPILER ===================
 
-L_ _COLON             ; :
-  DW _NOP             ; TO FIX WITH <CLR>
-L_ _COLONC             ; :`
-  DW _HENTRY
-LL_ _RPAR,TO_+_FIND
-  DW _TBUF,_INC,_CFND,_TBUF,_DEC,_SKIP?,_RET,_CFND,_2P
-LL_ _NOOP,_RET
+;L_ _COLON             ; :
+;  DW _NOP             ; TO FIX WITH <CLR>
+;L_ _COLONC             ; :`
+;  DW _HENTRY
+;LL_ _RPAR,TO_+_FIND
+;  DW _TBUF,_INC,_CFND,_TBUF,_DEC,_SKIP?,_RET,_CFND,_2P
+;LL_ _NOOP,_RET
 
 L_ _CFND
   DW _NOP
@@ -143,19 +143,21 @@ xFND?:
 @PARX1:  
   jmp   @parx
 
-L_ _WORD                  
-  DW _PARSE,_TBUF         ;  DW _VDBG,2
-LL_  _MAKESTR,__PAR       ; (S!
-  POP   DI AX SI
-  PUSH  DI
-  MOV   cL,AL
-;  MOV   [DI],CL
-;  INC   DI
-  STOSB
-  REP   MOVSB   ; NAME  MOVE
-  MOV   PB [DI],'`'
-  JMPS  @PARX1
+;L_ _WORD                  
+;  DW _PARSE,_TBUF         ;  DW _VDBG,2
+;LL_  _MAKESTR,__PAR       ; (S!
+;  POP   DI AX SI
+;  PUSH  DI
+;  MOV   cL,AL
+;;  MOV   [DI],CL
+;;  INC   DI
+;  STOSB
+;  REP   MOVSB   ; NAME  MOVE
+;  MOV   PB [DI],'`'
+;  JMPS  @PARX1
 
+  ALIGN_ 0
+  DW _EX
 L_ _UPDICT
   DW    _H,_WSTR
 LL_ _DPUSH,_TX                  ; >DICT
@@ -171,57 +173,60 @@ LL_ _MPUSH,__PAR    ; TOP OF DICTIONARY   IN DI
   PUSH  di
   JMPS   @PARX1
   
-LL_ _TOKEN?,_TOKEN
-LL_ _N??,_ZEQ
-LL_ _??,_ABORT?
-  NAM_ "?"
-  DW _RET
+;  ALIGN_ 0
+;  DW _NOP
+;LL_ _TOKEN?,_TOKEN
+;LL_ _N??,_ZEQ
+;LL_ _??,_ABORT?
+;  NAM_ "?"
+;  DW _RET
 
-L_ _ABORT0?                  ; (A'
-  DW _ZEQ
-L_ _ABORT?                  ; (A'
-  DW _ASTR,_PUSH  
-  DW _IF,_EXIT
-L_ _ALLERR
-  DW _POP
-_@_ERR DW _NOP,_ABORT
-L_ _N0X
-  DW _0X
-_EXIT DW _RDROPX
+;L_ _ABORT0?                  ; (A'
+;  DW _ZEQ
+;L_ _ABORT?                  ; (A'
+;  DW _ASTR,_PUSH  
+;  DW _IF,_EXIT
+;L_ _ALLERR
+;  DW _POP
+;_@_ERR DW _NOP,_ABORT
+;L_ _N0X
+;  DW _0X
+;_EXIT DW _RDROPX
 
 ; -------------- MATH ------------------
 
 L_ _DLIT
   DW _RLDP
 L_ _LIT
-  DW _RLDP,_RET
+  DW _RLDP ;,_RET
+LL_ _NOOP,_RET
   
 LL_ _@COMMA,_LD
 LL_ _COMMA,_HX
 L_ _STP
   DW  _PUSH,_RSTP,_POPX
 
-L_ _POSTENT                 ; ==:   \ N:  OR =,
-  DW _DUP 
-  DW _POSTX,_COMMA
-L_ _HENTRY                  ; H=:  _HER_E  !!!
-_@HERE   DW _H
-L_ _ENTRY                   ; =:
-  DW _0,_TOKEN?
-;  DW _VDBG,3
-L_ _ENTRYZ                   ; (=:
-_@SAME  DW _NOP
-  DW _DC@,_1P,_TX,_MPUSH,_STM
-L_ _STM
-  DW _2M,_PUSH,_IST,_POPX
-LL_ _IST,_J
-L_ _ST 
-  DW _PUSH,_POPSTX ; 
+;L_ _POSTENT                 ; ==:   \ N:  OR =,
+;  DW _DUP 
+;  DW _POSTX,_COMMA
+;L_ _HENTRY                  ; H=:  _HER_E  !!!
+;_@HERE   DW _H
+;L_ _ENTRY                   ; =:
+;  DW _0,_TOKEN?
+;;  DW _VDBG,3
+;L_ _ENTRYZ                   ; (=:
+;_@SAME  DW _NOP
+;  DW _DC@,_1P,_TX,_MPUSH,_STM
+;L_ _STM
+;  DW _2M,_PUSH,_IST,_POPX
+;LL_ _IST,_J
+;L_ _ST 
+;  DW _PUSH,_POPSTX ; 
   
-L_ _TOKEN                  
-  DW _LIT,32,_WORD
-L_ _DC@
-  DW _DUP,__ARET
+;L_ _TOKEN                  
+;  DW _LIT,32,_WORD
+;L_ _DC@
+;  DW _DUP,__ARET
 P_ _C@
   MOV   TOPH,[TOP]
 P_ _HW_B
@@ -568,7 +573,7 @@ P_ _IF
   INC     TOP
 @IF1:
   DEC     TOP
-  CALL    @ADROP
+  D_TO    top
 @IFZ:
   JNZ     @SKIP	
 	
@@ -690,15 +695,12 @@ L_ _WSCAN
   RET
 
 P_ __ADROPX
-  CALL  @ADROP
+  XCHG  W,TOP
+  D_TO  top
 P_ __ARET
   POP   WA
   XCHG  WA,IP
   JMP   WA
-@ADROP:
-  XCHG  W,TOP
-  D_TO  top
-  RET
   
 P_ __PAR
   PUSH  AR
@@ -759,44 +761,9 @@ _BPDBG    DW _NOP,_BK,__ADROPX
    
     ALIGN_ 0
   
-;  DB "GAGA"
-  
-  
-;freemem:
-;  DW ENDMEM-FREEMEM-2
-;;INCLUDE NF9_1.IC1
-;  ENTRY_  _ENTRY,'=:'
-;  ENTRY_  0,''
-;EndMem:
-
 MyCseg  ends
         end  Start
 
-;L_ _CONVERT
-;  DW    __PAR
-;  POP   BX AX SI DI
-;  XCHG  AX,CX
-;@@1:
-;  LODSB
-;  CMP   AL,'A'
-;  JB    @@2
-;  SUB   AL,7
-;@@2:
-;  SUB   AL,'0'
-;  CMP   AX,BX
-;  JNC   @@9
-;  XCHG  DI,AX
-;  MUL   BX
-;  XCHG  DI,AX
-;  ADD   DI,AX
-;  LOOP  @@1
-;  SKIPB
-;@@9:
-;  DEC   SI
-;@@8:
-;  PUSH  DI SI CX
-;  JMP   @PARX
-  
 IF 0
 
 L_ _BSCANE
@@ -809,73 +776,30 @@ L_ _WSCANE
   REPE    SCASW
   RET
 
-@PAX:
-		PUSH	AX
-		MOV		AL,AH
-		CALL	@@PB
-		POP		AX
-@@PB:
-		PUSH	AX
-		SHR		AL,1
-		SHR		AL,1
-		SHR		AL,1
-		SHR		AL,1
-		CALL	@@PD
-		POP		AX
-@@PD:	
-		AND		AL,15
-		CMP		AL,10
-		JB		@ALP1
-		ADD		AL,7
-@ALP1:
-		ADD		AL,'0'
-@PC:	MOV		AH,0EH
-		INT		10H
-		RET
-
-@ACR:
-  MOV AL,13
-  CALL  @PC
-  MOV   AL,10
-  JMPS @PC
-  
-@ROT3:
-	CALL	@PSPC
-  D_TO  TOP
-  CALL  @ROT1
-  CALL  @ROT1
-@ROT1:
-  XCHG  [DSP],TOP
-  XCHG  [DSP+2],TOP
-  MOV   AX,TOP
-@PHEX:  CALL	@PAX	
-@PSPC:	MOV		AL,' '
-	JMPS	@PC
-
-@BPDBG:
-  CALL  @DBG_OFF
-  MOV   CX,RSP
-  MOV   DI,[SI]
-  PUSH  AX IP DI CX DSP AR
-  X
-  PUSH  TOP
-  CALL  @ACR
-	CALL	@ROT3
-  ADD   DSP,4
-	CALL	@ROT3
-  X
-  POP   DI CX
-	CALL	@ROT3
-  CLR   AX
-  INT   16H
-  AND   AL,0DFH
-  CMP   AL,'S'
-  JE    @DBHE
-  CALL    @DBG_ON
-@DBHE:
+L_ _CONVERT
+  DW    __PAR
+  POP   BX AX SI DI
   XCHG  AX,CX
-  TEST  AL,1
-  JMP   @DBG2
-   
+@@1:
+  LODSB
+  CMP   AL,'A'
+  JB    @@2
+  SUB   AL,7
+@@2:
+  SUB   AL,'0'
+  CMP   AX,BX
+  JNC   @@9
+  XCHG  DI,AX
+  MUL   BX
+  XCHG  DI,AX
+  ADD   DI,AX
+  LOOP  @@1
+  SKIPB
+@@9:
+  DEC   SI
+@@8:
+  PUSH  DI SI CX
+  JMP   @PARX
+
 ENDIF
 

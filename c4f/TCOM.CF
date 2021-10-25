@@ -212,8 +212,12 @@ M: TWICE` CALL THEN;
 : STAT? CR ." |BODY " VAL' T@ COM>0 ." |CODE " HERE COM>0
   1K $100 + HERE - ." |BYTES TO ADD = " . CR
 ;
-: WORD_THE_ONE '  \ =:
- 12 ,  , Z, 2 C, '= C, ': C,  Z, Z, 0 C,  ;
+: WORD_THE_ONE ' ' \ =:
+ 21 , 
+  , Z, 4 C, 'E C, 'V C, 'A C, 'L C,
+  , Z, 2 C, '= C, ': C,
+ Z, Z, 0 C,  ;
+
 
 : : T: ;
 \ GAGA1

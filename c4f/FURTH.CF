@@ -1,11 +1,6 @@
 ABRAKADABRA
 
-: (VAR3 (D#2 (; (EX 
-: `EL? BLK 0<>; 
-: \`
-: \ |LTIB (DUP 0; 1- 
-: L/ (@&; ,< -64 ,
-MCLR ' EVAL  AT' QUIT !  \ FIX
+MCLR 
 AT' AT' =: VAL'  
 AT' VAL' =: TO' 
 TO' `EL? TO' TOKEN? ! \ FIX

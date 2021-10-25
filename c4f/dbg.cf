@@ -1,15 +1,15 @@
 \ DEBUGERR  ------
-: |[] ."[" EX ."]" ;;
+\ EXTERNAL VERSION
+\ COMPILES SEPARATE FROM THE KERNEL
+
+: []| ."[" EX ."]" ;;
 : [ID] CSTR      
 : [S] |SPC DROP|     
-: [TYPE] |[] TIMES| CSTR DUP |C. BL U< 0; DROP '. ;; 
+: [TYPE] []| TIMES| CSTR DUP |C. BL U< 0; DROP '. ;; 
 : UNITS? U/MOD SWAP  0; 1+ ; 
 : SAME? TFND 0; 4+ [ID] TBUF ; 
- '  SAME?  ' (=:   T!   \ FIX (=:
+ '  SAME?  ' (=:   !   \ FIX (=:
 
-: VLIST T BEGIN DUP 4+ C@ WHILE SPC DUP @ H. 4+ DUP ID. NAME>
-  KEY ^[ = UNTIL THEN DROP;
-  
 : `BD |SPC STR| CSTR B. ; 
 : DUMP 1H UNITS? STR| 
 : DU CR DUP H. SPC 1H 2DUP `BD [TYPE] ; 
@@ -21,24 +21,28 @@
 \ ' |TBUF!.  VAL' vDBG T!
 \ ' PINZ     VAL' vPIN T!   \ WHEN NEED TO CHECK PARSING
 
+
+: `TOZ
+  2+
+: $. ."$" H. ; 
+: `6-
+ 6 - WFIND (IF `TOZ "VAL" 
 : `WID. ID. WID. ; 
+: `4+
+ 2+  WFIND (IF `6- "AT"  `WID. ;
+: `2+
+ 2+  WFIND (IF `4+ "TO"  `WID. ;
 : JID. J 
 : @ID. DUP H. STR DUP H. SWAP @ H. 
-: ?ID. WFIND IF WID. ;THEN
- 2+  WFIND IF "TO"  `WID. ;THEN
- 2+  WFIND IF "AT"  `WID. ;THEN
- 6 - WFIND IF "VAL" `WID. ;THEN  2+
-: $. ."$" H. ; 
-0 VALUE `ADR2 
-: `" (WSCN ,< 7 , 
->, ((A" ((." (MAC ((0" ((" ((;" ("SW ,< 
-: `|WW CALL EX (SET2 THEN ,<
+: ?ID. WFIND (IF `2+  WID. ;
+
+: `|WW MARK> EX (SET2 THEN ,<
 0 CONST `WW 
 : `A:? WFIND (IF .; ."_:_" WID. ; 
 : SEE ' 
 : @SEE TO `WW 
 : SL bs TIMES| 
-: WW `|WW CR DUP H. DUP `A:? STR DUP H. DUP ?ID. `" 1+ 0;
+: WW `|WW CR DUP H. DUP `A:? STR DUP H. DUP ?ID. DBG" 1+ 0;
   PUSH ("SKIP [ID] POP ;
 \ : DUTEST 1 2 3 " 1234" ;  
 
@@ -50,10 +54,10 @@
 : `DBG SPC  S3 H H. T H. `DBGA H. SPC  ;
 : DBG. `DBGIN R3 `DBG JID. BK DROP
 : `DBGOUT `DBGEmt  AT EMIT  `DBGA A! ;
-' DBG. VAL' vDBG T!
+' DBG. VAL' vDBG !
 
 : TRACE ADR' TO TROFF PUSH TRON ; 
 : `@DBG   `DBGIN POP R3 PUSH `DBG I DUP H. @ H.
        J DUP H. ?ID. `DBGOUT  ,< 
 VAL' @DO_DBG DEFER (DBGRET 
-' `@DBG  ' @DO_DBG  T!
+' `@DBG  ' @DO_DBG  !

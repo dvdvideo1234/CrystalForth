@@ -1,45 +1,53 @@
 
-' @INI VAL' @INIT     T!    \ TARGET FORTH INITIAL STATE
+' @INI VAL' @INIT     T!    \ TARGET FORTH INITIALIZER
+' @LPAR VAL'  FIND    T!    \ TARGET FORTH INITIAL STATE
 ' ">NUMC ' `COMPNUM   T!    \ FIX @COMPNUM
 ' ">NUM  ' `NUMBER    T!    \ FIX @NUMBER
 '  `.     ' @ERR      T!    \ FIX ERROR.
-' MEMTI|  ' `TIZ      T!    \ FIX EVAL 
-' `STACK  ' @EVAL     T!    \ FIX @EVAL 
-TO' ACCEPT ' `@ACPT   T!  
+TO' ACCEPT ' `@ACPT   T!    \ FIX ACCEPT IN MAINLP
+' `EVAL  VAL' `@ACPT  T!    \ FIX EVAL IN MAINLP
 '  `OK    ' @OK       T!    \ FIX  vOK.
 ' `SOURCE ' `PARSE    T!    \ FIX PARSE
-'  (;,    ' @SEMICO   T!    \ FIX ;`
 ' T>    ' CFND        T!    \ FIX CFND
-'  HERE   ' HODD      T!    \ FIX HODD
-'  HODD   ' `HERE     T!    \ FIX H=:
-'  <CLR>   ' TARG:    T!    \ FIX TARG:
 ' `ALLCLR  ' `@ABINI  T!
-'  |LASTH ' ALIGNED   T!    \ FIX ALIGNED
-AT' |SAFE! ' `_MAC    T!    \ FIX MAC
+
 
 HERE    VAL' H T!           \ TARGET FORTH HEAP
 
 THIDE (DEF
 THIDE (D#0
 
+
+APT- POP        =:  (D#0
 APT- ONE        =:  1
+TO' H>T         =:  H>T|    
+'   (D#0        =:  POP
 APT- ((A"       =:  (!"
+APT- ((0"       =:  (@"
+APT- ((;"       =:  (/"
 APT- ((."       =:  (."        
 APT- (("        =:  ("
 APT- (LIT       =:  (# 
 APT- TARG:      =:  :          
-APT- _MARK      =:  MRK>`
-APT- `<RELS_    =:  <RLS`
-APT2 _HENTRY        :`         
+APT- `<RLS      =:  <RELS`
+APT2 TARG:C         :`         
 APT2 TARG;          ;`
 APT2 TARG,<         ,<`        
 APT2 FTO`           TO`
 APT2 FAT`           AT` 
 APT2 FVAL`          VAL` 
-APT2 _BEGIN         BEGIN`
-' `\            =:  \ 
+APT2 CSWP>          CSWAP>`
+APT- <CSWP      =:  <CSWAP`
+APT2 `<MRK          BEGIN`
+APT2 `RLS>          THEN`
+APT2 TREPEAT        REPEAT`
+APT2 TAGAIN         AGAIN`
+APT- :(;        =:  :;
+' `MRK>         =:  MARK>`
+APT2 `\             \` 
+' \`            =:  \ 
 
-WORD_THE_ONE _ENTRY     \ WORD THE ONE
+WORD_THE_ONE `=:  `EVAL   \ WORD THE TWO
 
 STAT? H           \ STATISTICS & ALIGNING TO 1K
      

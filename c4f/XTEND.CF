@@ -1,12 +1,6 @@
 \ VARIABLES STAGE 2 \ COMPILE  MACRO ------------------
 
 
-: ?"LEN ?C@ 1+ ; 
-: EVEN (@&; ,< -2 , 
-: C@A+ XA C@R+ XA ;
-: NUP XEP| DUP ;
-
-
 \ : STR  |SWAP
 
 \ ERROR PRIMITIVES  --------------------- 
@@ -20,9 +14,6 @@
 : C!A+ XA C!R+ XA ;
 : >ZSTR CSTR H ?XEP| MEMTO A@ OFF ; 
 : CMOVE> A+L SWAP |DROP MPUSH ;
-HERE >, (D#0 @ 
-: FILL A! STR| A@ C!+ ;
-N: ERASE 0 ,  =, BLANK 32 ,
   
 
 : CSP! SP@ (SET2   
@@ -41,21 +32,10 @@ N: ERASE 0 ,  =, BLANK 32 ,
 : [TYPE] |[] TIMES| CSTR DUP |C. BL < 0; DROP '. ;; 
 
 : SAME? TFND 0; 4+ [ID] TBUF ; 
-HERE >, (D#0 @   
-: @ADR+ ' + ;
-N: `TO' -2 , 
-N: `VAL' 2 , 
-=, `AT' -4 , 
-
-: FORGET FND? DUP @DEF? EVEN TO H >DEA TO T ; 
-: (code POP T @ ! ; 
 
 HERE >, (D#0 @2 WITHIN ;
 N: `BREL? -128 , 128 , 
 =, PRNTBL 32 , 240 ,
-
-: HIDE FND? 5 +  '` 
-: SWAPC! SWAP C! ; 
 
 HERE >, (D#0 @ (DOS ;
 >, `RW  (VAR3 ,< N: Fread  $3F00 , 0 ,

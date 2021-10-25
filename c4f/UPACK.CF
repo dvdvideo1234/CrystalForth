@@ -1,41 +1,51 @@
 \ PACK AND UNPACK STRINGS  
 \ OPTIONS ,  !  "  :
 \ ESCAPE CODES & CONTROL  / ESCAPES  _ SPACE ~ NEGATE MSB
-
-128 CONST MSB 
-: `SPACE SPC SKIP
+: DST" H 
+: 5+ (@+; ,< 5 ,
+: `SPACE BL SKIP
 : `AHLD A@
 : HLD, |HLD C!+ ;
-: `MSB MSB HLD 1- XOR! ;
+: `MSB1 MSB HLD 1- XOR! ;
 : `CONTROL  TO @STATE  31& SKIP
 : `ESCAPE  TO @STATE    HLD,            
-: `COPYCHK  TO @STATE ("SW ,< 4 C, '^ C, '" C, '_ C, '~ C,
- 2ALIGNED >, `AHLD  `CONTROL  `ESCAPE `SPACE `MSB
-: |PAR   H 4+ TO HLD EX H 4+ HLD OVER- SWAP
-: C!- 1- XEP| J 
-: C!  PUSH C!R+ RDROP;
-: "PK `COPYCHK  \ PACK STRING TO MEMORY  \ SRC LEN DST
- |PAR FOR PUSH C@R+ @STATE POP NEXT NAND DROP ;
+: `COPYCHK  TO @STATE ("SW ,< ,T ^"_~   2ALIGNED 
+>, `AHLD  `CONTROL  `ESCAPE `SPACE `MSB1
+: PAR|  DST" TO HLD EX DST" HLD OVER- SWAP  C!- ;
+: ">PK CSTR  \ PACK STRING TO MEMORY  \ SRC LEN DST
+: S>PK `COPYCHK  PAR| STR| CSTR @STATE ;
  
-: `U2" '/ HLD, HLD, ; 
-: `USPACE '_ HLD, ;
-: `UNCHK DUP MSB AND IF [ '~ HLD, ] MSB XOR  THEN
-("SW  ,< 4 C, '^ C, '~ C, 32 C, '" C,
- 2ALIGNED >, CALL `U2"  `U2" `USPACE `U2" THEN 
-   DUP BL U< IF '^ HLD, THEN HLD, ;
-: "UPK   \ UNPACK MEMORY TO STRING  \ SRC LEN DST
- |PAR FOR PUSH C@R+ `UNCHK POP NEXT NAND DROP ;
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
+: (," ("SKIP CSTR S, ;
+: "S, CSTR S, ;
+
+: `(0" SWAP 0= SKIP 
+: `(!" SWAP 0;
+: `(;" @ERR ;
+
+: `ASTRI (BSCN ,<  ,T ",!./@   2ALIGNED  
+>, 1- OVER   
+: `CHK" C@ c" <> ;
+: STR? DUP NAME> 1- C@ c" = DUP 0; DROP DUP 1+ C@ `ASTRI 1+ ;
+0 WARY `STR  >,  NOOP   "S,  `(!"    ".   `(;"    `(0" ,< 
+0 WARY `DBG" >,  :"     :,"   :!"   :."   :/"     :@"  :MAC ,<
+: DBG" PUSH 0 `DBG" 7 POP WSCAN ;
+
+: `OK" CSTR AT `CHK" IF S1- DUP 0;  TO `CHK" 0<>; THEN S1- ;
+: `U" 1- XEP| `OK" S>PK " ; \  UNDER STRING
+
+
+\ ( CALL RDROP ) LIKE JUMP
+: `STR@  RDROP `U" `STR @EXEC ;;
+: `STR@, RDROP `U" `DBG" @EXEC ", ;
+
+: `U2" A@ c" HLD, ; 
+: `USPACE '_ ;
+: ">UPK CSTR  \ UNPACK MEMORY TO STRING  \ SRC LEN DST
+: S>UPK PAR| STR| CSTR  DUP MSB AND IF [ '~ HLD, ] MSB XOR THEN
+ (| HLD, ("SW  ,< 5 C, '^ C, '~ C, 32 C, '" C, '_ C, 2ALIGNED
+ >, CALL `U2"  `U2" `USPACE `U2" `U2" THEN 
+ A@ DUP BL U< 0; '^ HLD,
+: 1L+ (@+; ,< '@ ,
  
  
  
