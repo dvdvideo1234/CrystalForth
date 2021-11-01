@@ -3,7 +3,7 @@
 : [ID] CSTR      
 : [S] |SPC DROP|     
 : [TYPE] |[] TIMES| CSTR DUP |C. BL U< 0; DROP '. ;; 
-: UNITS? U/MOD SWAP  0; 1+ ; 
+: UN? U/MOD SWAP  0; 1+ ; 
 : SAME? TFND 0; 4+ [ID] TBUF ; 
  '  SAME?  ' (=:   T!   \ FIX (=:
 
@@ -11,7 +11,7 @@
   KEY ^[ = UNTIL THEN DROP;
   
 : `BD |SPC STR| CSTR B. ; 
-: DUMP 1H UNITS? STR| 
+: DUMP 1H UN? STR| 
 : DU CR DUP H. SPC 1H 2DUP `BD [TYPE] ; 
 : PINZ 0 
 : PIN I CR H. H H. B. SP@ H. S6 T H. T @
@@ -52,8 +52,9 @@
 : `DBGOUT `DBGEmt  AT EMIT  `DBGA A! ;
 ' DBG. VAL' vDBG T!
 
-: TRACE ADR' TO TROFF PUSH TRON ; 
+: `XTR PUSH TR+ ; 
+: TRACE ADR' `XTR : TR- TR-; 
 : `@DBG   `DBGIN POP R3 PUSH `DBG I DUP H. @ H.
        J DUP H. ?ID. `DBGOUT  ,< 
-VAL' @DO_DBG DEFER (DBGRET 
+VAL' @DO_DBG DEFER `DBGRET 
 ' `@DBG  ' @DO_DBG  T!

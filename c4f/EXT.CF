@@ -1,55 +1,33 @@
-: IT ;
-: EVEN (@&; ,< -2 , 
-: @H- |H 
-: @- 2- ?XEP| @ ;
-: END:? AT CSTK> STK?  AT <CSTK STK? + ;
+\ INCLUDE ASSIGNES.CF
+INCLUDE MACRO.CF
+INCLUDE NUMOUT.CF
+INCLUDE DBG.CF
+
+: < - 0< ;        
+: (code POP T @ ! ;
+: RED| 2DUP EX (IF VAL SWAP| ;;
+: UMAX NIP|
+: URED RED| U< ; 
+: UMIN DROP| URED 
+; 
 
 : @INT  TOKEN? VAL ,<` N??  @DEF? VAL ADR' ; 
 HERE >, (D#0 : `@INT+ @ @INT + PUSH;  ,<
 ==: TO -2 , 
 ==: AT -4 , 
-\ ==: X:` Z,
+==: X:` Z,
 ==: VAL 2 ,    DROP
 
-: FORGET FND? DUP @DEF? EVEN TO H DEA> TO T ; 
-: (code POP T @ ! ; 
 : HIDE FND? 5+  '`' 
 : SWAPC! SWAP C! ; 
-: DEA? DUP 4+ C@ ;
 : 2DROP DROP DROP; 
-: `ADD DUP DEA> OVER-
-: S+! ROT  
-: +S! XEP| TUCK J STR + S>M J 
-: +!  |@! + ;  \ : H>T| EX H>T ;
->, BEGIN  PUSH J EXECUTE POP DEA> 
-: LST| DEA? (IF EXIT AGAIN
-: `PRUNE| H DUP OFF T EX DUP PUSH `ADD POP DEA> TO T DROP;
-: PRUNE H>T|  `PRUNE|
- LST| J @ H U< 0; J 4+ 1+ C@ '` <> 0; J `ADD ;
 
+: FORGET FND? DUP @DEF? EVEN TO H DEA> TO T ; 
 
 : FSAVE H>T| TO TOKEN? FCREATE TO XY VAL PRUNE 1B H STR + OVER-
 AT |SAFE! @INI VAL @INIT   XY Fwrite XY Fclose  ; 
 
-MCLR PRUNE
-M: IF` (IF MARK>;
-' IF` =: WHILE`
-M: UNTIL` (IF <RELS; 
-
 : VLIST T BEGIN DUP 4+ C@ WHILE SPC DUP @ H. 4+ DUP ID. NAME>
   KEY ^[ = UNTIL THEN DROP; ,<
 
-: `?,<  AT CSTK> STK?  0<>;  AT <CSTK STK?  0<>;  ,<` ;
  
-: P5 5 . ;
-: BD CR OVER H. STR| CSTR B. ;
-
-: ]`  TO THEN`   \ TAIL RECURSION v
-: ;` `?,< (| :;  LASTH H 1- U< 0;
-    H 2- @ ODD 0<>; RDROP @H- TO <CSTK 
-  AGAIN` ;
-
-: Q5 5 . ;
-' P5 8 BD
-
-' Q5 8 BD

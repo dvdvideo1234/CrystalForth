@@ -242,9 +242,6 @@ P_ _LDSTA       ; @!A
 
 P_ _4P
   INC     TOP
-  SKIPB
-P_ _1P
-  SKIPA
   INC     TOP
 P_ _2P
   INC     TOP
@@ -291,7 +288,13 @@ P_ _RET
 @NOP3:  
   JMP     @NOP
   
-P_ _CALL_IP
+P_ _TROFFX
+  CALL    @DBG_OFF
+  SKIPB
+P_ _1PX
+	INC     TOP
+  SKIPA
+P_ @CALL_IP
   CALL    IP
   JMPS    @RET
   
@@ -637,6 +640,8 @@ L_ _ULESS
   SUB   TOP,W
   JMPS  @FLAG
 
+P_ _ZEQX
+    POP     IP
 P_ _ZEQ
     NEG     TOP
     cmc
@@ -718,9 +723,6 @@ LL_ _WFND,__PAR          ;_STREQU
   CMP   SI,[DI-4]
   RET
 
-  ALIGN_ 0
-  DW _EX
-LL_ _TROFF,_CALL_IP
 @DBG_OFF:
   SKIPR   DI 
   TEST    WL,1
@@ -738,7 +740,7 @@ P_ _TROFF?
 L_ _TRONM?
   DW _TROFF?,_NOOP
   DW _EX
-LL_ _TRON,_CALL_IP
+LL_ _TRON,@CALL_IP
 @DBG_ON:
   SKIPR   DI      ;  EB 0C	
   DB      0EBH,_@JDBG-@DBG2
@@ -776,26 +778,48 @@ L_ _WSCANE
   REPE    SCASW
   RET
 
+BAZE DW 10
+
+P_ _DIG?
+  XCHG  AX,TOP
+  SUB   AL,'0'
+  JC    @@ERR
+  CMP   AL,0AH
+  JC    @@OK
+  SUB   AL,7
+  JC    @@ERR
+@@OK:
+  CMP   AX,BAZE
+  CMC
+@@ERR:
+  CMC
+  XCHG  AX,TOP
+  SBB   AX,AX
+  JMP   @WPUSH
+  
+
 L_ _CONVERT
   DW    __PAR
   POP   BX AX SI DI
   XCHG  AX,CX
 @@1:
   LODSB
-  CMP   AL,'A'
-  JB    @@2
-  SUB   AL,7
-@@2:
   SUB   AL,'0'
+  JC    @@ERR
+  CMP   AL,0AH
+  JC    @@OK
+  SUB   AL,7
+  JC    @@ERR
   CMP   AX,BX
-  JNC   @@9
+  JNC   @@ERR
+@@OK:
   XCHG  DI,AX
   MUL   BX
   XCHG  DI,AX
   ADD   DI,AX
   LOOP  @@1
   SKIPB
-@@9:
+@@ERR:
   DEC   SI
 @@8:
   PUSH  DI SI CX

@@ -1,85 +1,35 @@
-\ VARIABLES STAGE 2 \ COMPILE  MACRO ------------------
+MCLR 
+\ PRUNE
+
+M: IF` (IF MARK>;
+' IF` =: WHILE`
+' MARK>` =: CALL`
+' MARK>` =: [`
+M: UNTIL` (IF <RELS; 
+M: AGAIN` (JUMP <RELS; 
+
+: P5 5 . ;
+
+<M>
 
 
-\ : STR  |SWAP
 
-\ ERROR PRIMITIVES  --------------------- 
+: BD CR OVER H. STR| CSTR B. ;
 
-      \ FUNCTION EVAL  & EXECUTE MACRO 
-
-\ MEMORY  PRIMITIVES  ------------------
-
-: CMOVE SWAP 
-: MEMTO A! STR| CSTR   \  THEN \ C!A+
-: C!A+ XA C!R+ XA ;
-: >ZSTR CSTR H ?XEP| MEMTO A@ OFF ; 
-: CMOVE> A+L SWAP |DROP MPUSH ;
-  
-
-: CSP! SP@ (SET2   
-: CSP (CON ;; 
-
-: D# HERE >, CSP!       
-: |LASTH EX LASTH! ; 
+: `?,<  AT CSTK> STK?  0<>;  AT <CSTK STK?  0<>;  ,<` ;
  
-\ HI LEVEL FUNCTIONS  --------------------- 
+: ]`  TO THEN`   \ TAIL RECURSION v
+: ;` `?,< (| :;  LASTH H 1- U< 0;
+    H 2- @ ODD 0<>; RDROP @H- TO <CSTK 
+  AGAIN` ;
 
+INCLUDE EXT.CF
 
-: < - 0< ;        
-: |[] ."[" EX ."]" ;;
-: [ID] CSTR      
-: [S] |SPC |DROP     
-: [TYPE] |[] TIMES| CSTR DUP |C. BL < 0; DROP '. ;; 
+: FORSAV FORGET FSAVE ;
+: Q5 5 . ;
 
-: SAME? TFND 0; 4+ [ID] TBUF ; 
+<M>
+' P5 8 BD
+' Q5 8 BD
 
-HERE >, (D#0 @2 WITHIN ;
-N: `BREL? -128 , 128 , 
-=, PRNTBL 32 , 240 ,
-
-HERE >, (D#0 @ (DOS ;
->, `RW  (VAR3 ,< N: Fread  $3F00 , 0 ,
->, `RW  (VAR3 ,< N: Fwrite $4000 , 0 , 
-: `RWPOS `fsk ,<
-=, Fseek  $4200 ,
-
-\ HERE .  TEST10 2616
-
-
-\ COMPARING PRIMITIVES  
-: RED| 2DUP EX (IF SWAP ;;
-: UMAX |NIP 
-: URED RED| U< ; 
-: UMIN |DROP URED ; 
-\ : MAX |NIP  
-\ : REDI RED| < ; 
-\ : MIN |DROP REDI ;
-\ BYTE. >LO
-
-\ : INCLUDE TO TOKEN? EOS| 
-\ @OPENI| FGet UNTIL| READLN EVAL EOS ; 
-\ : FTYPE TO TOKEN? @!EMIT|
-\ (BE  EOS| @OPENI| FGet UNTIL| CR RDL EOS ;
-
-\ : INBUF (2CON ,<  -$600 , $40 , 
-\ >, EOS! : `CR (2RDRP; ; UNW 
-\ : `bs  (DUP 0; 1- TO bs SPC TO bs ; 
-\ : `CH (A@ PRNTBL 0; (A@  (SKIP 
-\ : `tab BL (DUP EMIT `(2?+ SWAPC! 1+ 
-\ : `ZERO ;; 
-\ : `CHTAB ("SW 
-\ ,< 5 C,     ^H C, ^I C, ^M C, ^Z C,     127 C, 
-\ >,      `CH `bs   `tab  `CR    TO `CR   `ZERO 
-\ : RDL  |SPC INBUF 
-\ : ACCEPT (PUSH 0 BEGIN (DUP I-
-\  (IF  EXIT  KEY `CHTAB AGAIN ;
-\  UNW ' RDL ' QUIT !
-
-\ : >HI 1B U* ;   \ MULTIPLY 
-\ : U* |DROP 
-\ : UM* A! 0 TWICE| TWICE| +* +* +* 
-\ : +* (+* ; 
-
-\ INCLUDE fLUSH.CF  \ HERE .  TEST10 2986
-\ INCLUDE NUMOUT.CF \ HERE .  TEST11 3292
-
+FORSAV P5 SAV3.COM

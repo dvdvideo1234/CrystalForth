@@ -1,4 +1,16 @@
-128 CONST HLDBUF
+: S6 (| CALL XEP| XEP| XEP| THEN 
+: S3 |SPC CALL TWICE| THEN ROT DUP 
+: H. W>BB CALL 
+: B. |SPC THEN  W>B 1H U/MOD TWICE| .# ;
+
+: UNTIL| BEGIN IXEC 
+: WHILEZ| UNTIL RDROP;
+: WHILE| (IF EXIT 
+: UNTILZ| IXEC  WHILE| 
+;
+
+' TBUF =: HLDBUF
+
 : #> DROP HLD 
 : HLDSZ HLDBUF HLD - ;
 
@@ -10,7 +22,7 @@
 : <#>| <# EX ?TAB #> TYPE ; 
 : `6 DUP 0< 0; NEG EX '-  
 : HOLD |HLD C!- ;
-: # BASE  U/MOD SWAP  ALPHA HOLD ; 
+: # BASE  U/MOD SWAP  VAL .# HOLD ; 
 \ : U. 0 
 : U.RS |SPC 
 : U.R lf 
@@ -25,3 +37,4 @@
 ; 
 : #. 0 SWAP |SPC .R# ; 
 
+CR .( NUMOUT ) BYTE. S6

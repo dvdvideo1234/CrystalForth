@@ -7,7 +7,6 @@
 TO' ACCEPT ' `@ACPT   T!    \ FIX ACCEPT IN MAINLP
 ' `EVAL  VAL' `@ACPT  T!    \ FIX EVAL IN MAINLP
 '  `OK    ' @OK       T!    \ FIX  vOK.
-' `SOURCE ' `PARSE    T!    \ FIX PARSE
 ' T>    ' CFND        T!    \ FIX CFND
 ' `ALLCLR  ' `@ABINI  T!
 
@@ -20,6 +19,7 @@ THIDE (D#0
 
 APT- POP        =:  (D#0
 APT- ONE        =:  1
+APT- TRUE       =:  -1
 TO' H>T         =:  H>T|    
 '   (D#0        =:  POP
 APT- ((A"       =:  (!"
@@ -40,10 +40,8 @@ APT2 CSWP>          CSWAP>`
 APT- <CSWP      =:  <CSWAP`
 APT2 `<MRK          BEGIN`
 APT2 `RLS>          THEN`
-APT2 TREPEAT        REPEAT`
-APT2 TAGAIN         AGAIN`
 APT- :(;        =:  :;
-' `MRK>         =:  MARK>`
+APT2 `MRK>          [`
 APT2 `\             \` 
 ' \`            =:  \ 
 

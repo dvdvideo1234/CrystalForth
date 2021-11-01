@@ -1,8 +1,18 @@
 \ PACK AND UNPACK STRINGS  
 \ OPTIONS ,  !  "  :
 \ ESCAPE CODES & CONTROL  / ESCAPES  _ SPACE ~ NEGATE MSB
-: DST" H 
-: 5+ (@+; ,< 5 ,
+
+: `ADD DUP DEA> OVER-
+: S+! ROT  
+: +S! XEP| TUCK J STR + S>M J 
+: +!  |@! + ;  \ : H>T| EX H>T ;
+: DEA? DUP 4+ C@ ;
+>, BEGIN  PUSH J EXECUTE POP DEA> 
+: LST| DEA? (IF EXIT AGAIN
+: `PRUNE| H DUP OFF T EX DUP PUSH `ADD POP DEA> TO T DROP;
+: PRUNE TO H>T  `PRUNE|
+ LST| J @ H U< 0; J 5+ C@ '`' <> 0; J `ADD ;
+
 : `SPACE BL SKIP
 : `AHLD A@
 : HLD, |HLD C!+ ;
@@ -11,32 +21,28 @@
 : `ESCAPE  TO @STATE    HLD,            
 : `COPYCHK  TO @STATE ("SW ,< ,T ^"_~   2ALIGNED 
 >, `AHLD  `CONTROL  `ESCAPE `SPACE `MSB1
-: PAR|  DST" TO HLD EX DST" HLD OVER- SWAP  C!- ;
+: PAR|  `DST" TO HLD EX `DST" HLD OVER- SWAP  C!- ;
 : ">PK CSTR  \ PACK STRING TO MEMORY  \ SRC LEN DST
 : S>PK `COPYCHK  PAR| STR| CSTR @STATE ;
  
-: (," ("SKIP CSTR S, ;
-: "S, CSTR S, ;
-
-: `(0" SWAP 0= SKIP 
-: `(!" SWAP 0;
-: `(;" @ERR ;
+: (," ("SKIP   : "S, CSTR S, ;
+: `(0" PUSH VAL `WITHSTK ;
 
 : `ASTRI (BSCN ,<  ,T ",!./@   2ALIGNED  
 >, 1- OVER   
 : `CHK" C@ c" <> ;
-: STR? DUP NAME> 1- C@ c" = DUP 0; DROP DUP 1+ C@ `ASTRI 1+ ;
-0 WARY `STR  >,  NOOP   "S,  `(!"    ".   `(;"    `(0" ,< 
-0 WARY `DBG" >,  :"     :,"   :!"   :."   :/"     :@"  :MAC ,<
-: DBG" PUSH 0 `DBG" 7 POP WSCAN ;
+0 WARY `STR  >,  NOOP   "S,  VAL ((A"    ".   @ERR    `(0" ,< 
+0 WARY DBG" >,  :" :," :!" :." :/" :@" :MC" :SW" :SC" ,<
+\ : DBG" PUSH 0 `DBG" 7 POP WSCAN ;
 
 : `OK" CSTR AT `CHK" IF S1- DUP 0;  TO `CHK" 0<>; THEN S1- ;
 : `U" 1- XEP| `OK" S>PK " ; \  UNDER STRING
 
+: `STR? DUP NAME> 1- `CHK" SKIP? TO 0=  DUP 1+ C@ `ASTRI 1+;
 
 \ ( CALL RDROP ) LIKE JUMP
 : `STR@  RDROP `U" `STR @EXEC ;;
-: `STR@, RDROP `U" `DBG" @EXEC ", ;
+: `STR@, RDROP `U" DBG" @EXEC ", ;
 
 : `U2" A@ c" HLD, ; 
 : `USPACE '_ ;
@@ -45,7 +51,7 @@
  (| HLD, ("SW  ,< 5 C, '^ C, '~ C, 32 C, '" C, '_ C, 2ALIGNED
  >, CALL `U2"  `U2" `USPACE `U2" `U2" THEN 
  A@ DUP BL U< 0; '^ HLD,
-: 1L+ (@+; ,< '@ ,
+: `1L+ (@+; ,< '@ ,
  
  
  
