@@ -1,0 +1,38 @@
+: 2!- TWICE
+: !- 2- PUSH !I POP; 
+: SWAP! SWAP ! ;  
+
+: @I J @ ;
+: @ISTR J STR ;
+: @+ PUSH @R+ POP; 
+: @2 @+ @ ;
+
+: C, |H  
+: C!+ PUSH C!R+ POP;
+: UNW DROP|
+: @H- |H  
+: @- 2- ?XEP| @ ;
+
+: CMOVE SWAP  
+: S>M ASTR| CSTR 
+: C!A+ XA C!R+ XA ;
+HERE >, (D#0 @ 
+: FILL ASTR| PUSH A@ C!R+ POP; ,<
+N: ERASE 0 ,  N: BLANK 32 ,  DROP
+
+: S>" TBUF
+: S>"! ?XEP| NUP C!+ S>M ;
+
+
+: |@! XR PUSH J @ EX POP!;
+
+: " CSTR
+: `MAKE" DUP PUSH T MPUSH POP SWAP 
+: C!- 1- XEP|
+: C!I J 
+: C! PUSH C!R+ RDROP; 
+: ">Z CSTR 
+: S>Z S>" 0 C!A+ 1+; \ TO S TBUF
+: T> T
+: DEA> 4+ 
+: NAME> CSTR +  ;

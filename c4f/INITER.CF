@@ -15,12 +15,14 @@ HERE    VAL' H T!           \ TARGET FORTH HEAP
 
 THIDE (DEF
 THIDE (D#0
+THIDE  CALL` 
+THIDE  ;THEN` 
 
 
 APT- POP        =:  (D#0
 APT- ONE        =:  1
 APT- TRUE       =:  -1
-TO' H>T         =:  H>T|    
+\ TO' H>T         =:  H>T|    
 '   (D#0        =:  POP
 APT- ((A"       =:  (!"
 APT- ((0"       =:  (@"
@@ -31,7 +33,7 @@ APT- (LIT       =:  (#
 APT- TARG:      =:  :          
 APT- `<RLS      =:  <RELS`
 APT2 TARG:C         :`         
-APT2 TARG;          ;`
+APT2 T;;            ;;`
 APT2 TARG,<         ,<`        
 APT2 FTO`           TO`
 APT2 FAT`           AT` 
@@ -42,8 +44,14 @@ APT2 `<MRK          BEGIN`
 APT2 `RLS>          THEN`
 APT- :(;        =:  :;
 APT2 `MRK>          [`
+' [`            =:  CALL` 
+' [`            =:  MARK>` 
 APT2 `\             \` 
 ' \`            =:  \ 
+APT2  T]            ]`
+APT2  T;            ;`
+APT2  TAGAIN        AGAIN`
+' ]`            =:  ;THEN`    \ SINTACTIC SUGAR
 
 WORD_THE_ONE `=:  `EVAL   \ WORD THE TWO
 

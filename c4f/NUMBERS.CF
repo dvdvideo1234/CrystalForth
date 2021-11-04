@@ -1,0 +1,60 @@
+
+: U/ NIP|    : U/MOD A! 0 
+: (UM/ SWAP| TWICE TWICE -/ -/ -/ -/ ;
+: UMOD U/MOD DROP;
+: UM/MOD U/MOD XEP| (UM/ ; \ ( UD U - U UD )
+
+: 9>? 9 SKIP
+: OPT? ONE OVER U< 
+: 7& (@&; ,< 7 , 
+HERE >, (D#0 @  
+: BASE! 2- W>B 2+ ,<
+  10 VALUE BASE 
+N: `DECI 10 , N: `BIN 2 , N: `HEX 16 ,  DROP
+
+: 1K* 1K
+: U* DROP|
+: UM* A! 0 TWICE TWICE +* +* +* +* ;
+
+: ?# DUP AT WITHIN ,< ': , 'A , >,  SKIP? TO 0=
+ '0 - 9>? - DUP BASE U< ;
+>, (PNT2 ,<  0 DEFER @STATE 
+: `DIG# BASE! 0 ;
+: `ERRN 0& A! ;
+: `DIG^  TO @STATE  31& SKIP
+: `ADIG' TO @STATE  
+: `MUL+  PUSH BASE U* POP +
+: `DIGICHK  TO @STATE A@ OPT? NIP    IF
+   ("SW ,< 5 C, '' C, '^ C, '# C, '$ C, '%  C, 2ALIGNED
+  >, CALL `ADIG' `DIG^ `DIG# `HEX `BIN  THEN
+  A@  THEN ?# (IF `ERRN  `MUL+ ;
+: `-? OPT? 0; OVER C@ `@R<> ,< '- , >, 0<>; S1- EX XEP| NEG ;
+: "># CSTR
+: S># `DECI 0 -ROT DUP (IF 1-; `-?  NIP| 
+: CONV  `DIGICHK FOR PUSH C@R+ J 1+ A! @STATE POP 
+    A@ (IF `CONV; NEXT 1+; ,<
+    
+ INCLUDE UPACK.CF  \ 230 B
+
+>,
+\ : >NUM,
+  ,|
+\ : >NUM 
+  TOKEN? 
+: ">NUM  TR-| `STR? SKIP? `STR@ 
+: `"># "># ?? ;;  
+
+: ">NUMC  TR-| `STR? SKIP? `STR@, `">#  ,|  
+: :#  (MAC ,< ,T (#     2ALIGNED
+
+: S6 (| CALL XEP| XEP| XEP| THEN 
+: S3 |SPC CALL TWICE THEN ROT DUP 
+: H. W>BB CALL 
+: B. |SPC THEN  W>B 1H U/MOD TWICE 
+: .# |C. 9>? + (@+; ,< '0 ,   \ FOR NUMOUT 
+
+: . -IF NEG ."-" THEN  
+: U. `DECI SKIP 
+: .H `HEX SKIP
+: .B `BIN |SPC 
+: `U.  BASE U/MOD  SKIP? RECURSE .# ;;

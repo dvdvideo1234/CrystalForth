@@ -1,0 +1,39 @@
+\ TAIL   
+
+: FND? TOKEN? N??| 
+: TFND T  FND ;
+
+: ,' ,| 
+: ' FND?
+: @DEF? @2 
+: UNDEF? ODD !"UNDEF?" ;;
+
+HERE >, (D#0
+: @ADR+  @ (| + 
+: ADR' '  TO ODD ODDH? ; 
+N: TO' -2 ,  N: AT' -4 , N: VAL' 2 , DROP
+
+HERE >, (D#0 @ADR+ , ;
+N: FTO` -2 ,  N: FAT` -4 , N: FVAL` 2 ,  DROP 
+ 
+: @INT  TOKEN? VAL ,<` N??  @DEF? VAL ADR' ; 
+HERE >, (D#0 : `@INT+ @ @INT + PUSH;  ,<
+N: TO -2 , 
+N: AT -4 , 
+N: X:` Z,
+N: VAL 2 ,    DROP
+
+: OR NOT SWAP NOT NAND ;
+: (code POP T @ ! ; 
+: `LAST? LASTH H <> ;
+: `@BACK H 2- @  ;
+\ : ?` ,| ADR' `LAST? `@BACK OR @"CAN`T!" CSTK> DROP UNW ;;
+: `OPTIMIZE?  `LAST?  `@BACK  ODD  0=  AND ;
+
+\ MCLR  <M>  M: :JUMP (JUMP; : PRUNE ;  <M> \ EMPTY PRUNE
+
+: T]   TO `RLS>   \ TAIL RECURSION OPTIMIZE
+: T; `OPTIMIZE? T;;  0;   UNW  @H-  TO <CSTK 
+: TAGAIN :JUMP  `<RLS ;;
+
+

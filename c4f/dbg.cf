@@ -59,4 +59,4 @@
 VAL' @DO_DBG DEFER (DBGRET 
 ' `@DBG  ' @DO_DBG  !
 
-CR .( DBG ) BYTE. |[]
+CR .( DBG     ) BYTE. |[]

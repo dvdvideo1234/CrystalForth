@@ -35,6 +35,15 @@ M: :VAR  (VAR;
 : VAR ,|  CREATE
 ; 
  
+: D# >, HERE EX LASTH! ;
+: `DO POP ADR' ,<  0 VECTOR  `vDO
+: DO# `DO TOKEN? ">NUM `vDO ; 
+: ZDO `DO 0 `vDO ; 
+: DO  `DO   `vDO ; 
+: DO' `DO ' `vDO ;
+: FMLY AT `vDO DROP| STR| DUP `vDO OVER+ ;
+: FML# AT `vDO TIMES| VAL DO# ;;
+
 : CSP! SP@ ,<
 0 VALUE CSP
 
@@ -46,7 +55,7 @@ CSP!
 \ PERFORMING BRANCHES
 : WHILE` :IF MARK>` ;;
 : JUMP|` :| MARK>` ;; 
-: IF-` :IF- MARK>` ;;  \ M: -IF` 1+ IF-; 
+: IF-` :IF- MARK>` ;;  
 : -IF` :-IF MARK>` ;;  \ M: -IF` 1+ IF-; 
 : NEXT-` THEN` 
 : UNTIL-` :IF- <RELS` ;; 
@@ -87,8 +96,6 @@ M: :code (code;
 : 0#> D# :0> ;; 
 : 1#> D# :1> ;; 
 : 2#> D# :2> ;;
-: FMLY AT `vDO DROP| STR| [ OVER + ] `vDO ;;
-: FML# AT `vDO TIMES| VAL DO# ;;
 \ \ DBG.  CSP.
 
 : OPS 
@@ -111,8 +118,10 @@ U1+ NEG 0< -/ A@ RP@ EX 2/ DROP RDROP; DROP;  RDROP
 PRBA1
 FORGET OPS  
 
-: ENTRY, ,' Z, \ H TO CSP
-: TOK, =" ", ;  \ CSP ID. TO BK ;
+: N3, ,' Z, \ H TO CSP
+: TOK, =" CSTR AT S, ;  
+
+\ FACTORIES OF MAKERS 
 : `MKR CREATE , EX ,' ;    \ <BUILD   
 : `W, STR , ;
 : 3MKR `MKR , , DOES>  `W,    
@@ -125,6 +134,7 @@ FORGET OPS
 : LARY TO   `ARY| :LARY ; 
 : XARY      `ARY| :XARY ; 
 : BCONST (, |C. CONST ; 
+
 : BYTE. HERE ' -
 : BYTES? SPC . ."BYTES__" ;
 : P=: ALIGNED HERE 1+ =: CSP! ; 
@@ -134,5 +144,7 @@ FORGET OPS
 \ : EXPORTED FND?? 2@ FND?? DUP @ NOT A" DEFINED"  2! ;
 \ P=: BRK $CC C, ' (NOP 1- JMP#,
 \ : |VALUE :` CALL` EX :SET2 THEN` CONST ;  
-CR .( MACRO ) BYTE. MMRK
+
+\ 345678901234
+CR .( MACRO   ) BYTE. MMRK
 <M> 

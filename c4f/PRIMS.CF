@@ -1,563 +1,87 @@
-\ REDEFINITIONS AND FORWARD DEFINITIONS ---------------
-
-'  (JUMP   =:  (DEF
- 
-\ =! |BEFTOR 
-\ =! SPC
-\ =! CR
-\ =! [ID]
-\ =! ID.
-\ =! [S]  \ "
-\ =! (("  \ "
-\ =! ((."  \ "
-\ \ =! (MAC
-=! |LASTH
-\ =! >,
-\ =! TARG,<
-
-\ =============   VARIABLES  ==============
-
-  64  CONST 1L
-1024  CONST 1K
-   1  CONST   `1
-  ' `1 2+  =: BYE
-   -1 CONST TRUE
-' `FIB CONST FIB  
- 
-: ON  TRUE SKIP
-: OFF 0 
-: SWAP! SWAP ! ;   
-  
- 0 VALUE  BLK     
-: MCLR (LIT `MACADR  ,<    
-' `MACADR VALUE MOBJ   
- 
-: EMT! (LIT BE   ,<
-' BE VALUE  `@E  >, AT CNTC ++ ;
-' `@E 2+ =: EMIT 
- 
-: KEY! (LIT BK     ,<
-' BK  VALUE  `@K1  >, ;;
-' `@K1 2+ =: KEY 
-
 \ ============ PRIMITIVE METHODS ===============
 
-: |DROP EX
-: .; DROP;
-: |NIP EX NIP ;   
-: |SWAP EX SWAP ;
-: IXEC J
-: EXECUTE PUSH; 
-:  `RW IXEC ! IXEC `1 
-: EXIT RDROP;
-: S1- U1+ 1- ; 
-: ?XEP+| DUP 1+ SKIP 
-: ?XEP| DUP 
-: XEP| XR EXECUTE POP;
-: U* |DROP 
-: UM* A! 0 TWICE TWICE +* +* +* +* ;
-: U/ |NIP    : U/MOD A! 0 
-: (UM/ |SWAP TWICE TWICE -/ -/ -/ -/ ;
-: UMOD U/MOD DROP;
-: UM/MOD U/MOD XEP| (UM/ ; \ ( UD U - U UD )
-: A-L XEP|  
-: I- J - ;
-: S+L XEP| 
-: A+L XEP| 
-: I+ J + ;   
-\ : 4+ (@+;  ,< 4 ,
-: AND NAND NOT ;
-\ : = XOR 0= ;
-\ : CSTR PUSH C@R+ XR POP ;
-: CSTR- 1- ?C@ ; 
-: DEA? DUP 4+ C@ ;
-: ?"LEN ?C@ 1+ ; 
-: HODD H DUP \ H TO FIX HERE 
-: ODD (@&; ,< 1 , 
-: TUCK DUP -ROT ;
+: I J ;
 : |ROT EX
 : ROT -ROT -ROT ;
-: XDROT XEP| 
-: DROT |ROT  
-: D0 0 0 ;
-: EVEN (@&; ,< -2 , 
-: C@A+ XA C@R+ XA ;
-: C!- 1- XEP|
-: C!I J 
-: C! PUSH C!R+ RDROP; 
-\ : !I J 
-\ : !  PUSH !R+ RDROP; \ INIT INITR (PNT2 \ SETPOINT
-\ : = - 0= ;
-: I J ;
-\ : >DEA 4+ 
-\ : NAME> CSTR + ;;
-\  >, @R+ 
-\ : <>; - 0<>; ; 
-: NUP XEP| DUP ;
+: TUCK DUP -ROT ;
+: 2DUP OVER OVER ;
+: SWAP| EX SWAP ;
+: DROP| EX
+: .; DROP;
+: NIP| EX NIP ;   
 
-
-: MEMTI| A+L 0   
-: TI| BLK XR LTIB PUSH
- ETIB PUSH PUSH CALL EX POP POP POP THEN
- TO BLK TO LTIB TO ETIB 
-: /BLK BLK 0; 0 TO ETIB ; 
-: (LIT, (MAC ,< 2 C, ,"(#"  2ALIGNED
-: (;,   (MAC ,< 2 C, ,"(;"  2ALIGNED
-: `(MAC (MAC ,< 4 C, ,"(MAC"  2ALIGNED
-: |#,, EX (LIT, , ;
-
-\ : STR  |SWAP
-: @+ PUSH @R+ POP; 
-\ : (CON @R+ RDROP; 
-\ : (D#1  POP XR 2+ ; 
-\ : (PNT2 (D#1 XR !R+ RDROP;
-: 2@ |SWAP
-: @2 @+ @ 
-: NOP;  ;
-
-\  VARIABLES VALUES & CONSTANTS -------------
-
-\ ' @TIB CONST INBUF
-
-\ : |H CALL EX (SET2 THEN ,<       0 CONST H \ HEAP TOP
-\ 0 VALUE ERRA  \ HOLDS ERROR MESSAGE ADDRESS
-\ : |LTIB CALL EX (SET2 THEN ,<   
-\ ' `EVALCNT   CONST LTIB 
-\ ' `EVALEND   VALUE ETIB
-\ : |T CALL EX (SET2 THEN ,<   $D800 CONST T \ VOCABULARY TOP
-\ >, (PNT2 ,<  0 DEFER LOXEC \ LOCATE AND EXECUTE \ FORTH STATE 
-\ >, (PNT2 ,<  0 DEFER REINIT 
-\   ' T   VECTOR vT    \ WHERE TO SEARCH ON INTERPRETT
-
-
-
-\ : (| @R+ XR PUSH;
+\ : S1+ PUSH  
+: `CONV; 1- POP
+: 1+ 1+; 
+: RANGE>S 1+
+: OVER- OVER
+: - NEG
+: + +2/ DROP; ,<
  
-: (RNG| RANGE>S  
+: IXEC J
+: EXECUTE PUSH; 
+: ?XEP-| 1-
+: ?XEP| DUP    
+: XEP| XR EXECUTE POP; 
+: ?XEP+| DUP 1+ XEP| ; 
+\ : S+L
+\  XEP| 
+: A+L XEP| 
+: I+ J + ; 
+: (<RNG| RANGE>S A+L SKIP
+: (RNG|  RANGE>S     SKIP
+: ASTR| A!
 : STR| XR POP    
-: .TIMES |DROP   
+: .TIMES DROP|   
 : TIMES PUSH XR  
 : TIMES| (FOR CALL BEGIN J EXECUTE THEN (NEXT RELS<
+\ : 2EXIT 
  RDROP RDROP; 
-: (<RNG| RANGE>S A+L STR| ;
-\ : C_ON `1 SKIP      
-\ : C_OFF 0  
-\ : SWAPC! SWAP C! ;  \ TEST1 1032
-: |@! @+ 2- XR EXECUTE POP!;
-\ : POP! !R+ RDROP; 
-\ : ++ |@! 1+ ;
-\ : -- |@! 
-: +!  |@! + ;
+ @R+ @R+
+: |SAFE! A! @!A XA PUSH A@ EXECUTE POP POP!;
+: 0<>; 0; 
+: EXIT RDROP;
 
-\ ERROR PRIMITIVES  --------------------- 
+: NUP XEP| DUP ;
+1  CONST  ONE
+HERE 2- =: BYE 
 
-\ : `(?" 0     \ ALWAYS ERROR  \ NOT RETURN
-\ : `(0" 0=   \ ONZERO ERROR
-\ : ((A" ("SKIP TO ERRA 0; 
-\    TARG,< \ TO INTERPRETTER MODE 
-\   ABORT ,<
-\ : |N?? EX  
-\ : N??  0= 
-\ : ??  !"?" ;;
-: ODDH? !"ODDH?" ;;
-
-      \ FUNCTION EVAL  & EXECUTE MACRO 
-
-\ : S>"! XEP| DUP J A! CALL \ C!A+ 
-: `MEMTO STR| CSTR   \  THEN \ C!A+
-: C!A+ XA C!R+ XA ;
-\ : PARSE ETIB |LTIB (PARS ; 
-\ : WORD  PARSE  TBUF  S>"! '` C!A+ ; \ ( PARSE: SOURCE FIX )
-\ : TOKEN? |N?? 
-\ : TOKEN \ "TOKEN" CR TIB [S] |BEFTOR 
-\    BL WORD   ?C@   ;
-\    
-\ : (MAC (D#0 \ |STATE  
-\ : SEVAL CSTR  \ ' `MEMTI| ' EVAL ! 
-\ : EVAL NOP  SKIP BEGIN LOXEC 
-\ : @EVAL  NOP  TOKEN   0= UNTIL DROP  ; \ `STACK
-
-
-\ SEARCH PRIMITIVES  ------------------
-
-\ : `NOSCN RDROP J SKIP
-\ : `SCN POP NOT XR DROP DROP POP POP + ; 
-\ : SCN|  A! DUP XR  PUSH (FOR CALL BEGIN J EXECUTE
-\  (IF `SCN  THEN (NEXT RELS<  `NOSCN ; 
-\ : B?" PUSH  \ BYTE "STRING" B?" -- INDEX
-\ : (BSCN XR CSTR POP CSCAN ; \ BYTE :"PROC" -- INDEX
-\   DUP A! (CSCAN ;
-\ : CSCAN SCN|    \ ADR LEN BYTE -- INDEX
-\ : C@+= CSTR A@ - ; 
-\ : CSKIP SCN| C@+= 0= ;
-\ : WSCAN SCN| STR A@ - ;
-\ : WSCAN DUP A! (WSCAN ;
-\ : ("SW ("SKIP B?" 1+ 
-\ : (XARY 2* POP + @EXEC ;
-\ : `(XARY PUSH; 
-\ : `SAVEX I ! ;
-\ : @EXEC @ VAL HODD (IF `(XARY  `SAVEX NOP ;
-\ : `;FND DROP 0  EXIT ; 
-\ : `CFND| >DEA 
-\ : `FND| DEA? (IF `;FND  OVER OVER IXEC 
-\   IF `CFND| ;THEN NIP  `1   EXIT ;
- 
-\ TEST2 1206
-
-\ VARIABLES STAGE 1 ------------------
-
-
-\ : (@,
-\ : @,  @  
-\ : , |H     
-\ : !+ PUSH !R+ POP ;
-: |, EX 
-: `<RELS_ , 
-: LASTH! H ,<
-0 VALUE LASTH
-: C@, C@ 
-: C, |H  
-: C!+ PUSH C!R+ POP;
-: |ALIGNED EX    
-: ALIGNED NOP \  |LASTH  FIX
- HODD NIP 0; $90 C, ;
-' |ALIGNED VECTOR  v",
-\ 0 VALUE BLK
-\ : MCLR $D800 ,<     0 VALUE MOBJ      
-\ HERE >, (D#0 @ PUSH ETIB LTIB - ; 
-\ N: TIBC@ ' C@ , 
-\ N: TIB^ ' NOP; , 
-\ N: TIB    ' LTIB ,
-\ =, TIBC! ' C! ,
-\ : TIB- |LTIB 1- ; 
-\ : TIB+ |LTIB 1+ ; 
-
-\ HERE .  TEST3 1338
-
-\ MEMORY  PRIMITIVES  ------------------
-
-: CMOVE SWAP 
-: MEMTO A! `MEMTO ; 
-: >ZSTR CSTR H ?XEP| MEMTO A@ OFF ; 
-: CMOVE> A+L SWAP |DROP MPUSH ;
-\ : MPUSH S+L |NIP SWAP TIMES| 1- PUSH CSTR- C!I POP ;
-HERE >, (D#0 @ 
-: FILL A! STR| A@ C!+ ;
-N: ERASE 0 ,  =, BLANK 32 ,
-  
-\ HERE .  TEST4 1428
-  
-\ HERE .  TEST5 1452
-
-\ COMPILER BASIC PRIMITIVES  ------------ 
-
-\ : |BEFTOR ."_<BEFORE_" ID. CR (BRK EX ."_AFTER>_" CR (BRK ;
-
-\ : `SCAN? TIB J CSCAN
-\ : `LASTSCAN (-IF CALL  DROP  LTIB THEN ;
-\ : `SKIP? J BL <>; TIB J CSKIP 
-\ : `PARSE-LEN?  |LTIB  SWAP `LASTSCAN - ;
-\ : PARSE NOP  PUSH `SKIP?  TIB^ `SCAN? DUP `PARSE-LEN? EXIT ;
-: "STR, '" 
-: `", WORD ?C@ N?? 
-: ", CSTR v", DUP C, 
-: S, STR| CSTR C, ; 
-
-\ : H>T H  STR  |T MPUSH ; 
-
-\ HERE .  TEST6 1654
-
-\ NUMBERS ---------------------------
+: !I J 
+: ! PUSH POP!; 
+:  `RW IXEC ! IXEC ONE RDROP; 
 
 : ("SW ("SKIP B?" 1+ 
 : (XARY 2* POP + @ PUSH;
-: 9>? 9 SKIP
-: OPT? `1 OVER U<  (@&; ,< 7 , 
-: ALPHA 9>? + (@+; ,< '0 ,   \ FOR NUMOUT 
-HERE >, (D#0 @  : BASE! 2- W>B 2+ ,<  10 VALUE BASE 
-N: `DECI 10 , N: `BIN 2 , N: `HEX 16 ,  DROP
-\ : DIG?  '0 - 9>? - DUP BASE U< ;
-\ : `DIGS  (BSCN ,< 36 C, \ NUM/CHAR
-\ ,"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ" 2ALIGNED
-: `-? OPT? 0; OVER C@ '- = 0; S1- EX XEP| NEG ;
-\ : `DIG# BASE! 0 ;
-\  0 VALUE FLAG
-\ >, (PNT2 ,<  0 DEFER FUN_STATE 
-\ : `ADIG  A@
-\ : `DIG?  $DF AND DIG? DUP 0=  TO FLAG   (IF .;  AHEAD
-\ : `DIG^  TO FUN_STATE   FLAG 31 AND AHEAD
-\ : `ADIG' TO FUN_STATE  
-\ : `MUL+                     FLAG   THEN THEN 
-\    \ BASE*+ : BASE*+ (| + XEP| BASE U* ;
-\     PUSH BASE U* POP +
-\ : `BASEZ  TO FUN_STATE  
-\ : `OPTION FLAG A@ OPT?  (IF `DIG?
-\   A@ ("SW ,< 5 C, ,"'^#$%" 2ALIGNED
-\   >, `ADIG `ADIG' `DIG^ `DIG# `HEX `BIN ,<
+: XDROT XEP| 
+: DROT |ROT  
+: D0 0 0 ;
+: `DST" H 
+: 5+ (@+; ,< 5 ,
+: `MASK| EX 1- 
+: AND NAND NOT ;
+>, @R+ @R+
+: WITHIN OVER- PUSH - POP U< ; \ N: `BREL? -128 , 128 ,
+\ : A-L
+\ >, XEP|  
+: I- J - ; >,
 
-: ATOI `DECI 0 -ROT (?IF 1+; `-? BASE CONVERT NIP ;
-\ : `ATOI; RDROP POP;
-\ `BASEZ `-? PUSH PUSH 
-\     BEGIN J WHILE C@R+ TO FLAG J A! 
-\       FUN_STATE   FLAG 0< (IF `ATOI;
-\     POP (NEXT TWICE PUSH REPEAT `ATOI; ;
+: S1- U1+
+: 1-; 1- ; 
 
-: ">NUMC |#,,    
-: ">NUM CSTR ATOI (BRK ?? (BRK ;; 
+: SPLIT  SWAP|
+: W>BB  DUP HW>B XEP| 
+: W>B `MASK| ,<
+256 CONST 1B
 
-\ HERE .  TEST7 1748
-
-\ MAKERS ---------------------------------- 
-
-\ : `?:, DUP  
-\ : `:, |, TARG:! ;  
-\ : TARG:! HODD  ODDH?
-\ : =: 0 TOKEN?  NOP \ FIX SAME?  
-\ : (=:  ?"LEN |T MPUSH TWICE
-\ : !- 2- PUSH !I POP ;
-
-
-      
-      \   INTERPRETTER 
- 
-\ : `[]OPER EX (XARY  ">NUM @EXEC ">NUMC @,
-\ : TARG; (;,  
-\ : TARG,< TO LOXEC \ "TARG,<" |BEFTOR 
-\ : `INTERP `[]OPER vT FND ;
-\ : FND? T  "FND?" |BEFTOR 
-\ : FND `FND| 4+ CR OVER ID. DUP ID. ."HAHA"
-\ : "-  ?"LEN 
-\ SRC DST LEN --> >R >A LEN FLGCHAR
-\ : MEM=   PUSH A! XR VAL HODD 
-\    IF C@R+ XA C@R+ = (IF `MEM=; THEN
-\    2/ AHEAD BEGIN @R+ XA @R+ = (IF `MEM=; THEN UNTIL-  
-\ : `MEM=; RDROP 1+ ;
-
-
-
-      
-      \   COMPILER
-
-\ : ITFND TBUF ++
-\ : TFND T CFND ;
-\ : TARG: NOP  TARG:!  \ CSP!  \ MAKE COLON ENTRY
-\ : >, TO LOXEC   `[]OPER  ITFND TBUF -- IF- (. TFND 
-\  1+ THEN 1+ ; 
-
-                
-  
-\ : `HOFS  ,<  \ MARK WHERE TO RETURN AFTER ,QUIT --> `HOFS
-\ ' @INIT HERE!     \ ONLY THIS TYPE OF REMARKS FROM HERE \
-\ >,     \ MAIN LOOP 
-\  NOP   \ INITIALIZATION  ON ABORT
-\  NOP   \ ERROR PRINT
-\ : QUIT
-\  BEGIN
-\    NOP \ ACCZ  \ READLINE FROM KBD
-\    @EVAL \ EVAL INPUT
-\ : vOK   NOP  \ OK!
-\    AGAIN ,<     \ TO HERE 
-\ ' `HOFS HERE!  \ STEP BACK TO HOFS
+\ : `16/ TWICE
+\ : `4/ TWICE 2/ ;
 \ 
-INCLUDE XTEND.CF \ HERE .  TEST11 3292
-\ INCLUDE INITER.CF
- 
-' @INI VAL' @INIT T!
-\ ' `INTERP VAL' LOXEC T! \ TARGET FORTH INITIAL STATE
-' ">NUMC ' `COMPNUM T!   \ FIX @COMPNUM
-' ">NUM  ' `NUMBER  T!   \ FIX @NUMBER
-'  `.     ' @ERR    T!   \ FIX ERROR.
-' MEMTI|  ' `TIZ    T!   \ FIX EVAL 
-' `STACK  ' @EVAL   T!   \ FIX @EVAL 
-'  `OK    ' @OK     T!   \ FIX  vOK.
-'  SOURCE ' @PARSE  T!   \ FIX PARSE
-'  SAME?  ' @SAME   T!   \ FIX (=:
-'  HERE   ' HODD    T!   \ FIX HODD
-'  HERE   ' @HERE   T!   \ FIX H=:
-'  CSP!   ' TARG:   T!   \ FIX TARG:
-'  |LASTH ' ALIGNED T!   \ FIX ALIGNED
-\ '  FIX VAL' H       T!   \ NEW H 
 
-\ ERRORS IN:
-\  (BRK PARSE
+\ COMPILER BASIC PRIMITIVES  ------------ 
 
-
-
-
-
-\ : 4+ (@+;  ,< 4 ,
-\ : = XOR 0= ;
-\ : CSTR PUSH C@R+ XR POP ;
-\ : CSTR- 1- ?C@ ; 
-\ : !I J 
-\ : !  PUSH !R+ RDROP; \ INIT INITR (PNT2 \ SETPOINT
-\ : = - 0= ;
-\ : >DEA 4+ 
-\ : NAME> CSTR + ;;
-\  >, @R+ 
-\ : <>; - 0<>; ; 
-\ : (CON @R+ RDROP; 
-\ : (D#1  POP XR 2+ ; 
-\ : (PNT2 (D#1 XR !R+ RDROP;
-\  VARIABLES VALUES & CONSTANTS -------------
-
-\ ' @TIB CONST INBUF
-
-\ : |H CALL EX (SET2 THEN ,<       0 CONST H \ HEAP TOP
-\ 0 VALUE ERRA  \ HOLDS ERROR MESSAGE ADDRESS
-\ : |LTIB CALL EX (SET2 THEN ,<   
-\ ' `EVALCNT   CONST LTIB 
-\ ' `EVALEND   VALUE ETIB
-\ : |T CALL EX (SET2 THEN ,<   $D800 CONST T \ VOCABULARY TOP
-\ >, (PNT2 ,<  0 DEFER LOXEC \ LOCATE AND EXECUTE \ FORTH STATE 
-\ >, (PNT2 ,<  0 DEFER REINIT 
-\   ' T   VECTOR vT    \ WHERE TO SEARCH ON INTERPRETT
-
-\ : (| @R+ XR PUSH;
-
-\ : C_ON `1 SKIP      
-\ : C_OFF 0  
-\ : SWAPC! SWAP C! ;  \ TEST1 1032
-\ : POP! !R+ RDROP; 
-\ : ++ |@! 1+ ;
-\ : -- |@! 
-
-\ MAKERS ---------------------------------- 
-
-\ : `?:, DUP  
-\ : `:, |, TARG:! ;  
-\ : TARG:! HODD  ODDH?
-\ : =: 0 TOKEN?  NOP \ FIX SAME?  
-\ : (=:  ?"LEN |T MPUSH TWICE
-\ : !- 2- PUSH !I POP ;
-
-
-      
-      \   INTERPRETTER 
- 
-\ : `[]OPER EX (XARY  ">NUM @EXEC ">NUMC @,
-\ : TARG; (;,  
-\ : TARG,< TO LOXEC \ "TARG,<" |BEFTOR 
-\ : `INTERP `[]OPER vT FND ;
-\ : FND? T  "FND?" |BEFTOR 
-\ : FND `FND| 4+ CR OVER ID. DUP ID. ."HAHA"
-\ : "-  ?"LEN 
-\ SRC DST LEN --> >R >A LEN FLGCHAR
-\ : MEM=   PUSH A! XR VAL HODD 
-\    IF C@R+ XA C@R+ = (IF `MEM=; THEN
-\    2/ AHEAD BEGIN @R+ XA @R+ = (IF `MEM=; THEN UNTIL-  
-\ : `MEM=; RDROP 1+ ;
-
-
-
-      
-      \   COMPILER
-
-\ : ITFND TBUF ++
-\ : TFND T CFND ;
-\ : TARG: NOP  TARG:!  \ CSP!  \ MAKE COLON ENTRY
-\ : >, TO LOXEC   `[]OPER  ITFND TBUF -- IF- (. TFND 
-\  1+ THEN 1+ ; 
-
-                
-  
-\ : `HOFS  ,<  \ MARK WHERE TO RETURN AFTER ,QUIT --> `HOFS
-\ ' @INIT HERE!     \ ONLY THIS TYPE OF REMARKS FROM HERE \
-\ >,     \ MAIN LOOP 
-\  NOP   \ INITIALIZATION  ON ABORT
-\  NOP   \ ERROR PRINT
-\ : QUIT
-\  BEGIN
-\    NOP \ ACCZ  \ READLINE FROM KBD
-\    @EVAL \ EVAL INPUT
-\ : vOK   NOP  \ OK!
-\    AGAIN ,<     \ TO HERE 
-\ ' `HOFS HERE!  \ STEP BACK TO HOFS
-
-\ 0 VALUE BLK
-\ : MCLR $D800 ,<     0 VALUE MOBJ      
-\ HERE >, (D#0 @ PUSH ETIB LTIB - ; 
-\ N: TIBC@ ' C@ , 
-\ N: TIB^ ' NOP; , 
-\ N: TIB    ' LTIB ,
-\ =, TIBC! ' C! ,
-\ : TIB- |LTIB 1- ; 
-\ : TIB+ |LTIB 1+ ; 
-
-
-\ : `(?" 0     \ ALWAYS ERROR  \ NOT RETURN
-\ : `(0" 0=   \ ONZERO ERROR
-\ : ((A" ("SKIP TO ERRA 0; 
-\    TARG,< \ TO INTERPRETTER MODE 
-\   ABORT ,<
-\ : |N?? EX  
-\ : N??  0= 
-\ : ??  !"?" ;;
-\ : S>"! XEP| DUP J A! CALL \ C!A+ 
-\ : PARSE ETIB |LTIB (PARS ; 
-\ : WORD  PARSE  TBUF  S>"! '` C!A+ ; \ ( PARSE: SOURCE FIX )
-\ : TOKEN? |N?? 
-\ : TOKEN \ "TOKEN" CR TIB [S] |BEFTOR 
-\    BL WORD   ?C@   ;
-\    
-\ : (MAC (D#0 \ |STATE  
-\ : SEVAL CSTR  \ ' `MEMTI| ' EVAL ! 
-\ : EVAL NOP  SKIP BEGIN LOXEC 
-\ : @EVAL  NOP  TOKEN   0= UNTIL DROP  ; \ `STACK
-
-
-\ SEARCH PRIMITIVES  ------------------
-
-\ : `NOSCN RDROP J SKIP
-\ : `SCN POP NOT XR DROP DROP POP POP + ; 
-\ : SCN|  A! DUP XR  PUSH (FOR CALL BEGIN J EXECUTE
-\  (IF `SCN  THEN (NEXT RELS<  `NOSCN ; 
-\ : B?" PUSH  \ BYTE "STRING" B?" -- INDEX
-\ : (BSCN XR CSTR POP CSCAN ; \ BYTE :"PROC" -- INDEX
-\   DUP A! (CSCAN ;
-\ : CSCAN SCN|    \ ADR LEN BYTE -- INDEX
-\ : C@+= CSTR A@ - ; 
-\ : CSKIP SCN| C@+= 0= ;
-\ : WSCAN SCN| STR A@ - ;
-\ : WSCAN DUP A! (WSCAN ;
-\ : ("SW ("SKIP B?" 1+ 
-\ : (XARY 2* POP + @EXEC ;
-\ : `(XARY PUSH; 
-\ : `SAVEX I ! ;
-\ : @EXEC @ VAL HODD (IF `(XARY  `SAVEX NOP ;
-\ : `;FND DROP 0  EXIT ; 
-\ : `CFND| >DEA 
-\ : `FND| DEA? (IF `;FND  OVER OVER IXEC 
-\   IF `CFND| ;THEN NIP  `1   EXIT ;
- 
-\ TEST2 1206
-
-\ VARIABLES STAGE 1 ------------------
-
-
-\ : (@,
-\ : @,  @  
-\ : , |H     
-\ : !+ PUSH !R+ POP ;
-
-\ : MPUSH S+L |NIP SWAP TIMES| 1- PUSH CSTR- C!I POP ;
-\ : |BEFTOR ."_<BEFORE_" ID. CR (BRK EX ."_AFTER>_" CR (BRK ;
-
-\ : `SCAN? TIB J CSCAN
-\ : `LASTSCAN (-IF CALL  DROP  LTIB THEN ;
-\ : `SKIP? J BL <>; TIB J CSKIP 
-\ : `PARSE-LEN?  |LTIB  SWAP `LASTSCAN - ;
-\ : PARSE NOP  PUSH `SKIP?  TIB^ `SCAN? DUP `PARSE-LEN? EXIT ;
-
-\ =! |BEFTOR 
-\ =! SPC
-\ =! CR
-\ =! [ID]
-\ =! ID.
-\ =! [S]  \ "
-\ =! (("  \ "
-\ =! ((."  \ "
-\ \ =! (MAC
-\ =! >,
-\ =! TARG,<
+: 31& (@&; ,< 31 ,  
+\ : |@! XR PUSH J @ EX POP!;
+: `@R<> @R+ XOR ;
+\ >, @R+
+: = XOR 0= ;
 

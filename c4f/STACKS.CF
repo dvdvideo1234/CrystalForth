@@ -1,0 +1,38 @@
+\ USER STACKS & COMPILER BRANCH RESOLVING
+
+>, (VAR3 AT >PUSH 
+: HNDLS >POP ,< ' `FLS 40 + , ' `FLS  , ' `FLS  40 + ,
+>,  (VAR3 AT >PUSH 
+: CSTK> >POP ,< ' `FWD 40 + , ' `FWD  , ' `FWD  40 + ,
+>,  (VAR3 AT >PUSH 
+: <CSTK >POP ,< ' `BCK 40 + , ' `BCK  , ' `BCK  40 + ,
+: HTOP AT HNDLS @ @ ;
+: `STK> CSTK>
+: `STK>|  EX TO CSTK> ;    
+: `<STK <CSTK
+: `<STK|  EX TO <CSTK ;
+: CSWP> `STK> `STK> SWAP ; 
+: <CSWP `<STK `<STK SWAP ;
+: `<CLR> AT CSTK> STK!  AT <CSTK STK! ;
+
+: ORG! H - ,<    0 VALUE HOFS
+TO' H  =: OBJ! 
+
+: `MRK> H  TO CSTK>       \ MARK>
+: Z, 0 SKIP 
+: ,| EX  , 
+: LASTH! H ,<
+0 VALUE LASTH
+
+: |LASTH EX LASTH! ;
+
+: `<RLS <CSTK TO LASTH! ; \ RELS  , : LASTH! H ,<
+
+: HERE H  
+: R>T HOFS + ; 
+: T>R HOFS - ; 
+: `<MRK HERE TO <CSTK LASTH! ;  \ BEGIN
+
+>, EX  \ THEN|
+: `RLS> LASTH! CSTK> HERE SWAP! ; 
+ 

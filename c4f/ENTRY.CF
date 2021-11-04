@@ -1,0 +1,15 @@
+
+: ODDH? !"ODDH?" ;;
+: HODD HERE (| ODDH?  DUP \ H TO FIX HERE 
+: ODD (@&; ,< 1 , 
+
+>, `EL?
+: TOKEN? N??|
+: TOKEN  BL  [ : ?C@ DUP C@ ]   
+: WORD PARSE [ '`' C!A+ ] S>" ;;
+
+: ==: DUP ,| 
+: =H HODD  \ HENTRY ; H=:  _HER_E  !!!\ _@HERE 
+: `=: 0 TOKEN?               \ ; =:  ;  DW _VDBG,3
+: (=:   NOP " 2!- TO T ;  \  _ENTRYZ   _@SAME  DW _  
+  

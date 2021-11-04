@@ -7,8 +7,8 @@
 : SAME? TFND 0; 4+ [ID] TBUF ; 
  '  SAME?  ' (=:   T!   \ FIX (=:
 
-: VLIST T BEGIN DUP 4+ C@ WHILE SPC DUP @ H. 4+ DUP ID. NAME>
-  KEY ^[ = UNTIL THEN DROP;
+\ : VLIST T BEGIN DUP 4+ C@ WHILE SPC DUP @ H. 4+ DUP ID. NAME>
+\   KEY ^[ = UNTIL THEN DROP;
   
 : `BD |SPC STR| CSTR B. ; 
 : DUMP 1H UN? STR| 

@@ -1,37 +1,34 @@
-: OR NOT SWAP NOT NAND ;
+
+\ ' PINZ     VAL' vPIN !   \ WHEN NEED TO CHECK PARSING
+
 : EVEN (@&; ,<  -2 ,
-: SPACES TIMES| SPC ;    
-: `LAST? LASTH H <> ;
-: `@BACK H 2- @  ;
-: ?` ,| ADR' `LAST? `@BACK OR @"CAN`T!" 
-: UNW DROP|
-: @H- |H  
-: @- 2- ?XEP| @ ;
-: `OPTIMIZE?  `LAST?  `@BACK  ODD  0=  AND ;
+: =" TOKEN? " ;
+: ON  -1 SWAP! ;
+: OFF 0 SWAP! ;
+: HIDE FND? 5+  '`' 
+: SWAPC! SWAP C! ; 
+: OVER+ OVER + ;
+: 2DROP| EX 
+: 2DROP DROP DROP; 
 
-AT' ASTR| =: (RNG|
-\ ASSIGNES
-' [`  =: CALL`
-' [`  =: MARK>` 
-' ;` =: ;;` 
-MCLR  <M>  M: :JUMP (JUMP; : PRUNE ; <M>
+: RED| 2DUP EX (IF VAL SWAP| ;;
+: UMAX NIP|
+: URED RED| U< ; 
+: UMIN DROP| URED ; 
+: MAX NIP|
+: RED RED| 
+: < - 0< ;        
+: MIN DROP| RED ; 
 
-: ]`  TO THEN`   \ TAIL RECURSION OPTIMIZE
-: ;` `OPTIMIZE? ;;` 0;   UNW  @H-  TO <CSTK 
-: AGAIN` :JUMP  <RELS` ;;
-' ]` =: ;THEN`    \ SINTACTIC SUGAR
+MCLR <M> : PRUNE ; <M>
 
-: >MAC "MACRO.CF"  VAL INCLUDE ;
-: (code POP T @ ! ; 
-: D# >, HERE EX LASTH! ;
-: `DO POP ADR' (SET2 
-: `vDO (JUMP ,< Z, 
-: DO# `DO TOKEN? ">NUM `vDO ; 
-: ZDO `DO 0 `vDO ; 
-: DO `DO `vDO ; 
-: DO' `DO ' `vDO ;
-: IT ;
 : FORGET FND? DUP @DEF? EVEN TO H DEA> TO T ; 
 
-INCLUDE MACRO.CF
 
+INCLUDE MACRO.CF
+INCLUDE NUMOUT.CF
+\ INCLUDE DBG.CF
+INCLUDE FLUSH.CF
+\ USING C4F.SCR
+INCLUDE WORDS.CF
+INCLUDE APPROVE.CF
