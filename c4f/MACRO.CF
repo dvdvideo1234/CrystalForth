@@ -101,13 +101,14 @@ M: :code (code;
 : OPS 
 POP SP@ !R+ @R+ XR XA SKIP +2/ DUP J D2/ NOT PUSH 0= +* U< NAND
 U1+ NEG 0< -/ A@ RP@ EX 2/ DROP RDROP; DROP;  RDROP 
+(MAC (!" (." (" (@" (/" (," ("SW (BSCN  \ "PRIMITIV'S 
  OVER ; 
 \ CSP.
 
 : PRBA1 \ FOR MACROSES
   :code :0> :1> :2>  \ DOES
- :MC" :!"  :." :" :@" :/"  :,"  :SW" :SC" :# \ "PRIMITIV'S 
-:VAR :VAR3 :SET2 :CON :BARY :LARY :WARY :XARY :|  :; 
+\ :MC" :!" :." :" :@" :/" :," :SW" :SC" \ "PRIMITIV'S MACRO
+ :# :VAR :VAR3 :SET2 :CON :BARY :LARY :WARY :XARY :|  \ :; 
  :JUMP  :FOR :NEXT ;
 \ \DBG. CSP.
 

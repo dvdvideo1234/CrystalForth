@@ -1,13 +1,13 @@
 
 ' @INI VAL' @INIT     T!    \ TARGET FORTH INITIALIZER
-' @LPAR VAL'  FIND    T!    \ TARGET FORTH INITIAL STATE
+' `@LPAR VAL'  FIND   T!    \ TARGET FORTH INITIAL STATE
 ' ">NUMC ' `COMPNUM   T!    \ FIX @COMPNUM
 ' ">NUM  ' `NUMBER    T!    \ FIX @NUMBER
 '  `.     ' @ERR      T!    \ FIX ERROR.
 TO' ACCEPT ' `@ACPT   T!    \ FIX ACCEPT IN MAINLP
 ' `EVAL  VAL' `@ACPT  T!    \ FIX EVAL IN MAINLP
 '  `OK    ' @OK       T!    \ FIX  vOK.
-' T>    ' CFND        T!    \ FIX CFND
+' `T>    ' CFND       T!    \ FIX CFND
 ' `ALLCLR  ' `@ABINI  T!
 
 
@@ -18,6 +18,16 @@ THIDE (D#0
 THIDE  CALL` 
 THIDE  ;THEN` 
 
+THIDE :MC" 
+THIDE :!" 
+THIDE :." 
+THIDE :" 
+THIDE :@" 
+THIDE :/" 
+THIDE :," 
+THIDE :SW" 
+THIDE :SC" 
+THIDE :(;  
 
 APT- POP        =:  (D#0
 APT- ONE        =:  1
@@ -30,11 +40,12 @@ APT- ((;"       =:  (/"
 APT- ((."       =:  (."        
 APT- (("        =:  ("
 APT- (LIT       =:  (# 
-APT- TARG:      =:  :          
+APT- T:         =:  :          
+APT- T>,        =:  >,
 APT- `<RLS      =:  <RELS`
-APT2 TARG:C         :`         
+APT2 T:C            :`         
 APT2 T;;            ;;`
-APT2 TARG,<         ,<`        
+APT2 T,<            ,<`        
 APT2 FTO`           TO`
 APT2 FAT`           AT` 
 APT2 FVAL`          VAL` 
@@ -42,7 +53,6 @@ APT2 CSWP>          CSWAP>`
 APT- <CSWP      =:  <CSWAP`
 APT2 `<MRK          BEGIN`
 APT2 `RLS>          THEN`
-APT- :(;        =:  :;
 APT2 `MRK>          [`
 ' [`            =:  CALL` 
 ' [`            =:  MARK>` 

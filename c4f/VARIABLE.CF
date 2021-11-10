@@ -52,3 +52,6 @@
 \ : `B>N `MASK| ,<
  16 CONST 1H
 
+: MCLR (LIT `MACADR  ,<    
+' `MACADR VALUE MOBJ   
+ 

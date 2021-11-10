@@ -60,7 +60,6 @@ APT- _EX        =: EX      \ V
 APT- _FOR       =: (FOR    \ V
 APT- _MIF       =: (-IF    \ V
 APT- _SKIP?     =: SKIP?   \ V
-APT- _0X        =: 0;         
 APT- _ZEQX      =: 0=;     \ V
                 
 \ 6 LOGIC         

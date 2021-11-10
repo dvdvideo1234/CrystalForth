@@ -201,6 +201,8 @@ L_ _LIT
   DW _RLDP ;,_RET
 LL_ _NOOP,_RET
   
+L_ POP@COM
+    DW _POP
 LL_ _@COMMA,_LD
 LL_ _COMMA,_HX
 L_ _STP
@@ -377,10 +379,10 @@ P_ _PUSHX            ; (PUSH;
   POP    IP
   JMPS   @DROP
 		
-P_ _0X
-  Z?      TOP
-  JE      @DROPX
-  JMPS   @DROP
+;P_ _0X
+;  Z?      TOP
+;  JE      @DROPX
+;  JMPS   @DROP
   
 P_ _CRSTP		       ; (C!R+
   POP     WA
@@ -607,6 +609,8 @@ P_ _XA            ; ( XA
   XCHG    W,AR
   JMPS    @RPUSH
 
+L_ POP@EX
+    DW  _POP
 L_ _@EXEC
   DW _LD
 LL_ _EXEC,__ADROPX    ;  TEST    WL,1    ; SKIP JMP TO DBG

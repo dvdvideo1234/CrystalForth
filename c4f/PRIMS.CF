@@ -1,5 +1,9 @@
 \ ============ PRIMITIVE METHODS ===============
 
+: `Ivague? J 
+: `vague? 2+ @ \ vague?
+: ODD (@&; ,< 1 , 
+
 : I J ;
 : |ROT EX
 : ROT -ROT -ROT ;
@@ -9,6 +13,8 @@
 : DROP| EX
 : .; DROP;
 : NIP| EX NIP ;   
+: `EVEN (@&; ,<  -2 ,
+: 31& (@&; ,< 31 ,  
 
 \ : S1+ PUSH  
 : `CONV; 1- POP
@@ -35,12 +41,12 @@
 : .TIMES DROP|   
 : TIMES PUSH XR  
 : TIMES| (FOR CALL BEGIN J EXECUTE THEN (NEXT RELS<
-\ : 2EXIT 
- RDROP RDROP; 
+: `2EXIT  RDROP
+: EXIT RDROP;
+: 0<>; 0=
+: 0; (IF EXIT (; 
  @R+ @R+
 : |SAFE! A! @!A XA PUSH A@ EXECUTE POP POP!;
-: 0<>; 0; 
-: EXIT RDROP;
 
 : NUP XEP| DUP ;
 1  CONST  ONE
@@ -79,7 +85,6 @@ HERE 2- =: BYE
 
 \ COMPILER BASIC PRIMITIVES  ------------ 
 
-: 31& (@&; ,< 31 ,  
 \ : |@! XR PUSH J @ EX POP!;
 : `@R<> @R+ XOR ;
 \ >, @R+

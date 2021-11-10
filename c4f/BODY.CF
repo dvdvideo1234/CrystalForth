@@ -1,51 +1,21 @@
 \ ============== COMPILER ===================
 
-: TARG: `<CLR>  \ TNOP TO FIX WITH <CLR>
-: TARG:C =H LASTH! \ L_ _COLONC  :`   DW _HENTRY
-: >, TO FIND  TBUF ++ CFND TBUF -- SKIP? (; CFND 2+ ;
+: T: `<CLR>  \ TNOP TO FIX WITH <CLR>
+: T:C NOP LASTH! \ L_ _COLONC  :`   =H := NOP
+: T>, TO FIND  TBUF ++ CFND TBUF -- SKIP? (; CFND 2+ ;
 
-\ ============== EVAL ===================
+VAL' T>,  ' `@MAC   T! \ 
 
-: MEMTI| A+L 0   
-: TI| BLK XR LTIB PUSH   ETIB PUSH PUSH
- CALL EX POP POP POP THEN    TO BLK TO LTIB TO ETIB 
-: /BLK BLK 0; 0 TO ETIB ; 
 
-: `RP AT `WITHSTK `R_BTM  `R_TOP ,< ,T RSTK? 2ALIGNED
-: `SP AT `WITHSTK `S_BTM  `S_TOP ,< ,T DSTK? 2ALIGNED
-: `STACK TR-| RP@  vPIN  `RP   SP@ 2- `SP     ;; 
-
-: (MAC (D#0   AT |SAFE! VAL >,  VAL FIND 
-: SEVAL CSTR          \ SEVAL
-: `EVAL MEMTI|        \ FIX WITH MEMTI|
-BEGIN   `STACK TOKEN (IF .; FIND  \ FIX WITH `STACK
-: @OPER  NOOP OPER[] @EXEC AGAIN  ,<
-
-: :(;   (MAC ,< ,T (;     2ALIGNED
-: :MC"  (MAC ,< ,T (MAC   2ALIGNED
-: :!"   (MAC ,< ,T (!"    2ALIGNED
-: :."   (MAC ,< ,T (."    2ALIGNED
-: :"    (MAC ,< ,T ("     2ALIGNED
-
-: :@"   (MAC ,< ,T (@"    2ALIGNED
-: :/"   (MAC ,< ,T (/"    2ALIGNED
-: :,"   (MAC ,< ,T (,"    2ALIGNED
-: :SW"  (MAC ,< ,T ("SW   2ALIGNED
-: :SC"  (MAC ,< ,T (BSCN  2ALIGNED
-: :JUMP (MAC ,< ,T (JUMP  2ALIGNED
-
-: MCLR (LIT `MACADR  ,<    
-' `MACADR VALUE MOBJ   
- 
 \ ---------- INIT INTERPRETTER ----------------
 
-: @INI H>T MSB (| SEVAL TO @INIT
+: @INI H>T MSB (|  SEVAL  TO @INIT
 : `@ABINI  NOP AHEAD
 
 \ ============   INTERPRETTER   ==============
 
-: T;; \ L_ _SEMICO
-: @SEMICO :(;  \ ;  (;,  _LPAR,TO_+_FIND      ; [`
+: T;;  :(;  \ ;;  
    AT CSTK> STK?  0<>;  AT <CSTK STK?  0<>;
-: TARG,< THEN  TO FIND  : @LPAR  vT FND ;         
+: T,< THEN  TO FIND  \ TARG,<
+: `@LPAR  vT FND ;         
 

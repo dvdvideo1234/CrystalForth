@@ -4,27 +4,27 @@
 : [S] |SPC DROP|     
 : [TYPE] |[] TIMES| CSTR DUP |C. BL U< 0; DROP '. ;; 
 : UN? U/MOD SWAP  0; 1+ ; 
-: SAME? TFND 0; 4+ [ID] TBUF ; 
- '  SAME?  ' (=:   !   \ FIX (=:
+: `SAME? TFND 0; 4+ [ID] TBUF ; 
+ '  `SAME?  ' (=:   !   \ FIX (=:
 
-: VLIST T BEGIN DUP 4+ C@ WHILE SPC DUP @ H. 4+ DUP ID. NAME>
-  KEY ^[ = UNTIL THEN DROP;
+\ : VLIST T BEGIN DUP 4+ C@ WHILE SPC DUP @ H. 4+ DUP ID. NAME>
+\   KEY ^[ = UNTIL THEN DROP;
   
 : `BD |SPC STR| CSTR B. ; 
 : DUMP 1H UN? STR| 
-: DU CR DUP H. SPC 1H 2DUP `BD [TYPE] ; 
+: `DU CR DUP H. SPC 1H 2DUP `BD [TYPE] ; 
 : PINZ 0 
-: PIN I CR H. H H. B. SP@ H. S6 T H. T @
-: `PIN H. T. TBUF ID. BK DROP ;  
+: `PIN I CR H. H H. B. SP@ H. S6 T H. T @
+: ``PIN H. T. TBUF ID. BK DROP ;  
 \ : |TBUF!. @R+ PIN EX PINZ ;; 
-: PTIB CR ETIB H. LTIB `PIN ; \ ' PTIB  VAL' vPIN T!
+\ : PTIB CR ETIB H. LTIB ``PIN ; \ ' PTIB  VAL' vPIN T!
 \ ' |TBUF!.  VAL' vDBG T!
 \ ' PINZ     VAL' vPIN T!   \ WHEN NEED TO CHECK PARSING
 
 : `WID. ID. WID. ; 
 : JID. J 
 : @ID. DUP H. STR DUP H. SWAP @ H. 
-: ?ID. WFIND IF WID. ;THEN
+: `?ID. WFIND IF WID. ;THEN
  2+  WFIND IF "TO"  `WID. ;THEN
  2+  WFIND IF "AT"  `WID. ;THEN
  6 - WFIND IF "VAL" `WID. ;THEN  2+
@@ -32,13 +32,15 @@
 0 VALUE `ADR2 
 : `" (WSCN ,< 9 , 
 >, (MAC (!"  (."  ("   (@"  (/"  (,"  ("SW (BSCN  ,< 
+\ : `" (WSCN ,< 7 , 
+\ >, ((A" ((." (MAC ((0" ((" ((;" ("SW ,< 
 : `|WW CALL EX (SET2 THEN ,<
-0 CONST `WW 
+0 CONST ``WW 
 : `A:? WFIND (IF .; ."_:_" WID. ; 
 : SEE ' 
-: @SEE TO `WW 
+: @SEE TO ``WW 
 : SL bs TIMES| 
-: WW `|WW CR DUP H. DUP `A:? STR DUP H. DUP ?ID. `" 1+ 0;
+: `WW `|WW CR DUP H. DUP `A:? STR DUP H. DUP `?ID. `" 1+ 0;
   PUSH ("SKIP [ID] POP ;
 \ : DUTEST 1 2 3 " 1234" ;  
 
@@ -46,16 +48,16 @@
 0 VALUE  `DBGEmt 
 0 VALUE  `DBGA        \ EMIT TO_METHOD CHANGED
 : `DBGIN A@ TO `DBGA  TO EMIT @ TO `DBGEmt  EMT! CR ; 
-: R3 POP POP POP J H. PUSH J H. PUSH J H. PUSH ; 
+: `R3 POP POP POP J H. PUSH J H. PUSH J H. PUSH ; 
 : `DBG SPC  S3 H H. T H. `DBGA H. SPC  ;
-: DBG. `DBGIN R3 `DBG JID. BK DROP
+: DBG. `DBGIN `R3 `DBG JID. BK DROP
 : `DBGOUT `DBGEmt  AT EMIT  `DBGA A! ;
 ' DBG. VAL' vDBG !
 
 : `XTR PUSH TR+ ; 
 : TRACE ADR' `XTR : TR- TR-; 
-: `@DBG   `DBGIN POP R3 PUSH `DBG I DUP H. @ H.
-       J DUP H. ?ID. `DBGOUT  ,< 
+: `@DBG   `DBGIN POP `R3 PUSH `DBG I DUP H. @ H.
+       J DUP H. `?ID. `DBGOUT  ,< 
 VAL' @DO_DBG DEFER (DBGRET 
 ' `@DBG  ' @DO_DBG  !
 

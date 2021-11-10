@@ -9,10 +9,6 @@
 : `", WORD ?C@ N?? 
 : ", CSTR v", DUP C, 
 : S, STR| CSTR C, ; 
-: M: ';  
-: ?M: AT |SAFE! ,< 0 , VAL' HOFS , >,
-   CALL =H :MC" `", THEN 
-: <M> MOBJ   |H TO MOBJ ;   
 
 : T. T   
 : WID.  4+ 

@@ -28,7 +28,7 @@
 : `OK" CSTR AT `CHK" IF S1- DUP 0;  TO `CHK" 0<>; THEN S1- ;
 : `U" 1- XEP| `OK" S>PK ;; \  UNDER STRING
 
-: `STR? DUP NAME> 1- `CHK" SKIP? TO 0=  DUP 1+ C@ `ASTRI 1+;
+: `STR? DUP `NAME> 1- `CHK" SKIP? TO 0=  DUP 1+ C@ `ASTRI 1+;
 
 \ ( CALL RDROP ) LIKE JUMP
 : `STR@  RDROP `U" `STR @EXEC ;;
