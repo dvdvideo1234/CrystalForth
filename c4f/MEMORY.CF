@@ -1,6 +1,12 @@
+ '`  CONST  '`' 
+  -1 CONST TRUE
+
 : 2!- TWICE
 : !- 2- PUSH !I POP; 
+: `H?OFF H DUP 
+: `OFF 0    
 : SWAP! SWAP ! ;  
+: ON  TRUE SWAP! ;
 
 : @I J @ ;
 : @ISTR J STR ;
@@ -33,9 +39,21 @@ N: ERASE 0 ,  N: BLANK 32 ,  DROP
 : C! PUSH C!R+ RDROP; 
 : ">Z CSTR 
 : `S>Z S>" 0 C!A+ 1+; \ TO S TBUF
+
 : `T> T
 : DEA> 4+ 
 : `NAME> CSTR +  ;
+
+: `ADD DUP DEA> OVER- 
+: S+! ROT
+: +S! XEP| TUCK J STR + S>M J 
+: +!  |@! + ;  
+: LST| T BEGIN DUP 4+ C@ (IF EXIT PUSH J EXECUTE POP DEA>
+         AGAIN
+: `PRUNE| `H?OFF EX DUP DEA> TO T `ADD DROP; 
+: PRUNE TO H>T
+ `PRUNE| LST| J @ H U< 0; J 5+ C@ '`' <> 0; J `ADD ;
+ 
 : ONPLACE (| CALL ?XEP| TWICE NUP THEN   \ MEMORY 
 : REVERT PUSH BEGIN (NEXT TWICE DUP PUSH J U< (IF `2EXIT
   J @ @I J C!  C!R+ POP AGAIN ; UNW

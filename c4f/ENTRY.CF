@@ -37,8 +37,9 @@ N: VAL 2 ,    DROP
 BEGIN I (IF `2EXIT @I J POP ! PUSH AGAIN THEN (D#2 DUP \ POP4+
 : (=: .;  THEN " 2!- TO T ;  \  _ENTRYZ   _@SAME  DW _  
 
-\ '  EXIST?  ' (=:   !   \ FIX (=:
-
+: =! 0 `=: T 2+ ++ ; \ CREATE UNDEFINED WORD
 
 ' =H ' T:C   T! \ L_ _COLONC  :`   =H := NOP  
 : FORGET `FND? DUP `@DEF? `EVEN TO H DEA> TO T ; 
+: HIDE AT TFND 5+  '`' 
+: SWAPC! SWAP C! ; 

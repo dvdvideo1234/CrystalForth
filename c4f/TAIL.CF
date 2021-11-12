@@ -1,4 +1,4 @@
-\ TAIL   
+\ TAIL 
 
 : M: ';  
 : ?M: AT |SAFE! ,< 0 , VAL' HOFS , >,

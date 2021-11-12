@@ -1,22 +1,5 @@
 \ ============ PRIMITIVE METHODS ===============
 
-: `Ivague? J 
-: `vague? 2+ @ \ vague?
-: ODD (@&; ,< 1 , 
-
-: I J ;
-: |ROT EX
-: ROT -ROT -ROT ;
-: TUCK DUP -ROT ;
-: 2DUP OVER OVER ;
-: SWAP| EX SWAP ;
-: DROP| EX
-: .; DROP;
-: NIP| EX NIP ;   
-: `EVEN (@&; ,<  -2 ,
-: 31& (@&; ,< 31 ,  
-: OR NOT SWAP NOT NAND ;
-
 \ : S1+ PUSH  
 : `CONV; 1- POP
 : 1+ 1+; 
@@ -24,6 +7,35 @@
 : OVER- OVER
 : - NEG
 : + +2/ DROP; ,<
+: `Ivague? J 
+: `vague? 2+ @ \ vague?
+: ODD (@&; ,< 1 , 
+
+: I J ;
+: NIP| EX NIP ;   
+: DROP| EX
+: .; DROP;
+: SWAP| EX SWAP ;
+: ROT| EX
+: ROT -ROT -ROT ;
+: TUCK DUP -ROT ;
+: 2DUP OVER OVER ;
+: `RED| 2DUP EX (IF VAL SWAP| ;;
+: UMAX NIP|
+: URED `RED| U< ; 
+: UMIN DROP| URED ; 
+: MAX NIP|
+: RED `RED| 
+: < - 0< ;        
+: MIN DROP| RED ; 
+
+: `EVEN (@&; ,<  -2 ,
+: 31& (@&; ,< 31 ,  
+: OR NOT SWAP NOT NAND ;
+
+: OVER+ OVER + ;
+: 2DROP| EX 
+: 2DROP DROP DROP; 
  
 : IXEC J
 : EXECUTE PUSH; 
@@ -60,7 +72,7 @@ HERE 2- =: BYE
 : ("SW ("SKIP B?" 1+ 
 : (XARY 2* POP + @ PUSH;
 : XDROT XEP| 
-: DROT |ROT  
+: DROT ROT|  
 : D0 0 0 ;
 : `DST" H 
 : 5+ (@+; ,< 5 ,

@@ -11,6 +11,7 @@ TO' ACCEPT ' `@ACPT   T!    \ FIX ACCEPT IN MAINLP
 '  `OK    ' @OK       T!    \ FIX  vOK.
 ' `T>    ' CFND       T!    \ FIX CFND
 ' `ALLCLR  ' `@ABINI  T!
+' `SOURCE ' PARSE     T!    \ FIX PARSE
 
 
 HERE    VAL' H T!           \ TARGET FORTH HEAP

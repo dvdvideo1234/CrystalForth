@@ -2,7 +2,6 @@
 
 \ EMIT TO_METHOD CHANGED
 
-   -1 CONST TRUE
 0  QUAN  CNTC
 
 : ZBLK 0      ,<  0 VALUE  BLK  
@@ -12,12 +11,12 @@
 : EMT! (LIT BE (SET2 (VAR
 : EMIT  BE  AT CNTC ++ ;
 : |C. EX EMIT ; 
-: |SPC EX 
-: SPC  |C. ,<     32  CONST BL
- 
-\ >, |C. ,<        
- '`  CONST  '`' 
 
+: |SPC EX SKIP
+: SPACES  TIMES|
+: SPC  |C. ,<   
+  32  CONST BL
+ 
 \ =============   VARIABLES  ==============
 
 : BLK>SCR BLK ,<  0 VALUE  SCR

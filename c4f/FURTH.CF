@@ -1,38 +1,6 @@
-
-\ : EVEN (@&; ,<  -2 ,
-: =" TOKEN? " ;
-: ON  -1 SWAP! ;
-: OFF 0  SWAP! ;
-\ AT' ODD =: vague?
-\ TO' vague? =: Ivague?
-\ : [>X PUSH Ivague? (IF TO @EXEC /"NOT_DEFINED!" ;
-\ : [>, PUSH Ivague? (IF MARK> H @I TO LASTH! \ ,
-\  POP!; THEN TO @, ;
-: DEA? 4+ C@ ;
-: HIDE AT TFND 5+  '`' 
-: SWAPC! SWAP C! ; 
-: OVER+ OVER + ;
-: 2DROP| EX 
-: 2DROP DROP DROP; 
-
-: RED| 2DUP EX (IF VAL SWAP| ;;
-: UMAX NIP|
-: URED RED| U< ; 
-: UMIN DROP| URED ; 
-: MAX NIP|
-: RED RED| 
-: < - 0< ;        
-: MIN DROP| RED ; 
-
-MCLR <M> : PRUNE ; <M> \ PRUNE NOT DEFINED YET
-
-\ : FORGET FND? DUP @DEF? EVEN TO H DEA> TO T ; 
-
-INCLUDE MACRO.CF
-M9
-INCLUDE NUMOUT.CF
+\ INCLUDE NUMOUT.CF
 \ INCLUDE DBG.CF
 INCLUDE FLUSH.CF
 \ USING C4F.SCR
-INCLUDE WORDS.CF
+\ INCLUDE WORDS.CF
 INCLUDE APPROVE.CF
