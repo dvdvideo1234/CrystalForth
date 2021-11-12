@@ -15,6 +15,7 @@
 : NIP| EX NIP ;   
 : `EVEN (@&; ,<  -2 ,
 : 31& (@&; ,< 31 ,  
+: OR NOT SWAP NOT NAND ;
 
 \ : S1+ PUSH  
 : `CONV; 1- POP

@@ -1,8 +1,10 @@
 
 ' @INI VAL' @INIT     T!    \ TARGET FORTH INITIALIZER
 ' `@LPAR VAL'  FIND   T!    \ TARGET FORTH INITIAL STATE
-' ">NUMC ' `COMPNUM   T!    \ FIX @COMPNUM
 ' ">NUM  ' `NUMBER    T!    \ FIX @NUMBER
+' `[>X  VAL' `NUMBER  T!    \ FIX @EXE_WORD
+' ">NUMC ' `COMPNUM   T!    \ FIX @COMPNUM
+' `[>, VAL' `COMPNUM  T!    \ FIX @COMP_WORD
 '  `.     ' @ERR      T!    \ FIX ERROR.
 TO' ACCEPT ' `@ACPT   T!    \ FIX ACCEPT IN MAINLP
 ' `EVAL  VAL' `@ACPT  T!    \ FIX EVAL IN MAINLP

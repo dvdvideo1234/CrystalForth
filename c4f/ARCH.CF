@@ -40,3 +40,31 @@
       INSPTR FNDPTR DUP DEA> ONPLACE  THEN
     INSPTR DEA> TO INSPTR 
   REPEAT ;
+
+\ : [>X PUSH Ivague? (IF TO @EXEC /"NOT_DEFINED!" ;
+\ : [>, PUSH Ivague? (IF MARK> H @I , POP!; THEN TO @, ;
+' [>X 1 OPER[] !
+' [>, 3 OPER[] !
+
+\ : TFND T  FND ;
+\ 
+\ : ==: DUP ,| 
+\ : =H HODD  \ HENTRY ; H=:  _HER_E  !!!\ _@HERE 
+\ : `=: 0 TOKEN?               \ ; =:  ;  DW _VDBG,3
+\ : (=:   NOP " 2!- TO T ;  \  _ENTRYZ   _@SAME  DW _  
+\   
+\ : SAME? TFND 0; 4+ [ID] TBUF ; 
+\  '  SAME?  ' (=:   !   \ FIX (=:
+\ 
+: DEFD? 0=  !"DEFD!" ;;
+: EXIST?  TFND 0; PUSH   2DUP OR DEFD?  Ivague? IF TR+ 
+ DROP \ FLAG UNDEFINED & COUNT OF USING
+ POP RDROP \ RET ADR NA EXIST? SE PREMAHVA
+ PUSH XR PUSH I 2+ -- \ NOW DEFINED
+BEGIN I (IF TO EXIT  @I J POP ! PUSH AGAIN THEN
+(D#2 DUP : vSAME [ID] ;
+'  EXIST?  ' (=:   !   \ FIX (=:
+
+\ : GAGA ;
+\ =! DO.
+\ : GAGA 1 DO. 2 DO. 4 DO. 7 DO.  ;

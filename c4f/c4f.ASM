@@ -48,9 +48,9 @@ _@_OK  DW _NOP,_JUMP,@MAINLP
 L_ _OPER
    DW _WARY
 _@NUMBER  DW 0
-    DW _@EXEC
+    DW 0 ;_@EXEC
 _@COMPNUM DW 0
-   DW _@COMMA,0,0   ;  FOR COMMENT
+   DW 0,0,0   ; _@COMMA & FOR COMMENT
 
   CONST_  _MSB,128
   CONST_  _FIB,@FIB
@@ -201,12 +201,12 @@ L_ _LIT
   DW _RLDP ;,_RET
 LL_ _NOOP,_RET
   
-L_ POP@COM
-    DW _POP
-LL_ _@COMMA,_LD
-LL_ _COMMA,_HX
-L_ _STP
-  DW  _PUSH,_RSTP,_POPX
+;L_ POP@COM
+;    DW _POP
+;LL_ _@COMMA,_LD
+;LL_ _COMMA,_HX
+;L_ _STP
+;  DW  _PUSH,_RSTP,_POPX
 
 ;L_ _POSTENT                 ; ==:   \ N:  OR =,
 ;  DW _DUP 

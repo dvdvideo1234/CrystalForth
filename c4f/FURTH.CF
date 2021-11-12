@@ -3,10 +3,11 @@
 : =" TOKEN? " ;
 : ON  -1 SWAP! ;
 : OFF 0  SWAP! ;
-AT' ODD =: vague?
-TO' vague? =: Ivague?
-: [>X PUSH Ivague? (IF TO @EXEC /"NOT_DEFINED!" ;
-: [>, PUSH Ivague? (IF MARK> H @I , POP!; THEN TO @, ;
+\ AT' ODD =: vague?
+\ TO' vague? =: Ivague?
+\ : [>X PUSH Ivague? (IF TO @EXEC /"NOT_DEFINED!" ;
+\ : [>, PUSH Ivague? (IF MARK> H @I TO LASTH! \ ,
+\  POP!; THEN TO @, ;
 : DEA? 4+ C@ ;
 : HIDE AT TFND 5+  '`' 
 : SWAPC! SWAP C! ; 
@@ -28,6 +29,7 @@ MCLR <M> : PRUNE ; <M> \ PRUNE NOT DEFINED YET
 \ : FORGET FND? DUP @DEF? EVEN TO H DEA> TO T ; 
 
 INCLUDE MACRO.CF
+M9
 INCLUDE NUMOUT.CF
 \ INCLUDE DBG.CF
 INCLUDE FLUSH.CF

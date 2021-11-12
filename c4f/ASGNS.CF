@@ -86,8 +86,8 @@ APT- _WSTR      =: STR
 APT- _CSTR      =: CSTR       
                 
 \ 8 COMPILER PRIM ITIVES
-APT- _@COMMA    =: @,
-APT- _COMMA     =: ,
+\ APT- _@COMMA    =: @,
+\ APT- _COMMA     =: ,
 APT- _DLIT      =: (##    \ V
 APT- _LIT       =: (LIT    \ V
 APT- __VAR      =: (VAR    \ V
