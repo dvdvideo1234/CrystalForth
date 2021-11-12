@@ -10,6 +10,8 @@
 : `Ivague? J 
 : `vague? 2+ @ \ vague?
 : ODD (@&; ,< 1 , 
+\ >, @R+
+: = XOR 0= ;
 
 : I J ;
 : NIP| EX NIP ;   
@@ -31,7 +33,6 @@
 
 : `EVEN (@&; ,<  -2 ,
 : 31& (@&; ,< 31 ,  
-: OR NOT SWAP NOT NAND ;
 
 : OVER+ OVER + ;
 : 2DROP| EX 
@@ -43,6 +44,17 @@
 : ?XEP| DUP    
 : XEP| XR EXECUTE POP; 
 : ?XEP+| DUP 1+ XEP| ; 
+
+: `MASK| EX 1- 
+: AND NAND NOT ;
+: SPLIT  SWAP|
+: W>BB  DUP HW>B XEP| 
+: W>B `MASK| ,<
+256 CONST 1B
+
+: BB>W W>B >< SWAP W>B
+: OR NOT SWAP NOT NAND ;
+
 \ : S+L
 \  XEP| 
 : A+L XEP| 
@@ -56,6 +68,8 @@
 : TIMES| (FOR CALL BEGIN J EXECUTE THEN (NEXT RELS<
 : `2EXIT  RDROP
 : EXIT RDROP;
+: (@|; @R+ OR EXIT ;
+: `@R<> @R+ XOR ;
 : 0<>; 0=
 : 0; (IF EXIT (; 
  @R+ @R+
@@ -76,8 +90,6 @@ HERE 2- =: BYE
 : D0 0 0 ;
 : `DST" H 
 : 5+ (@+; ,< 5 ,
-: `MASK| EX 1- 
-: AND NAND NOT ;
 >, @R+ @R+
 : WITHIN OVER- PUSH - POP U< ; \ N: `BREL? -128 , 128 ,
 \ : A-L
@@ -87,19 +99,8 @@ HERE 2- =: BYE
 : S1- U1+
 : 1-; 1- ; 
 
-: SPLIT  SWAP|
-: W>BB  DUP HW>B XEP| 
-: W>B `MASK| ,<
-256 CONST 1B
 
 \ : `16/ TWICE
 \ : `4/ TWICE 2/ ;
 \ 
-
-\ COMPILER BASIC PRIMITIVES  ------------ 
-
-\ : |@! XR PUSH J @ EX POP!;
-: `@R<> @R+ XOR ;
-\ >, @R+
-: = XOR 0= ;
 

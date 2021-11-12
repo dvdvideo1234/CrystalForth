@@ -20,6 +20,11 @@ HERE >, (D#0 C@ (INT#
    TO _FL TO _AX TO _BX TO _CX TO _DX ;
 N: (DOS  $21 ,  
 =, (VID  $10 , 
+
+2 VALUE ATTRIB
+: PAGE 79 24 BB>W 0 ATTRIB >< $600 (VID 
+: HOME 0 0 
+: GOTOXY BB>W D0 $200 (VID ;
  
 HERE >, (D#0 @ XDROT (DOS ; 
 N: Fsize $4202 , 

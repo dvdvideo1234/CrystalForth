@@ -16,7 +16,7 @@ HERE >, (D#0
 N: TO' -2 ,  N: AT' -4 , N: VAL' 2 , DROP
 
 HERE >, (D#0 @ADR+ , ;
-N: FTO` -2 ,  N: FAT` -4 , N: FVAL` 2 ,  DROP 
+N: FTO` -2 ,  N: FAT` -4 , N: FVAL` 2 ,  N: C:` 0 , DROP 
  
 : `@INT  TOKEN? VAL T,< N??  `@DEF? AT `ODDH? ; 
 HERE >, (D#0 

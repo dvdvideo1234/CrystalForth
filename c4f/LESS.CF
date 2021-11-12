@@ -1,0 +1,8 @@
+\ FIRST T - 
+\ H 1B - CONST BODY?
+\ VALUE VOC?
+\ CR VOC? .( VOC  ) . BODY?  .(   BODY ) .
+\ CR .( TOTAL ) VOC? BODY? + . .( <8K  )
+\  8 1K* VOC? - BODY? - .
+\ FORGET BODY?
+10 1K* H 1B - - FIRST T - - .

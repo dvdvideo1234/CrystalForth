@@ -1,5 +1,6 @@
 \ PRIMITIV'S MACROSES 
-MCLR  PRUNE  <M> : MMRK ; <M>
+MCLR  PRUNE  
+<M> : MMRK ; <M>
 
 \ BRANCHES
 M: :| (|;
@@ -8,6 +9,7 @@ M: :IF- (IF-;
 M: :-IF (-IF;  \ M: -IF` 1+ IF-; 
 M: :FOR  (FOR;
 M: :NEXT (NEXT;
+M: :EX EX;
 
 \ METHODS
 M: :VAR3 (VAR3;
@@ -18,14 +20,21 @@ M: :WARY (WARY;
 M: :BARY (BARY;     
 M: :XARY (XARY;
 M: :VAR  (VAR; 
+M: RANGE|` (RNG| ?XEP+|; 
+M: <RANGE|` (<RNG| ?XEP-|; 
+M: ITER|` STR| ?XEP+|;  
+M: <ITER|` VAL (<RNG| ?XEP-|; 
+M: :|C |C.; 
 
 <M> 
-: (, @R+ , ;
+\ : (, @R+ , ;
 
 \ MAKERS 
 : QUAN  :VAR3 
 : VALUE :SET2 
 : CONST ,| =H  :CON  ;; 
+: |VALUE =H CALL` :EX :SET2 THEN` CONST ;  
+
 : VQUAN   :VAR3
 : VECTOR  :SET2 
 : DEFER ,| =H :JUMP  ;;
@@ -70,10 +79,6 @@ CSP!
 : FOR-` :JUMP SKIP 
 : FOR` :FOR MARK>` BEGIN` ;;
 : NEXT` THEN` :NEXT <RELS` ;;
-: RANGE|` (, (RNG| (, ?XEP+| ;;  
-: <RANGE|` (, (<RNG| (, ?XEP-| ;; 
-: ITER|` (, STR| (, ?XEP+| ;;  
-: <ITER|` (, VAL (<RNG| (, ?XEP-| ;; 
 
 <M> 
 
@@ -134,7 +139,7 @@ FORGET OPS
 : WARY      `ARY| :WARY ; 
 : LARY TO   `ARY| :LARY ; 
 : XARY      `ARY| :XARY ; 
-: BCONST (, |C. CONST ; 
+: BCONST :|C CONST ; 
 
 : BYTE. HERE ' -
 : BYTES? SPC . ."BYTES__" ;
@@ -144,8 +149,8 @@ FORGET OPS
 \ : EXPORT -1 C: =: ;
 \ : EXPORTED FND?? 2@ FND?? DUP @ NOT A" DEFINED"  2! ;
 \ P=: BRK $CC C, ' (NOP 1- JMP#,
-\ : |VALUE :` CALL` EX :SET2 THEN` CONST ;  
 
 \ 345678901234
 CR .( MACRO   ) BYTE. MMRK
 <M> 
+: IT ;

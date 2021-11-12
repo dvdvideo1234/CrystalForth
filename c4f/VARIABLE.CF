@@ -19,7 +19,14 @@
  
 \ =============   VARIABLES  ==============
 
-: BLK>SCR BLK ,<  0 VALUE  SCR
+: |SCR CALL EX (SET2 THEN ,<       0 CONST SCR
+
+>, `MASK| ,<  \ USED
+1024  CONST 1K
+ 
+: |XY CALL EX
+: >XY TO 1K  (SET2 THEN ,<       0 CONST XY
+: BLK>SCR BLK TO SCR ;
 
 \ KEY TO_METHOD CHANGED
 : KEY! (LIT BK (SET2 (VAR
@@ -41,9 +48,6 @@
 \ : 1L& `MASK| ,<
   64  CONST 1L
 
->, `MASK| ,<  \ USED
-1024  CONST 1K
- 
 : EOSZ DROP|
 : EOS? EOS
 : `@0<>? A! 0 @!A ;

@@ -32,17 +32,20 @@ N: ERASE 0 ,  N: BLANK 32 ,  DROP
 
 : |@! XR PUSH J @ EX POP!;
 
-: " CSTR
-: `MAKE" DUP PUSH T MPUSH POP SWAP 
+: " CSTR T
+: PUSH" PUSH DUP XR MPUSH POP SWAP \ `MAKE"
 : C!- 1- XEP|
 : C!I J 
 : C! PUSH C!R+ RDROP; 
+
 : ">Z CSTR 
 : `S>Z S>" 0 C!A+ 1+; \ TO S TBUF
 
+\ : C@+ PUSH C@R+ POP;
+
 : `T> T
 : DEA> 4+ 
-: `NAME> CSTR +  ;
+: NAME> CSTR +  ;
 
 : `ADD DUP DEA> OVER- 
 : S+! ROT
