@@ -16,7 +16,9 @@
 : `<CLR> AT CSTK> STK!  AT <CSTK STK! ;
 
 : `[>, PUSH `Ivague? IF  H @I CALL CSWAP>  POP!; THEN  (D#0
-: @, @ : , |H : !+   PUSH !R+ POP; 
+: @, @ 
+: , |H 
+: !+   PUSH !R+ POP; 
 
 : ORG! H - ,<    0 VALUE HOFS
 TO' H  =: OBJ! 

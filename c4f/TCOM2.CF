@@ -1,0 +1,83 @@
+ 
+FORGET IT 
+: IT ; 
+
+0  VALUE OLDT 
+: `USE LTIB ,<
+0 VALUE `OLDL 
+
+' TO @ 4+ @ =: T'
+TO' SWAP! =: OFF
+
+: `(PRE `USE @R+ EXECUTE `OLDL TO LTIB ;
+: %  `(PRE 
+: %2 T' =: ;
+: APT-  `(PRE ' HIDE ; 
+: APT2 APT- `(PRE  HIDE  =: ;
+
+: ALIGN 1- SWAP 1- OR 1+ ;
+: 2ALIGNED HERE 2 ALIGN 
+: HERE! HERE - 
+: ALLOT |H + ;
+' : =: T:
+0 VALUE HDICT
+: EDICT (| DEA> LST| ;;
+
+M: FREEMEM?` T H - ;
+M: TSTR` T EDICT OVER- ;
+: `@DICT HDICT SKIP? (; FIRST ;
+: GETMEM 2+ DUP FREEMEM? U< @"GETMEM!" HDICT PUSH PUSH `@DICT
+ POP - TO HDICT TSTR HDICT OVER- DUP TO T S>M POP HDICT ! ;
+: FREEMEM HDICT 0; HDICT @ TO HDICT TSTR `@DICT MPUSH TO T ;
+
+: `MARK@          @R+ TO HOFS   @R+ TO H     @R+  TO T RDROP;
+: `MARK! @R+ DROP HOFS !R+      H !R+        T !R+ RDROP; 
+: ``1 (VAR3 `MARK!
+: @MARK `MARK@ ,< 6 ALLOT
+
+
+CR .( TCOM   ) BYTE. IT
+
+FGGHDFGHDFGHDFG
+
+' (DEF: N: DEF >, ODD = : `CNTR 0; J ID. H INC ;
+N: =USED >, 2/ = `CNTR ; =, >USED >, 2/ U< `CNTR ;
+: `? J C@ - DUP 0< 0; RDROP : `SRCH; 2DROP 0 EXIT ;
+
+0 VAR `T_DATA  
+0 VALUE `T_HND     
+0 VAR `TOTAL
+: TWRITE1 
+  `T_DATA ! 
+  `T_DATA SWAP
+: TWRITE3 DUP 
+  `TOTAL +! 
+  `T_HND  Fwrite ;; \  CR _DX H. _CX . _AX . ;
+: TPRUNE 
+    ESC 
+    PRUNE 
+    ESC 
+;
+: ADDZONE ;RNG> 
+: ADDBLK BLOCK 1K TWRITE3 ;
+: TSAVE  TPRUNE  
+    `TOTAL OFF 
+    TOKEN? FOPEN {  FCREATE} 
+    TO `T_HND   
+    TD 2+ H OVER- TWRITE3
+    2 TD @  " --END--" TFND ??# DROP 
+    >NF< SWAP - 1+ TWRITE1
+    TD @   `T_DATA @ 1-  TWRITE3               
+    1 0 TWRITE1
+    `T_HND Fclose
+;
+
+: STOP (LIT TO ESC  @  (LIT (; - 0; MARK@ HIDROP INITO ;;
+: START STOP 
+: EGG CR CR ." EGG " 
+  23000 HIPUSH MARK!  
+  FX NOP TO ESC
+  " TARAMPOL.CF" INCLUDED \ 34 LOAD      
+   <H> TINIT  
+  " F_KRNL.CF" INCLUDED \ 36 62 THRU 
+;;
