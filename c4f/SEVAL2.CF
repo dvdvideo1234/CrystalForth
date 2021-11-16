@@ -1,0 +1,39 @@
+\ ============== EVAL ===================
+
+>, `EL?
+: TOKEN? N??|
+: TOKEN  BL  [ : ?C@ DUP C@ ]   
+: WORD PARSE [ '`' C!A+ ] S>" ;;
+: =" TOKEN? " ;
+
+: MEMTI| A+L 0   
+: TI| BLK XR LTIB PUSH   ETIB PUSH PUSH
+ CALL EX POP POP POP THEN    TO BLK TO LTIB TO ETIB 
+: /BLK BLK 0; 0 TO ETIB ; 
+
+: `RP AT `WITHSTK `R_BTM  `R_TOP ,< ,T RSTK? 2ALIGNED
+: `SP AT `WITHSTK `S_BTM  `S_TOP ,< ,T DSTK? 2ALIGNED
+: `STACK TR-| RP@  vPIN  `RP   SP@ 2- `SP     ;; 
+
+=! `T>,@MAC
+: (MAC (D#0   AT |SAFE!  `T>,@MAC  VAL FIND 
+: SEVAL CSTR          \ SEVAL
+: `EVAL MEMTI|        \ FIX WITH MEMTI|
+BEGIN   `STACK TOKEN (IF .; FIND  \ FIX WITH `STACK
+: @OPER  NOOP OPER[] @EXEC AGAIN  ,<
+
+\ ' SEVAL ' `@SEVAL  T! \ 
+
+: :(;   (MAC ,< ,T (;     2ALIGNED
+: :MC"  (MAC ,< ,T (MAC   2ALIGNED
+: :!"   (MAC ,< ,T (!"    2ALIGNED
+: :."   (MAC ,< ,T (."    2ALIGNED
+: :"    (MAC ,< ,T ("     2ALIGNED
+
+: :@"   (MAC ,< ,T (@"    2ALIGNED
+: :/"   (MAC ,< ,T (/"    2ALIGNED
+: :,"   (MAC ,< ,T (,"    2ALIGNED
+: :SW"  (MAC ,< ,T ("SW   2ALIGNED
+: :SC"  (MAC ,< ,T (BSCN  2ALIGNED
+: :JUMP (MAC ,< ,T (JUMP  2ALIGNED
+

@@ -1,0 +1,27 @@
+\ STRINGS / ERRORS PRINT ---------------------------
+
+: ALIGN| EX    
+: ALIGNED |LASTH  HERE ODD 0; 0 C, ;
+: ((" ("SKIP ;; 
+' ALIGN| VECTOR  v",
+
+: ,T BL
+: `", WORD ?C@ N?? 
+: ", CSTR v", DUP C, 
+: S, STR| CSTR C, ; 
+
+: T. T   
+: WID.  4+ 
+: ID. |SPC 
+: ". CSTR        
+: TYPE STR| CSTR EMIT ; 
+: (." ("SKIP  ". ;;  
+
+: XY? 1K LTIB - ;
+
+: ?|CR 0; 
+: |CR EX 
+: CR ."^M^J" 0 TO CNTC ;
+: `OK ."_ok" CR .">>_"  ;;  
+: `. EMT! KEY! CR TBUF ID. NOP ID. CR BLK 0;  \ ERRA
+  BLK>SCR ZBLK XY? >XY ;

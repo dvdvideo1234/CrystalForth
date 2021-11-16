@@ -34,7 +34,8 @@ TO' H  =: OBJ!
 : `<RLS <CSTK TO LASTH! ; \ RELS  , : LASTH! H ,<
 
 : HERE H  
-: R>T HOFS + ; 
+: R>T HOFS + ;
+\ : RTR| R>T EX 
 : T>R HOFS - ; 
 : `<MRK HERE TO <CSTK LASTH! ;  \ BEGIN
 

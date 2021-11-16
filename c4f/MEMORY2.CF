@@ -1,7 +1,7 @@
  '`  CONST  '`' 
   -1 CONST TRUE
 
-: 2!- TWICE
+: 2!- TWICE|
 : !- 2- PUSH !I POP; 
 
 : @0! DUP @ SWAP
@@ -25,7 +25,7 @@
 : C!A+ XA C!R+ XA ;
 HERE >, (D#0 @ 
 : FILL ASTR| PUSH A@ C!R+ POP; ,<
-N: ERASE 0 ,  N: BLANK 32 ,  DROP
+==: ERASE 0 ,  ==: BLANK 32 ,  DROP
 
 : S>" TBUF
 : S>"! ?XEP| NUP C!+ S>M ;
@@ -58,7 +58,7 @@ N: ERASE 0 ,  N: BLANK 32 ,  DROP
 : PRUNE TO H>T
  `PRUNE| LST| J @ H U< 0; J 5+ C@ '`' <> 0; J `ADD ;
  
-: ONPLACE (| CALL ?XEP| TWICE NUP THEN   \ MEMORY 
-: REVERT PUSH BEGIN (NEXT TWICE DUP PUSH J U< (IF `2EXIT
+: ONPLACE (| CALL ?XEP| TWICE| NUP THEN   \ MEMORY 
+: REVERT PUSH BEGIN (NEXT TWICE| DUP PUSH J U< (IF `2EXIT
   J @ @I J C!  C!R+ POP AGAIN ; UNW
 

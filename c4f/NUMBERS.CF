@@ -18,7 +18,6 @@ N: `DECI 10 , N: `BIN 2 , N: `HEX 16 ,  DROP
 
 : ?# DUP AT WITHIN ,< ': , 'A , >,  SKIP? TO 0=
  '0 - 9>? - DUP BASE U< ;
->, (PNT2 ,<  0 DEFER @STATE 
 : `DIG# BASE! 0 ;
 : `ERRN 0& A! ;
 : `DIG^  TO @STATE  31& SKIP
@@ -34,7 +33,6 @@ N: `DECI 10 , N: `BIN 2 , N: `HEX 16 ,  DROP
 : CONV  `DIGICHK FOR PUSH C@R+ J 1+ A! @STATE POP 
     A@ (IF `CONV; NEXT 1+; ,<
     
- INCLUDE UPACK.CF  \ 230 B
 
 >,
 \ : >NUM,

@@ -21,7 +21,7 @@
 
 : `ASTRI (BSCN ,<  ,T ",!./@   2ALIGNED  
 >, 1- OVER   
-: `CHK" C@ `@R<> ,< '" , >, ;;
+: `CHK" C@ `@R<> ,< '" , >, (; ,<
 0 WARY `STR  >,  NOOP   "S,  VAL ((A"    ".   @ERR    `(0" ,<
 0 WARY DBG" >,  :" :," :!" :." :/" :@" :MC" :SW" :SC" ,<
 \ : DBG" PUSH 0 `DBG" 7 POP WSCAN ;

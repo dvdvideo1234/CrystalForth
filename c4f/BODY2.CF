@@ -1,0 +1,22 @@
+\ ============== COMPILER ===================
+
+: T: `<CLR>  \ TNOP TO FIX WITH <CLR>
+: T:C NOP LASTH! \ L_ _COLONC  :`   =H := NOP
+: T>, TO FIND
+: `T>,@MAC  TBUF ++ CFND TBUF -- SKIP? (; CFND 2+ ;
+
+\ VAL' T>,  ' `@MAC   T! \ 
+
+
+\ ---------- INIT INTERPRETTER ----------------
+
+: @INI H>T MSB (|  SEVAL  TO @INIT
+: `@ABINI  NOP AHEAD
+
+\ ============   INTERPRETTER   ==============
+
+: T;;  :(;  \ ;;  
+   AT CSTK> STK?  0<>;  AT <CSTK STK?  0<>;
+: T,< THEN  TO FIND  \ TARG,<
+: `@LPAR  vT FND ;         
+

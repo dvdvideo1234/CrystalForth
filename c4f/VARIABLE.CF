@@ -49,8 +49,7 @@
   64  CONST 1L
 
 : EOSZ DROP|
-: EOS? EOS
-: `@0<>? A! 0 @!A ;
+: EOS? EOS @0! ;
 
 \ : `B>N `MASK| ,<
  16 CONST 1H

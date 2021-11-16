@@ -11,7 +11,7 @@
 : `@BUF `PREV 1K* FIRST + ; 
 : UPDATE  `@FBUFS ON ; 
 : -BUF `@BUFS ON 
-: DISCARD `@FBUFS `OFF ; 
+: DISCARD `@FBUFS OFF ; 
 : !BUFS  NBUFS TIMES| `+BUF TO `PREV  
 : `?SAVE `@FBUFS C@ 0;
  `@BUF `@BUFS @ TO Fseek Fwrite IO?  DISCARD ;

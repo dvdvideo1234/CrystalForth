@@ -18,9 +18,9 @@ N: TO' -2 ,  N: AT' -4 , N: VAL' 2 , DROP
 HERE >, (D#0 @ADR+ , ;
 N: FTO` -2 ,  N: FAT` -4 , N: FVAL` 2 ,  N: C:` 0 , DROP 
  
-: `@INT  TOKEN? VAL T,< N??  `@DEF? AT `ODDH? ; 
+: T'  TOKEN? VAL T,< N??  `@DEF? AT `ODDH? ; 
 HERE >, (D#0 
-: `@INT+ @ `@INT + PUSH;  ,<
+: `@INT+ @ T' + PUSH;  ,<
 N: TO -2 , 
 N: AT -4 , 
 N: X:` Z,
@@ -32,7 +32,8 @@ N: VAL 2 ,    DROP
 : DEFD? 0=  !"DEFD!" ;;
 : ==:   DUP ,| 
 : =H    `HODD  \ HENTRY ; H=:  _HER_E  !!!\ _@HERE 
-: `=:   0 TOKEN?   TFND IF PUSH   2DUP OR DEFD?  `Ivague? IF
+: `=:   0 TOKEN? 
+: N3  TFND IF PUSH   2DUP OR DEFD?  `Ivague? IF
  DROP XR PUSH I 2+ -- \ FLAG_UNDEFINE&COUNT  NOW DEFINED
 BEGIN I (IF `2EXIT @I J POP ! PUSH AGAIN THEN (D#2 DUP \ POP4+
 : (=: .;  THEN " 2!- TO T ;  \  _ENTRYZ   _@SAME  DW _  

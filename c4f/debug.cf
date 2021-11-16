@@ -36,12 +36,13 @@
 >, ((A" ((." (MAC ((0" ((" ((;" ("SW ,< 
 : `|WW CALL EX (SET2 THEN ,<
 0 CONST ``WW 
+: ``STR SWAP| R>T @+ T>R ;
 : `A:? WFIND (IF .; ."_:_" WID. ; 
 : SEE ' 
 : @SEE TO ``WW 
 : SL bs TIMES| 
-: `WW `|WW CR DUP H. DUP `A:? STR DUP H. DUP ?ID. `" 1+ 0;
-  PUSH ("SKIP [ID] POP ;
+: `WW `|WW CR DUP H. DUP `A:? ``STR DUP H. DUP ?ID. `" 1+ 0;
+  R>T PUSH ("SKIP [ID] POP ;
 \ : DUTEST 1 2 3 " 1234" ;  
 
 \  BREAKPOINT  DEBUGERR 
