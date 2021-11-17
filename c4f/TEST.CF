@@ -1,19 +1,13 @@
 FORGET IT
 
 : IT ;
-VAL' DEA> =: NAME>
-: .( ') PARSE TYPE ;;
-\ M1
 
-: BYTE. HERE ' -
-: BYTES? SPC . ."BYTES__" ;
-\ M2
+10 WARY ATEN
 
 : VLIST T BEGIN DUP 4+ C@
- (IF MARK> SPC DUP @ H. 4+ DUP ID. NAME>
-   KEY ^[ = 
-  (IF <RELS THEN DROP; ,<
-M3
+ (IF .; SPC DUP @ H. 4+ DUP ID. NAME>
+   KEY ^[ = UNTIL  DROP; ,<
+
 
 CR .( TEST    ) BYTE. IT
 

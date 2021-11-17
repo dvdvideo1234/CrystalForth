@@ -22,14 +22,14 @@
 : `ASTRI (BSCN ,<  ,T ",!./@   2ALIGNED  
 >, 1- OVER   
 : `CHK" C@ `@R<> ,< '" , >, (; ,<
-0 WARY `STR  >,  NOOP   "S,  VAL ((A"    ".   @ERR    `(0" ,<
+0 WARY `STR  >,  NOOP   "S,  VAL (!"    ".   @ERR    `(0" ,<
 0 WARY DBG" >,  :" :," :!" :." :/" :@" :MC" :SW" :SC" ,<
 \ : DBG" PUSH 0 `DBG" 7 POP WSCAN ;
 
 : `OK" CSTR AT `CHK" IF S1- DUP 0;  TO `CHK" 0<>; THEN S1- ;
 : `U" 1- XEP| `OK" S>PK ;; \  UNDER STRING
 
-: `STR? DUP NAME> 1- `CHK" SKIP? TO 0=  DUP 1+ C@ `ASTRI 1+;
+: `STR? DUP NAME> 1- `CHK" SKIP? 0=;  DUP 1+ C@ `ASTRI 1+;
 
 \ ( CALL RDROP ) LIKE JUMP
 : `STR@  RDROP `U" `STR @EXEC ;;

@@ -1,0 +1,59 @@
+\ =============   VARIABLES  ==============
+
+\ EMIT TO_METHOD CHANGED
+
+0  QUAN  CNTC
+
+: ZBLK 0      ,<  0 VALUE  BLK  
+: `EL? EX BLK 0<>; 
+: `\ |LTIB DUP 0; 1- 
+: L/ (@&; ,< -64 ,
+: EMT! (# BE (SET2 (VAR
+: EMIT  BE  AT CNTC ++ ;
+: |C. EX EMIT ; 
+
+: |SPC EX SKIP
+: SPACES  TIMES|
+: SPC  |C. ,<   
+  32  CONST BL
+ 
+\ =============   VARIABLES  ==============
+
+: |SCR CALL EX (SET2 THEN ,<       0 CONST SCR
+
+>, `MASK| ,<  \ USED
+1024  CONST 1K
+ 
+: |XY CALL EX
+: >XY TO 1K  (SET2 THEN ,<       0 CONST XY
+: BLK>SCR BLK TO SCR ;
+
+\ KEY TO_METHOD CHANGED
+: KEY! (# BK (SET2 (VAR
+: KEY BK ;;
+
+ 
+: |HLD CALL EX (SET2 THEN ,<       0 CONST HLD
+
+\ =============   CONSTANTS  ==============
+
+8  CONST  bs       
+  
+: EOS! bs (SET2 ,<   0 VAR EOS 
+
+>, `MASK| ,<  \ USED IN fLUSH.CF
+  4 CONST NBUFS    
+
+' `TIB CONST TIB
+\ : 1L& `MASK| ,<
+  64  CONST 1L
+
+: EOSZ DROP|
+: EOS? EOS @0! ;
+
+\ : `B>N `MASK| ,<
+ 16 CONST 1H
+
+: MCLR (# `MACADR  ,<    
+' `MACADR VALUE MOBJ   
+ 

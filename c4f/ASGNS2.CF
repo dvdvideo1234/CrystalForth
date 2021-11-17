@@ -1,0 +1,183 @@
+
+\ 1 MAIN OPS
+APT- _IF        =: (IF     \   
+APT- _IFM       =: (IF-    \  
+APT- _JUMP      =: (JUMP   \  
+APT- _RET       =: (;      \ 
+APT- _DUP       =: DUP     \ 
+APT- _POP       =: POP     \ 
+APT- _PUSH      =: PUSH    \ 
+APT- _J         =: J       \ 
+APT- _RLDP      =: @R+     \ 
+APT- _RSTP      =: !R+     \
+APT- _XA        =: XA      \ 
+APT- _XR        =: XR      \ 
+APT- _PLAVG     =: +2/     \ 
+APT- _PMUL      =: +*      \ 
+APT- _SDIV      =: -/      \ 
+APT- _NAND      =: NAND    \ 
+                
+\ 2 MATH          
+APT- _HW_B      =: HW>B        
+APT- _H_L       =: ><        
+APT- _2M        =: 2-         
+APT- _1M        =: 1-         
+APT- _2MUL      =: 2*       
+APT- _ZERO      =: 0&       
+APT- _4P        =: 4+         
+APT- _2P        =: 2+         
+APT- _U1P       =: U1+         
+APT- _2DIV      =: 2/      \ V
+APT- _D2DIV     =: D2/     \ V
+APT- _NEG       =: NEG     \ V
+                
+\ 3 REGISTERS     
+APT- _ALD       =: A@      \ V
+APT- _AST       =: A!      \ V
+APT- _RPLD      =: RP@     \ V
+APT- _SPLD      =: SP@     \ V
+                
+\ 4 STACK         
+APT- _NIP       =: NIP     \ V
+APT- _OVER      =: OVER    \ V
+APT- _RDROP     =: RDROP   \ V
+APT- _SWAP      =: SWAP    \ V
+APT- _DROP      =: DROP    \ V DROP
+APT- _MROT      =: -ROT    \ V
+                
+\ 5 CONTROL       
+APT- _1PX       =: 1+;         
+APT- _POPX      =: POP;    \ V
+APT- _PUSHX     =: PUSH;   \ V
+APT- _DROPX     =: DROP;   \ V
+APT- __ASM      =: 4TH>         
+APT- _RDROPX    =: RDROP;  \ V
+APT- _NEXT      =: (NEXT   \ V 
+APT- _NOP       =: NOP     \ V
+APT- _ASTR      =: ("SKIP  \ V
+APT- _SKIP      =: SKIP    \ V
+APT- _EX        =: EX      \ V
+APT- _FOR       =: (FOR    \ V
+APT- _MIF       =: (-IF    \ V
+APT- _SKIP?     =: SKIP?   \ V
+APT- _ZEQX      =: 0=;     \ V
+                
+\ 6 LOGIC         
+APT- _XOR       =: XOR     \ V
+APT- _NOT       =: NOT     \ V
+APT- _ZEQ       =: 0=      \ V
+APT- _NEQ       =: <>      \ V
+APT- _0LESS     =: 0<      \ V
+APT- _ULESS     =: U<      
+                
+\ 7 MEMORY        
+APT- _UPDICT    =: H>T     
+APT- _DPUSH     =: >T      
+APT- _MPUSH     =: MPUSH   \ >MEM      
+APT- _INC       =: ++      \ V
+APT- _DEC       =: --      \ V
+APT- _CRLDP     =: C@R+    \ V
+APT- _CRSTP     =: C!R+    \ V
+APT- _POPSTX    =: POP!;   \ V
+APT- _LD        =: @         
+APT- _C@        =: C@         
+APT- _LDSTA     =: @!A         
+APT- _WSTR      =: STR       
+APT- _CSTR      =: CSTR       
+                
+\ 8 COMPILER PRIM ITIVES
+\ APT- _@COMMA    =: @,
+\ APT- _COMMA     =: ,
+APT- _DLIT      =: (##     \ V
+APT- _LIT       =: (#      \ V
+APT- __VAR      =: (VAR    \ V
+APT- __VAR3     =: (VAR3   \ V
+APT- __CONS     =: (CON    \ V
+APT- _POSTX     =: (|      
+APT- _DZ0       =: (D#0        
+APT- _DZ1       =: (D#1        
+APT- _DZ2       =: (D#2        
+APT- __SETPNT   =: (PNT2 
+APT- __SETVAR   =: (SET2 
+APT- _PARS      =: (PARS   \ V
+APT- _TARY      =: (TARY   \ V 
+APT- _5ARY      =: (5ARY   \ V 
+APT- _LARY      =: (LARY   \ V 
+APT- _WARY      =: (WARY   \ V 
+APT- _BARY      =: (BARY   \ V 
+APT- _PLSX      =: (@+;    \ V
+APT- _ANDX      =: (@&;    \ V
+                
+\ 9 SPECIAL       
+APT- _ABORT     =: ABORT   \ V
+APT- _QUIT      =: QUIT    \ V
+APT- _@EXEC     =: @EXEC   \ V
+APT- _EXEC      =: EXEC    \ V
+APT- _@_OK      =: @OK       
+APT- _OPER      =: OPER[]       
+                
+\ 10 DEBUG         
+APT- _BP        =: (BRK    \ V
+APT- _BPDBG     =: @DO_DBG      
+APT- _TROFFX    =: TR-;    
+APT- _TRON      =: TR+
+APT- _TRONM?    =: TR-| 
+APT- _VDBG      =: vDBG
+APT- _VPIN      =: vPIN
+APT- _NOOP      =: NOOP
+                
+\ 11 SEARCH        
+APT- _B?        =: B?"         
+APT- _BSCN      =: (BSCN      \ APT- _BSCANE    =: B?<>     
+APT- _WSCN      =: (WSCN      \ APT- _WSCANE    =: W?<>   
+APT- _BSCAN     =: BSCAN     \ V
+APT- _WSCAN     =: WSCAN     \ V
+APT- _PARSE     =: PARSE      
+                
+\ 12 IO            
+APT- _BE        =: BE      \ V BIOS EMIT
+APT- _BK        =: BK      \ V BIOS KEY
+APT- _INT       =: (INT#   \ V
+                
+\ 13 CONSTANTS     
+APT- _MSB       =: MSB
+APT- _FIB       =: FIB
+APT- _TBUF      =: TBUF
+APT- _FIRST     =: FIRST
+APT- _0         =: 0
+                
+\ 14 VALUES        
+APT- _ETIB      =: ETIB
+APT- _LTIBX     =: |LTIB
+APT- _LTIB      =: LTIB
+APT- _TX        =: |T                
+APT- _T         =: T
+APT- _HX        =: |H                 
+APT- _H         =: H
+APT- _VT        =: vT
+APT- _INIT      =: @INIT
+APT- _FIND      =: FIND
+                
+\ 15 VOCABULARY     
+APT- _FND       =: FND     \ V
+APT- _WFND      =: WFND    \ V  
+APT- _WFIND     =: WFIND    \ V  
+APT- _CFND      =: CFND    \ V
+                
+\ 16 USED          
+APT- _@_DBG     =: @DBG   \ V
+APT- _@_ACCEPT  =: `@ACPT   
+APT- _@R_BTM    =: `R_BTM
+APT- _@R_TOP    =: `R_TOP
+APT- _@S_BTM    =: `S_BTM
+APT- _@S_TOP    =: `S_TOP
+APT- _@MACADR   =: `MACADR
+APT- _@COMPNUM  =: `COMPNUM
+APT- _@NUMBER   =: `NUMBER
+APT- _@PARSE    =: `(PARSE
+APT- _@TIB      =: `TIB  
+APT- _@BCK      =: `BCK  
+APT- _@FLS      =: `FLS  
+APT- _@FWD      =: `FWD  
+                
+\ TO FIX        

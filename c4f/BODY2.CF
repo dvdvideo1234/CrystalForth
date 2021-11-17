@@ -1,7 +1,8 @@
 \ ============== COMPILER ===================
 
+=! =H
 : T: `<CLR>  \ TNOP TO FIX WITH <CLR>
-: T:C NOP LASTH! \ L_ _COLONC  :`   =H := NOP
+: T:C =H  LASTH! \ L_ _COLONC  :`   =H := NOP
 : T>, TO FIND
 : `T>,@MAC  TBUF ++ CFND TBUF -- SKIP? (; CFND 2+ ;
 

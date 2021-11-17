@@ -5,7 +5,7 @@
 : [TYPE] |[] TIMES| CSTR DUP |C. BL U< 0; DROP '. ;; 
 : UN? U/MOD SWAP  0; 1+ ; 
 \ : `SAME? TFND 0; 4+ [ID] TBUF ; 
- '  [ID]  ' (=:   T!   \ FIX (=:
+\  '  [ID]  ' (=:   T!   \ FIX (=:
 
 \ : VLIST T BEGIN DUP 4+ C@ WHILE SPC DUP @ H. 4+ DUP ID. NAME>
 \   KEY ^[ = UNTIL THEN DROP;
@@ -30,10 +30,8 @@
  6 - WFIND IF "VAL" `WID. ;THEN  2+
 : $. ."$" H. ; 
 0 VALUE `ADR2 
-\ : `" (WSCN ,< 9 , 
-\ >, (MAC (!"  (."  ("   (@"  (/"  (,"  ("SW (BSCN  ,< 
-: `" (WSCN ,< 7 , 
->, ((A" ((." (MAC ((0" ((" ((;" ("SW ,< 
+: `" (WSCN ,< 9 , 
+>, (MAC (!"  (."  ("   (@"  (/"  (,"  ("SW (BSCN  ,< 
 : `|WW CALL EX (SET2 THEN ,<
 0 CONST ``WW 
 : ``STR SWAP|  T>R @+ R>T ;
@@ -53,7 +51,7 @@
 : `DBG SPC  S3 H H. T H. `DBGA H. SPC  ;
 : DBG. `DBGIN `R3 `DBG `JID. BK DROP
 : `DBGOUT `DBGEmt  AT EMIT  `DBGA A! ;
-' DBG. VAL' vDBG !
+' DBG. VAL' vDBG T!
 
 : `XTR PUSH TR+ ; 
 : TRACE ADR' `XTR : TR- TR-; 

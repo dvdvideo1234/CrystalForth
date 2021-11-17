@@ -1,0 +1,29 @@
+\ ========   COMPILER RUNTIME   ========
+ 
+\ REDEFINITIONS AND FORWARD DEFINITIONS ---------------
+
+'  (JUMP   =:  (DEF
+ 
+>, @R+ @R+
+: `WITHSTK  WITHIN 0=    AHEAD
+
+: (@"    0=                
+: (!"    ("SKIP  PUSH   THEN  (IF EXIT
+: (/"    POP
+: @ERR NOP ABORT
+
+
+: N??| EX 
+: N??  0=
+: ??   (!" ,< ,T ? >, ;;
+
+: `WITHRNG SWAP @2 `WITHSTK  ;
+: `>PUSH `WITHRNG ,< ,T FULL?  2ALIGNED
+: `>POP  `WITHRNG ,< ,T EMPTY? 2ALIGNED
+
+>, (D#1 PUSH 
+: >PUSH @ISTR 2- `>PUSH @I !- POP!;
+: >POP  @ISTR    `>POP  @I @+ POP!;
+: STK! DUP PUSH 4+ @ POP!;
+: STK?  DUP PUSH 4+ @ POP @ - 2/ ;
+

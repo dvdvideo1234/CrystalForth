@@ -2,7 +2,7 @@
 
 : ALIGN| EX    
 : ALIGNED |LASTH  HERE ODD 0; 0 C, ;
-: ((" ("SKIP ;; 
+: (" ("SKIP ;; 
 ' ALIGN| VECTOR  v",
 
 : ,T BL

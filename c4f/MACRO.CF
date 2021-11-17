@@ -45,7 +45,7 @@ M: :|C |C.;
 ; 
  
 : D# >, HERE EX LASTH! ;
-: `DO POP ADR' ,<  0 VECTOR  `vDO
+: `DO POP T' ,<  0 VECTOR  `vDO
 : DO# `DO TOKEN? ">NUM `vDO ; 
 : ZDO `DO 0 `vDO ; 
 : DO  `DO   `vDO ; 
@@ -79,6 +79,7 @@ CSP!
 : FOR-` :JUMP SKIP 
 : FOR` :FOR MARK>` BEGIN` ;;
 : NEXT` THEN` :NEXT <RELS` ;;
+: RECURSE` T VAL '  VAL ,| ;
 
 <M> 
 
@@ -90,7 +91,7 @@ M: :code (code;
 <M> 
 
 >, 2* 
-: `ARY| 2* 1+ 2/ :` EX |LASTH 
+: `ARY| 2* 1+ 2/ =H EX |LASTH 
 : `CLARYW TIMES| Z, 
 ; 
 
