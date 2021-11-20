@@ -5,7 +5,7 @@
 : [TYPE] |[] TIMES| CSTR DUP |C. BL U< 0; DROP '. ;; 
 : UN? U/MOD SWAP  0; 1+ ; 
 \ : `SAME? TFND 0; 4+ [ID] TBUF ; 
-\  '  [ID]  ' (=:   T!   \ FIX (=:
+'  [ID]  ' (=:   T!   \ FIX (=:
 
 \ : VLIST T BEGIN DUP 4+ C@ WHILE SPC DUP @ H. 4+ DUP ID. NAME>
 \   KEY ^[ = UNTIL THEN DROP;
@@ -60,4 +60,4 @@
 VAL' @DO_DBG DEFER (DBGRET 
 ' `@DBG  ' @DO_DBG  T!
 
-\ CR .( DBG     ) BYTE. |[]
+CR .( debug2   ) BYTE. |[]

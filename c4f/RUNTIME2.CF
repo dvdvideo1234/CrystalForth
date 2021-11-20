@@ -4,7 +4,9 @@
 
 '  (JUMP   =:  (DEF
  
->, @R+ @R+
+: STK! DUP PUSH 4+ @ POP!;
+\ >, 
+@R+ @R+
 : `WITHSTK  WITHIN 0=    AHEAD
 
 : (@"    0=                
@@ -24,6 +26,6 @@
 >, (D#1 PUSH 
 : >PUSH @ISTR 2- `>PUSH @I !- POP!;
 : >POP  @ISTR    `>POP  @I @+ POP!;
-: STK! DUP PUSH 4+ @ POP!;
 : STK?  DUP PUSH 4+ @ POP @ - 2/ ;
 
+CR .( RUNTIME2 ) BYTE. STK!

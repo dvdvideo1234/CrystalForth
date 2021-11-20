@@ -104,3 +104,4 @@ HERE 2- =: BYE
 \ : `4/ TWICE 2/ ;
 \ 
 
+CR .( PRIMS2   ) BYTE. `CONV;

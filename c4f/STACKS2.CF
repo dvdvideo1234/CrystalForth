@@ -40,9 +40,8 @@ TO' H  =: OBJ!
 : T>R HOFS - ; 
 : T! T>R ! ;
 : `<MRK HERE TO <CSTK LASTH! ;  \ BEGIN
-' HERE ' `@PRUNE T!
 
 >, EX  \ THEN|
 : `RLS> LASTH! CSTK> HERE SWAP! ; 
  
-\ CR .( STACKS   ) BYTE. HTOP
+CR .( STACKS2  ) BYTE. HTOP

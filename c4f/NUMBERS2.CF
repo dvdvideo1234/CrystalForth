@@ -31,7 +31,7 @@ HERE >, (D#0 @
 : "># CSTR
 : S># `DECI 0 -ROT DUP (IF 1-; `-?  NIP| 
 : CONV  `DIGICHK FOR PUSH C@R+ J 1+ A! @STATE POP 
-    A@ (IF `CONV; NEXT 1+; ,<
+    A@ (IF `CONV; NEXT TO 1+ ; 
     
 
 : >NUM,  ,|
@@ -53,3 +53,5 @@ HERE >, (D#0 @
 : .H `HEX SKIP
 : .B `BIN |SPC 
 : `U.  BASE U/MOD  SKIP? RECURSE .# ;;
+
+CR .( NUMBERS2 ) BYTE. U/

@@ -32,7 +32,7 @@
 : `STR? DUP NAME> 1- `CHK" SKIP? TO 0=  DUP 1+ C@ `ASTRI 1+;
 
 \ ( CALL RDROP ) LIKE JUMP
-: `STR@  RDROP `U" `STR @EXEC ;;
+: `STR@  RDROP `U" TBUF OFF `STR @EXEC ;;
 : `STR@, RDROP `U" DBG" @EXEC ", ;
 
 : `U2" A@ '" HLD, ; 

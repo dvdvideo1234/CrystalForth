@@ -1,6 +1,6 @@
 \ ============ PRIMITIVE METHODS ===============
 
-\ : S1+ PUSH  
+: S1+ PUSH  
 : `CONV; 1- POP
 : 1+ 1+; 
 : RANGE>S 1+

@@ -1,3 +1,4 @@
+=! HERE
  '`  CONST  '`' 
   -1 CONST TRUE
 
@@ -46,19 +47,17 @@ HERE >, (D#0 @
 
 : `T> T
 : DEA> 4+ 
-: NAME> CSTR +  ;
+: NAME> CSTR + (;   H OFF  : LST| T BEGIN DUP 4+ C@ (IF EXIT
+  PUSH J EXECUTE POP DEA>           AGAIN
 
-: `ADD DUP DEA> OVER- 
+: PRUNE TO H>T CALL DUP DEA> TO T CALL CSWAP> DROP; THEN H
+ AT LST| J @ HERE U< 0; J 5+ C@ '`' <> 0; J THEN DUP DEA> OVER-
 : S+! ROT
 : +S! XEP| TUCK J STR + S>M J 
-: +!  |@! + ;  
-: LST| T BEGIN DUP 4+ C@ (IF EXIT PUSH J EXECUTE POP DEA>
-         AGAIN
-: `PRUNE| H DUP OFF EX DUP DEA> TO T `ADD DROP; 
-: PRUNE TO H>T
- `PRUNE| LST| J @ H U< 0; J 5+ C@ '`' <> 0; J `ADD ;
+: +!  |@! + ;
  
 : ONPLACE (| CALL ?XEP| TWICE| NUP THEN   \ MEMORY 
 : REVERT PUSH BEGIN (NEXT TWICE| DUP PUSH J U< (IF `2EXIT
   J @ @I J C!  C!R+ POP AGAIN ; UNW
 
+CR .( MEMORY2  ) BYTE. '`'

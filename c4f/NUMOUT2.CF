@@ -1,0 +1,34 @@
+: UNTIL| BEGIN IXEC 
+: WHILEZ| UNTIL RDROP;
+: WHILE| (IF EXIT 
+: UNTILZ| IXEC  WHILE| 
+;
+
+' TBUF =: `HLDBUF
+
+: #> DROP HLD 
+: `HLDSZ `HLDBUF HLD - ;
+
+: ?TAB `HLDSZ - SPACES ;   \ TAB NUMOUT 
+: <# `HLDBUF TO HLD BASE! ;
+\ : BASE! 2- W>B 2+ ,< 10 VALUE BASE 
+: <#>| <# EX ?TAB #> TYPE ; 
+: `6 DUP 0< 0; NEG EX '-  
+: HOLD |HLD C!- ;
+: # BASE  U/MOD SWAP  VAL .# HOLD ;  \  VAL .#  ALPHA
+\ : U. 0 
+: U.RS |SPC 
+: U.R 10
+: U.R# <#>| 
+: `u. 31 AND XEP| 
+: S# UNTILZ| # DUP 
+;
+\ : . 0 
+: .RS |SPC 
+: .R 10
+: .R# <#>| SWAP `6 SWAP `u. 
+; 
+: #. 0 SWAP |SPC .R# ; 
+
+\ 345678901234
+CR .( NUMOUT2  ) BYTE. UNTIL|

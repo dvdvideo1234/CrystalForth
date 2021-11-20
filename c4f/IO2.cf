@@ -4,7 +4,7 @@
 >, EOS! : `CR2 RDROP RDROP; 
 : `CH A@ AT WITHIN ,< 32 , 240 , >, 0; A@ SKIP 
 : `tab BL DUP A! EMIT 2DUP + A@ SWAP! 1+; 
-: `CHTAB ("SW ,< 5 C, ^H C, ^I C, ^M C, ^Z C, 127 C, 
+: `CHTAB ("SW ,< 5 C, ^H C, ^I C, ^M C, ^Z C, 255 C, 
 >, `CH `bs `tab `CR2  TO `CR2 NOOP ,<
 
 \ INTS DOS, FILES & VIDEO
@@ -74,3 +74,4 @@ HERE >, (D#0 @ (DOS ;
 : FTYPE TO TOKEN?  @OPENI| FGet 
   BEGIN  FIB (ACCEPT EOS? UNTIL  HCLOSE ;
 
+CR .( IO2      ) BYTE. `bs

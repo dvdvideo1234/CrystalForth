@@ -1,0 +1,20 @@
+\ TAIL 
+
+: M: ';  
+: ?M: AT |SAFE! ,< 0 , VAL' HOFS , >,
+   CALL =H :MC" `", THEN 
+: <M> MOBJ   |H TO MOBJ ;   
+
+: (code POP T @ ! ; 
+: `LAST? LASTH H <> ;
+: `@BACK H 2- @  ;
+\ : ?` ,| ADR' `LAST? `@BACK OR @"CAN`T!" CSTK> DROP UNW ;;
+: `OPTIMIZE?  `LAST?  `@BACK  ODD  0=  AND ;
+
+\ MCLR  <M>  M: :JUMP (JUMP; : PRUNE ;  <M> \ EMPTY PRUNE
+
+: T]   TO `RLS>   \ TAIL RECURSION OPTIMIZE
+: T; `OPTIMIZE? T;;  0;   UNW  @H-  TO <CSTK 
+: TAGAIN :JUMP  `<RLS ;;
+
+CR .( TAIL2    ) BYTE. M:

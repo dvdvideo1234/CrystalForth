@@ -1,10 +1,11 @@
 \ ============== EVAL ===================
 
->, `EL?
+\ : =" TOKEN? " ;
+: =" CALL " ;
+ `EL? THEN
 : TOKEN? N??|
 : TOKEN  BL  [ : ?C@ DUP C@ ]   
 : WORD PARSE [ '`' C!A+ ] S>" ;;
-: =" TOKEN? " ;
 
 : MEMTI| A+L 0   
 : TI| BLK XR LTIB PUSH   ETIB PUSH PUSH
@@ -37,3 +38,4 @@ BEGIN   `STACK TOKEN (IF .; FIND  \ FIX WITH `STACK
 : :SC"  (MAC ,< ,T (BSCN  2ALIGNED
 : :JUMP (MAC ,< ,T (JUMP  2ALIGNED
 
+CR .( SEVAL2   ) BYTE. ="

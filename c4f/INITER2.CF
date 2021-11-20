@@ -1,0 +1,65 @@
+
+' @INI VAL' @INIT     T!    \ TARGET FORTH INITIALIZER
+' `@LPAR VAL'  FIND   T!    \ TARGET FORTH INITIAL STATE
+' ">NUM  ' `NUMBER    T!    \ FIX @NUMBER
+' `[>X  VAL' `NUMBER  T!    \ FIX @EXE_WORD
+' ">NUMC ' `COMPNUM   T!    \ FIX @COMPNUM
+' `[>, VAL' `COMPNUM  T!    \ FIX @COMP_WORD
+'  `.     ' @ERR      T!    \ FIX ERROR.
+TO' ACCEPT ' `@ACPT   T!    \ FIX ACCEPT IN MAINLP
+' `EVAL  VAL' `@ACPT  T!    \ FIX EVAL IN MAINLP
+'  `OK    ' @OK       T!    \ FIX  vOK.
+' `T>    ' CFND       T!    \ FIX CFND
+' `ALLCLR  ' `@ABINI  T!
+
+
+HERE    VAL' H T!           \ TARGET FORTH HEAP
+
+HIDE (DEF
+HIDE (D#0
+HIDE  CALL` 
+HIDE  ;THEN` 
+HIDE  MARK>` 
+
+HIDE :MC" 
+HIDE :!" 
+HIDE :." 
+HIDE :" 
+HIDE :@" 
+HIDE :/" 
+HIDE :," 
+HIDE :SW" 
+HIDE :SC" 
+HIDE :(;  
+
+APT- POP        =:  (D#0
+APT- ONE        =:  1
+APT- TRUE       =:  -1
+'   (D#0        =:  POP
+APT- T:         =:  :          
+APT- T>,        =:  >,
+APT2 `<RLS          <RELS`
+APT2 T:C            :`         
+APT2 T;;            ;;`
+APT2 T,<            ,<`        
+APT2 FTO`           TO`
+APT2 FAT`           AT` 
+APT2 FVAL`          VAL` 
+APT2 CSWP>          CSWAP>`
+APT2 <CSWP          <CSWAP`
+APT2 `<MRK          BEGIN`
+APT2 `RLS>          THEN`
+APT2 `MRK>          [`
+' [`            =:  CALL` 
+' [`            =:  MARK>` 
+APT2 `\             \` 
+' \`            =:  \ 
+APT2  T]            ]`
+APT2  T;            ;`
+' ]`            =:  ;THEN`    \ SINTACTIC SUGAR
+APT2  TAGAIN        AGAIN`
+
+\ TSAVE PIF.COM     \ SAVE RESULT
+      \ PREPARE NEW WORDS TO BE ASSIGNED 
+	  
+

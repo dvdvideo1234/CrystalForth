@@ -26,7 +26,7 @@ HERE >, (D#0
 : `[>X PUSH `Ivague? (IF TO @EXEC 
 : NDF TRUE VAL `UNDEF? ,< \ ALLWAIS ERROR
  
-=! [ID]
+\ =! [ID]
 : DEFD? 0=  !"DEFD!" ;;
 : ==:   DUP ,| 
 : =H    `HODD  \ HENTRY ; H=:  _HER_E  !!!\ _@HERE 
@@ -34,7 +34,8 @@ HERE >, (D#0
 : N3  TFND IF PUSH   2DUP OR DEFD?  `Ivague? IF
  DROP XR PUSH I 2+ -- \ FLAG_UNDEFINE&COUNT  NOW DEFINED
 BEGIN I (IF `2EXIT @I J POP ! PUSH AGAIN THEN (D#2 DUP \ POP4+
-: (=: [ID] THEN " 2!- TO T ;  \  _ENTRYZ   _@SAME  .; 
+: (=: .; THEN " 2!- TO T ;  \  _ENTRYZ   _@SAME  .; 
+\ : (=: [ID] THEN " 2!- TO T ;  \  _ENTRYZ   _@SAME  .; 
 
 : =! 0 =: T 2+ ++ ; \ CREATE UNDEFINED WORD
 
@@ -42,3 +43,5 @@ BEGIN I (IF `2EXIT @I J POP ! PUSH AGAIN THEN (D#2 DUP \ POP4+
 : FORGET `FND? DUP `@DEF? `EVEN TO H DEA> TO T ; 
 : HIDE AT TFND 5+  '`' 
 : SWAPC! SWAP C! ; 
+
+CR .( ENTRY2   ) BYTE. `FND?

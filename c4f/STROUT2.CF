@@ -25,3 +25,5 @@
 : `OK ."_ok" CR .">>_"  ;;  
 : `. EMT! KEY! CR TBUF ID. NOP ID. CR BLK 0;  \ ERRA
   BLK>SCR ZBLK XY? >XY ;
+
+CR .( STROUT2  ) BYTE. ALIGN|

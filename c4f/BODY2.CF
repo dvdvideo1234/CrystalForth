@@ -21,3 +21,4 @@
 : T,< THEN  TO FIND  \ TARG,<
 : `@LPAR  vT FND ;         
 
+CR .( BODY2    ) BYTE. T:

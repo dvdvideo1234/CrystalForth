@@ -2,7 +2,8 @@
 \ OPTIONS ,  !  "  :
 \ ESCAPE CODES & CONTROL  / ESCAPES  _ SPACE ~ NEGATE MSB
 
->, (PNT2 ,<  0 DEFER @STATE 
+: (," ("SKIP   : "S, CSTR S, (;
+ (PNT2 ,<  0 DEFER @STATE 
 : `SPACE BL SKIP
 : `AHLD A@
 : HLD, |HLD C!+ ;
@@ -16,7 +17,6 @@
 : ">PK CSTR  \ PACK STRING TO MEMORY  \ SRC LEN DST
 : S>PK `COPYCHK  `PAR| STR| CSTR @STATE ;
  
-: (," ("SKIP   : "S, CSTR S, ;
 : `(0" PUSH VAL `WITHSTK ;
 
 : `ASTRI (BSCN ,<  ,T ",!./@   2ALIGNED  
@@ -32,7 +32,7 @@
 : `STR? DUP NAME> 1- `CHK" SKIP? 0=;  DUP 1+ C@ `ASTRI 1+;
 
 \ ( CALL RDROP ) LIKE JUMP
-: `STR@  RDROP `U" `STR @EXEC ;;
+: `STR@  RDROP `U" TBUF OFF `STR @EXEC ;;
 : `STR@, RDROP `U" DBG" @EXEC ", ;
 
 : `U2" A@ '" HLD, ; 
@@ -44,4 +44,6 @@
  >, CALL `U2"  `U2" `USPACE `U2" `U2" THEN 
  A@ DUP BL U< 0; '^ HLD,
 : L+ (@+; ,< '@ ,
+
+CR .( UPACK2   ) BYTE. (,"
  
