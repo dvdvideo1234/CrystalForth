@@ -2,7 +2,7 @@
 
 \ EMIT TO_METHOD CHANGED
 
-\ : `B>N `MASK| ,<
+: `B>N `MASK| ,<
  16 CONST 1H
 
 0  QUAN  CNTC

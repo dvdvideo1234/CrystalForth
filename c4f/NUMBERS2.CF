@@ -2,7 +2,7 @@
 : U/ NIP|    : U/MOD A! 0 
 : (UM/ SWAP| TWICE| TWICE| -/ -/ -/ -/ ;
 : UMOD U/MOD DROP;
-: UM/MOD U/MOD XEP| (UM/ ; \ ( UD U - U UD )
+: UM/MOD U/MOD PUSH (UM/ POP; \ ( UD U - U UD )
 
 : 9>? 9 SKIP
 : OPT? ONE OVER U< 
