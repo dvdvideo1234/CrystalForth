@@ -43,5 +43,15 @@ TO' H  =: OBJ!
 
 >, EX  \ THEN|
 : `RLS> LASTH! CSTK> HERE SWAP! ; 
+
+: (DO SWAP POP -ROT  PUSH PUSH PUSH;
+
+: (LP 1 
+: `(+LP XR POP POP I- +2/ 0<   IF
+: `(LP; DROP RDROP 2+ PUSH; 
+: `(-LP NEG  THEN I+ PUSH @ PUSH;
+ 
+: (+LP (-IF `(+LP NEG XR POP J POP - +2/ 0< (IF `(-LP `(LP; ;
+
  
 CR .( STACKS2  ) BYTE. HTOP

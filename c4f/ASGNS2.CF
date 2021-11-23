@@ -26,7 +26,6 @@ APT- _2MUL      =: 2*
 APT- _ZERO      =: 0&       
 APT- _4P        =: 4+         
 APT- _2P        =: 2+         
-APT- _U1P       =: U1+         
 APT- _2DIV      =: 2/      \ V
 APT- _D2DIV     =: D2/     \ V
 APT- _NEG       =: NEG     \ V

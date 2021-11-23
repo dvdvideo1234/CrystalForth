@@ -673,7 +673,7 @@ P_ _SDIV          ; ( -/
   CMP     TOP,AR
   JB      @NOP4
   SUB     TOP,AR     
-P_ _U1P  
+;P_ _U1P  
   INC     PW [DSP]
 @NOP4:
   JMP     @NOP

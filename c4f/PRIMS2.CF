@@ -96,7 +96,7 @@ HERE 2- =: BYE
 \ >, XEP|  
 : I- J - ; >,
 
-: S1- U1+
+: S1- PUSH 1+ POP
 : 1-; 1- ; 
 
 
