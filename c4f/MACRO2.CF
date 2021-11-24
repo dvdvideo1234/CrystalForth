@@ -1,0 +1,161 @@
+\ PRIMITIV'S MACROSES 
+MCLR  PRUNE  
+<M> : MMRK ; <M>
+
+\ BRANCHES
+M: :| (|;
+M: :IF (IF;
+M: :IF- (IF-;  
+M: :-IF (-IF;  \ M: -IF` 1+ IF-; 
+M: :FOR  (FOR;
+M: :NEXT (NEXT;
+M: DO` (DO BEGIN;
+M: LOOP` (LP <RELS;
+M: +LOOP` (+LP <RELS;
+
+M: :EX EX;
+
+\ METHODS
+M: :VAR3 (VAR3;
+M: :SET2 (SET2;
+M: :CON (CON;
+M: :LARY (LARY;     
+M: :WARY (WARY;
+M: :BARY (BARY;     
+M: :XARY (XARY;
+M: :VAR  (VAR; 
+M: RANGE|` (RNG| ?XEP+|; 
+M: <RANGE|` (<RNG| ?XEP-|; 
+M: ITER|` STR| ?XEP+|;  
+M: <ITER|` VAL (<RNG| ?XEP-|; 
+M: :|C |C.; 
+
+<M> 
+\ : (, @R+ , ;
+
+\ MAKERS 
+: QUAN  :VAR3 
+: VALUE :SET2 
+: CONST ,| =H  :CON  ;; 
+: |VALUE =H CALL` :EX :SET2 THEN` CONST ;  
+
+: VQUAN   :VAR3
+: VECTOR  :SET2 
+: DEFER ,| =H :JUMP  ;;
+: CREATE-- H TO HLD [ T 5+ @ #'-'- = 0; EX HLD TO H |T DEA> ]
+: CREATE  =H :VAR ;
+: VARIABLE 0
+: VAR ,|  CREATE
+; 
+ 
+: D# >, HERE EX LASTH! ;
+: `DO POP T' ,<  0 VECTOR  `vDO
+: DO# `DO TOKEN? ">NUM `vDO ; 
+: ZDO `DO 0 `vDO ; 
+: DO  `DO   `vDO ; 
+: DO' `DO ' `vDO ;
+: FMLY AT `vDO DROP| STR| DUP `vDO OVER+ ;
+: FML# AT `vDO TIMES| VAL DO# ;;
+
+: CSP! SP@ ,<
+0 VALUE CSP
+
+\ : CSP. CR SP@ H. BK DROP
+: CSP? SP@ CSP <> !STACK_CHANGED_!" ;
+CSP!  
+
+
+\ PERFORMING BRANCHES
+: WHILE` :IF MARK>` ;;
+: JUMP|` :| MARK>` ;; 
+: IF-` :IF- MARK>` ;;  
+: -IF` :-IF MARK>` ;;  \ M: -IF` 1+ IF-; 
+: NEXT-` THEN` 
+: UNTIL-` :IF- <RELS` ;; 
+: TWICE|` CALL` THEN` ;; 
+' WHILE` =: IF`
+
+\ PERFORMING_BRANCHES
+: UNTIL` :IF <RELS` ;; 
+: REPEAT` TO THEN` AGAIN` ;;    
+: ELSE` TO THEN` (| CSWAP>`  
+: AHEAD` :JUMP MARK>` ;; 
+: FOR-` :JUMP SKIP 
+: FOR` :FOR MARK>` BEGIN` ;;
+: NEXT` THEN` :NEXT <RELS` ;;
+: RECURSE` T VAL '  VAL ,| ;
+
+<M> 
+
+M: :0> (D#0;         
+M: :1> (D#1;         
+M: :2> (D#2;  
+M: :code (code;     
+\ M: TRICE|` CALL TWICE| THEN; 
+<M> 
+
+>, 2* 
+: `ARY| 2* 1+ 2/ =H EX |LASTH 
+: `CLARYW TIMES| Z, 
+; 
+
+\ HELPERS
+: .( ') PARSE TYPE ;;
+: `CLARYSET Z, MARK>` SWAP `CLARYW THEN` ; \ SET
+: DOES>` :code SKIP 
+: 0#> D# :0> ;; 
+: 1#> D# :1> ;; 
+: 2#> D# :2> ;;
+\ \ DBG.  CSP.
+
+: OPS 
+POP SP@ !R+ @R+ XR XA SKIP +2/ DUP J D2/ NOT PUSH 0= +* U< NAND
+NEG 0< -/ A@ RP@ EX 2/ DROP RDROP; DROP;  RDROP 
+(MAC (!" (." (" (@" (/" (," ("SW (BSCN  \ "PRIMITIV'S 
+ OVER ; 
+\ CSP.
+
+: PRBA1 \ FOR MACROSES
+  :code :0> :1> :2>  \ DOES
+\ :MC" :!" :." :" :@" :/" :," :SW" :SC" \ "PRIMITIV'S MACRO
+ :# :VAR :VAR3 :SET2 :CON :BARY :LARY :WARY :XARY :|  \ :; 
+ :JUMP  :FOR :NEXT ;
+\ \DBG. CSP.
+
+: PRBA  0 BEGIN UNTIL- FOR- NEXT-
+ TWICE| RANGE| <RANGE| BEGIN UNTIL JUMP| THEN RDROP IF- THEN 
+-IF THEN IF THEN (; ,<  \ TEST PRIMITIV'S MACROSES
+\ DBG.  CSP.  \ CHECK AGAINST STACK CHANGE
+PRBA1
+FORGET OPS  
+
+: N3, ,' Z, \ H TO CSP
+: TOK, =" CSTR AT S, ;  
+
+\ FACTORIES OF MAKERS 
+: `MKR CREATE , EX ,' ;    \ <BUILD   
+: `W, STR , ;
+: 3MKR `MKR , , DOES>  `W,    
+: `W: `W, 
+: `(:  :` `W, @EXEC ; 
+: 2MKR `MKR , DOES> `W: ;     
+: 1MKR `MKR DOES> `(: ;
+: BARY VAL `ARY| :BARY ; 
+: WARY      `ARY| :WARY ; 
+: LARY TO   `ARY| :LARY ; 
+: XARY      `ARY| :XARY ; 
+: BCONST :|C CONST ; 
+
+: BYTE. HERE ' -
+: BYTES? SPC . ."BYTES__" ;
+: P=: ALIGNED HERE 1+ =: CSP! ; 
+\ DBG.  CSP.
+
+\ : EXPORT -1 C: =: ;
+\ : EXPORTED FND?? 2@ FND?? DUP @ NOT A" DEFINED"  2! ;
+\ P=: BRK $CC C, ' (NOP 1- JMP#,
+
+\ 345678901234
+CR .( MACRO2  ) BYTE. MMRK
+<M> 
+
