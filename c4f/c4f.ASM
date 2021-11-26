@@ -366,6 +366,14 @@ P_ _AST                   ; A!
 P_ _DROP              ; (DROP
   JMPS   @DROP
 	
+P_ _RST                   ; A!
+	MOV		RSP,TOP
+  JMPS   @DROP
+	
+P_ _DST                   ; A!
+	MOV		DSP,TOP
+  JMPS   @DROP
+	
 P_ _POPSTX
   POP   IP
   SKIPB

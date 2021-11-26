@@ -1,0 +1,61 @@
+CR ."REM1_"
+
+\ FORGET C@+
+
+: C@+ PUSH C!R+ POP; ,<
+M: 2@` @2 SWAP ;
+: D, SWAP , VAL ,| ;
+: PAD H (@+; ,< 324 ,
+VAL' SEVAL =: EVAL
+
+: "+BL! BL 
+: "+C! SWAP 
+: C+"! ?XEP| NAME> C! J ++ ;
+0 VAR PARS# Z,         \ DOUBLE VAR AFTER VARCON
+0 VAR `LVL# 
+: `LVL- `LVL# -- ;
+' (VAR  1#> PUSH @I S>M A@ POP!; ,<  2#> 2@ OVER- ;
+<M> 3MKR `"ADDER D, <M> 
+: (TEXT) ,<
+D0 `"ADDER `"ACCUM  
+\ TO' `"ACCUM  =: ()+S
+
+: `>PADPAD PAD 
+: (EMPTY) DUP `"ACCUM 
+: 2! DROP| 4+ 2!- ;
+
+: `// PARS# @+ ! ;  
+: `INITER  PARS# OFF `// `LVL# OFF `>PADPAD  \ EMPTY REMARK
+  AT FIND @ ,< \ TO `(LOCATE  SAVE
+0 VALUE  `(LOCATE  \  OLD INTERPRETTER MODE  
+
+: `?PAR+ `LVL# @ 0<>; \ NON FOUND 
+  TBUF  C@ 1- IF
+       TBUF CSTR OVER C@ '~ =    IF S1- THEN SWAP C!- 
+  THEN
+: `PAR+ "+BL! CSTR TO `"ACCUM  
+: `PAR++  PARS# ++ ;
+: `(  PARS# ++ ;
+: `) `LVL# @ `LVL- 0<>; \ `LVL# = -1 IS "OK" TO EXIT (
+: `)))   `(LOCATE AT FIND !   ;  
+
+CREATE `REM-TBL
+N3, `( (  N3, `) )  N3, `// |  N3, \` \  Z, Z, ,"^@" ALIGNED
+
+: (`   : ( `INITER  \ SAVE OLD INTERPRETTER MODE
+ TO FIND `REM-TBL FND 4+ ;  \ NEW (INTERPRETTER
+\  >LOCATE `">1C ?()|\" `?PAR+ `( `V) `// \` ,< 
+: |() (` EX  `))) ;   \ COMMENTS LIKE PREPOSITION 
+: (?) '  |()  EXECUTE  EX PARS# 2@ ;
+: (INCLUDE) TO TOKEN? |()  VAL INCLUDE ;
+' `?PAR+ 4 OPER[] !
+' @EXEC  5 OPER[] !
+
+( 
+~( ID1 ID2 ID3 ID4 ID5 ~| ID0 ID9 ID8 ID7 ID6 ID5
+  ID2 ID4 ID6 ID8 
+  ID09876 
+~)  CR (TEXT) TYPE 
+)
+BYTE. C@+
+

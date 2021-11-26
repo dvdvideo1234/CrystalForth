@@ -137,7 +137,7 @@ FORGET OPS
 : `W, STR , ;
 : 3MKR `MKR , , DOES>  `W,    
 : `W: `W, 
-: `(:  :` `W, @EXEC ; 
+: `(:  =H `W, @EXEC ; 
 : 2MKR `MKR , DOES> `W: ;     
 : 1MKR `MKR DOES> `(: ;
 : BARY VAL `ARY| :BARY ; 
@@ -145,6 +145,7 @@ FORGET OPS
 : LARY TO   `ARY| :LARY ; 
 : XARY      `ARY| :XARY ; 
 : BCONST :|C CONST ; 
+: R&D "R&D.CF" VAL INCLUDE ;
 
 : BYTE. HERE ' -
 : BYTES? SPC . ."BYTES__" ;

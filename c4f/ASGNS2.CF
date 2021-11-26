@@ -34,7 +34,9 @@ APT- _NEG       =: NEG     \ V
 APT- _ALD       =: A@      \ V
 APT- _AST       =: A!      \ V
 APT- _RPLD      =: RP@     \ V
+APT- _RST       =: RP!      \ V
 APT- _SPLD      =: SP@     \ V
+APT- _DST       =: SP!      \ V
                 
 \ 4 STACK         
 APT- _NIP       =: NIP     \ V

@@ -1,96 +1,44 @@
-: FOREACH 
-  >EACH >" PARCOMEN  ,< 
-  
-{ SADR SLEN CNT // STEP OFST DEST } 
-
-FUNCTION `FOREACH 
-LOCALS/ 
-
-  : BAD? 
-    !"PARAMS?" 
-  ; 
-  
-  : XLAT[I] J NOT BL + ,<
-  BL BARY XLAT
-  
-  : MACROPARAMS? 0 XLAT BL ERASE
-    >EACH CSTR 
-    .TIMES; 
-      CSTR DUP BL U< 
-      DROP ?;  
-      XLAT INC 
-  ;
-  
-  : HAS_PARAMS? 
-    0 XLAT C@ BAD?  \ ^@ MOT ALOWED
-    BL FOR          \ FORWARD 
-      XLAT[I] C@ 
-      IF
-        AT STEP INC
-        STEP XLAT[I] C!
-      THEN  
-    NEXT DROP
-    STEP 0<>;
-      1 TO STEP 
-      "_^A" >EACH "+! DROP 
-  ; 
-    
-  : PREPARE 
-    [ 
-      SADR STEP DUP AT SLEN +! NPAR TO SADR 
-    ] 
-    OFST  TO DEST >EACH CSTR 
-    .TIMES; 
-      CSTR DUP BL U< 
-      IF 
-        XLAT C@  \ XLAT OPERATION
-        1- PUSH  SADR POP N`THP 
-        .TIMES; CSTR 
-      THEN 
-          DEST C!+ TO DEST 
-  ; 
-  
-  { : PARDUMP CR 
-    SADR N. ."SADR_" 
-    SLEN N. ."SLEN_"
-    CNT  N. ."CNT__"
-    STEP N. ."STEP_"
-    OFST N. ."OFST_"
-    DEST N. ."DEST_"
-    TBUF BL DUMP CR
-  ; }
-  
-/LOCALS 
-  CNT 0; MACROPARAMS?
-  SADR SLEN + TO OFST \ PARDUMP
-  SADR CNT NPAR OFST - BAD? HAS_PARAMS? \ PARDUMP
-  CNT STEP (/MD !"ODDLIST" 0 TO SLEN 	TIMES; 
-    PREPARE OFST DEST OVER- EVAL 
-RETURN 
-;
-
-/S
-
-\ { + - U* U/ 2* 2/ UMOD NEG GAGA } "CR_>." FOREACH
-
-: ** DUP U* ; : 2^ 1 SWAP TIMES; 2* ;
-CR { ASDF ASFD AFDS AFSD } ">." FOREACH 
-{ %1111 $20 '~ 3#200 7#100 99 ^A 'A } \ SHOW}
-CR ">NUM_^A_." FOREACH .
-
-{ %1111 $20 '~ 3#200 7#100 99 ^A 'A } \ SHOW}
-CR ">NUM_^A_NEG_." FOREACH 
-CR { %1111 $20 '~ 3#200 7#100 99 ^A 'A } SHOW}
-CR ">NUM_^A_**_." FOREACH 
-
-\ { + - U* U/ 2* 2/ UMOD NEG } SHOW}
-\ CR  "'_^A_'$_EMIT_H._>._=:_>._^A" FOREACH
-\ CR { + - U* U/ 2* 2/ UMOD NEG } SHOW}
-\ CR  ">._^A_>._=:_>._^B" FOREACH
-{ 1 A 2 B 3 C 4 D 5 E 6 F } SHOW}
-CR  ">._^A_>._^B_SPACE" FOREACH 
-\ ">NUM_^A_CONST_^B1" FOREACH 
-
-CR { 1 . 2 3 + } ">._??^A!!" FOREACH
-CR 
-
+: (SZ) "CR_.(_^A_)_BYTE._^A" 
+`( "HOW `)         : (FOREACH) (TEXT) 
+`( "HOW SADR SLEN `| CNT STEP OFST TEMP `)  FUNC: FOREACH
+FLOCK:
+  : HAS-PARAMS? "HOW CSTR 
+  : HAS-^CHARS   TBUF (EMPTY) 
+    STR| CSTR ^#CHAR;  \ ON NOT ^ CONTINUE
+      TO TEMP (TEXT) TEMP BSC 1+ 0<>; \ ON FOUND CONTINUE
+  : TEMP+ AT TEMP 1 ()+S
+  ;  
+  : SET_PARAMS
+  SSP TO "HOW  (TEXT) 
+    ITER|
+     C@ PUSH "HOW STR 
+     BEGIN  I C?IN  
+	 WHILE  
+	   PUSH STEP OVER 1- C! POP 
+     REPEAT 2DROP  AT STEP INC  
+     EXIT
+  ;  
+  : PREPARE VAL ()+S 2@ AT CNT 2! \ SAVE (TEXT)
+    [ STEP AT OFST +! \ TO NEXT TUPLE  
+	  (TEXT)          \ RESULT OF PREPARE
+	   AT CNT 2@ VAL ()+S 2!  \ RESTORE (TEXT)
+	] 
+	T 1K - (EMPTY) "HOW STR 
+	STR|  
+	  CSTR (|JUMP TEMP+ DUP TO TEMP ^#CHAR; 
+	  RDROP  1+ OFST + PUSH SADR STR POP AT SCANP# TBUF 
+	  CSTR ()+S
+	;
+;FLOCK
+  "HOW C@ 0; SLEN 0; 
+  HAS-PARAMS? (TEXT) NIP 0; \ NOTHING >DO
+  SLEN 1K U< #">LIST" \ LIST TOO BIG 
+  "HOW  ">S ?SSP| SET_PARAMS  \ PUSH AND PREPARE "HOW"   
+  SADR SLEN  2DUP HAS-^CHARS (TEXT) !""^LIST"  DROP  \ SINTAX
+  >S ?SSP| SSP DUP TO SADR \ PUSH LIST
+  STR 1K TO SCANP#  DUP TO SLEN 0; \ LIST EMPTY ?
+  SLEN STEP D/M !"%LIST" \ TUPLES ?
+  TO (EMPTY) \  TO EMPTY  (TEXT)
+  TIMES| 
+    PREPARE >S ?SSP| SSP STR EVAL
+RETURN ;
