@@ -1,7 +1,5 @@
 CR ."REM1_"
 
-\ FORGET C@+
-
 : C@+ PUSH C!R+ POP; ,<
 M: 2@` @2 SWAP ;
 : D, SWAP , VAL ,| ;
@@ -30,8 +28,8 @@ D0 `"ADDER `"ACCUM
 0 VALUE  `(LOCATE  \  OLD INTERPRETTER MODE  
 
 : `?PAR+ `LVL# @ 0<>; \ NON FOUND 
-  TBUF  C@ 1- IF
-       TBUF CSTR OVER C@ '~ =    IF S1- THEN SWAP C!- 
+  DUP  C@ 1- IF
+        CSTR OVER C@ '~ =    IF S1- THEN SWAP C!- 
   THEN
 : `PAR+ "+BL! CSTR TO `"ACCUM  
 : `PAR++  PARS# ++ ;
@@ -57,5 +55,6 @@ N3, `( (  N3, `) )  N3, `// |  N3, \` \  Z, Z, ,"^@" ALIGNED
   ID09876 
 ~)  CR (TEXT) TYPE 
 )
+
 BYTE. C@+
 
