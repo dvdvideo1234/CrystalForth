@@ -1,0 +1,160 @@
+\ PSFILTER.SEQ  Extract text from a Postscript file, 09sep93cht
+
+( comment:
+
+Copy from COPYFILE.SEQ by C. H. Ting.
+
+The output file uses a handle defined as OUTHCB.  The input file
+opens a handle on the top of the handle stack by SEQUP, because the
+LINEREAD routine insists on reading the file whose handle is pointed
+to by SHNDL, on the top of the handle stack.  At the end of COPYFILE,
+this handle is dropped by SEQDOWN.
+
+After input file handle and output file handle are set up, one line
+is read from the input file and written to the output file until the
+end of the input file.
+
+In a Postscript file, texts are enclosed in parentheses.  I want to
+extract texts out and place them in another file.  The strategy is
+to search the first left parenthesis to determine the head of the
+text, and then get the last right parenthesis for the end of text.
+Copy the line to the output file and continue until the end of
+the input file.
+
+Later, I will do character replacement for \ \222 and \(.
+
+Postcript string output command is \ SB x y n string n -- 
+If y chnages more than 10, start a new line.
+If y changes more than 60, start a new paragraph.
+
+COPYFILE.SEQ, 6-16-88, C. H. Ting
+Add filter, 9-01-93, C. H. Ting
+
+comment; )
+
+empty
+decimal
+
+variable ?LF                                    \ LF or CR
+variable lastX
+variable lastY
+variable currentX
+variable currentY
+
+defer work   ' noop is work                     \ whatever you like
+                                                \ to do with the
+                                                \ input lines.
+handle outhcb                                   \ output file
+
+: getXY ( -- )
+        'TIB @ >R
+        #TIB @ >R
+        >IN @ >R
+        outbuf count #TIB ! 'TIB !
+        0 >IN !
+        bl word number drop currentX !
+        bl word number drop currentY !
+        R> >IN !
+        R> #TIB !
+        R> 'TIB !
+        ;
+
+: leftParen ( addr1 -- addr2, 0 if no left parenthesis )
+        count ( addr count -- )
+        0 do    count 40 =
+                if undo exit then
+        loop
+        drop 0
+        ;
+
+: rightParen ( addr1 -- addr2, 0 if no right parenthesis )
+        count swap over + 1-
+        swap
+        0 do    dup c@ 41 =
+                if undo exit then
+                1-
+        loop
+        drop 0
+        ;
+
+: ?SB ( addr -- flag, is BS at end of line? )
+        count + 4 -
+        count 83 =
+        if      count 66 =
+                if drop true
+                else drop false
+                then
+        else    drop false
+        then
+        ;
+
+: extractText ( addr1 -- addr2 count )
+        dup ?SB 0=
+        if false exit then
+        getXY
+        dup leftParen
+        ?dup if
+                swap rightParen
+                ?dup if
+                        over - 0 max
+                else    0
+                then
+        else    0
+        then
+        ;
+
+: copyText ( addr -- )
+        extractText
+        ?dup if dup outbuf !
+                outbuf 1+
+                swap cmove
+                lastY @
+                currentY @ dup lastY ! - abs
+                dup 60 >
+                IF      outbuf count +
+                        13 over c!
+                        1+ 10 swap c!
+                        2 outbuf c+!
+                        drop
+                ELSE    10 >
+                        IF      32 outbuf count + c!
+                                1 outbuf c+!
+                        THEN
+                THEN
+        else    drop
+                0 outbuf !
+        then
+        ;
+
+' copyText is work
+
+: copying       ( -- )
+        0 lastY !
+        0.0 seek ibreset                        \ init input file
+        begin   lineread                        \ read one line
+                dup c@                          \ end-of-file?
+        while   work
+                outbuf count                    \ get the line
+                outhcb hwrite drop              \ write it out
+        repeat                                  \ until done
+        drop
+        ;
+
+: copyfile      ( COPYFIL <inputfile> <outputfile> <return> )
+        sequp                                   \ Initialize a new
+                                                \   handle on the handle
+                                                \   stack.
+        seqhandle !hcb                            \ input file spec
+        outhcb !hcb                             \ ouput file spec
+        cr ." Copying from " seqhandle count type \ anounce copying
+           ."  to " outhcb count type
+        cr seqhandle hopen abort" Open file error"  \ open input file
+        outhcb hcreate abort" Create ERROR!"    \ make output file
+        0.0 outhcb movepointer                  \ reset file pointer
+        copying                                 \ copy the file
+        seqdown                                 \ Close input file
+                                                \   and release the
+                                                \   input file handle.
+        outhcb hclose drop ;                    \ close output file
+
+

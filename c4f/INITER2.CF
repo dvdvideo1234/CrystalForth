@@ -7,7 +7,7 @@
 ' `[>, VAL' `COMPNUM  T!    \ FIX @COMP_WORD
 '  `.     ' @ERR      T!    \ FIX ERROR.
 TO' ACCEPT ' `@ACPT   T!    \ FIX ACCEPT IN MAINLP
-' `EVAL  VAL' `@ACPT  T!    \ FIX EVAL IN MAINLP
+' EVAL  VAL' `@ACPT   T!    \ FIX EVAL IN MAINLP
 '  `OK    ' @OK       T!    \ FIX  vOK.
 ' `T>    ' CFND       T!    \ FIX CFND
 ' `ALLCLR  ' `@ABINI  T!

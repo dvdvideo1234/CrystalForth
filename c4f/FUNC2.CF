@@ -1,0 +1,56 @@
+\ CR ."FUNC2_"
+
+  0 VALUE `PAR^  \ RUNTIME OF FUNC:
+2#> : `@PAR @ : `PAR+ `PAR^ + ; 0#> `@PAR @ ; 1#> `@PAR ! ; ROT
+3=: V0 -2 ,    3=: V1 -4 ,    3=: V2 -6 ,    3=: V3 -8 ,
+3=: V4 -10 ,   3=: V5 -12 ,   3=: V6 -14 ,   3=: V7 -16 ,  
+DROP DROP DROP 
+
+: (PAR C@R+ C@R+ OVER OVER +        \ PARS LOCS AND  PARS+LOCS
+  `PAR^ XR RP@ TO `PAR^  SWAP       \ SAVE & SET PARPTR
+  NEG 2* `PAR+ DUP RP! PUSH XR PUSH \ SIZE CALC & ALLOC AT RSP
+  FOR-   0 !R+  NEXT- DROP          \ `ZEROS 
+  FOR- SWAP !R+ NEXT- DROP RDROP    \ `FILLPAR
+  EX   `PAR^ RP!  POP  TO `PAR^ ;   \ ON EXIT FUNCTION
+
+\ : `SCANP; POP  NOT `V2 + TO `V2  : `!TBUF TBUF OFF ;
+\ : `>WORD DROP|  : `>PAR# DROP|  : SCANP#
+\  (PAR ,< 3 C, 0 C, >, `V0 `V1  MEMTI| [ `V2 `V1 LTIB - ] `V2
+\   `!TBUF FOR TOKEN NIP (IF `SCANP;   NEXT RDROP; ,<
+
+\ 0 VALUE `OLDT    \ COMPILETIME OF FUNC:
+\ : RETURN` `OLDT TO T ; \ COMPILETIME OF FUNC:
+\ : LOC/` AHEAD` CSTK> CSP! T,< ;
+\ : /LOC  CSP? TO CSTK>  THEN`  T>, ;
+\ 
+\ \ END-ADDR & LEN --> WA WL NEWLEN
+\ : FUNC:` : FUNC: PARS# @2 (TEXT) DUP ROT -
+\  (PAR ,< 4 C, 0 C, >,
+\  bs `V0 U<  !">FNPARS" C: : T TO `OLDT  `V0 IF
+\  (# `V0 DUP `V0 bs U* + SWAP DO I 0 BL `V2 `V3 (PARS TO `V3
+\  TO PUSH" N3  bs +LOOP THEN  (# (PAR , `V0 `V1 - C, `V1 C, ;
+ 
+
+CR .( FUNC2    ) BYTE. `PAR^
+
+( 
+~( 
+A \ FIRST  PARAMETTER
+B \ SECOND PARAMETTER
+~) 
+FUNC: A+B 
+LOC/
+  : G A B - ;
+  : D A B + ;
+  : E A B U* ;
+  BL =: `
+/LOC
+G .
+D .
+E .
+RETURN ; 
+)
+
+\ (TEXT) EVAL
+
+\ ;FUNC"

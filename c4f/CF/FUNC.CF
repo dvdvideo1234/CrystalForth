@@ -1,0 +1,43 @@
+CR ."FUNC"  0 VALUE `PAR^  \ RUNTIME OF FUNC:
+2#> : `@PAR @ : `PAR+ `PAR^ + ;   0#> `@PAR @ ;  1#> `@PAR ! ;
+<M> ROT 3MKR `PQUAN ,  <M> 
+-2 -2 8 FMLY `PQUAN `V0 `V1 `V2 `V3 `V4 `V5 `V6 `V7
+
+: `SETPAR @R+ W>B I 1- C@ 2DUP +  \ PARS LOCS AND  PARS+LOCS 
+  `PAR^ XR PUSH AT PARSTACK @ TO `PAR^ \ SAVE & SET PARPTR
+  NEG 2* `PAR+ DUP AT PARSTACK 4+ U< !"PAR" \ SIZE CALC & CHK
+  DUP PUSH  AT PARSTACK !  \ OK - THEN REGISTER & PREPARE R
+  FOR- 0 !R+ NEXT- DROP           \ `ZEROS 
+  FOR- SWAP !R+ NEXT- POP 2DROP   \ `FILLPAR
+  EX   `PAR^  AT PARSTACK !  POP  TO `PAR^ ; \ ON EXIT FUNCTION
+
+: `SCANP; POP  NOT `V2 + TO `V2  : !TBUF TBUF OFF ;
+: `>WORD |DROP  : `>PAR# |DROP  : SCANP#
+ `SETPAR ,< 3 C, 0 C, >, `V0 `V1  MEMTI| [ `V2 `V1 LTIB - ] `V2
+  !TBUF FOR TOKEN NIP IF ? `SCANP;  NEXT ;; ,<
+
+ 0 VALUE `OLDT   : RETURN` `OLDT TO T ; \ COMPILETIME OF FUNC:
+: FLOCK:` AHEAD` CSP! CSP CSP! ,<` ;
+: ;FLOCK  ?CSP TO CSP   THEN`  CSP! >, ;
+
+: `FNC? `FPARS#^ @2 + XEP| bs J U<  !"#FNPARS" C: : ; : FUNC:`
+: FUNC: `FNC? T TO `OLDT   FOR I 2* 4* (# `V0 + 0 (TEXT) I 1+
+ `>WORD TBUF (=: NEXT   (# `SETPAR , `FPARS#^ @2 C, C, ;    
+ 
+BYTE. `PAR^
+( 
+`( A B `) 
+FUNC: A+B 
+FLOCK:
+  : G A B - ;
+  : D A B + ;
+  : E A B U* ;
+;FLOCK
+G .
+D .
+E .
+RETURN ; 
+)
+\ (TEXT) EVAL
+
+\ ;FUNC"

@@ -1,0 +1,47 @@
+: SEND ( a xt )
+    CALL PUSH  SWAP CALL EXECUTE POP THEN (SET2 THEN ,<
+0 CONST SELF
+: SELF+ ( n - a ) SELF + ;
+: LIT, ( x )
+   :#` , ;
+\ VARIABLE CLS ( contains ta )
+0 VALUE CLS
+: SIZE^ ( - aa )
+    CLS 0"scope?" CLS
+: CELL+ 
+	2+ ;
+: >SIZE ( ta - n ) CELL+ @ ;
+
+
+: CLASS ( "c " )
+    CREATE HERE 0 , 0 , 0 ,
+    WORDLIST OVER ! 
+: METHODS ( ta )
+    DUP TO CLS  @ DUP SET-CURRENT
+    >R GET-ORDER R> SWAP 1+ SET-ORDER ; ( ALSO CONTEXT ! )
+
+: MFIND ( ta ca u - xt n )
+    2>R BEGIN DUP WHILE DUP @ 2R@ ROT
+    SEARCH-WORDLIST ?DUP IF ROT DROP 2R> 2DROP EXIT THEN
+    CELL+ CELL+ @ REPEAT -1 ABORT" can't?" ;
+: SEND' ( a ta "m " )
+    BL WORD COUNT MFIND 0< STATE @ AND
+    IF SWAP LIT, LIT, POSTPONE SEND ELSE SEND THEN ;
+
+: SUPER ( "m " )
+    SIZE^ CELL+ @ BL WORD COUNT MFIND 0>
+    IF EXECUTE ELSE COMPILE, THEN 
+	; IMMEDIATE
+: DEFS ( n "f " )
+    CREATE SIZE^ @ , SIZE^ +!
+	IMMEDIATE
+    DOES> @ STATE @ IF LIT, POSTPONE SELF+ ELSE SELF+ THEN ;
+: SUBCLASS ( ta "c " )
+    CLASS SIZE^ OVER >SIZE OVER ! CELL+ ! ;
+: END ( )
+    SIZE^ DROP PREVIOUS DEFINITIONS 0 TO CLS ;
+: NEW ( ta "name " )
+    CREATE DUP , >SIZE ALLOT
+	IMMEDIATE
+    DOES> DUP CELL+ SWAP @ SEND' ;
+	

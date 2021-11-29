@@ -1,0 +1,27 @@
+: PAD H (@+; ,< 324 ,
+0 VAR PARS# Z,         \ TOTAL PARAMS | AFTER PARAMS
+0 QUAN `LVL# 
+: (TEXT) PAD 2- STR  ;
+: `// PARS# @+ ! ;  
+: `INITER  PARS# OFF `// AT `LVL# OFF PAD 2- OFF \ EMPTY REMARK
+  AT FIND @ ,< \ TO `(LOCATE  SAVE
+0 VALUE  `(LOCATE  \  OLD INTERPRETTER MODE  
+
+: `?PAR+ `LVL# 0<>;  PARS# ++ CSTR DUP 1- IF OVER C@ '~ =
+ ?S1- THEN  S1+ OVER BL SWAPC!  PAD 2- +S! DROP; ,<
+: `(  AT `LVL#  ++ ;
+: `) `LVL#  AT `LVL# -- 0<>; \ `LVL# = -1 IS "OK" TO EXIT (
+: `)))   `(LOCATE AT FIND !   ;  
+
+CREATE `REM-TBL
+N3, `( (  N3, `) )  N3, `// |  N3, \` \  Z, Z, ,"^@" ALIGNED
+
+: (`   : ( `INITER  \ SAVE OLD INTERPRETTER MODE
+ TO FIND `REM-TBL FND 4+ ;  \ NEW (INTERPRETTER
+\  >LOCATE `">1C ?()|\" `?PAR+ `( `V) `// \` ,< 
+: |() (` EX  `))) `LVL#  ;   \ COMMENTS LIKE PREPOSITION 
+: (INCLUDE) TO TOKEN? |()  VAL INCLUDE ;
+' `?PAR+ 4 1+ 2* ' OPER[] + T!
+' @EXEC  5 1+ 2* ' OPER[] + T!
+
+CR .( REM2     ) BYTE. PAD

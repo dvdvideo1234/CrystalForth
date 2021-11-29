@@ -1,0 +1,87 @@
+CR .( STROP )
+: !OP [ ">NUM TO ">NUM @EXEC C: @, ] 
+: OP!  POP (# VAL []OPER 8 CMOVE ;
+
+: `ZSR1 0 
+: >SR1 CALL XEP| (SET2 THEN ,<  
+0 CONST  SR1 
+: `SR0; `ZSR1 DUP A! 0; ;
+: `" `SR0;
+: `HLD, A@ 
+: HLD, |HLD C!+ ; 
+: `_ BL HLD, ;
+: `~ HLD CSTR- 128 OR  SWAPC! ; 
+: `^ `SR0; A@ 31 AND HLD, ; 
+: `|ZSR 0 TO SR1 H 4+ TO HLD EX
+       H 4+ HLD OVER- ;
+: `|LAST EX
+       `ZSR1 AHEAD 
+: `">PK CSTR 
+: S>PK `|ZSR `|LAST ITER| C@ >SR1 THEN
+ ("SW ,< 5 , '" C, '^ C, '~ C, '_ C, ALIGNED  
+>, `HLD, C: NOP `" `^ `~ `_ ,<
+\ : TEST " ?12345_^_^1^_1~_G?GL" TO S>PK DUMP ; 
+
+: `C@"= C@ '" = ;;
+ 1- 
+: S- 1- XEP| 1+ ; 
+: `?STR 0 OVER NAME> 1- `C@"= 0; 
+     OVER C@ 1- 0; 
+	 DROP DUP 1+ C@ ; 
+: `" [ S>PK SWAP C!- ]
+       CSTR TO S- DUP 0;
+	   OVER `C@"= 0;
+	   S- ;
+: `." `" ". ;          \ STRING PRINT 
+: `.\ `" H ! ;         \ STRING COMMENT  
+: (BS, ("SKIP SKIP     \ STRING COMPILE  WITHOUT LENGTH
+: `., `" CSTR S, ;     \ STRING COMPILE    WITHOUT LENGTH
+: (:, ("SKIP TO EVAL ; \ STRING EVAL
+: (," POP @, 
+: `.: `" ", ; 
+: `.; 0 SKIP       \ ? ; STRING PRINT ALWAYS  ABORT
+: `.# SWAP 0= SWAP \ 0 #  ON 0 STRING PRINT  ABORT
+: `.! `" PUSH  TBUF OFF  POP  VAL (!" ; \ 0<> ". ABORT
+: `STR `?STR ("SW ,<  TOK, ",!0;:.\ ALIGNED >, 
+ ">NUM	`"  `.,  `.!  `.#  `.;  `.:  `." `.\ ,<
+ 
+: `",  (," ("  
+: `.", (," (."
+: `.?, (," ("SW  \ COMPILING STRING SWITCH
+: `.,, (," (BS,  
+: `.:, (," (:,
+: `.!, (," (!" 
+: `.#, (," (0"  
+: `.;, (," (?" ,<
+: `STRC `?STR ("SW ,<  TOK, ",!0;:.\? ALIGNED >, 
+ TO ">NUM	`",  `.,,  `.!,  `.#,  `.;,  `.:,  `.", `.\ `.?, ,<
+
+: vague? DUP 2+ @ ODD ;
+: DEA' FND?? vague? UNDEF? ;
+HIDE UNDEF?
+: `EXE vague? IF A" NOT DEFINED!" ;THEN @EXEC ;
+: `COM vague? IF H OVER @, SWAP! ;THEN  @, ;
+
+\ : STROP [  `STR `STRC @EXEC C: @, ] OP! ;
+: STROP [  `STR `STRC `EXE C: `COM ] OP! ;
+STROP
+FORGET STROP
+
+'_ CONST c_ \ : `BL '_ ; 
+: `|HLD, EX HLD, ;
+: `SPEC A@ `|HLD, ,<
+'" CONST c"
+>, CSTR
+: S>UPK `|ZSR ITER| C@ DUP 128 AND IF 128 - '~ SWAP `|HLD, THEN
+  `|HLD, ?"_"""^"~"_"   MARK>  c_  `SPEC `SPEC `SPEC `SPEC	
+  THEN                       A@ DUP BL U< 0; '^ HLD, '@ + ; 
+  
+: SDUMP, \ SRC LEN -> SRC' 
+  |DROP |DROP UNTILZ|  DUP 19 UMIN PUSH PUSH DUP J ."__,"""
+  S>UPK  TYPE c" EMIT CR J + POP POP - DUP ;  
+  
+HIDE ."` \ "
+HIDE A"` \ "  
+HIDE "` \ "  
+
+BYTE. !OP

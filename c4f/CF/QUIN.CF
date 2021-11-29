@@ -1,0 +1,188 @@
+FORGET TT : TT ;
+
+: 2^ 1 SWAP TIMES| 2* ; 
+: >' TOKEN?  '" EMIT TO S>UPK TYPE '" EMIT SPC ;
+: ># TOKEN? ">NUM ;  : >. TOKEN? ID. ;
+: ** DUP U* ;        : 0SWAP 0 SWAP ;
+: (SZ) "CR_.(_^A_)_BYTE._^A" AHEAD
+: SUMSQ "^A_**_+" AHEAD
+: SUM "^A_+"  THEN  0SWAP
+( "HOW )         : (FOREACH) THEN (TEXT) 
+( "HOW SADR SLEN | CNT STEP OFST TEMP )  FUNC: FOREACH
+FLOCK:
+  : HAS-PARAMS? "HOW CSTR 
+  : HAS-^CHARS   TBUF (EMPTY) 
+    STR| CSTR ^#CHAR;  \ ON NOT ^ CONTINUE
+      TO TEMP (TEXT) TEMP BSC 1+ 0<>; \ ON FOUND CONTINUE
+  : TEMP+ AT TEMP 1 ()+S
+  ;  
+  : SET_PARAMS
+  SSP TO "HOW  (TEXT) 
+    ITER|
+     C@ PUSH "HOW STR 
+     BEGIN  I C?IN  
+	 WHILE  
+	   PUSH STEP OVER 1- C! POP 
+     REPEAT 2DROP  AT STEP INC  
+     EXIT
+  ;  
+  : PREPARE VAL ()+S 2@ AT CNT 2! \ SAVE (TEXT)
+    [ STEP AT OFST +! \ TO NEXT TUPLE  
+	  (TEXT)          \ RESULT OF PREPARE
+	   AT CNT 2@ VAL ()+S 2!  \ RESTORE (TEXT)
+	] 
+	T 1K - (EMPTY) "HOW STR 
+	STR|  
+	  CSTR (|JUMP TEMP+ DUP TO TEMP ^#CHAR; 
+	  RDROP  1+ OFST + PUSH SADR STR POP AT SCANP# TBUF 
+	  CSTR ()+S
+	;
+;FLOCK
+  "HOW C@ 0; SLEN 0; 
+  HAS-PARAMS? (TEXT) NIP 0; \ NOTHING >DO
+  SLEN 1K U< #">LIST" \ LIST TOO BIG 
+  "HOW  ">S ?SSP| SET_PARAMS  \ PUSH AND PREPARE "HOW"   
+  SADR SLEN  2DUP HAS-^CHARS (TEXT) !""^LIST"  DROP  \ SINTAX
+  >S ?SSP| SSP DUP TO SADR \ PUSH LIST
+  STR 1K TO SCANP#  DUP TO SLEN 0; \ LIST EMPTY ?
+  SLEN STEP D/M !"%LIST" \ TUPLES ?
+  TO (EMPTY) \  TO EMPTY  (TEXT)
+  TIMES| 
+    PREPARE >S ?SSP| SSP STR EVAL
+RETURN ;
+( FOREACH ) (SZ)
+
+\ CR ( ^A ^B ^C ^D ^E ^F ^G ^H ^I ) SUM .
+
+
+: HAN PUSH "SRC" "TMP" "DST" POP 
+( SRC TMP DST DISKS )
+FUNC: HANOJ 
+  DISKS 0; DISKS 1- DUP  TO DISKS  IF 
+    SRC DST TMP DISKS  HANOJ
+    SRC TMP DST 1      HANOJ
+    TMP SRC DST DISKS  HANOJ ;
+  THEN  CR ."Move_Disk_" 
+  SRC "_From_"  CALL      DST "_To_"    THEN
+  ID. ". .""_PILON_" 
+RETURN ;
+( HAN ) (SZ)
+
+\ : SIGN DUP 0< 2* 1+ SWAP 0= + ;
+: SIGN DUP 0; 0< 2* 1+ ;  \ 0</-1 0/0 0>/1
+: SIGN2 DUP 0< SWAP 0= 1+ OR ;  \ 0</-1 0/0 0>/1
+
+: SIGN-1 DUP 1+ 0; 0= 1+ ; \ -1/-1 0/0 */1
+: |TAB? 2+ CNTC + U< IF CR THEN |SPC ;
+
+: QUINS 0 
+( X | Y ) FUNC: `TRY  
+FLOCK: 
+   8   CONST Q8  
+  Q8    BARY ROW  
+  Q8    BARY FROW  
+  Q8 2* BARY DIAG\ 
+  0#> PUSH Y FROW (IXEC X Y + DIAG\ (IXEC Q8 Y - X + ,<
+  Q8 2* BARY DIAG/ 
+  ?:, QUIN-POSITION-POSIBLE?  >, C@ OR ; 
+  ?:, QUIN-SET   >, C_ON ; 
+  ?:, QUIN-RESET >, C_OFF ; 
+  DROP
+  : NEW-QUIN-POSITION Y 1+ X ROW C! ; 
+;FLOCK   
+  X Q8 U< IF 
+    Q8 TIMES| 
+      J TO Y    0 QUIN-POSITION-POSIBLE? 0<>;  
+      NEW-QUIN-POSITION    QUIN-SET  X 1+ `TRY   QUIN-RESET ;
+  THEN 80 Q8 |TAB? 0 Q8 ITER| ROW C@ DIG.
+RETURN ;
+( QUINS ) (SZ)
+
+
+EXPORT !PRINT-PERM
+EXPORT !SWAP-PERM
+
+( N ) FUNC: PERMUTE 
+FLOCK:
+  : `!PRINT-PERM POP ,<    0 VECTOR vPRINT
+  : `!SWAP-PERM  POP ,<    0 VECTOR vSWAP
+  EXPORTED  `!SWAP-PERM  !SWAP-PERM 
+  EXPORTED  `!PRINT-PERM !PRINT-PERM 
+;FLOCK 
+    AT N DEC  
+    N 0< 0<>;  
+    N IF ? vPRINT 
+    N PERMUTE  
+    N TIMES|  
+      J N vSWAP 
+      N PERMUTE  
+      J N vSWAP
+RETURN ;
+( PERMUTE ) (SZ)
+
+
+( ASTR ( "STRING" ) ) FUNC: PERM 
+FLOCK:  
+   0 VALUE LEN   
+  20 BARY  ARP  
+  : >PRINT !PRINT-PERM  80 LEN  |TAB? 0 ARP LEN TYPE ; 
+  : >SWAP  !SWAP-PERM  ( S D ) ARP PUSH ARP DUP PUSH
+    C@ ( S@ )      J  C@ ( D@ ) POP C! ( S! ) POP  C! ( D! ) ;
+;FLOCK 
+  >SWAP  >PRINT  ASTR  CSTR 20  UMIN   TO LEN
+  CR  0 ARP LEN CMOVE  LEN  PERMUTE 
+RETURN ;  
+( PERM ) (SZ)
+
+;S
+
+\ ----------------
+
+CR ( ASDF ASFD AFDS AFSD ) ">._^A" (FOREACH) 
+
+CR 0 ( %1111 $20 '~ 3#200 7#100 99 ^A 'A ) 
+">#_^A_." (FOREACH) .
+CR ( %1111 $20 '~ 3#200 7#100 99 ^A 'A ) 
+">#_^A_NEG_." (FOREACH) 
+CR ( %1111 $20 '~ 3#200 7#100 99 ^A 'A ) 
+">#_^A_**_." (FOREACH) 
+
+CR ( + - U* U/ 2* 2/ UMOD NEG ) ">._^A" (FOREACH)
+CR ( + - U* U/ 2* 2/ )
+ "'_^A_'$_EMIT_H._>._=:_>._^A" (FOREACH)
+CR ( + - U* U/ 2* 2/ UMOD NEG ) ">._^A_>._=:_>._^B" (FOREACH)
+( 1 A1 2 B1 3 C1 4 D1 5 E1 6 F1 ) 
+">#_^A_CONST_^B" (FOREACH) 
+
+CR ( 1 . 2 3 + ) "" (FOREACH)
+CR ( %1111 $20 '~ 3#200 7#100 99 ^A 'A ) 
+">'_^A" (FOREACH)
+
+CR 
+
+( \ DFGHDFGH
+: \ DFGHDFGHDFGH
+A \ SDFGHDFGHDFGHDFG
+2 ( SDFGHSDFGHDFG ( SDFGSDFGSDF ) )
+3 \ SDFGDFGHFD
++ ( FDGHDFGHDFG
+)
+.
+;
+) (TEXT) EVAL
+
+(  0   1   2   3   4   5   6   7   8   9  
+  10  11  12  13  14  15  16  17  18  19
+  20  21  22  23  24  25  26  27  28  29
+  30  31  32  33  34  35  36  37  38  39
+  40  41  42  43  44  45  46  47  48  49
+  50  51  52  53  54  55  56  57  58  59
+  60  61  62  63  64  65  66  67  68  69
+  70  71  72  73  74  75  76  77  78  79
+  80  81  82  83  84  85  86  87  88  89
+  90  91  92  93  94  95  96  97  98  99
+ 100 )
+
+CR (TEXT) TYPE 
+CR .(  SUM 1..100 = ) SUM . 
+CR CR

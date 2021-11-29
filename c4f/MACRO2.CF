@@ -32,6 +32,8 @@ M: :|C |C.;
 
 <M> 
 \ : (, @R+ , ;
+: 3=: ?XEP| ,
+: 2-: ?XEP| , ==: ;
 
 \ MAKERS 
 : QUAN  :VAR3 
@@ -146,6 +148,19 @@ FORGET OPS
 : XARY      `ARY| :XARY ; 
 : BCONST :|C CONST ; 
 : R&D "R&D.CF" VAL INCLUDE ;
+
+0 VALUE `OLDT    \ COMPILETIME OF FUNC:
+: RETURN` `OLDT TO T ; 
+: LOC/` AHEAD` CSTK> CSP! ,<` ;
+: /LOC  CSP? TO CSTK>  THEN`  >, ;
+
+\ COMPILETIME OF FUNC:
+: FUNC:` : FUNC: PARS# @2 (TEXT) DUP ROT -
+ (PAR ,< 4 C, 0 C, >,
+ bs V0 U<  !">FNPARS" C: : T TO `OLDT  V0 IF
+ (# V0 DUP V0 bs U* + SWAP DO I 0 BL  V2 V3 (PARS TO V3
+ TO PUSH" N3  bs +LOOP THEN  (# (PAR , V0 V1 - C, V1 C, ;
+ 
 
 : BYTE. HERE ' -
 : BYTES? SPC . ."BYTES__" ;

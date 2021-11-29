@@ -1,0 +1,34 @@
+( STRING PRIMITIVES )
+: UCSTR XEP| CSTR ;
+\ : TUCK DUP -ROT ;
+
+: `("! XEP| SBUF
+: >"! DXEP| 
+: >" OVER C@ 1+ CMOVE 
+;
+: ("! DXEP| NUP C!+ 
+: (MOVM  SWAP CMOVE 
+;
+: >HERE H DROP;
+: S! DUP OFF
+: +S! XEP| J STR + (MOVM
+: (;S! J - 2- J ! 
+;
+: S+C! SWAP
+: C+S! XEP| J STR + C!+ (;S! ;
+: "+BL "_" SKIP
+: +" SWAP 
+: "+ `("!
+: +"! SWAP
+: "+! UCSTR 
+: S"+! DXEP| NAME> (MOVM 
+: L"! J NOT + J C! 
+;
+: "+C! SWAP DXEP| NAME> C!+ L"! ;
+\ CREATE NULL "" \ CREATE STAR "*"
+\ : AUTO AUTOD +" ".CF" +"! ;;
+\ : `""AUTO! ""
+\ : AUTO! AUTOD >" ;
+\ 
+
+
