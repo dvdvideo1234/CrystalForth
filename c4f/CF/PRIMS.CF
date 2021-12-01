@@ -1,0 +1,237 @@
+\ REDEFINITIONS AND FORWARD DEFINITIONS ---------------
+
+'  (JUMP    =:    (DEF
+
+\ =! |LASTH
+\ =! C!
+\ =! |,
+\ =! (LIT, 
+\ =! T,<  
+\ =! TARG:!
+=! 1-
+
+\ PRIMS_01  -----------------------
+
+\ : `RANGE>S 1+ 
+: 1K* CALL 
+: 1B* TWICE| TWICE| THEN TWICE|
+: 2* DUP + ; 
+
+: AND NAND NOT ;
+
+
+: 0<>;  0= 
+: 0;    (IF EXIT ;; 
+
+\ : U2B 1+ 2/ ; \ BYTES TO WORDS ALIGNING
+: 1B/ TWICE| TWICE|
+: 4/ 2/ 2/ ;
+: ASR DUP $8000 AND 
+: AVR +2/ 
+: NIP PUSH DROP
+: (VAR POP; ; UNW
+
+\ : (DO SWAP POP -ROT  PUSH PUSH PUSH;
+\ 
+\ : (LP 1 
+\ : `(+LP XR POP POP I- +2/ 0<   IF
+\ : `(LP; DROP RDROP 2+ PUSH; 
+\ : `(-LP NEG  THEN I+ PUSH @ PUSH;
+\  
+\ : (+LP (-IF `(+LP NEG XR POP J POP - +2/ 0< (IF `(-LP `(LP; ;
+
+
+\ : ORG! H - (SET2 : HOFS (CON ; H ORG!
+\ : `HOFS  CALL (XR (PUSH CALL (EX (POP THEN  (SET2 THEN ,<
+0 CONST HOFS
+
+: TBEGIN |/H
+: HERE H 
+: R>T HOFS + ; 
+
+
+>, EX
+: TMARK> H  
+: Z, |,  ,< 
+  0  CONST 0
+
+: MCLR $D800 ,< 
+0 VALUE MOBJ 
+
+: CSP! SP@ (SET2 
+: CSP (CON ;; 
+
+\ PRIMITIVES  --------------------- 
+
+\ HERE 1+ =: `BRK $CC C, ' (NOP 1- $E9 ,R
+
+: 5+ (@+; ,< 5 , 
+
+: CSTR- 1-
+: ?C@ DUP  
+: C@ @  
+: W>B (@&; ,< 255 ,
+
+: TUCK DUP 
+: -ROT SWAP 
+: USWAP XEP| SWAP ; 
+: ROT USWAP SWAP ;
+: UM+ +2/ 0<
+: ODD (@&; ,< 1 , 
+: D+ ROT + PUSH UM+ POP + ;
+
+: C@+ SWAP|
+: CSTR ?C@ U1+ ;
+
+: @I J @ ; 
+
+: (BSCN W>B 
+: (SCN A! DUP XR PUSH FOR  J EXECUTE IF CSWAP>  NEXT THEN
+: `NFND POP XR DROP DROP POP NOT POP + (; 
+  PUSH 
+: (BSC XR CSTR POP (BSCN CSTR A@ XOR (;
+  PUSH 
+: (WSC XR CSTR POP (SCN STR A@ XOR ;
+\ TO' (BSCN  VAL! ("SW  \ FIX
+
+: ("SW ("SKIP   TO (BSCN 1+  \ TO (BSCN
+: (XARY 2* POP + @ PUSH; ; UNW
+
+\ : `FROM (D#0 EXECUTE @ ;
+
+\ VARIABLES ------------------
+\ 0 VALUE PRELT \ PRELTIB
+
+
+' T   VECTOR vTARG      
+
+' BYE  DEFER vERR
+
+: `K 0 (IO; ,< $16CD , $90C3 , >, DROP| 
+: BK `K DUP W>B 0; W>B ;
+: Key! (# BK (SET2 (CON 
+: KEY BK ;;
+ 
+: Emt! (# BE (SET2 (CON
+: EMIT BE CALL 1+ (SET2 THEN 
+: CNTC (CON ;; 
+: |C. EX EMIT ; 
+
+: |SPC EX 
+: SPC |C. ,<      
+  32  CONST  BL  
+  
+: `BS  |C. ,< 
+  8 CONST  bs 
+1024 CONST  1K 
+ 256 CONST  1B 
+ 
+0 VAR EOS    
+: EOS! bs EOS ! ;
+
+0 VALUE  BLK  
+' BYE VECTOR vBLK
+: SOURCE BLK 0; ETIB 0<>; BLK vBLK 1K + TO ETIB ;
+
+1 CONST `1
+
+ZDO VALUE 6 TIMES `_FL `_AX `_BX `_CX `_DX _DX2
+
+\ HI LEVEL PRIMITIVES  --------------------- 
+
+: T. vTARG 
+: WID.  4+ 
+: ID. |SPC 
+: ". CSTR 
+: TYPE STR| CSTR EMIT ;
+
+: (." ("SKIP ". ;;  
+: |[] ."[" EX ."]" ; 
+: `[ID] CSTR 
+: `[S] |SPC DROP| 
+: [TYPE] |[] TIMES| CSTR DUP |C. BL U< 0; DROP '. ;; 
+: (" ("SKIP ;; 
+: ?|CR 0; 
+: |CR EX 
+: CR ."^M^J" 0 TO CNTC ;
+: `OK ."_ok" CR .">>_"  ;;  
+
+: `. Emt! Key! CR TBUF ID. ID. CR 
+: vINI BYE ; 
+
+HERE >, (D#0 @2 
+: WITHIN OVER- PUSH - POP U< ; 
+==: `BREL? -128 , 128 , 
+==: PRNTBL 32 , 240 ,
+DROP
+HERE >, (D#0 TO WITHIN 0= ;
+==: `RSTACK -$2C0 10 + , -$40 ,
+==: `DSTACK -$2C0 $280 - , -$2C0 , 
+DROP
+
+\ COMPILER BASIC PRIMITIVES  ------------ 
+
+0#>  : `C@, C@                         
+: C, |H                          
+: C!+ PUSH W>B @I DUP W>B - + !R+ POP 
+: 1- (@+; ,< -1 , 
+==: NOP, $90 ,  DROP
+
+: `|ALIGN EX 
+: ALIGNED |/H HERE ODD 0; NOP, ; 
+' `|ALIGN VECTOR  v",
+
+: "STR, '" 
+: `", WORD ?C@ N?? 
+: ", CSTR v", DUP C, 
+: S, STR| CSTR C, ; 
+
+: FND?? |N?? 
+: FND'   TOKEN?      
+: TFND T FND  ;         
+
+: SAME? TFND 0; 4+ `[ID] TBUF ;
+: ,' |, 
+: ' FND?? @2 
+: UNDEF? ODD !"UNDEF?" ;;
+
+0#> @ : @ADR+  +
+: ADR' ' DUP 
+: `ODD?? ODD !"ODDH?" ;; 
+==: TO' -2 , 
+==: VAL' 2 , 
+==: AT' -4 ,  DROP
+
+: C_ON `1 (SKIP 
+: C_OFF 0 
+: SWAPC! SWAP 
+: C! C!+ DROP;  ;  UNW
+: HIDE FND?? 5+  '` SWAPC! ; 
+	
+\ : `STK! (SP@ (RP@ `STK 
+\ : `!2 `USWAP 
+
+: FORGET FND?? DUP TO UNDEF? EVEN TO H  TO >DEA TO T ; 
+
+: MEMTI| A+L 0 
+: TI| BLK XR LTIB PUSH ETIB PUSH PUSH CALL EX
+         POP     POP       POP THEN TO BLK TO LTIB  TO ETIB
+: /BLK BLK 0; 0 TO ETIB ; \ ' MEMTI| BE! EVAL \ FIX META
+: (RDROP POP XR DROP; 
+: (code POP vTARG @ ! ; 
+
+: `STACK  RP@  2- 2- `RSTACK !"RSTK?" 
+SP@ 2- `DSTACK !"DSTK?" ; 
+
+\ DOS & VIDEO
+: `|REGS EX TO `_FL TO `_AX TO `_BX TO `_CX TO `_DX ; 
+0#> @ : (DOS `|REGS (IO; ,< $21CD , 
+HERE =: `@INT  $89 C, $1C C, $89 C, $4C C, 2 C, $89 C, $54 C,
+4 C, $9C C, $4E C, $4E C, $89 C, 4 C, $58 C, $C3 C, 0 C, 
+==: `Fread $3F00 ,
+==: `Fwrite $4000 , 
+==: `Fseek $4200 ,  DROP
+: (VID `|REGS (IO; ,<  $10CD , ' `@INT  $EB C, HERE 1+ - C,
+
+
+

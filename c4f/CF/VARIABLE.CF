@@ -1,0 +1,23 @@
+\ --------------- VARIABLES & CONSTANTS --------------
+
+'  _@TBUF  CONST  TBUF 
+  
+      32  CONST  BL  
+       0  CONST  0
+       1  CONST  1
+      -1  CONST  -1
+     128  CONST  MSB
+
+' _@VOCTOP |VALUE |T T
+         0 |VALUE |H H
+         0 |VALUE |LTIB LTIB
+        
+: TIBZ A+L TO LTIB ,<        
+        0  VALUE ETIB
+\ 0 |VALUE |HLD HLD
+
+   0 POINT FINDEX     \ LOCATE AND EXECUTE
+   0 POINT INITEX     \ INITIALIZATION EXECUTE
+     ' T   VECTOR  vT
+\      ' BYE DEFER   vERR
+

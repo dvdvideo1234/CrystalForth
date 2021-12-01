@@ -1,0 +1,98 @@
+\ MINIMAL COMPILER
+
+: >T T
+: >DEA 4+ 
+: >NAME CSTR + ; 
+
+0#>  : @, @
+: , |H 
+: !+ PUSH !R+ POP; ; UNW
+==: (LIT, ,' (# 
+==: T;;   ,' (;   
+DROP
+
+>,   >NAME
+: ALIGN 1+
+: EVEN  (@&; ,< -2 ,
+: ("SKIP J POP POP  TO ALIGN PUSH PUSH; ; UNW
+
+: (@" 0=   \ ONZERO ERROR
+: (!" ("SKIP PUSH (IF DROP; 
+: (/" POP     \ ALWAYS ERROR  \ NOT RETURN
+ BYE ABORT ,< \ vERR
+
+: |N?? EX  
+: N??  0= 
+: ??  !"?"  ;;
+
+\ : CMOVE SWAP  
+\ : S>M ASTR| CSTR 
+\ : C!A+ XA C!R+ XA ;
+\ >, (NOP
+: TOKEN? |N??
+: TOKEN  BL   CALL 
+: ?C@ DUP  
+: C@ PUSH C@R+ RDROP;  THEN
+: WORD  CALL  
+: S>T '` T   CALL 
+: S>" (MPUSH THEN
+: C!- PUSH C!R- POP;  THEN
+: PARSE  NOP ETIB |LTIB A-L (PARS ; \ SOURCE
+
+\ : |, EX 
+\ : T<RELS_ , (SKIP
+\ : |/H EX
+\ : /H! H ,<
+\ 0  VALUE /H
+
+: CFND >T FND ;
+
+: H>T  H STR  |T
+: MPUSH (MPUSH NIP ;
+
+\ : ==: DUP   |,                          
+: =H NOP \ HERE `ODD?? /H!
+  H \ HERE  
+: =: 0 TOKEN?   NOP \ SAME?
+: (=:  ?C@ 1+ |T MPUSH TWICE|
+: !- PUSH !R- POP;
+\ : 2- (@+; ,< -2 ,
+
+: ">NUM CSTR ATOI ?? ;
+: ">NUMC ">NUM  (LIT, , ;
+ 
+\ FUNCTION EVAL  & EXECUTE MACRO 
+                
+0 BARY OPER[] >, ">NUM ">NUMC @EXEC @, ,< 
+
+\ : (MAC (D#0 `!STATE >, 
+: SEVAL CSTR 
+: EVAL TIBZ (SKIP  BEGIN FINDEX  \ TIBZ MEMTI|
+ : @EVAL NOP TOKEN 0= UNTIL (DROP; ; UNW \  `STACK 
+
+
+\ ---------- INIT INTERPRETTER ----------------
+
+: @INI H>T MSB (|  SEVAL  TO INITEX
+: `@ABINI  NOP (SKIP
+
+\   INTERPRETTER 
+      
+: T; T;;
+: T,< TO FINDEX
+: `@LPAR  vT FND ; 
+ 
+\   COMPILER
+      
+: T: NOP =H  
+: T>, TO FINDEX DUPUSH DUP ++ CFND POP -- (IF- 1+   DROP CFND
+: 2+ (@+; ,< 2 , 
+
+\ COMPILE  MACRO 
+	  
+\ : M: ';  
+\ : ?M: 0 `HOFS CALL T:! (, (MAC `", THEN 
+\ : <M> MOBJ |H TO MOBJ ;   
+\ : D# HERE >, CSP!       : |LASTH (EX LASTH! ; 
+ 
+

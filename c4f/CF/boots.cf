@@ -1,0 +1,265 @@
+: MCLR EDGE : MOBJ! (SET2 : MOBJ (CON (; : <M> MOBJ |H MOBJ! ;
+
+: BE (BE ;
+: :|, TARG:! 
+: |<RELS (EX 
+: _RELS , LASTH! ;
+: |MARK> (EX  
+: _CALL  H  
+: Z, 0 _RELS ; 
+: (, (@R+ _RELS ; 
+\ : D# HERE >, CSP! ;
+: ORG! H - ,<    
+0 VALUE  HOFS  
+: T>R HOFS - ;
+: HERE H 
+: R>T HOFS + ;
+: |LASTH (EX LASTH! ; 
+: _BEGIN HERE LASTH! ;
+: _THEN _BEGIN SWAP!  ;
+: ((." "SKIP| 
+: ". CSTR 
+: TYPE STR| CSTR \ EMIT (;
+\ : Emt! (LIT (BE (SET2 (CON 
+: EMIT (BE CALL 1+ (SET2 THEN 
+: CNTC (CON (; 
+: |SPC (EX 
+: SPC BL (SKIP
+: |CH. (EX EMIT ; 
+: T. vTARG 
+: WID. 4+ 
+: ID. |SPC  \ : IDUMP (DUP  ID. ; ' IDUMP TO' ?C@  T!
+". ;
+
+: I (J ;
+: (| (@R+ (XR (PUSH ;
+
+: `(IXEC (J (PUSH ; 
+: WHILE| (IF EXIT 
+: UNTILZ| `(IXEC WHILE| ; 
+: UNTIL| BEGIN `(IXEC 
+: WHILEZ| UNTIL EXIT ; 
+: `?ODD (DUP 
+: ODD (@&; ,< 1 , 
+: `1-? (DUP 0; 
+: 1- (@+; ,< -1 ,
+: ?0< (DUP 
+: 0< (0< ; HERE >, (D#0 
+: C@, C@ 
+: C, |H 
+: C!+ (PUSH W>B I @ (DUP W>B - + (!R+ (POP 1- ; 
+: |ALIGN  (EX 
+: ALIGNED |LASTH HERE ODD 0; ,< =, NOP, $90 , 
+: SWAPC! SWAP 
+: C! C!+ DROP; ,<
+HERE >, (D#0 @+ @ 
+: WITHIN OVER- (PUSH - (POP 
+: U< (U< ; 
+N: `RSTACK -$2C0 8 + , -$40 ,
+N: `DSTACK -$2C0 $280 - , -$2C0 ,
+=, BREL? -128 , 128 ,
+: `DXEP2-| 1- 
+: `DXEP-| 1- 
+: DXEP| (DUP 
+: XEP| (XR EXECUTE (POP ; 
+: A+L XEP| 
+: I+ (J + ; 
+: <RNG| RANGE>S 
+: <STR| A+L STR| ; 
+: DXEP+| (DUP 1+ XEP| ; 
+: U2B 1+
+: 2/ 0 
+: AVR (+2/ 
+: NIP XEP| (DROP; ; UNW
+: 2* (DUP + ;
+: (" "SKIP| ;;
+: |SWAP (EX SWAP ; 
+: _\ 
+: \ |LTIB `1-?
+: L/ (@&; ,< -64 ,
+: CSP! (SP@ ,< 
+0 VALUE CSP ' CSP! ' TARG: T! 
+: ' FND?? @+ @ ODD !"UDF" ;; 
+: ADR' ' (DUP 
+: ODD?? ODD !"ODD" ;;
+: WKEY |DROP 
+: BKEY [ (DUP W>B 0; W>B ] 0 (IO; ,< $16CD , $90C3 , 
+: Key! (LIT  BKEY (SET2 (CON 
+: KEY BKEY ;; \ OUTPUT LIB
+: `LT! (DUP ,< ' `LT! ' PARSE 6 + T!
+0 VALUE `LT
+: |HLD CALL (EX (SET2 THEN 
+: HLD (CON (; 
+: ?TAB HLD - 
+: SPACES TIMES| SPC ; 
+: |[] ."[" (EX ."]" ;; 
+: ?|CR 0; 
+: |CR (EX 
+: CR ."^M^J" 0 TO CNTC (; 
+: [ID] CSTR 
+: [S] |SPC |DROP 
+: [TYPE] |[] TIMES| CSTR (DUP |CH. BL U< 0; (_ ,< '. , >, ;
+
+>, |CH. ,<  8 CONST bs
+ 26 CONST eof
+ 16 CONST 1H
+ 10 CONST lf
+ 13 CONST cr
+  9 CONST tab
+256 CONST 1B
+-$600 CONST TIB  
+ 1024 CONST 1K  
+  $40 CONST 1L
+: EOS! cr ,< 0 VALUE EOS 
+: EOS| EOS (XR (PUSH 0 TO EOS (EX (POP TO EOS ; 
+: `OK ."_Ok" CR .">>" ;;  ' `OK TO' QUIT T! 
+: `CR eof (OF CALL EOS! EOS THEN 
+  cr (OF CALL NIP (DUP 
+ ;THEN  bs (OF CALL (DUP 0; 1- TO bs SPC TO bs ;THEN
+ tab (OF CALL BL THEN (DUP BL 1B WITHIN (IF DROP;  (DUP EMIT 
+ (OVER HLD + C! 1+ ; 
+: `RL  TIB 1L : ACCEPT  SWAP TO HLD 0 [ (DROP HLD SWAP SPC ]
+ CALL WHILE| KEY `CR THEN 
+: <>? (OVER OVER- ; ' `RL ' QUIT T!
+
+>, 0 ,< 0 VALUE BLK \ AT BLK == 0 TO BLK
+: XY? 1K LTIB - ;
+: |SCR CALL (EX (SET2 THEN 
+: SCR (CON (; 
+: |XY CALL (EX (SET2 THEN 
+: XY (CON (; 
+: `(ERR Emt! Key! CR TBUF ID. ID. \ ERROR ROUTINE ESTABLISH 
+ CR BLK 0; BLK TO SCR  AT BLK 
+: XY!  XY? 
+: >XY TO XY |XY 
+: 1KMOD (@&; ,< 1023 , META `(ERR vERR 
+ 
+\ MULTIPLY & DIVIDE  U* U/ MOD
+: A! (PUSH (XA (RDRP; 
+: >LO 1B 
+: U/ |DROP 
+: D/M A! 0 
+: (D/M TWICE TWICE (-/ (-/ (-/ 
+: -/ (-/ ; 
+: BB>W [ SWAP W>B + ] 
+: >HI 1B 
+: U* |DROP 
+: UM* A! 0 TWICE TWICE (+* (+* (+* 
+: +* (+* ; 
+: UMOD |DROP 
+: U/MOD D/M SWAP ; 
+
+\ CALLABLE PRIMITIVES
+: NUP XEP| 
+: DUP (DUP ; 
+: TUCK (DUP 
+: -ROT SWAP 
+: USWAP XEP| SWAP ; 
+: ROT USWAP SWAP ; 
+: AND (NAND 
+: NOT (NOT ; 
+: OR (NOT SWAP (NOT 
+: NAND (NAND ; 
+: <> - 
+: 0<> (0= 
+: 0= (0= ; 
+
+\ HEX NUMOUT 
+: 9>? tab (OVER U< 
+: 7& (@&; ,< 7 , 
+: S6 (| CALL XEP| XEP| XEP|  THEN 
+: S3 |SPC CALL TWICE THEN ROT DUP 
+: H. 1B U/MOD CALL 
+: B. |SPC THEN 1H  U/MOD TWICE 
+: DIG. |CH. 
+: ALPHA 9>? + 
+: 48+ (@+; ,< '0 , 
+
+: <# 0 TO HLD 
+: BASE! 2- W>B 2+ ,<
+ 10 VALUE BASE 
+: <#>| <# (EX ?TAB 
+: #> (DROP HLD TIMES| DIG. ; 
+: `6 (DUP 0< 0; (NEG (EX XEP| -10 SWAP 
+: HOLD |HLD 1+ ; 
+: U. 0 
+: U.RS |SPC 
+: U.R lf : U.R# <#>| 
+: u. 31 AND XEP| 
+: S# UNTILZ| 
+: # BASE U/MOD (DUP HOLD ; 
+: . 0 
+: .RS |SPC 
+: .R lf 
+: .R# <#>| SWAP `6 SWAP u. ;
+
+\ MEMORY
+: CMOVTO SWAP : CMOVE CALL TO HLD (DROP; THEN TIMES|
+: CMOV+ (PUSH CSTR (POP C!+ ; 
+: >ZSTR CSTR TBUF DXEP| CMOVTO HLD : OFF 0 SWAP! ; 
+: C@+ DXEP+| C@ ; : PAD H 320 + ;  : ON -1 SWAP! ; 
+: UNITS? D/M  0; 1+ ; 
+: `BD |SPC STR| CSTR B. ; : DUMP 1H UNITS? STR| 
+: DU CR DUP H. SPC 1H (OVER (OVER `BD [TYPE] ;;
+
+\ : (VAR2 (D#1 ;; ROT
+: ?:, (DUP 
+: :, :|, ;; 
+: `NIPA2 XEP|
+: `NIP1 XEP|
+: `RSTACK?? (RP@ `RSTACK (0= !"RSTACK?" ;;
+: `STACK `RSTACK?? : `DSTACK?? (SP@ 2- `DSTACK 
+     (0= !"DSTACK?" ;; META `STACK EVAL
+' |ALIGN VECTOR v", 
+: "STR, '" 
+: `?STR, WORD ?C@ `N?? 
+: `CSTR, CSTR v", 
+: STR, (DUP C,
+: S, |LASTH STR| CSTR C, ;
+: (MAC (D#0 CSTR @STATE @ (PUSH >, EVAL (POP @STATE ! ;  
+: MEMTI| A+L 0 
+: TI| BLK (XR LTIB (PUSH ETIB (PUSH (PUSH CALL (EX (POP (POP
+ (POP THEN TO BLK  TO LTIB TO ETIB 
+: /BLK BLK 0; 0 TO ETIB ; 
+: M: ';  
+: ?M: <M> HOFS (PUSH 0 TO HOFS TARG:! (, (MAC `?STR, (POP
+ TO HOFS <M> ;
+: `|UNW  (EX 
+: `UNW |DROP 
+: @H- |H 
+: @- 2- 
+: @. @+ 2- ; 
+: CSP? (SP@ CSP SWAP - ; 
+: `HODD? HERE ODD?? ;   ' `HODD? ' TARG:! T!
+: `?UNP CSP? (0< !"PAIR?" ;; 
+: |THEN (EX _THEN ; 
+: _;THEN |THEN
+: _; CSP? (0= IF TARG,< THEN
+   `?UNP LASTH H - 2+ 0<>; @H- `?ODD IF , 
+: _;; (MAC ,< 2 C, ,"(;" 2 ALIGNED  >, 
+: _REPEAT |THEN THEN 
+: _AGAIN |<RELS 
+: :JUMP (MAC ,< 5 C, ,"(JUMP"  2 ALIGNED  
+: `?SAME `TFND 0; 4+ [ID] TBUF ;  ' `?SAME TO' (=: T!
+
+\ : `V1 AT BLK CR TBUF [ID] [ID] CR BYE ; META `V1 vERR 
+ 
+THIDE [`
+THIDE ]`
+
+\ APT2  _THEN       THEN`
+\ APT2  _BEGIN      BEGIN`
+
+APT2  _;THEN      ;THEN`   
+' ;THEN`      =:  ]`
+APT2  _;;         ;;`   
+APT2  _AGAIN      AGAIN`   
+APT2  _REPEAT     REPEAT`   
+APT2  _CALL       CALL` 
+' CALL` =: MARK>`  
+' CALL` =: [`  
+APT-  ((."    =:  (."
+APT2  _\          \`
+APT2  _;          ;`
+APT-  _RELS   =:  <RELS`   
+

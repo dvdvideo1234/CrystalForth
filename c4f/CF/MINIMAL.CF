@@ -1,0 +1,69 @@
+ALIGNED
+
+'  POP      =:    (D#0
+ 
+: (| @R+ XR PUSH; ; UNW
+
+: (# @R+ ;
+
+\ : (D#1 POP XR     \ DOES_1 PRIMITIVE METHOD
+\ : 2+ (@+; ,< 2 , 
+
+\ : (D#2 POP XR     \ DOES_2 PRIMITIVE METHOD
+: 4+ (@+; ,< 4 , 
+
+\ : (VAR3 (D#2 
+\ : NOP; ;  
+: (SETP POP
+: (SET2 @R+ DROP (SKIP
+: !  PUSH
+: POP!; !R+ RDROP; ; UNW 
+: @2 PUSH @R+  (SKIP 
+: @  PUSH  
+: (CON @R+ 
+: EXIT RDROP; ; UNW
+
+0#> @ SWAP+! ;
+==: ++  1 ,
+==: -- -1 ,
+DROP
+
+\ : 2! PUSH !R+ (SKIP
+
+: OVER- OVER
+: - NEG 
+: + +2/ 
+: DROP; ; UNW
+
+\ : DROP| EX (DROP;  
+\ : SWAP| EX
+\ : SWAP PUSH XR POP; 
+: CSTR PUSH C@R+ XR POP; ; UNW
+\ : IXEC J
+\ : EXECUTE PUSH; 
+\ : ?XEP| DUP 
+\ : XEP| XR EXECUTE POP;  ; UNW
+\ : NUP XEP| DUP ;
+
+\ : A! PUSH XA RDROP; 
+\ : ASTR| A! 
+\ : STR| XR POP 
+\ : .TIMES DROP| 
+\ : TIMES PUSH XR  
+\ : TIMES| FOR J EXECUTE NEXT
+\ : 2EXIT 2RDROP; ; UNW 
+
+\ : @!| XR @R+ PUSH XR EX !R- RDROP;
+: STR  PUSH @R+ XR POP; ; UNW
+\ : C!+ PUSH C!R+ POP; ; UNW
+\ : A-L  XEP|  
+\ : I- J - ;
+\ : ++ @!| 
+: 1+ (@+; ,< 1 , 
+
+VAL' 1+ =: BYE
+
+\ : -- @!| 
+: 1- (@+; ,< -1 , 
+\ : A+L XEP| 
+\ : I+ J + ; 
