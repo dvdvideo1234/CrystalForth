@@ -77,38 +77,59 @@ _interpret:
 
 prim 'ABORT',_abort,@ABORT
 
-@HERE:
-  MOV   W,[WA] 
-  ADD   W,PW [VAL_+_DP]
-  JMP   @PUSHW
-
-@UNCOMMA:
-  SCASW
-  SCASW
-  CALL  @DUP
-;  MOV   WA,[WA]   ; POINTS TO USER DATA STK POINTER
+PRIM 'R@-',_RLDM,@JPDUP
+  POP   WA
+  MOV   TOP,[WA-2]
+    JJ @RDEC2
+  
+PRIM 'R!-',_RSTM,@JPDROP
+  POP   WA
+  MOV   [WA-2],W
+@RDEC2:
+  DEC   WA
+@RDEC1:
+  DEC   WA
   PUSH  WA
-  MOV   AX,[WA+2] ; LOAD LOWER LIMIT
-  MOV   WA,[WA]   ; POINTS TO USER DATA STK POINTER
-  LEA  BX,[WA-2]  ; NEW VALUE
-  CMP   BX,AX    ; EXCEEDED EDGE ?
-    JNGE  @floor
-  MOV   AX,BX
-  MOV   BX,[BX]   ; FETCH BY POINTER
-  POP   WA        ; RESTORE POINTER
-  STOSW           
+  JJ @NEXT1
+  
+PRIM 'R!+',_RSTP,@JPDROP
+  POP   WA
+  STOSW
+  PUSH  WA
+  JJ @NEXT1
+  
+PRIM 'R@+',_RLDP,@JPDUP
+  POP   WA
+  MOV   TOP,[WA]
+@RINC2:
+  SCASW
+  PUSH  WA
 @next1:           ; 11A
   JMP   NEXT
   
-@floor:
-    CALL  @?ERR
-    MAKESTR 'floor:'
-      
+PRIM 'CR!-',_CRSTM,@JPDROP
+  POP   WA
+  MOV   [WA-1],WL
+    J @RDEC1
+  
+PRIM 'CR!+',_CRSTP,@JPDROP
+  POP   WA
+  STOSB
+  PUSH  WA
+  J @NEXT1
+  
 doGETP:   
   PUSH IP
 doGETADR:
   MOV  IP,[WA]
   J @next1
+
+@HERE:
+  MOV   W,[WA]
+  SCASW
+  MOV   WA,[WA]
+  ADD   W,[WA]
+  JMP   @PUSHW
 
 ; -------------------
 ; Variables &  constantS
@@ -138,14 +159,15 @@ doGETADR:
 
         vaLUe 'BASE',_base,10
 
-        PRIM 'UN,',_UNcomma,@UNCOMMA
-        PRIM ',',_comma,@COMMA
+        PRIM 'UN,',_UNcomma,@STK2ATD
+        PRIM ',',_comma,@STK2TOU
         VARIABLE 'DP',_dp,ENDADR
             DW 100H,_@MACTOP
 
           DW DOVAR-2
-          DW DOCONST-1
+        PRIM 'DP+',_DPP,DOCONST-1
         PRIM 'HERE',_HERE,@HERE
+          DW 0,VAL_+_DP    ;DP+
 
         constant 'TIB',_tib,@TIB
 
@@ -183,71 +205,150 @@ PRIM 'SPC',_SPC,@CALL
 ; -------------------
 ; Stack & ERRORS
 ; -------------------
+ 
+  PRIMITIVE 'RDROP;',_RDROPX
+  POP   WA IP
+  J @NEXT1
+ 
+@STK2TOU:
+  CALL  _@DOES-1
+  DW _2?UP,_RLDP,_STP,_RSTM,_RDROPX
   
-@COMMA:
-  SCASW           ; WA - POINTS TO USER DATA STK POINTER
-  PUSH  WA        ; SAVE POINTER TO USER DATA
-  MOV   AX,[WA+4] ; LOAD UPPR LIMIT
-  MOV   WA,[WA]   ; POINTS TO USER DATA STK POINTER
-  SCASW
-  CMP   WA, AX; EXCEEDED EDGE ?
-    JNG  @ceiling
-  MOV   [DI-2],BX
-  POP   AX
-  XCHG  AX,WA
-  STOSW           ; STORE POINTER
-  JMP DODROP
+@STK2ATD:
+  CALL  _@DOES-2
+  DW _2?DN,_RLDP,_LDM,_RSTM,_RDROPX
   
+@STK2TOD:
+  CALL  _@DOES-1
+  DW _2?DN,_RLDP,_STM,_RSTM,_RDROPX
+  
+@STK2ATU:
+  CALL  _@DOES-2
+  DW _2?UP,_RLDP,_LDP,_RSTM,_RDROPX
+  
+; FOR USE IN DOES
+ 
 @ceiling:
     CALL  @?ERR
     MAKESTR 'ceiling:'
     
+  PRIM 'N+?',_N?UP,@JPDROP  ; CHK FOR STACK MOVE UP  - LIKE ",
+    SKIPA
+@?STKPHU1:    ; STACK MOVE UP  - LIKE C,
+    MOV   WL,1
+    SKIPA
+@?STKPHU2:    ; STACK MOVE UP  - LIKE ,
+    MOV   WL,2
+    MOV   WH,0    ; 0-255 BYTES OF ELEMENT - MO MORE
+    MOV   WA,[TOP]
+    ADD   WA,W
+    CMP   WA,[TOP+4] ; CHK UPPR LIMIT
+      JNG  @ceiling
+    SKIPA
+DOFOR:
+    MOV   IP,[IP]
+DOPUSH:
+    PUSH  BX
+      JMP DODROP
+
+    
+  PRIM '2+?',_2?UP,@?STKPHU2  ; CHK FOR STACK MOVE UP  - LIKE ",
+  PRIM '1+?',_1?UP,@?STKPHU1  ; CHK FOR STACK MOVE UP  - LIKE ",
+
+  PRIM 'N-?',_N?DN,@JPDROP  ; CHK FOR STACK MOVE  DOWN  - LIKE UN,
+    SKIPA
+@?STKMVD1:    ; STACK MOVE DOWN  - LIKE UN,
+    MOV   WL,1
+    SKIPA
+@?STKMVD2:    ; STACK MOVE DOWN  - LIKE UN,
+    MOV   WL,2
+    MOV   WH,0    ; 0-255 BYTES OF ELEMENT - MO MORE
+    MOV   WA,[TOP]
+    SUB   WA,W
+    CMP   WA,[TOP+2] ; CHK UPPR LIMIT
+      JNGE  @floor
+    J DOPUSH
+
+  PRIM '2-?',_2?DN,@?STKMVD2  ; CHK FOR STACK MOVE UP  - LIKE ",
+  PRIM '1-?',_1?DN,@?STKMVD1  ; CHK FOR STACK MOVE UP  - LIKE ",
+
+
+@floor:
+    CALL  @?ERR
+    MAKESTR 'floor'
+      
+;@UNCOMMA:
+;  SCASW
+;  SCASW
+;  CALL  @DUP
+;;  MOV   WA,[WA]   ; POINTS TO USER DATA STK POINTER
+;  PUSH  WA
+;  MOV   AX,[WA+2] ; LOAD LOWER LIMIT
+;  MOV   WA,[WA]   ; POINTS TO USER DATA STK POINTER
+;  LEA  BX,[WA-2]  ; NEW VALUE
+;  CMP   BX,AX    ; EXCEEDED EDGE ?
+;    JNGE  @floor
+;  MOV   AX,BX
+;  MOV   BX,[BX]   ; FETCH BY POINTER
+;  POP   WA        ; RESTORE POINTER
+;  STOSW           
+;  JMP NEXT
+  
+;@COMMA:
+;  SCASW           ; WA - POINTS TO USER DATA STK POINTER
+;  PUSH  WA        ; SAVE POINTER TO USER DATA
+;  MOV   AX,[WA+4] ; LOAD UPPR LIMIT
+;  MOV   WA,[WA]   ; POINTS TO USER DATA STK POINTER
+;  SCASW
+;  CMP   WA, AX; EXCEEDED EDGE ?
+;    JNG  @ceiling
+;  MOV   [DI-2],BX
+;  POP   AX
+;  XCHG  AX,WA
+;  STOSW           ; STORE POINTER
+;  JMP DODROP
+  
 PRIM 'TR-',_TRM,@CALL
 @TRM:
   MOV AX,0FFA7H
 @TRZ:  
   XCHG AX, PW [@INDIR]
+  CMP AX,0FFA7H
   RET
 
 PRIM 'TR',_TR,@CALL
   MOV AX,0B890H
   J @TRZ
 
- DIVE '(NEST-',@NESTRM
-    CALL  @TRM
-    PUSH  IP W
-    MOV   IP,WA
-    CALL  NEXT
-  DW _4TH
-    POP   W
-    CALL  @TRZ
-    JMP  DORET
-    
  PRIMITIVE '>4TH',_4TH
     JMP IP
 
 @?ERR:
     CALL  @CR
     POP  AX
-    CALL  @SHOWSTR
+    CALL  @NOPREFIX
     JJ  @?ERR2
     
-PRIM '("+',_STRSKIP,@PAR
-  PUSH  TOP IP
-  MOV   CL,[IP]
-  INC   Cx
-  ADD   NXT,CX
-  JMP   _@RETPAR
+PRIM '("+',_STRSKIP,@JPDUP
+  POP   TOP
+  XOR   AX,AX
+  MOV   AL,[TOP]
+  INC   AX
+  ADD   AX,TOP
+  PUSH  AX
+  JMP   NEXT
   
 COLON '("0A',_0ABRT
+    ;DW _DBG
     DW _ZEQ
 COLON '("A',_ABRT
+    ;DW _TR
     DW _STRSKIP,TO_+_STATE,_0RET
 @ONERR:
-  DW _CR,_STATE,_SDOT,_4TH
+  DW _CR,_STATE,_IDOT,_4TH
 @?ERR2:
     MOV  AX,PW [VAL_+_TBUF]
-    CALL  @SHOWSTR
+    CALL  @NOPREFIX
     MOV   AL,'?'
     CALL  @COUT
     JMP   @ABORT
@@ -385,7 +486,8 @@ _@RETPARZ:
 
 ;COLON 'NUM',_NUMBER
 COLONM 'NUM',_NUMBER
-  DW _STRSKIP?,_NOP,_0SWAP,_0SWAP,_COUNT,_TONUM,_ABRT
+  DW _STRSKIP?,_NOP,_0SWAP,_0SWAP,_COUNT
+  DW _TONUM,_ABRT
   MAKESTR 'NUM'
 @EXIT2: DW _DROP
 @EXIT1: DW _DROP,_RET 
@@ -396,11 +498,10 @@ COLONM 'NUM',_NUMBER
 ;COLON '2DROP',_2DROP
 
 COLON '"Z',_STRZ
-    DW _COUNT,_OVER,_PLUS,_0SWAP,_STORE,_RET
+    DW _COUNT,_OVER,_PLUS,_0SWAP,_ST,_RET
     
     
 COLONM 'NUMC',_COMPNUM
-;COLONM 'NUMC',_COMPNUM
   DW _STRSKIP?,_NOP,_NUMBER,_COMPILE,_LIT,_COMMA,_RET
   
 ; -----------------------
@@ -542,7 +643,7 @@ COLON 'LOOPS',_LOOPS
 @@1:
     DW _J,_EXECUTE
 @@2:
-  DW _NEXT,@@1,_POP,_DROP,_RET
+  DW _NEXT,@@1,_RDROPX
   
   
    
@@ -554,12 +655,11 @@ PRIM 'REVERT',_REVERT,@jPNIP
 	XCHG	W,WA
 		JJ		@@REV
 @@REV2:	
-	MOV		AL,[TOP]
-	MOV		AH,[WA]
-	MOV		[top],ah
+	XCHG		[top],WL
 	STOSB
 @@REV:
 	DEC		TOP
+	MOV		WL,[WA]
 	CMP		WA,TOP
 		JC 		@@REV2
 	JMP		DODROP
@@ -592,13 +692,17 @@ prim 'S!',_MAKESTR,@PAR
   MOV   PB [DI],'`'
   JMP   _@RETPARZ
 
-PRIM 'AL>EL',_ALEL,@CALL
+PRIM '(>EL',_TOEL,@CALL
   ADD  NXT,TOP
   RET
 
 PRIM '1+',_1P,@1P
 
 PRIM '2+',_2P,@2P
+
+PRIM '1-',_1M,@1M
+
+PRIM '2-',_2M,@2M
 
 PRIM 'PAX!',_PAX,@PAR
   POP   CX SI
@@ -664,6 +768,7 @@ prim 'CFND',_CFND,@CALL
   MOV   CL,[BX+4]
   LEA   DI,[BX+5]
   JMP  @FND
+  
 prim 'FND',_FND,@CALL
   MOV   DI,BX     ;KADE
   XOR   CL,CL
@@ -701,7 +806,7 @@ COLON 'COMPILE',_COMPILE
   DW _RLDP,_comma,_RET
 
 COLON '(@,',_@COMMA
-  DW _FETCH,_comma,_RET
+  DW _@,_comma,_RET
 
 
 COLON ':',_COLON  
@@ -731,15 +836,47 @@ COLONM 'HEADER',_HEADER
   DW _HERE
 colon '=:',_ENTRY
     dw _TOKEN?,_0SWAP,_?C@,_1P,_DICT,_MPUSH
-    DW _STOREM,_STOREM,TO_+_DICT,_RET
+    DW _STM,_STM,TO_+_DICT,_RET
 
-COLON '''',_TICK
-  DW _TOKEN?,_DICT,_FND,_0ABRT
+
+@TICK:
+  CALL _@DOES-2
+COLON '`TICK',_TK
+  DW _@,_TOKEN?,_DICT,_FND,_0ABRT
   MAKESTR 'NFND'
-  DW _FETCH,_RET
+  DW _@,_PLUS,_RET
 
+PRIM '''',_TICK,@TICK
+PRIM '''TO',_?TO,@TICK
+PRIM '''AT',_?AT,@TICK
+  DW 0,-2,-4
+
+@TICKX:
+  CALL  _@DOES-1
+  DW _TK,_EXEC,_RET
+  
+PRIM 'TO',_DOTO,@TICKX
+PRIM 'AT',_DOAT,@TICKX
+  DW -2,-4
+
+@TICKZ:
+  CALL  _@DOES-2
+  DW _TK,_COMMA,_RET
+  
+PRIM ''',`',_TICOM,@TICKZ
+PRIM 'TO`',_TOCOM,@TICKZ
+PRIM 'AT`',_ATCOM,@TICKZ
+  DW 0,-2,-4
+
+
+COLON 'TO',_to
+  DW _TICK,_2M,_EXEC,_RET
+  
+COLON 'AT',_At
+  DW _TICK,_2M,_2M,_EXEC,_RET
+  
 ;COLON ';CODE`',_SMCOD
-;  DW _POP,_DICT,_FETCH,_STORE,_RET
+;  DW _POP,_DICT,_@,_ST,_RET
  
  
 ; -----------------------
@@ -753,8 +890,8 @@ COLON '''',_TICK
 ; Outer Interpreter
 ; -----------------------
 
-COLON 'VIN',_VIN
-;COLONM 'VIN',_VIN
+COLONM 'VIN',_VIN
+;COLON 'VIN',_VIN
   DW _CR,_LIT,']',_EMIT,_TIB,_LIT,64,_ACCEPT,_SPC,_RET
   
 prim '(;',_RET,doRET
@@ -786,7 +923,7 @@ primITIVE '("?',_STRSKIP?,@CLRC
 
 prim '(BR',_JUMP,DOJUMP
 
-primITIVE '(NEXT',_NEXT
+primITIVE '(NXT',_NEXT
   POP   W 
   DEC   W 
   PUSH  W 
@@ -806,25 +943,6 @@ DOSKIP:
   lodsw
   jJ next
 
-DOFOR:
-  MOV   IP,[IP]
-DOPUSH:
-  PUSH  BX
-  jJ DODROP
-
-PRIM 'R!+',_RSTP,@JPDROP
-  POP   WA
-  STOSW
-  PUSH  WA
-  JJ NEXT
-  
-PRIMITIVE 'R@+',_RLDP,@JPDUP
-  POP   WA
-  MOV   TOP,[WA]
-  SCASW
-  PUSH  WA
-  JJ NEXT
-  
 DOSETV:
   SCASW
 _@SET:
@@ -845,7 +963,7 @@ doOVER:
 _@DOES:
   POP   W
   PUSH  IP
-  MOV   IP,W
+  XCHG  IP,W
   SKIPA
   
   SCASW
@@ -890,12 +1008,12 @@ next:
 @INDIR:
   CMPSW
   jmp PW [WA-2]
-  ORG $-4
-;@NODEBUG:
-;  DB 0FFH
-  NOP
-  DB 0B8H
-  ORG $+2
+;  ORG $-4
+;;@NODEBUG:
+;;  DB 0FFH
+;  NOP
+;  DB 0B8H
+;  ORG $+2
   CALL  @DBG
   CMPSW
   jmp PW [WA-2]
@@ -917,22 +1035,36 @@ doRET:
   
 PRIMITIVE 'EX',_EX
   POP   WA
-
-;prim 'NOP',_NOP 
-
 DIVE 'NOP',_NOP 
 DIVE '(NEST',docolon
   DW 13CH
+@DOCOL:
   PUSH  IP
 doLbl:  
   MOV   IP,WA
   j   NEXT
   
-prim '!+',_STOREP,@CLRCX
-  POP   [TOP]
-  JJ    @XINC
+ DIVE '(NEST-',@NESTRM
+    CALL  @TRM
+      JE @DOCOL
+    PUSH  IP W
+    MOV   IP,WA
+    CALL  NEXT
+  DW _4TH
+    POP   W
+    CALL  @TRZ
+      J  DORET
+    
+prim '!+',_STP,@JPNIP
+  MOV   [TOP],AX
+  JJ    @2P
 
-prim '@+',_FETCHP,@CLRCX
+prim 'C!+',_CSTP,@JPNIP
+  MOV   [TOP],AL
+  JJ    @1P
+
+primITIVE '@+',_LDP
+  X
   PUSH   [TOP]
 @XINC:  
   X
@@ -942,10 +1074,14 @@ prim '@+',_FETCHP,@CLRCX
   INC   TOP
   J   next  
 
-
-prim '!-',_STOREM,@CLRCX
-  POP   [TOP-2]
+primITIVE '@+',_LDM
   X
+  PUSH   [TOP]
+  X
+  JJ @2M
+  
+prim '!-',_STM,@JPNIP
+  MOV   [TOP-2],AX
 @2M:  
   DEC   TOP
 @1M:  
@@ -956,13 +1092,16 @@ prim '!-',_STOREM,@CLRCX
 ; Peek and Poke
 ; -------------------
 
-primitive '@',_fetch
+primitive '@',_@
   mov bx,PW [bx]
   j next
 
-prim '!',_store ,@CLRCX
-  POP   [BX]
-  X
+prim '!',_ST ,@JPNIP
+  MOV   [BX],AX
+  j doDROP
+
+prim 'C!',_CST ,@JPNIP
+  MOV   [BX],AL
   j doDROP
 
 PRIM '0SWAP',_0SWAP,@CLRCX
@@ -971,7 +1110,9 @@ PRIM '0SWAP',_0SWAP,@CLRCX
   
 prim '?C@',_?C@,@JPDUP
 @C@:  
-  mov   bl, PB[bx]
+  mov   bH, PB[bx]
+@HWtoB:  
+  XCHG  BH,BL
 @WtoB:  
   mov   bh,0
   j next
@@ -1012,7 +1153,7 @@ prim '0=',_Zeq,@CALL
   sbb bx,bx
   RET
 
-prim 'COUNT',_count,@CALLDPH
+prim 'CSTR',_count,@CALLDPH
   INC   BX
   RET
   
@@ -1053,7 +1194,7 @@ acceptl:
 
 ;FF 65
  
-COLON '(I',_INI
+COLONM '(I',_INI
   DW _LIT,_VIN,TO_+_TEXT_IN,_LIT
 DICTPTR:  
   DW ENDADR,_STR,_LIT,_@VOCTOP,_MPUSH,TO_+_DICT
@@ -1061,9 +1202,12 @@ DICTPTR:
 ;  DW _TR  ;GHXFGH
   DW  _RET
 
+ COLONM 'ALEL',_ALEL
+  DW _TOEL,TO_+_LTIB,TO_+_ETIB,_RET
+ 
 final:
 COLON 'EVAL',_EVAL    ; ADR LEN -> INTERPRET
-  DW _ALEL,TO_+_LTIB,TO_+_ETIB
+  DW _ALEL
 @EVAL:        
   DW _TOKEN,_IF,@EXIT1
   DW _LOCATE,_OPER,_PERFORM,_JUMP,@EVAL
