@@ -8,6 +8,22 @@ pd  equ dword ptr
 pw  equ word  ptr
 pb  equ byte  ptr
 
+SKIPA  MACRO
+  DB    03DH
+  ENDM
+
+SKIPB  MACRO
+  DB    03CH
+  ENDM
+
+SKIPr  MACRO reg
+MADR = $
+  mov   reg,0
+  IF $-MADR-2
+  org   $-1
+  ENDIF
+  org   $-1
+  ENDM
 
 nam_    macro   msg,FLAG
   local endstr
@@ -23,6 +39,11 @@ LINK = TEMP
   NAM_ NAM,FLAG
 LBL:
 ENDM  
+
+prim MACRO NAM,LBL,FLAG
+  HEAD NAM,LBL,0
+  DW FLAG
+  ENDM
 
 primitive MACRO NAM,LBL,FLAG
   HEAD NAM,LBL,FLAG
@@ -52,164 +73,207 @@ MyCseg  segment para  use16
 
 Start   Label byte
 
-        jmp _abort+2
-
-; -------------------
-; Variables
-; -------------------
-
-        variable 'state',_state,0
-
-        variable '>in',_to_in,0
-
-        variable '#tib',_number_tib,0
-
-        variable 'dp',_dp,freemem
-
-        variable 'base',_base,10
-
-        variable 'last',_last,final
-
-        constant '0',_0,0
-
-        constant 'BL',_BL,32
-
-        constant 'tib',_tib,32768
-
 ; -------------------
 ; Initialisation
 ; -------------------
 
-        primitive 'abort',_abort,0
-        mov ax,PW [val_+_number_tib]
-        mov PW [VAL_+_to_in],ax
+@abort:        
         xor bp,bp
-        mov PW [VAL_+_state],bp
         mov sp,-256
-        mov si,OFFSET _interpret+2
-        jmp next
+        CALL  @SET_IP
+        DW _TOint
+NEWLINE: 
+        DW _LIT,13,_EMIT,_lit,10,_EMIT,_lit,'>',_EMIT
+        DW _lit,64,_accept,_to_in,_store,_spc
+        dw _EVAL
+        DW _spc,_lit,'O',_EMIT,_lit,'K',_EMIT
+        DW _branch,NEWLINE
 
+_STATES DW @WARY,_TO_NUM,_EXEC,_TO_NUMC,_COMMA
+
+_spc dw docolon,_bl,_emit,_ret
+ 
+@word:
+  PUSH  SI
+  mov SI,PW [VAL_+_number_tib]
+  MOV CX,PW [VAL_+_to_in]
+      ;  JCXz @abort
+	mov Dh,bl	;save parametter
+  SUB SI,CX
+  mov bx,PW [VAL_+_dp]
+	xor aX,aX	; prepare for endline
+	mov DI,bx
+  STOSB 
+wordf:
+        JCXz wordz
+  lodsb
+  DEC cx
+  cmp al,Dh
+        je wordf
+wordc:  
+  inc  Pb [bx]
+  STOSB
+        jCXz wordz
+  lodsb
+  DEC cx
+  cmp al,Dh
+        jne wordc
+wordz:   
+  mov PW [VAL_+_to_in],cx
+  MOV PB [DI],'`'
+@SET_IP:
+	pop si
+  jmp next
+
+_TOFINDEX DW docolon,_POP,_state,_store,_RET
+
+_FINDEX DW docolon,_state,_fetch,_PUSH,_RET
+
+_error dw docolon,_zero_branch,intskip,_LIT,'?',_EMIT,_ABORT
+
+_TO_NUM DW docolon,_0,_0,_ROT,_count,_to_number,_error,_drop
+DROPX   DW _drop
+intskip dw  _RET
+
+_TO_NUMC  DW docolon,_TO_NUM,_lit,_lit,_comma,_comma,_RET
+
+_EVAL   DW docolon
+        dw _Bl,_word,_DUP,_PEEKB
+        DW _zero_branch,DROPX,_FINDEX,_STATES,_@exec
+        dw _branch,_EVAL+2
+        
 ; -------------------
-; Compilation
+; Peek and Poke
 ; -------------------
 
-        primitive ',',_comma,0
-        mov di,PW [VAL_+_dp]
-        xchg ax,bx
-        stosw
-        mov PW [VAL_+_dp],di
-        jmp @DROPW
+@fetch:        
+        mov bx,PW [bx]
+        jmp SHORT next
 
-        primitive 'lit',_lit,0
-        lodsw
-        jmp @PUSHW
+@store:        
+        pop PW [bx]
 
 ; -------------------
 ; Stack
 ; -------------------
 
-        primitive 'rot',_ROT,0
-        pop  dx ax
-        push dx
+@DROP:        
+  pop bx
+  jmp SHORT next
+
+@POP:
+  MOV   AX,[BP]
+  INC   BP
+  INC   BP
+  jmp SHORT @PUSHW
+  
+@PUSH:
+  POP   AX
+  XCHG  AX,BX
+  DEC   BP
+  DEC   BP
+  MOV   [BP],AX
+  jmp SHORT next
+  
+@dup:
+  push bx
+  jmp SHORT next
+
+@swap:
+  pop ax
+  jmp SHORT @PUSHW
+
+@rot:
+  pop  dx ax
+  push dx
 @PUSHW:
-        push bx
-        xchg ax,bx
-        jmp next
-
-        primitive 'drop',_drop,0
-@DROPW:        
-        pop bx
-        jmp next
-
-        primitive 'dup',_dup,0
-        push bx
-        jmp next
-
-;        primitive 'swap',_swap,0
-;        pop ax
-;        jmp @PUSHW
-
-; -------------------
-; Maths / Logic
-; -------------------
-
-;        primitive '-',_MINUS,0
-;        NEG BX
-;@plus:        
-        primitive '+',_plus,0
-  pop ax
-  add bx,ax
-        jmp next
-
- ;       jmp @plus
-
-;        primitive '0=',_Zeq,0
-;        sub bx,1
-;        sbb bx,bx
-;        jmp next
-  primitive '=',_equals,0
-  pop ax
-  SUB bx,ax        
-  sub bx,1
-  sbb bx,bx
-  jmp next
-
-;        colon '=',_equals,0
-;        DW _MINUS,_ZEQ,_RET
-
-; -------------------
-; Peek and Poke
-; -------------------
-
-        primitive '@',_fetch,0
-        mov bx,PW [bx]
-        jmp next
-
-        primitive '!',_store ,0
-        pop PW [bx]
-        jmp @DROPW
+  push bx
+  xchg ax,bx
 
 ; -------------------
 ; Inner Interpreter
 ; -------------------
 
-next:   MOV    DI,[SI]
-        CMPSW
-        jmp PW [di-2]
+next:
+  MOV    DI,[SI]
+  CMPSW
+next2:
+  jmp PW [di-2]
+
+; -------------------
+; Compilation
+; -------------------
+
+;_BRK: DW $+2
+;    INT 3
+;    JMP NEXT
+    
+@comma:        
+        mov di,PW [VAL_+_dp]
+        xchg ax,bx
+        stosw
+        mov PW [VAL_+_dp],di
+        jmp @DROP
+
+@lit:
+        lodsw
+        jmp @PUSHW
+
+; -------------------
+; Maths / Logic / ARRAY
+; -------------------
+
+@WARY:
+  SHL   BX,1
+  JMP   SHORT @BARY
+@MINUS:        
+  NEG BX
+@plus:        
+  pop DI
+@BARY:  
+  add bx,DI
+  jmp next
+
+@ZEQ:
+  sub bx,1
+  sbb bx,bx
+  jmp next
 
 ; -------------------
 ; Flow Control
 ; -------------------
 
-        primitive '0branch',_zero_branch,0
-        test bx,bx
-        pop bx
-        je @JUMP
-        lodsw
-        jmp next
+@0branch:        
+  test bx,bx
+  pop bx
+  je @JUMP
+  lodsw
+  jmp next
 
-        primitive 'branch',_branch,0
 @JUMP:        
-        mov si,PW [si]
-        jmp next
+  mov si,PW [si]
+  jmp next
 
-        primitive 'execute',_execute,0
-        LEA di,[bx+2]
-        pop bx
-        jmp PW [di-2]
+@TOEXEC:
+  MOV BX,[BX]
+@exec:
+  LEA di,[bx+2]
+  pop bx
+  jmp next2
+  ;jmp PW [di-2]
 
-        primitive 'exit',_RET,0
 @RET:        
-        mov si,PW [bp]
-        inc bp
-        inc bp
-        jmp next
+  mov si,PW [bp]
+@rdrop:
+  inc bp
+  inc bp
+  jmp next
 
 ; -------------------
 ; String
 ; -------------------
 
-  primitive 'count',_count,0
+@count:  
   inc bx
   push bx
   DEC BX
@@ -218,15 +282,11 @@ next:   MOV    DI,[SI]
   mov bh,0
   jmp next
 
-;  primitive 'c@',_PEEKB,0
-;  jmp @PEEKB
-
-
-  primitive '>number',_to_number,0
-	xchg ax,si
+@_to_number:
   MOV  CX,BX
-	pop  SI DI BX     ; ADDRESS AND ZEROS
+	pop  AX DI BX     ; ADDRESS AND ZEROS
   PUSH SI BP
+	xchg ax,si
   MOV  BP,PW [VAL_+_BASE]
 	mov  ah,0
 to_numl:
@@ -267,21 +327,23 @@ to_numz:
 ; Terminal Input / Output
 ; -----------------------
 
-  primitive 'accept',_accept,0
-  MOV  DI , PW [VAL_+_tib]
-  xor  cx,cx
-	xchg cx,Bx
+@accept:  
+  xor  cx,cx ; BX COUNTER - CX LIMIT
+  MOV  DI , PW [VAL_+_tib]  ; BUFFER
+  XCHG  CX,BX
 acceptl:
   call acc 
 	cmp  cx,BX
         jne  acceptl
+  LEA CX,[BX+DI]
+  mov PW [VAL_+_number_tib], CX
   jmp next
  
 acc:
   call getchar   
 	cmp  al,8
         jne  acc2
-  or   bx,bx
+  OR   BX,BX
         jz   acc1
   dec  bx
 	push ax
@@ -299,49 +361,19 @@ acc1:
 acc2:	
   cmp  al,13
         jne  acc3
-  mov  cx,bx
+  mov  Cx,Bx
 	ret  
 acc3:	
   cmp  al,' '
         jc   acc1
-  mov  [bx+di],al
-  inc  bx
+  MOV  [DI+BX],AL
+  inc  Bx
   jmp outchar
 
-  primitive 'word',_word,0
-  PUSH  SI
-	mov ah,bl	;save parametter
-  MOV SI,PW [VAL_+_tIB]
-  ADD SI,PW [VAL_+_number_tib]
-  mov cx,PW [VAL_+_to_in]
-  SUB SI,CX
-  mov bx,PW [VAL_+_dp]
-	xor al,al	; prepare for endline
-	mov DI,bx
-  STOSB 
-wordf:
-        jcxz wordz
-  lodsb
-  dec cx
-  cmp al,ah
-        je wordf
-wordc:  
-  inc  Pb [bx]
-  STOSB
-        jcxz wordz
-  lodsb
-  dec cx
-  cmp al,ah
-        jne wordc
-wordz:   
-  mov PW [VAL_+_to_in],cx
-	pop si
-  jmp next
-
-  primitive 'emit',_emit,0
+@emit:
   xchg ax,bx
   call outchar
-  jmp @DROPW
+  jmp @DROP
 
 getchar:
   mov ah,7
@@ -353,37 +385,63 @@ getchar:
 ; Dictionary Search
 ; -----------------------
 
-  primitive 'find',_find,0
-  PUSH SI
-	mov  AX,PW [VAL_+_last]
+@FND:
+  PUSH SI 	;mov  AX,PW [VAL_+_last]
 	xor  cx,cx
+  MOV  DI,BX
 findl:
   XCHG  SI,AX
   LODSW
   mov  cl,PB [si]
         jcxz findnf
-	AND  cL,31
-  CMP  CL,[BX]
-        JNE   findl
-  LEA  DI,[BX+1]
+	INC  cX
   rep  cmpsb
+  MOV  DI,BX
         jNe   findL
 findm: 
-	mov  cL,32
+	INC  cX
   mov  BX,si
 findnf:
-  POP  sp
-	push bx
+  POP  sI
+  RET
+
+@find:
+  POP   AX
+  XCHG  AX,BX
+	CALL  @FND
+@XFND:  
+  push bx
 	mov  Bx,cx
         jmp next
+
+@findc:
+  POP   AX
+  XCHG  AX,BX
+  INC   PB [BX]
+	CALL  @FND
+  DEC   PB [DI]
+        jmp SHORT @XFND
 
 ; -----------------------
 ; Colon Definition
 ; -----------------------
 
+  colon ';`',_semicolon,0
+  dw _lit,_RET,_comma,_TOint,_RET
+
+_TOint:
+  DW docolon,_TOFINDEX,_last,_FETCH,_find,_RET
+  
+_TOCOMP:
+  DW docolon,_TOFINDEX,_last,_FETCH,_FETCH
+;  dw _brk
+  dw _findc
+  DW _DUP,_zero_branch,@TOCOMPX,_ret
+@TOCOMPX  DW _DROP,_last,_FETCH,_FETCH,_FIND,_LIT,2,_PLUS
+  DW _RET
+  
   colon ':',_colon,0
-  dw _Bl,_state,_store,_create
-  dw _do_semi_code
+  dw _TOCOMP,_create,_do_semi_code
 docolon:
   dec bp
   dec bp
@@ -391,10 +449,6 @@ docolon:
   mov si,di
   jmp next
   
-  colon ';',_semicolon,immediate
-  dw _lit,_RET,_comma,_0,_state
-  dw _store,_RET
-
 ; -----------------------
 ; Headers
 ; -----------------------
@@ -426,42 +480,61 @@ doconst:
   mov Ax,PW [di]
   jmp @PUSHW
 
+
+; -----------------------
+; NAMES
+; -----------------------
+
+  prim 'rot',_ROT,@rot
+  prim 'dup',_dup,@dup
+  prim 'drop',_drop,@drop
+  prim 'pop',_POP,@POP
+  prim 'push',_PUSH,@PUSH
+  prim 'swap',_swap,@swap
+  prim 'c@',_PEEKB,@PEEKB
+  prim '@',_fetch,@fetch
+  prim '!',_store ,@store
+  prim '-',_MINUS,@MINUS
+  prim '+',_plus,@plus
+  prim '0=',_Zeq,@ZEQ  
+  prim 'abort',_abort,@abort
+  prim 'cstr',_count,@count
+  prim '0br',_zero_branch,@0branch
+  prim 'br',_branch,@JUMP
+  prim '@exec',_@exec,@TOEXEC
+  prim 'exec',_exec,@exec
+  prim 'exit',_RET,@RET
+  prim ',',_comma,@comma
+  prim 'lit',_lit,@lit
+  prim 'find',_find,@find
+  prim 'findc',_findc,@findc
+  prim 'bye',_bye,0
+  prim 'word',_word,@word
+  prim '>number',_to_number,@_to_number
+  prim 'accept',_accept,@accept
+  prim 'emit',_emit,@emit
+
+; -------------------
+; Variables
+; -------------------
+
+  variable 'state',_state,0
+  variable '>in',_to_in,0
+  variable '#tib',_number_tib,0
+  variable 'dp',_dp,freemem
+  variable 'base',_base,10
+  variable 'last',_last,final
+  constant '0',_0,0
+  constant 'BL',_BL,32
+
+final:
+  
+  constant 'tib',_tib,32768
+
 ; -----------------------
 ; Outer Interpreter
 ; -----------------------
 
-final:
-        colon 'interpret',_interpret,0
-interpt dw _number_tib,_fetch,_to_in,_fetch,_equals
-        DW _zero_branch,intpar
-        
-        DW _lit,50,_accept
-        dw _number_tib,_store
-        dw _0,_to_in,_store
-        
-intpar  dw _Bl,_word,_find,_dup
-        dw _zero_branch,intnf
-        DW _state,_fetch,_equals
-        dw _zero_branch,intexc
-        DW _comma
-        dw _branch,intdone
-        
-intexc  dw _execute
-        DW _branch,intdone
-        
-intnf   dw _dup,_ROT,_count,_to_number
-        dw _zero_branch,intskip
-        DW _state,_fetch
-        dw _zero_branch,intnc
-        
-        DW _last,_fetch,_dup
-        dw _fetch,_last,_store,_dp,_store
-intnc   dw _abort
-
-intskip dw _drop, _drop, _state, _fetch
-        dw _zero_branch,intdone
-        DW _lit,_lit,_comma,_comma
-intdone dw _branch,interpt
 
 freemem:
 
