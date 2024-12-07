@@ -3,40 +3,10 @@
 ;DEBUGER
 ;-------------------
 
-
-@BP   EQU PW [DSP+00]
-@SP   EQU @BP  + 2
-@DI   EQU @SP  + 2
-@SI   EQU @DI  + 2
-@DX   EQU @SI  + 2
-@CX   EQU @DX  + 2
-@BX   EQU @CX  + 2
-@AX   EQU @BX  + 2
-@FL   EQU @AX  + 2
-@LRA  EQU @FL  + 2  ; LOCAL RETURN ADDRESS
-@RA   EQU @LRA + 2
-@TOP  EQU @RA  + 2
-
-@SAVEREGS:
-  PUSHF;16
-       ;14 12 10  8  6  4  2  0
-  PUSH  AX BX CX DX SI DI SP BP
-  MOV   BP,SP
-  PUSH  AX
-  LEA   AX,[@TOP]   ; TOP OF RETURN STACK
-  MOV   [@SP],AX
-  POP   AX
-  JMP   @LRA
-
-@LOADREGS:
-  POP   AX
-  MOV   @LRA,AX
-  POP   BP DI DI SI DX CX BX AX
-  POPF
-  RET
-
 @REGSTR:
+  PUSH  DX
   CALL  @SAVEREGS
+  MOV   BP,SP
   CALL  @CR  
   MOV   AX,@RA
   CALL  @SHOWSTR
@@ -45,8 +15,12 @@
   
   PRIM 'REGS.',_RDOT,@CALL
 @REGS:  
+  PUSH  DX
   CALL  @SAVEREGS
+  MOV   BP,SP
 @REGSZ:  
+  LEA   AX,[@TOP]   ; TOP OF RETURN STACK
+  MOV   [@SP],AX
   CALL  @CR  
   MOV   SI,SP
   CALL  @DOTR
@@ -57,32 +31,14 @@
   MOV   SI,@TOP
   CALL  @DOTR3
 @WAITLOAD:
-  CALL  _@BIOSK
-@POPREGSZ:
-  CALL  @LOADREGS
-  RET
-  
-@EMIT:
-  CALL @SAVEREGS
-  POP   BP
-  PUSH  BP AX
-  CALL  DORET
-  DW _POP,_EMIT,_4TH
-  J @POPREGSZ
-  
-@KEY:   CALL @SAVEREGS
-  POP   BP
-  PUSH  BP
-  CALL  DORET
-  DW _KEY,_PUSH,_4TH
-  POP   AX
-  MOV   BP,SP
-  MOV   @AX,AX
-  J @POPREGSZ
+  CALL  @BIOSKEY
+  JMP  @POPREGSZ
   
   PRIM 'DBG.',_DBG,@CALL
 @DBG:
+  PUSH  DX
   CALL  @SAVEREGS
+  MOV   BP,SP
   CALL  @CR  
   MOV   AX,SI       ; IP - CURRENT ADDRESS OF VIRTUALMASHINE FORTH
   CALL  @CALDOTZ    ; IP. 
