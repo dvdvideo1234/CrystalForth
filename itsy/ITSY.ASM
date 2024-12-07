@@ -29,11 +29,6 @@ primitive MACRO NAM,LBL,FLAG
   DW $+2
   ENDM
 
-prim MACRO NAM,LBL,FLAG,ADR
-  HEAD NAM,LBL,FLAG
-  DW ADR
-  ENDM
-
 colon MACRO NAM,LBL,FLAG
   HEAD NAM,LBL,FLAG
   DW docolon
@@ -67,24 +62,26 @@ Start   Label byte
 
         variable '>in',_to_in,0
 
-        variable '#tib',_number_t_i_b,0
+        variable '#tib',_number_tib,0
 
         variable 'dp',_dp,freemem
 
         variable 'base',_base,10
 
-        variable 'ETB',_ETB,10
-
         variable 'last',_last,final
 
-        constant 'tib',_t_i_b,32768
+        constant '0',_0,0
+
+        constant 'BL',_BL,32
+
+        constant 'tib',_tib,32768
 
 ; -------------------
 ; Initialisation
 ; -------------------
 
         primitive 'abort',_abort,0
-        mov ax,PW [val_+_number_t_i_b]
+        mov ax,PW [val_+_number_tib]
         mov PW [VAL_+_to_in],ax
         xor bp,bp
         mov PW [VAL_+_state],bp
@@ -101,52 +98,64 @@ Start   Label byte
         xchg ax,bx
         stosw
         mov PW [VAL_+_dp],di
-@DROP:        
-        pop bx
-        jmp next
+        jmp @DROPW
 
         primitive 'lit',_lit,0
         lodsw
-@DUPW:
-        push bx
-        xchg ax,bx
-        jmp next
+        jmp @PUSHW
 
 ; -------------------
 ; Stack
 ; -------------------
 
         primitive 'rot',_ROT,0
-        pop dx
-        pop ax
+        pop  dx ax
         push dx
-        jmp @DUPW
+@PUSHW:
+        push bx
+        xchg ax,bx
+        jmp next
 
-        prim 'drop',_drop,0,@DROP
+        primitive 'drop',_drop,0
+@DROPW:        
+        pop bx
+        jmp next
 
         primitive 'dup',_dup,0
         push bx
         jmp next
 
-        primitive 'swap',_swap,0
-        pop ax
-        jmp @DUPW
+;        primitive 'swap',_swap,0
+;        pop ax
+;        jmp @PUSHW
 
 ; -------------------
 ; Maths / Logic
 ; -------------------
 
+;        primitive '-',_MINUS,0
+;        NEG BX
+;@plus:        
         primitive '+',_plus,0
-        pop ax
-        add bx,ax
+  pop ax
+  add bx,ax
         jmp next
 
-        primitive '=',_equals,0
-        pop ax
-        sub bx,ax
-        sub bx,1
-        sbb bx,bx
-        jmp next
+ ;       jmp @plus
+
+;        primitive '0=',_Zeq,0
+;        sub bx,1
+;        sbb bx,bx
+;        jmp next
+  primitive '=',_equals,0
+  pop ax
+  SUB bx,ax        
+  sub bx,1
+  sbb bx,bx
+  jmp next
+
+;        colon '=',_equals,0
+;        DW _MINUS,_ZEQ,_RET
 
 ; -------------------
 ; Peek and Poke
@@ -158,16 +167,15 @@ Start   Label byte
 
         primitive '!',_store ,0
         pop PW [bx]
-        pop bx
-        jmp next
+        jmp @DROPW
 
 ; -------------------
 ; Inner Interpreter
 ; -------------------
 
-next:    lodsw
-        xchg di,ax
-        jmp PW [di]
+next:   MOV    DI,[SI]
+        CMPSW
+        jmp PW [di-2]
 
 ; -------------------
 ; Flow Control
@@ -176,21 +184,22 @@ next:    lodsw
         primitive '0branch',_zero_branch,0
         test bx,bx
         pop bx
-        je @branch
+        je @JUMP
         lodsw
         jmp next
 
         primitive 'branch',_branch,0
-@branch:
+@JUMP:        
         mov si,PW [si]
         jmp next
 
         primitive 'execute',_execute,0
-        mov di,bx
+        LEA di,[bx+2]
         pop bx
-        jmp PW [di]
+        jmp PW [di-2]
 
-        primitive 'exit',_exit,0
+        primitive 'exit',_RET,0
+@RET:        
         mov si,PW [bp]
         inc bp
         inc bp
@@ -200,74 +209,73 @@ next:    lodsw
 ; String
 ; -------------------
 
-        primitive 'count',_count,0
-        inc bx
-        push bx
-        mov bl,byte[bx-1]
-        mov bh,0
-        jmp next
+  primitive 'count',_count,0
+  inc bx
+  push bx
+  DEC BX
+@PEEKB:        
+  mov bl, PB[bx]
+  mov bh,0
+  jmp next
 
-        primitive '>number',_to_number,0
-	pop  ax
-        pop  di
-	mov  cx,bx
-	push si
+;  primitive 'c@',_PEEKB,0
+;  jmp @PEEKB
+
+
+  primitive '>number',_to_number,0
 	xchg ax,si
-        push bp
-	mov  bp,10
+  MOV  CX,BX
+	pop  SI DI BX     ; ADDRESS AND ZEROS
+  PUSH SI BP
+  MOV  BP,PW [VAL_+_BASE]
 	mov  ah,0
-to_numl: jcxz to_numz
-	call to_nums
-	jmp  to_numl
-to_numz: pop  bp
+to_numl:
+        jcxz to_numz
+  lodsb
+	dec  cx
+  CMP   AL,'0'+0AH
+        JC    OK_DIG?
+  CMP   AL,'A'
+        JC    to_numERR
+  SUB   AL,7
+OK_DIG?:
+  SUB   AL,'0'
+        JC    to_numERR
+  CMP   AX,BP
+        JNC   to_numERR
+  xchg ax,di
+  mul  bp
+	xchg ax,di
+  xchg ax,BX
+  mul  bp
+	xchg ax,BX
+  add  BX,AX
+  adC  di,DX
+        jmp  to_numl
+to_numERR:
+  INC   CX
+  DEC   SI
+to_numz:
 	xchg ax,si
-	pop  si
-        push di
-	push ax
+  pop  bp si
+  push BX di ax
 	xchg cx,bx
         jmp next
 
-to_nums: lodsb
-	dec  cx
-to_n2:   cmp  al,'#'
-	jne  to_n4
-	mov  al,16
-to_n3:	mov  bp,ax
-	ret
-to_n4:   cmp  dl,'%'
-	jne  to_n6
-	mov  al,2
-	jmp  to_n3
-to_n5:   dec  si
-	inc  cx
-	ret
-to_n6:	cmp  al,'9'+1
-        jc   to_n7
-        cmp  al,'A'
-        jc   to_n7
-        sub  al,7
-to_n7:   sub  al,48
-        cmp  aX,bp
-        jnc  to_n5
-        xchg ax,di
-        mul  bp
-	xchg ax,di
-        add  di,ax
-	ret
 
 ; -----------------------
 ; Terminal Input / Output
 ; -----------------------
 
-        primitive 'accept',_accept,0
-        xor  cx,cx
-	xchg cx,ax
-	xchg di,ax
-acceptl: call acc 
-	cmp  cx,di
-	jne  acceptl
-	xchg di,ax
-	ret
+  primitive 'accept',_accept,0
+  MOV  DI , PW [VAL_+_tib]
+  xor  cx,cx
+	xchg cx,Bx
+acceptl:
+  call acc 
+	cmp  cx,BX
+        jne  acceptl
+  jmp next
  
 acc:
   call getchar   
@@ -286,14 +294,13 @@ outchar:
   xchg ax,dx
   mov  ah,2
   int  021h
-acc1:	ret
-
+acc1:	
+  ret
 acc2:	
   cmp  al,13
         jne  acc3
   mov  cx,bx
-	ret
-  
+	ret  
 acc3:	
   cmp  al,' '
         jc   acc1
@@ -301,29 +308,26 @@ acc3:
   inc  bx
   jmp outchar
 
-crlf:	mov  al,10
-	push ax
-  mov  al,13
-  jmp  outc2
-
-
   primitive 'word',_word,0
-  push si
+  PUSH  SI
 	mov ah,bl	;save parametter
-  mov si,PW [VAL_+_etb]
+  MOV SI,PW [VAL_+_tIB]
+  ADD SI,PW [VAL_+_number_tib]
   mov cx,PW [VAL_+_to_in]
+  SUB SI,CX
   mov bx,PW [VAL_+_dp]
-  sub si,cx
-	mov PW [bx],0
-wordf:
 	xor al,al	; prepare for endline
-        jcxz wordc
+	mov DI,bx
+  STOSB 
+wordf:
+        jcxz wordz
   lodsb
   dec cx
   cmp al,ah
         je wordf
 wordc:  
-  call _spcs
+  inc  Pb [bx]
+  STOSB
         jcxz wordz
   lodsb
   dec cx
@@ -332,110 +336,95 @@ wordc:
 wordz:   
   mov PW [VAL_+_to_in],cx
 	pop si
-        jmp next
-
-  primitive 'emit',emit,0
-  xchg ax,bx
-  call outchar
-  pop bx
   jmp next
 
-  primitive 's+c!',_emit,0
-_spcs:
-	inc  Pb [bx]
-	mov  di,255
-	and  di,[bx]
-	mov  [di+bx],cl	
-        ret
+  primitive 'emit',_emit,0
+  xchg ax,bx
+  call outchar
+  jmp @DROPW
 
 getchar:
-  xchg ax,cx
   mov ah,7
   int 021h
   mov ah,0
-	xchg ax,cx
-        jmp  findnf
-
-
+  RET
 
 ; -----------------------
 ; Dictionary Search
 ; -----------------------
 
   primitive 'find',_find,0
-	mov  si,PW [VAL_+_last]
+  PUSH SI
+	mov  AX,PW [VAL_+_last]
 	xor  cx,cx
 findl:
+  XCHG  SI,AX
+  LODSW
   mov  cl,PB [si]
         jcxz findnf
-	inc  cx
-  mov  di,bx
+	AND  cL,31
+  CMP  CL,[BX]
+        JNE   findl
+  LEA  DI,[BX+1]
   rep  cmpsb
-        je   findm
-	add  si,cx
-	lea  si,[si+3]
-	jmp  findl
+        jNe   findL
 findm: 
-  mov  dx,si
-	mov  cx,si
+	mov  cL,32
+  mov  BX,si
 findnf:
-  xchg ax,sp
+  POP  sp
 	push bx
-	xchg ax,sp
-	mov  dx,cx
-        ret
+	mov  Bx,cx
+        jmp next
 
 ; -----------------------
 ; Colon Definition
 ; -----------------------
 
-        colon ':',_colon,0
-        dw _lit,-1,_state,_store,_create
-        dw _do_semi_code
-docolon: dec bp
-        dec bp
-        mov PW [bp],si
-        lea si,[di+2]
-        jmp next
-
-        colon ';',_semicolon,immediate
-        dw _lit,_exit,_comma,_lit,0,_state
-        dw _store,_exit
+  colon ':',_colon,0
+  dw _Bl,_state,_store,_create
+  dw _do_semi_code
+docolon:
+  dec bp
+  dec bp
+  mov PW [bp],si
+  mov si,di
+  jmp next
+  
+  colon ';',_semicolon,immediate
+  dw _lit,_RET,_comma,_0,_state
+  dw _store,_RET
 
 ; -----------------------
 ; Headers
 ; -----------------------
 
-        colon 'create',_create,0
-        dw _dp,_fetch,_last,_fetch,_comma
-        dw _last,_store,_lit,32,_word,_count
-        dw _plus,_dp,_store,_lit,0,_comma
-        dw _do_semi_code
+  colon 'create',_create,0
+  dw _dp,_fetch,_last,_fetch,_comma
+  dw _last,_store,_Bl,_word,_count
+  dw _plus,_dp,_store,_0,_comma
+  dw _do_semi_code
 dovar:
-        push bx
-        lea bx,[di+2]
-        jmp next
+  XCHG  AX,DI
+  jmp @PUSHW
 
-        primitive '(;code)',_do_semi_code,0
-        mov di,PW [val_+_last]
-        mov al,PB [di+2]
-        and ax,31
-        add di,ax
-        mov PW [di+3],si
-        mov si,PW [bp]
-        inc bp
-        inc bp
-        jmp next
+  primitive '(;code)',_do_semi_code,0
+  mov di,PW [val_+_last]
+  mov al,PB [di+2]
+  and ax,31
+  add di,ax
+  mov PW [di+3],si
+  jmp @RET
 
 ; -----------------------
 ; Constants
 ; -----------------------
 
-        colon 'constant',_constant,0
-        dw _create,_comma,_do_semi_code
-doconst: push bx
-        mov bx,PW [di+2]
-        jmp next
+  colon 'constant',_constant,0
+  dw _create,_comma,_do_semi_code
+doconst: 
+  mov Ax,PW [di]
+  jmp @PUSHW
 
 ; -----------------------
 ; Outer Interpreter
@@ -443,14 +432,14 @@ doconst: push bx
 
 final:
         colon 'interpret',_interpret,0
-interpt dw _number_t_i_b,_fetch,_to_in,_fetch,_equals
+interpt dw _number_tib,_fetch,_to_in,_fetch,_equals
         DW _zero_branch,intpar
         
-        DW _t_i_b,_lit,50,_accept
-        dw _number_t_i_b,_store
-        dw _lit,0,_to_in,_store
+        DW _lit,50,_accept
+        dw _number_tib,_store
+        dw _0,_to_in,_store
         
-intpar  dw _lit,32,_word,_find,_dup
+intpar  dw _Bl,_word,_find,_dup
         dw _zero_branch,intnf
         DW _state,_fetch,_equals
         dw _zero_branch,intexc
