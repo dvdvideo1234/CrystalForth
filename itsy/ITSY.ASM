@@ -296,10 +296,17 @@ P_ _DROP
 P_ _INC                   ; ++
 	INC   PW [TOP]
   JMPS   @DROP
-	  
+p_ _for 
+  mov   ip,[ip]
+P_ _PUSH
+  PUSH TOP
+@DROP:
+  d_to  top
+  JMPs  @nOP
+  	  
 L_ _UPDICT
   DW    _H,_STR
-LL_ _DPUSH,_TX                  ; >DICT
+LL_ _DICT,_TX                  ; >DICT
 LL_ _MPUSH,__PAR    ; TOP OF DICTIONARY   IN DI
   POP   DI CX SI     ;_@_MPUSH:  
   ADD   SI,CX                ; AFTER NAME ADDRESS
@@ -314,40 +321,20 @@ LL_ _MPUSH,__PAR    ; TOP OF DICTIONARY   IN DI
   MOV   RSP,BP
   X
   POP   BP AR
-  JMPS  @DROPX
+P_ _DROPx
+  jmps  @DROPx
 
 P_ __VAR
   MOV   W,IP
   JMPS  @WPUSHX
 P_ __cons
-  MOV   W,[IP]
-  SKIPB
+  push   [IP]
 P_ _POPX
   POP   W
 @WPUSHX:
   POP   IP
   JMPS  @WPUSH
   
-P_ __SETVAR
-  MOV   [IP+2],top
-P_ _DROPX
-@DROPX:
-  R_TO  IP
-@DROP:  
-  D_TO  TOP
-  JMPS   @NOP
-
-  
-P_ __setpnt
-  POP   [IP+2]
-  SKIPA
-P_ _ANDX
-  AND  TOP,[IP]
-P_ _RET
-@RET:  
-  POP   IP
-  JMP   @NOP
-     
  P_ _CRLDP                 ; ( C@R+
 	POP		  WA
   MOV     wL,[WA]
@@ -366,18 +353,40 @@ P_ _RLDP              ; (@R+
   TO_D    TOP
 @XCHG:
   MOV    TOP,W 
+  jmpS  @nop
 
 ; -------------------
 ; Inner Interpreter
 ; -------------------
 
+P_ _RDROPX
+  POP W
+  SKIPA
+P_ _PLSX
+  ADD  TOP,[IP]
+  JMPS   @RET               
+P_ __setpnt
+  POP   [IP+2]
+  SKIPA
+P_ _ANDX
+  AND  TOP,[IP]
+  jmpS  @ret
+P_ __SETVAR
+  MOV   [IP+2],top
+  skipb 
+p_ _pushx
+  push  top
+@DROPX:
+  D_TO  TOP
+P_ _RET
+@RET:  
+  POP   IP
 @NOP:
-  XCHG    WA,AX
-  LODSW
+  mov    WA,[ip]
 @DBG1:
-  TEST    AL,1       
-  XCHG    WA,AX
+  lea   ip,[ip+2]
 @DBG2:
+  TEST    wa,1       
   JZ      @NEST
   DEC     WA
   JMP     WA
@@ -395,8 +404,7 @@ P_ _@EXEC
 P_ _EXEC
   MOV WA,TOP
   D_TO TOP
-  XCHG AX,WA
-  jmpS @DBG1
+  jmpS @DBG2
 
 ; -------------------
 ; Stack
@@ -407,10 +415,6 @@ P_ _NIP
   POP W
   X
   N_
-  
-P_ _PUSH
-  PUSH TOP
-  JMP  @DROP
   
 P_ _XR
   POP   W
@@ -568,12 +572,17 @@ xFND?:
   RET
 
 LL_ _WFIND,_T
-LL_ _WFND,__PAR          ;_STREQU
+LL_ _WFND,__PAR         
   JMPS  @WFND
 
   ALIGN_ 0
   
 freemem:
+  dw  endcode-freemem-2
+  entry_ _entry,'=:'
+  entry_ 0,0
+  
+endcode:  
 
 MyCseg  ends
         end  Start
