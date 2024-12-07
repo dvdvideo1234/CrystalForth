@@ -4,6 +4,9 @@ VAL_ = 2
 TO_  = -2
 AT_  = -4
 
+DTOP = 0
+DPTR = 0 
+
 pd  equ dword ptr
 pw  equ word  ptr
 pb  equ byte  ptr
@@ -14,6 +17,26 @@ ENDM
 
 SKIPB   MACRO
   DB    03CH
+ENDM
+
+DOKE MACRO ADR,DATA 
+  LOCAL DPOLD
+  DPOLD = $
+  ORG   ADR
+  DW    DATA
+  ORG   DPOLD
+ENDM
+
+ENTRYB MACRO  NAM,LBL
+  LOCAL DPOLD,ESIZE
+  DPOLD = $
+LBL:
+  ENTRY NAM,LBL
+ESIZE = $-DPOLD
+DPTR = DPTR - ESIZE
+  ORG DPTR
+  ENTRY NAM,LBL
+  ORG DPOLD
 ENDM
 
 JJ MACRO ADR
