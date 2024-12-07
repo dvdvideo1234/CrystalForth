@@ -1,69 +1,4 @@
- link =  0
- TEMP = 0
-immediate  = 080h
-locals  @@
-VAL_ = 2
-
-pd  equ dword ptr
-pw  equ word  ptr
-pb  equ byte  ptr
-
-SKIPA  MACRO
-  DB    03DH
-  ENDM
-
-SKIPB  MACRO
-  DB    03CH
-  ENDM
-
-SKIPr  MACRO reg
-MADR = $
-  mov   reg,0
-  IF $-MADR-2
-  org   $-1
-  ENDIF
-  org   $-1
-  ENDM
-
-nam_    macro   msg,FLAG
-  local endstr
-  db    endstr-$-1+FLAG
-  db    msg
-endstr  label   byte
-        endm
-
-HEAD MACRO  NAM,LBL,FLAG
-TEMP = $
-  DW LINK
-LINK = TEMP
-  NAM_ NAM,FLAG
-LBL:
-ENDM  
-
-prim MACRO NAM,LBL,FLAG
-  HEAD NAM,LBL,0
-  DW FLAG
-  ENDM
-
-primitive MACRO NAM,LBL,FLAG
-  HEAD NAM,LBL,FLAG
-  DW $+2
-  ENDM
-
-colon MACRO NAM,LBL,FLAG
-  HEAD NAM,LBL,FLAG
-  DW docolon
-  ENDM
-
-constant MACRO NAM,LBL,FLAG
-  HEAD NAM,LBL,0
-  DW doconst,FLAG
-  ENDM
-
-variable MACRO NAM,LBL,FLAG
-  HEAD NAM,LBL,0
-  DW dovar,FLAG
-  ENDM
+INCLUDE ITSY.IMC
 
 MyCseg  segment para  use16
 
@@ -73,146 +8,171 @@ MyCseg  segment para  use16
 
 Start   Label byte
 
+  mov   bx,1000h     ; only 64k allocate
+  mov   ah,4ah
+  int   21h
+  MOV   AX,3
+  INT   10H
+
 ; -------------------
 ; Initialisation
 ; -------------------
 
-@abort:        
-        xor bp,bp
-        mov sp,-256
-        CALL  @SET_IP
-        DW _TOint
+P_ _abort
+  xor DSP,DSp
+  mov Rsp,-1024
+  CALL  @RET
+  DW _INITEX
+  
+; -----------------------
+; Outer Interpreter
+; -----------------------
+
 NEWLINE: 
         dw _emiter
         db 13,10,'>',0
-        DW _lit,64,_accept,_to_in,_store
+        DW _READLN
         dw _emiter
         db ' ',0
         dw _EVAL
         dw _emiter
         db ' Ok',0
-        DW _branch,NEWLINE
+        DW _JUMP,NEWLINE
 
-_STATES DW @WARY,_TO_NUM,_EXEC,_TO_NUMC,_COMMA
+ ALIGN_ 0
+ 
+_STATES DW _WARY,_TO_NUM,_@EXEC,_TO_NUMC,_@COMMA
 
-@word:
-  PUSH  SI
-  mov SI,PW [VAL_+_number_tib]
-  MOV CX,PW [VAL_+_to_in]
-	mov Dh,bl	;save parametter
-  SUB SI,CX
-  mov bx,PW [VAL_+_dp]
-	xor aX,aX	; prepare for endline
-	mov DI,bx
-  STOSB 
-wordf:
-        JCXz wordz
-  lodsb
-  DEC cx
-  cmp al,Dh
-        je wordf
-wordc:  
-  inc  Pb [bx]
-  STOSB
-        jCXz wordz
-  lodsb
-  DEC cx
-  cmp al,Dh
-        jne wordc
-wordz:   
-  mov PW [VAL_+_to_in],cx
-  MOV PB [DI],'`'
-@SET_IP:
-	pop si
-  jmp next
+_COMMAX DW _EX,_COMMA,_RET
 
-_TOFINDEX DW docolon,_POP,_state,_store,_RET
+_LIT_COMX DW _EX,_COMMAX
+_LIT_COM  DW __@COMM,_LIT
+_RET_COM  DW __@COMM,_RET
 
-_FINDEX DW docolon,_state,_fetch,_PUSH,_RET
+_VAR  DW _COMMAX
+_CREATE   DW _HENTRY,__@COMM,__VAR
 
-_error dw docolon,_zero_branch,intskip
-        dw _emiter
+LL_ _2LIT,_RLDP
+LL_ _LIT,_RLDP
+_NOP DW _RET
+
+_@NERR  DW _?C@
+_NERR   DW _ZEQ
+_error  dw _IF,_NOP,_emiter
         db '?',0
-  dw _ABORT
+        dw _ABORT
 
-_TO_NUM DW docolon,_0,_0,_ROT,_count,_to_number,_error,_drop
-DROPX   DW _drop
-intskip dw  _RET
+_TO_NUMC  DW _LIT_COMX
+_TO_NUM DW _PUSH,_0,_0,_POP,_count,_CONV,_error
+_2DROP DW _drop
+DROPX   DW _dropX
 
-_TO_NUMC  DW docolon,_TO_NUM,_lit,_lit,_comma,_comma,_RET
 
-_EVAL   DW docolon
-        dw _Bl,_word,_DUP,_PEEKB
-        DW _zero_branch,DROPX,_FINDEX,_STATES,_@exec
-        dw _branch,_EVAL+2
+P_ _?C@
+  DW _DUP,_C@,_RET
+  
+_SEVAL  dw _COUNT
+_EVAL   dw _TIBZ
+@EVAL   dw _TOKEN,_?C@
+        DW _IF,DROPX,_FINDEX,_STATES,_@exec,_JUMP,@EVAL
         
+_TO_T DW _T,_2PLUS,_2PLUS,_COUNT,_PLUS,_RET
+
+; -----------------------
+; Constants
+; -----------------------
+
+_consT dw _commaX,_HENTRY,__@COMM,__CONS
+
+  const_ _0,0
+  const_ _BL,32
+  const_ _L,64
+  const_ _CMD,128
+  const_ _tib,-2048
+
+; -------------------
+; Variables
+; -------------------
+
+  vaLUE_ _Ltib,0
+_TIBZ     DW _DUP,TO_+_Ltib,_PLUS  
+  vaLUE_ _Etib,0
+_SETBASE  DW _2M,_W_B,_2P  
+  vaLUE_ _base,10
+
+L_ _TX 
+  DW _T,_EX
+  VALUE_ _T,-2048
+L_ _HX 
+  DW _H,_EX
+  VALUE_ _H,freemem
+  
+ POINT_ _FINDEX,VAL_+_TOint
+ POINT_ _INITEX,_REINIT
+
+; -----------------------
+; Headers
+; -----------------------
+
+_HENTRY DW _H
+_ENTRY DW _0,_TOKEN,_@NERR,_?C@,_TX,_MPUSH,_STM,_STM,_RET
+  
+__@COMM DW _POP
+_@COMMA DW _@ 
+_COMMA  DW _HX,_STP,_RET
+
 ; -------------------
 ; print, Peek and Poke
 ; -------------------
 
-_emiter dw @emiter
-@em1:
-  call outchar
-@emiter:
-  lodsb
-  or al,al
-  jne @em1
-  jmp short next
+_emiter dw _CRLDP,_DUP,_IF,DROPX,_EMIT,_JUMP,_EMITER
 
-@fetch:        
-  mov bx,PW [bx]
-  jmp SHORT next
+_STR DW _PUSH,_RLDP,_XR,_POPX
 
-@store:        
-  pop PW [bx]
+_@ DW _STR,_NIP,_RET
 
-; -------------------
-; Stack
-; -------------------
+_ST DW _STP,_DROPX
 
-@DROP:        
-  pop bx
-  jmp SHORT next
+_JMPX DW _RLDP,_XR,_PUSH,_RET
 
-@POP:
-  MOV   AX,[BP]
-  INC   BP
-  INC   BP
-  jmp SHORT @PUSHW
+P_ _STP
+  D_TO  [TOP]
+P_ _2P
+  INC   TOP
+@1P:  
+  INC   TOP
+  JMPS  @NOP3
+P_ _1P
+  JMPS  @1P
+
+P_ _STM
+  D_TO [TOP-2]
+@2M:
+  DEC TOP
+P_ _1M
+  DEC TOP
+@NOP3:  
+  JMP @NOP
+P_ _2M
+  JMPS @2M
+
+; ------------------------------------
+; Initialisation OF THE INTERPRETTER
+; ------------------------------------
+
+_REINIT DW _UPDICT,_CMD,_JMPX,_SEVAL
+  DW TO_+_INITEX
+  DW _SKIP
+
+; -----------------------
+; Interpetation
+; -----------------------
+
+P_ _semicolon
+  dw _RET_com
+_TOint:
+  DW TO_+_FINDEX,_T,_fnd,_RET
   
-@PUSH:
-  POP   AX
-  XCHG  AX,BX
-  DEC   BP
-  DEC   BP
-  MOV   [BP],AX
-  jmp SHORT next
-  
-@dup:
-  push bx
-  jmp SHORT next
-
-@swap:
-  pop ax
-  jmp SHORT @PUSHW
-
-@rot:
-  pop  dx ax
-  push dx
-@PUSHW:
-  push bx
-  xchg ax,bx
-
-; -------------------
-; Inner Interpreter
-; -------------------
-
-next:
-  MOV    DI,[SI]
-  CMPSW
-next2:
-  jmp PW [di-2]
-
 ; -------------------
 ; Compilation
 ; -------------------
@@ -221,87 +181,60 @@ next2:
 ;    INT 3
 ;    JMP NEXT
     
-@comma:        
-        mov di,PW [VAL_+_dp]
-        xchg ax,bx
-        stosw
-        mov PW [VAL_+_dp],di
-        jmp @DROP
+_colon dw _HENTRY
 
-@lit:
-        lodsw
-        jmp @PUSHW
+_TOCOMP:
+  DW TO_+_FINDEX,_H,_INC,_cfnd,_H,_DEC
+  DW _DUP,_IF,@TOCOMPX,_ret
+@TOCOMPX  DW _DROP,_cfnd
+_2PLUS DW _LIT,2,_PLUS
+  DW _RET
+  
+;------------------------------------------
 
-; -------------------
-; Maths / Logic / ARRAY
-; -------------------
+P_ __PAR
+  PUSH  AR BP
+  X
+  PUSH  TOP
+  CLR   CX
+P_ __ASM
+  JMP   IP
 
-@WARY:
-  SHL   BX,1
-  JMP   SHORT @BARY
-@MINUS:        
-  NEG BX
-@plus:        
-  pop DI
-@BARY:  
-  add bx,DI
-  jmp next
+P_ __ASMX
+  POP   WA
+  XCHG  WA,IP
+  JMP   WA
+  
+LL_ _TOKEN,_Bl
+LL_ _word,_H,_ETIB,_Ltib,__PAR
+  XCHG  AX,CX
+  POP  CX SI BX DX   ;GET parametterS
+  PUSH BX
+	mov DI,bx
+  STOSB 
+  SUB SI,CX
+wordf:
+        JCXz wordz
+  lodsb
+  DEC cx
+  cmp al,DL
+        je wordf
+wordc:  
+  inc  Pb [bx]
+  STOSB
+        jCXz wordz
+  lodsb
+  DEC cx
+  cmp al,DL
+        jne wordc
+wordz:   
+  mov PW [VAL_+_Ltib],cx
+  MOV PB [DI],'`'
+    JMPS   @PARX
 
-@ZEQ:
-  sub bx,1
-  sbb bx,bx
-  jmp next
-
-; -------------------
-; Flow Control
-; -------------------
-
-@0branch:        
-  test bx,bx
-  pop bx
-  je @JUMP
-  lodsw
-  jmp next
-
-@JUMP:        
-  mov si,PW [si]
-  jmp next
-
-@TOEXEC:
-  MOV BX,[BX]
-@exec:
-  LEA di,[bx+2]
-  pop bx
-  jmp next2
-  ;jmp PW [di-2]
-
-@RET:        
-  mov si,PW [bp]
-@rdrop:
-  inc bp
-  inc bp
-  jmp next
-
-; -------------------
-; String
-; -------------------
-
-@count:  
-  inc bx
-  push bx
-  DEC BX
-@PEEKB:        
-  mov bl, PB[bx]
-  mov bh,0
-  jmp next
-
-@_to_number:
-  MOV  CX,BX
-	pop  AX DI BX     ; ADDRESS AND ZEROS
-  PUSH SI BP
-	xchg ax,si
-  MOV  BP,PW [VAL_+_BASE]
-	mov  ah,0
+PP_ _CONV,_PAR
+	PUSH CX
+  CALL @POPAL
 to_numl:
         jcxz to_numz
   lodsb
@@ -316,239 +249,330 @@ OK_DIG?:
         JC    to_numERR
   CMP   AX,BP
         JNC   to_numERR
+  CALL @MULADD
+        jmp  to_numl
+to_numERR:
+  INC   CX
+  DEC   SI
+to_numz:
+  push BX di SI CX
+    JMPS   @PARX
+    
+@MULADD:
   xchg ax,di
   mul  bp
 	xchg ax,di
   xchg ax,BX
   mul  bp
 	xchg ax,BX
-  add  BX,AX
-  adC  di,DX
-        jmp  to_numl
-to_numERR:
-  INC   CX
-  DEC   SI
-to_numz:
-	xchg ax,si
-  pop  bp si
-  push BX di ax
-	xchg cx,bx
-        jmp next
+  adD  di,AX
+  adC  BX,DX
+  RET
+  
+@POPAL:
+  POP DX AX CX SI BX DI 
+  MOV  BP,PW [VAL_+_BASE]
+  JMP DX
 
+P_ _RSTM              ; (!R+
+  POP     WA
+  DEC     WA
+  DEC     WA
+  MOV     [WA],TOP
+  JMPS   @PUSHWA
+		    
+P_ _RSTP              ; (!R+
+  POP     WA
+  MOV     [WA],TOP
+  SCASW
+PP_ PUSHWA,@PUSHWA
+  PUSH    WA
+  SKIPA
+P_ _DEC                   ; ++
+	DEC   PW [TOP]
+P_ _DROP
+  JMPS   @DROP
+	  
+P_ _INC                   ; ++
+	INC   PW [TOP]
+  JMPS   @DROP
+	  
+L_ _UPDICT
+  DW    _H,_STR
+LL_ _DPUSH,_TX                  ; >DICT
+LL_ _MPUSH,__PAR    ; TOP OF DICTIONARY   IN DI
+  POP   DI CX SI     ;_@_MPUSH:  
+  ADD   SI,CX                ; AFTER NAME ADDRESS
+  STD                        ; BACKWARDS
+  CMPSB                      ; PREPARE FOR DIRECTION
+  REP   MOVSB                ; NAME  MOVE
+  CLD
+  inc   di
+@MPUSH:  
+  PUSH  di
+@PARX:
+  MOV   RSP,BP
+  X
+  POP   BP AR
+  JMPS  @DROPX
+
+P_ __VAR
+  MOV   W,IP
+  JMPS  @WPUSHX
+P_ __cons
+  MOV   W,[IP]
+  SKIPB
+P_ _POPX
+  POP   W
+@WPUSHX:
+  POP   IP
+  JMPS  @WPUSH
+  
+P_ __SETVAR
+  MOV   [IP+2],top
+P_ _DROPX
+@DROPX:
+  R_TO  IP
+@DROP:  
+  D_TO  TOP
+  JMPS   @NOP
+
+  
+P_ __setpnt
+  POP   [IP+2]
+  SKIPA
+P_ _ANDX
+  AND  TOP,[IP]
+P_ _RET
+@RET:  
+  POP   IP
+  JMP   @NOP
+     
+ P_ _CRLDP                 ; ( C@R+
+	POP		  WA
+  MOV     wL,[WA]
+  mov     wh,0
+  JMPS    @WPUSH1
+
+P_ _RLDP              ; (@R+
+  POP     WA
+  MOV     w,[WA]
+  INC     WA
+@WPUSH1:        
+  INC     WA
+@_J:
+  PUSH    WA  
+@WPUSH:  
+  TO_D    TOP
+@XCHG:
+  MOV    TOP,W 
+
+; -------------------
+; Inner Interpreter
+; -------------------
+
+@NOP:
+  XCHG    WA,AX
+  LODSW
+@DBG1:
+  TEST    AL,1       
+  XCHG    WA,AX
+@DBG2:
+  JZ      @NEST
+  DEC     WA
+  JMP     WA
+    
+PP_ _EX,@EX              ; ( EX
+  POP     WA
+@NEST:  
+  XCHG    IP,WA
+@RPUSH:
+  PUSH    WA
+  N_
+
+P_ _@EXEC
+  MOV TOP,[TOP]
+P_ _EXEC
+  MOV WA,TOP
+  D_TO TOP
+  XCHG AX,WA
+  jmpS @DBG1
+
+; -------------------
+; Stack
+; -------------------
+
+P_ _NIP
+  X
+  POP W
+  X
+  N_
+  
+P_ _PUSH
+  PUSH TOP
+  JMP  @DROP
+  
+P_ _XR
+  POP   W
+  PUSH  TOP
+  jmp SHORT @XCHG
+  
+P_ _POp
+@POP:  
+  POP  W
+  SKIPA
+P_ _dup
+  MOV W,TOP
+  jmp SHORT @WPUSH
+
+; -------------------
+; Maths / Logic / ARRAY
+; -------------------
+
+L_ _MINUS
+  DW _NEG
+L_ _PLUS
+  DW _PLAVG,_DROPX
+  
+P_ _PLAVG				; ( +2/
+  X
+  POP   W
+  ADD   TOP,W
+  PUSH  TOP
+  X
+P_ _2DIV  
+  RCR     TOP,1
+  N_
+		
+P_ _nAND	          ; ( AND
+  D_TO W
+    AND     TOP,W
+@not:
+    INC     TOP
+P_ _NEG
+    NEG     TOP
+    N_
+    
+P_ _ZEQ
+  neg TOP
+  sbb TOP,TOP
+p_ _not  
+  jmp @NOt
+
+P_ _WARY
+  SHL   TOP,1
+P_ _BARY
+  pop WA
+  add TOP,WA
+@NOP2:
+  jmp @NOP
+
+; -------------------
+; Flow Control
+; -------------------
+
+P_ __DEFER
+P_ _JUMP
+@JUMP:        
+  mov iP,PW [iP]
+  jmpS @nOP
+
+P_ _IF
+  Z? TOP
+  D_TO TOP
+  je @JUMP
+P_ _SKIP
+  INC IP
+  INC IP
+  jmpS @nOP2
 
 ; -----------------------
 ; Terminal Input / Output
 ; -----------------------
 
-@accept:  
-  xor  cx,cx ; BX COUNTER - CX LIMIT
-  MOV  DI , PW [VAL_+_tib]  ; BUFFER
-  XCHG  CX,BX
-acceptl:
-  call acc 
-	cmp  cx,BX
-        jne  acceptl
-  LEA CX,[BX+DI]
-  mov PW [VAL_+_number_tib], CX
-  jmp next
- 
-acc:
-  call getchar   
-	cmp  al,8
-        jne  acc2
-  OR   BX,BX
-        jz   acc1
-  dec  bx
-	push ax
-  call outchar
-  mov  al,' '
-outc2:
-  call outchar
-  pop  ax
-outchar:
-  xchg ax,dx
-  mov  ah,2
+LL_ _emit,__PAR
+  MOV Dx,bx
+  mov  Ah,2
   int  021h
-acc1:	
-  ret
-acc2:	
-  cmp  al,13
-        jne  acc3
-  mov  Cx,Bx
-	ret  
-acc3:	
-  cmp  al,' '
-        jc   acc1
-  MOV  [DI+BX],AL
-  inc  Bx
-  jmp outchar
+  jmp  @PARX
 
-@emit:
-  xchg ax,bx
-  call outchar
-  jmp @DROP
-
-getchar:
-  mov ah,7
+P_ _key
+  MOV  WH,7
+  XCHG AX,W
   int 021h
   mov ah,0
-  RET
+  XCHG AX,W
+  JMP @WPUSH
+
+L_ _READLN
+  DW _CMD,_L
+LL_ _ACCEPT,__ASMX
+  PUSH DX
+  MOV DX,BX
+  D_TO BX
+  PUSH AX
+  MOV  [BX],DL
+  MOV DX,BX
+  MOV AH,10
+  INT  33
+  POP  AX DX
+  INC  BX 
+  
+; -------------------
+; String
+; -------------------
+
+P_ _cOUNT 
+  inc  TOP
+  TO_D TOP
+  DEC  TOP
+P_ _C@
+  mov TOPl, PB[TOP]
+P_ _W_B
+  mov TOPh,0
+  jmp @NOP
 
 ; -----------------------
 ; Dictionary Search
 ; -----------------------
 
-@FND:
-  PUSH SI 	;mov  AX,PW [VAL_+_last]
-	xor  cx,cx
-  MOV  DI,BX
-findl:
-  XCHG  SI,AX
-  LODSW
-  mov  cl,PB [si]
-        jcxz findnf
-	INC  cX
-  rep  cmpsb
-  MOV  DI,BX
-        jNe   findL
-findm: 
-	INC  cX
-  mov  BX,si
-findnf:
-  POP  sI
+L_ _CFND
+  DW _TO_T
+LL_ _FND,__PAR         
+  CALL  @METHOD
+  repe  cmpsb
+  RET
+@METHOD:
+  POP   DX DI AX
+@fnd:
+  add   di,cx
+  mov   Bx,di
+  LEA   di,[DI+4]
+  mov   cl,[di]
+  jcxz  xfnd?
+  INC   CX
+  MOV   SI,AX
+  CALL  DX
+  jNZ   @fnd
+  MOV   cL,1
+  STC
+  ADC   [BX+2],CX
+  XCHG  BX,AX
+xFND?:
+  PUSH  AX CX 
+@PARX1:  
+  jmp   @parx
+@WFND:
+  CALL  @METHOD
+  CMP   SI,[DI-4]
   RET
 
-@find:
-  POP   AX
-  XCHG  AX,BX
-	CALL  @FND
-@XFND:  
-  push bx
-	mov  Bx,cx
-        jmp next
+LL_ _WFIND,_T
+LL_ _WFND,__PAR          ;_STREQU
+  JMPS  @WFND
 
-@findc:
-  POP   AX
-  XCHG  AX,BX
-  INC   PB [BX]
-	CALL  @FND
-  DEC   PB [DI]
-        jmp SHORT @XFND
-
-; -----------------------
-; Colon Definition
-; -----------------------
-
-  colon ';`',_semicolon,0
-  dw _lit,_RET,_comma,_TOint,_RET
-
-_TOint:
-  DW docolon,_TOFINDEX,_last,_FETCH,_find,_RET
+  ALIGN_ 0
   
-_TOCOMP:
-  DW docolon,_TOFINDEX,_last,_FETCH,_FETCH
-;  dw _brk
-  dw _findc
-  DW _DUP,_zero_branch,@TOCOMPX,_ret
-@TOCOMPX  DW _DROP,_last,_FETCH,_FETCH,_FIND,_LIT,2,_PLUS
-  DW _RET
-  
-  colon ':',_colon,0
-  dw _TOCOMP,_create,_do_semi_code
-docolon:
-  dec bp
-  dec bp
-  mov PW [bp],si
-  mov si,di
-  jmp next
-  
-; -----------------------
-; Headers
-; -----------------------
-
-  colon 'create',_create,0
-  dw _dp,_fetch,_last,_fetch,_comma
-  dw _last,_store,_Bl,_word,_count
-  dw _plus,_dp,_store,_0,_comma
-  dw _do_semi_code
-dovar:
-  XCHG  AX,DI
-  jmp @PUSHW
-
-  primitive '(;code)',_do_semi_code,0
-  mov di,PW [val_+_last]
-  mov al,PB [di+2]
-  and ax,31
-  add di,ax
-  mov PW [di+3],si
-  jmp @RET
-
-; -----------------------
-; Constants
-; -----------------------
-
-  colon 'constant',_constant,0
-  dw _create,_comma,_do_semi_code
-doconst: 
-  mov Ax,PW [di]
-  jmp @PUSHW
-
-
-; -----------------------
-; NAMES
-; -----------------------
-
-  prim 'rot',_ROT,@rot
-  prim 'dup',_dup,@dup
-  prim 'drop',_drop,@drop
-  prim 'pop',_POP,@POP
-  prim 'push',_PUSH,@PUSH
-  prim 'swap',_swap,@swap
-  prim 'c@',_PEEKB,@PEEKB
-  prim '@',_fetch,@fetch
-  prim '!',_store ,@store
-  prim '-',_MINUS,@MINUS
-  prim '+',_plus,@plus
-  prim '0=',_Zeq,@ZEQ  
-  prim 'abort',_abort,@abort
-  prim 'cstr',_count,@count
-  prim '0br',_zero_branch,@0branch
-  prim 'br',_branch,@JUMP
-  prim '@exec',_@exec,@TOEXEC
-  prim 'exec',_exec,@exec
-  prim 'exit',_RET,@RET
-  prim ',',_comma,@comma
-  prim 'lit',_lit,@lit
-  prim 'find',_find,@find
-  prim 'findc',_findc,@findc
-  prim 'bye',_bye,0
-  prim 'word',_word,@word
-  prim '>number',_to_number,@_to_number
-  prim 'accept',_accept,@accept
-  prim 'emit',_emit,@emit
-
-; -------------------
-; Variables
-; -------------------
-
-  variable 'state',_state,0
-  variable '>in',_to_in,0
-  variable '#tib',_number_tib,0
-  variable 'dp',_dp,freemem
-  variable 'base',_base,10
-  variable 'last',_last,final
-  constant '0',_0,0
-  constant 'BL',_BL,32
-
-final:
-  
-  constant 'tib',_tib,32768
-
-; -----------------------
-; Outer Interpreter
-; -----------------------
-
-
 freemem:
 
 MyCseg  ends
