@@ -83,21 +83,22 @@ Start   Label byte
         CALL  @SET_IP
         DW _TOint
 NEWLINE: 
-        DW _LIT,13,_EMIT,_lit,10,_EMIT,_lit,'>',_EMIT
-        DW _lit,64,_accept,_to_in,_store,_spc
+        dw _emiter
+        db 13,10,'>',0
+        DW _lit,64,_accept,_to_in,_store
+        dw _emiter
+        db ' ',0
         dw _EVAL
-        DW _spc,_lit,'O',_EMIT,_lit,'K',_EMIT
+        dw _emiter
+        db ' Ok',0
         DW _branch,NEWLINE
 
 _STATES DW @WARY,_TO_NUM,_EXEC,_TO_NUMC,_COMMA
 
-_spc dw docolon,_bl,_emit,_ret
- 
 @word:
   PUSH  SI
   mov SI,PW [VAL_+_number_tib]
   MOV CX,PW [VAL_+_to_in]
-      ;  JCXz @abort
 	mov Dh,bl	;save parametter
   SUB SI,CX
   mov bx,PW [VAL_+_dp]
@@ -129,7 +130,10 @@ _TOFINDEX DW docolon,_POP,_state,_store,_RET
 
 _FINDEX DW docolon,_state,_fetch,_PUSH,_RET
 
-_error dw docolon,_zero_branch,intskip,_LIT,'?',_EMIT,_ABORT
+_error dw docolon,_zero_branch,intskip
+        dw _emiter
+        db '?',0
+  dw _ABORT
 
 _TO_NUM DW docolon,_0,_0,_ROT,_count,_to_number,_error,_drop
 DROPX   DW _drop
@@ -143,15 +147,24 @@ _EVAL   DW docolon
         dw _branch,_EVAL+2
         
 ; -------------------
-; Peek and Poke
+; print, Peek and Poke
 ; -------------------
 
+_emiter dw @emiter
+@em1:
+  call outchar
+@emiter:
+  lodsb
+  or al,al
+  jne @em1
+  jmp short next
+
 @fetch:        
-        mov bx,PW [bx]
-        jmp SHORT next
+  mov bx,PW [bx]
+  jmp SHORT next
 
 @store:        
-        pop PW [bx]
+  pop PW [bx]
 
 ; -------------------
 ; Stack
