@@ -31,7 +31,7 @@
 @REGS:  
   CALL  @SAVEREGS
 @REGSZ:  
-  CALL  @CRDOT  
+  CALL  @CR  
   MOV   SI,SP
   CALL  @DOTR
   CALL  @DOTR
@@ -47,17 +47,15 @@
   
 @REGSTR:
   CALL  @SAVEREGS
-  CALL  @CRDOT  
-  XOR   AX,AX
-  MOV   SI,@RA
-  LODSB
-  CALL  @STRTYPE
-  MOV   @RA,SI
+  CALL  @CR  
+  MOV   AX,@RA
+  CALL  @SHOWSTR
+  MOV   @RA,AX
   JMP   @REGSZ
   
 @DBG:
   CALL  @SAVEREGS
-  CALL  @CRDOT  
+  CALL  @CR  
   MOV   AX,SI       ; IP - CURRENT ADDRESS OF VIRTUALMASHINE FORTH
   CALL  @CALD3      ; IP. [IP]. [IP+2].
 
@@ -72,8 +70,15 @@
   MOV   AX,PW[VAL_+_DP]
   CALL  @HDOT
   
-  MOV   AX,[@SI]
+  MOV   BX,[@SI]
+  MOV   AX,BX
+  MOV   CX,[BX-2]
+  MOV   DI,[@DI]
+  LEA   DI,[DI-2]   
+  CMP   CX,DI
+  JNE   @NOTALBL
   CALL  @LBLID
+@NOTALBL:  
   
   MOV   ax,[@DI]
   CALL  @STRID
@@ -120,29 +125,17 @@ PRIM 'H.',_HDOT,0,@DRCALL
   POP   AX
   RET
 
-@PUSH:
-  XCHG  SP,BP
-  push  Ax
-  XCHG  SP,BP
-  RET
- 
 PRIM 'TR-',_TRM,0,@CALL
-  MOV PB [@INDIR],0B8H
+@TRM:
+  MOV AL,0FFH
+@TRZ:  
+  XCHG AL, PB [@INDIR]
   RET
 
 PRIM 'TR',_TR,0,@CALL
-  MOV PB [@INDIR],0E8H
-  RET
+  MOV AL,0B8H
+  J @TRZ
 
-@DIGOUT:
-  AND   AL,15
-  CMP   AL,10
-  JC    @DIG1
-  ADD   AL,7
-@DIG1:
-  ADD   AL,'0'
-  JMP   @COUT
-  
 @SEARCH:
   MOV   DI,PW [VAL_+_DICT]
   XOR   CX,CX
@@ -174,9 +167,9 @@ PRIM 'TR',_TR,0,@CALL
   JE    @NOLBL
   PUSH  AX
   MOV   AX, OFFSET @CLN
-  CALL  @STROUT
+  CALL  @?STR
   POP   AX
-  CALL  @STROUT
+  CALL  @?STR
 @NOLBL:
   RET
   
@@ -184,38 +177,40 @@ PRIM 'TR',_TR,0,@CALL
   DEC   AX
   DEC   AX
   CALL  @SEARCH
-  JNE   @STROUT
-  JMP   @HDOT
+  JE    @HDOT
+  JMP   @?STR
   
-@STROUT:
-  XCHG  AX,SI
-  LODSB
-  AND   AX,127
-@STRTYPE:
-  XCHG  CX,AX
-  JCXZ  @@OUT
-@@LPSTR:
-  LODSB
-  CALL  @COUT
-  LOOP  @@LPSTR
-@@OUT:  
-  JMP   @SPDOT
+;@?STR:
+;  XCHG  AX,SI
+;  LODSB
+;  AND   AX,127
+;@STRTYPE:
+;  XCHG  CX,AX
+;  JCXZ  @@OUT
+;@@LPSTR:
+;  LODSB
+;  CALL  @COUT
+;  LOOP  @@LPSTR
+;@@OUT:  
+;  JMP   @SPDOT
   
-@CRDOT:  
-  MOV   AL,13
-  CALL  @COUT
-  MOV   AL,10
-  JMP   @COUT
+;@CRDOT:  
+;  MOV   AL,13
+;  CALL  @COUT
+;  MOV   AL,10
+;  JMP   @COUT
   
   
-@POP:
-  XCHG  SP,BP
-  POP   AX
-  XCHG  SP,BP
-  RET
-
-_@BIOSK:
-  XOR   AX,AX
-  INT   16H
-  RET
-  
+;@POP:
+;  XCHG  SP,BP
+;  POP   AX
+;  XCHG  SP,BP
+;  RET
+;
+;@PUSH:
+;  XCHG  SP,BP
+;  push  Ax
+;  XCHG  SP,BP
+;  RET
+; 
+;
