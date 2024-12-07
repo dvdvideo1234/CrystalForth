@@ -1,11 +1,11 @@
 
 INCLUDE ITSY.IMC
 
-DTOP = 10000  ;-1EA7H
+DTOP = 10000  - 1A44H
 DPTR = DTOP
 
 LISTGEN = 01
-DBG_FLAG= 01
+DBG_FLAG= 0;1
 
 IF LISTGEN
    DIVE EQU ENTRYB
@@ -126,10 +126,9 @@ doGETADR:
 
 @HERE:
   MOV   W,[WA]
-  SCASW
-  MOV   WA,[WA]
+  MOV   WA,[WA+2]
   ADD   W,[WA]
-  JMP   @PUSHW
+  JMP   DOPUSHW
 
 ; -------------------
 ; Variables &  constantS
@@ -177,6 +176,82 @@ doGETADR:
 
         constant 'BL',_BL,' '
 
+; -----------------------------
+; DEBUG WORDS
+; ------------------------------
+ 
+@SEARCH2:
+; INPUT: AX:=[ADDRESS_TO_SEARCH]
+; OUTPUT: 
+;    ON ZF=0 FOUND      AX:=NAME
+;    ON ZF=1 NOT_FOUND  DI:=AX+2
+; USED REGS: AX CX DI
+
+  MOV   DI,PW [VAL_+_DICT]
+  XOR   CX,CX
+  SKIPB
+@@IDLP:  
+  SCASW
+  ADD   DI,CX
+  MOV   CL,[DI+4]
+  JCXZ  @IDLPX
+  INC   CX
+  SCASW
+  JNE    @@IDLP
+@@ID:
+  SCASW
+  XCHG  AX,DI
+  SKIPA
+@IDLPX:
+  MOV   DI,AX
+  SCASW
+  OR    CX,CX
+  RET
+  
+@PREFIXTO:
+  CALL  @PREFIX
+  MAKESTR 'TO'
+@PREFIXAT:
+  CALL  @PREFIX
+  MAKESTR 'AT'  
+@PREFIXCLN:
+  CALL  @PREFIX
+  MAKESTR ':'  ; COLON DEFINITION
+
+PRIM 'LBL?.',_LBL?,@DRCALL
+@LBLID:
+  CALL  @SEARCH2
+  JNZ    @PREFIXCLN
+@NOLBL:
+  RET
+@PREFIX:
+  POP   DI
+  PUSH  AX
+  XCHG  AX,DI
+  CALL  @NOPREFIX
+  POP   AX
+@NOPREFIX:  
+  CALL  @SHOWSTR
+  JJ @SPDOT
+
+PRIM 'ID.',_IDOT,@DRCALL
+  J @NOPREFIX
+  
+PRIM 'ID?.',_ID?,@DRCALL
+@STRID:
+  CALL  @SEARCH2
+    JNZ    @NOPREFIX
+  XCHG  AX,DI   ;AX+=2
+  CALL  @SEARCH2
+    JNZ    @PREFIXTO
+  XCHG  AX,DI   ;AX+=2
+  CALL  @SEARCH2
+    JNZ    @PREFIXAT
+  ADD   AX,-4
+@HDOT2:  
+  JMP    @HDOT
+  
+
 PRIM 'H.',_HDOT,@DRCALL
 @HDOT:
   CALL  @WORDOUT
@@ -202,13 +277,20 @@ PRIM 'SPC',_SPC,@CALL
   POP   AX
   RET
 
+@DIGOUT:
+  AND   AL,15
+  CMP   AL,10
+  JC    @DIG1
+  ADD   AL,7
+@DIG1:
+  ADD   AL,'0'
+  JMP   @COUT
+  
+; DBG
+
 ; -------------------
 ; Stack & ERRORS
 ; -------------------
- 
-  PRIMITIVE 'RDROP;',_RDROPX
-  POP   WA IP
-  J @NEXT1
  
 @STK2TOU:
   CALL  _@DOES-1
@@ -438,45 +520,50 @@ PRIM 'OPER',_OPER,@WARY
   
 prim 'C@',_c@,@C@
 
-prim '>NUM',_tonum,@PAR
-  PUSH BX
-  POP   CX SI DI BX
+digit?: xor   ah,ah
+        cmp   al,'9'
+        jbe   @@okdig
+        and   al,0dfh
+        cmp   al,'A'
+        jb    @@notdig
+        sub   al,7
+@@okdig:  sub   al,'0'
+        jb    @@notdig
+        cmp   ax,TOP
+        cmc
+@@notdig: ret
+
+@MULADDZ:
   XOR   AX,AX
+@MULADD:        ; NXT:NXT+2 *= BX
+  XCHG  AX,NXT+2    ; LO W
+  MOV   DI,NXT      ; HI W
+  XCHG  DI,AX       ; AX-HI DI-LO
+  mul   TOP
+  XCHG  DI,AX       ; DI-HI
+  mul   TOP         ; AX-LO DX-HI
+  ADD   NXT+2,AX
+  adC   DI,dx
+  MOV   NXT,DI
+  RET
+
+prim '>NUM',_tonum,@PAR ; 0 0 ADR CNT BASE
+  POP   CX SI
+  X
 @@numl: 
     jCXZ @@numz
   LODSB
 @@nums: 
-  cmp al,'9'+1
-    jc @@numg
-;        cmp al,'a'
-;        jc to_nums
-;        sub al,32
-;  AND aL,0DFH
-  cmp al,'A'
+  CALL  digit?
     jc @@numh
-  sub al,7
-@@numg: sub al,48
-  cmp   aX,Pw[val_+_base]
-    jnc @@numh
-  push  Ax
-  MOV   AX,BX  
-  xchg  ax,DI
-  mul   Pw[val_+_base]
-  xchg  ax,DI
-  mul   Pw[val_+_base]
-  POP   BX        ; AH = 0  !!!
-  XCHG  AX,BX
-  add   Bx,Ax
-  adC   DI,dx
+  CALL  @MULADD
   dec   Cx
     JJ   @@numl
 @@numh: 
   DEC   SI
 @@numz: 
-  push  Bx
-  push  di
-  push  SI
-  push  cx
+  X
+  push  SI cx
 _@RETPAR:  
   POP   BX
 _@RETPARZ:  
@@ -486,7 +573,7 @@ _@RETPARZ:
 
 ;COLON 'NUM',_NUMBER
 COLONM 'NUM',_NUMBER
-  DW _STRSKIP?,_NOP,_0SWAP,_0SWAP,_COUNT
+  DW _STRSKIP?,_NOP,_0SWAP,_0SWAP,_COUNT,_BASE
   DW _TONUM,_ABRT
   MAKESTR 'NUM'
 @EXIT2: DW _DROP
@@ -498,7 +585,7 @@ COLONM 'NUM',_NUMBER
 ;COLON '2DROP',_2DROP
 
 COLON '"Z',_STRZ
-    DW _COUNT,_OVER,_PLUS,_0SWAP,_ST,_RET
+    DW _COUNT,_OVER,_PLUS,_0SWAP,_CST,_RET
     
     
 COLONM 'NUMC',_COMPNUM
@@ -508,15 +595,6 @@ COLONM 'NUMC',_COMPNUM
 ; Terminal Input / Output
 ; -----------------------
 
-@DIGOUT:
-  AND   AL,15
-  CMP   AL,10
-  JC    @DIG1
-  ADD   AL,7
-@DIG1:
-  ADD   AL,'0'
-  JMP   @COUT
-  
   PRIM '(DK',_DKEY,@CALLZPH
 GETCHAR:
   mov ah,7
@@ -596,16 +674,15 @@ prim '(PARS',_PARSPRIM,@PAR
   PUSH  AX DI 
   JMP   _@RETPARZ
   
+COLONM 'WORD',_word
+  DW  _SUSPEND,_SM
+  
 COLON 'PARS',_PARS
   DW  _ETIB,_LTIB,_PARSPRIM,TO_+_LTIB,_RET
   
-COLON 'WORD',_word
-;COLONM 'WORD',_word
-  DW  _PARS
 COLON 'S>T!',_SM
   DW  _TBUF,_MAKESTR,_RET
 
-;COLON 'TOKEN',_TOKEN
 COLONM 'TOKEN',_TOKEN
   DW _BL,_WORD,_?C@,_RET
 
@@ -624,12 +701,6 @@ COLON 'EXECUTE',_EXECUTE
 
 PRIM '(FOR',_FOR,DOFOR
 
-PRIMITIVE 'J',_J
-  POP CX AX
-  PUSH AX CX 
-  JMP @PUSHW
-  
-
 COLON '..TIMES',_DDTIMES
   DW _XDROP
 COLON '.TIMES',_DTIMES
@@ -643,7 +714,7 @@ COLON 'LOOPS',_LOOPS
 @@1:
     DW _J,_EXECUTE
 @@2:
-  DW _NEXT,@@1,_RDROPX
+  DW _NEXT,@@1,_POP,_DROP,_RDROPX
   
   
    
@@ -682,6 +753,7 @@ prim 'MOVTO',_TOADR,@PAR
   ;POP   DI  = BX
   POP   CX SI
     REP   MOVSB
+  mov   nxt+2,di    ; addres of nextbyte to dx
   JMP   _@RETPARZ
 
 prim 'S!',_MAKESTR,@PAR
@@ -914,6 +986,20 @@ doDEFER:
 ; Flow Control
 ; -------------------
 
+PRIMITIVE 'J',_J
+  POP CX AX
+  PUSH AX CX 
+  JJ DOPUSHW
+  
+PRIMITIVE 'RDROP;',_RDROPX
+  POP   WA IP
+    JJ NEXT
+ 
+primITIVE '(|',_suspend   ; OTLOGEN PREXOD
+  lodsw
+  PUSH  AX
+  JJ NEXT
+  
 primITIVE '("?',_STRSKIP?,@CLRC
   MOV   CL,[DI]   ; DI = BX
   ADD   DI,CX
@@ -927,8 +1013,7 @@ primITIVE '(NXT',_NEXT
   POP   W 
   DEC   W 
   PUSH  W 
-  INC   W
-  JE    DOSKIP
+  JS    DOSKIP
 DOJUMP:        
   mov IP,PW [IP]
   jJ next
@@ -956,7 +1041,7 @@ DONIP:
 
 doOVER:
   MOV W,[DSP+2]
-  jJ @PUSHW
+  jJ DOPUSHW
 
   SCASW
   SCASW
@@ -970,18 +1055,18 @@ _@DOES:
   SCASW
 DOvar:
   XCHG   W,WA
-  jJ @PUSHW
+  jJ DOPUSHW
 
   SCASW
   SCASW
 doconst: 
   mov W,[WA]
-  jJ @PUSHW
+  jJ DOPUSHW
 DODUP:
   PUSH  TOP
 DOPOP:
   POP   W
-  jJ @PUSHW
+  jJ DOPUSHW
 
 @CALLDPH:
   MOV   WL,[TOP]
@@ -989,10 +1074,10 @@ DOPOP:
   XOR   WH,WH
 @CALLPH:
   CALL  WA
-@PUSHW:
+DOPUSHW:
   XCHG  W,TOP
+@PUSHW:
   X 
-@RPUSHW:
   PUSH  W
 @SWAPSTK:  
   X
@@ -1192,8 +1277,6 @@ acceptl:
   jne  acceptl
   RET
 
-;FF 65
- 
 COLONM '(I',_INI
   DW _LIT,_VIN,TO_+_TEXT_IN,_LIT
 DICTPTR:  
@@ -1204,7 +1287,7 @@ DICTPTR:
 
  COLONM 'ALEL',_ALEL
   DW _TOEL,TO_+_LTIB,TO_+_ETIB,_RET
- 
+
 final:
 COLON 'EVAL',_EVAL    ; ADR LEN -> INTERPRET
   DW _ALEL
@@ -1212,7 +1295,7 @@ COLON 'EVAL',_EVAL    ; ADR LEN -> INTERPRET
   DW _TOKEN,_IF,@EXIT1
   DW _LOCATE,_OPER,_PERFORM,_JUMP,@EVAL
   
-;freemem = $ - START + 100H    ; ITSY.COM
+;freemem = $
 
 ; 941
 ; 939 940 942  958 965 954 949 932 938
@@ -1228,7 +1311,7 @@ IF LISTGEN
 ELSE
 DW 0    ; FILLER
 DPTR = $
-DW FREEMEM-ENDADR-2
+;DW FREEMEM-ENDADR-2
   ENTRY '=:',_ENTRY 
   ENTRY '',0 
 DTOP = $
@@ -1240,10 +1323,10 @@ DPTR = DPTR - 2
     DOKE DICTPTR,DPTR
     DOKE  DPTR,DTOP
     
-Zfreemem = DPTR - ENDADR - 2  
+Zfreemem = DPTR - ENDADR
 
 IF Zfreemem LT 0
-  MEMORY_ERROR
+    JMP MEMORY_ERROR
 ENDIF
 
     
