@@ -23,10 +23,9 @@ topL= BL  ; AX DATA STACK TOP REGISTER
 topH= BH  ; AX DATA STACK TOP REGISTER
 wA  = di  ; DI WORK REGISTER
 W   = AX
+WL  = AL
+WH  = AH
 ar  = DX  ; DX ARITHMETIC ( ADDRESS ) register 
-CNR  = CX  ; CX DATA REGISTER
-CNRL = CL  ; CX DATA REGISTER
-CNRH = CH  ; CX DATA REGISTER
 
 
 
@@ -59,68 +58,60 @@ IF LISTGEN
   ENTRYB '',Start0
 ENDIF
 
-  mov   bx,1000h     ; only 64k allocate
-  mov   ah,4ah
-  int   21h
-        jmp SHORT @aborT
-;       jmp SHORT @aborT2
+; -------------------
+; Initialisation
+; -------------------
+
+@ABORT:
+  MOV ax,0
+  ORG $-2
+PRIM 'BYE',_BYE,0,0
+  mov PW [val_+_LTIB],ax
+  mov sp,@R_TOP
+  mov bp,@S_TOP
+  CALL  DORET
+  DW _LPAR
+_interpret:
+  DW _TEXT_IN,_EVAL,_JUMP,_interpreT  
+
+  
+  ;mov si,OFFSET _interpret
+  ;JJ @next1
+          DW DOVAR-2
+        vaLUe 'DICT',_DICT,0,@VOCTOP
+        
+        vaLUe '#tib',_LTIB,0,0
+
+          DW DOVAR-2
+        POINT 'LOCATE',_LOCATE,0,@LOCINI
+
+        VECTOR 'TEXT>',_TEXT_IN,0,_INI
+
+        constant '0',_0,0,0
+
+doGETP:   ; 0117
+  PUSH IP
+doGETADR:
+  MOV  IP,[WA]
+@next1:           ; 11A
+  JMP NEXT
+
+prim 'ABORT',_abort,0,@ABORT
+
+;  mov   bx,1000h     ; only 64k allocate
+;  mov   ah,4ah
+;  int   21h
+;        jmp SHORT @aborT
 
 ; -------------------
 ; Variables &  constantS
 ; -------------------
 
-        vaLUe 'DICT',_DICT,0,@VOCTOP
-        
         vaLUe '>IN',_ETIB,0,0
 
-        vaLUe '#tib',_LTIB,0,0
+        vaLUe 'BASE',_base,0,10
 
-        POINT 'LOCATE',_LOCATE,0,@LOCINI
-
-        constant 'TBUF',_TBUF,0,@TBUF
-
-; -------------------
-; Initialisation
-; -------------------
-
-primitive 'ABORT',_aborDOt,0
-;  MOV AX,PW [VAL_+_DP]
-;  CALL @STROUT
-;  MOV AL,'?'
-;  CALL @COUT
-@ABORT:
-  MOV ax,0
-_BYE  = $-2
-  mov PW [val_+_LTIB],ax
-  MOV AX,OFFSET @LOCINI
-  mov PW [VAL_+_LOCATE],ax
-  
-  mov sp,@R_TOP
-  mov bp,@S_TOP
-  mov si,OFFSET _interpret
-  jmp next
-
-@aborT2:
-;  MOV BP,-256
-;  CALL  @REGSTR
-;  MAKESTR 'MOV BP,-256'
-;  MOV AX,1
-;  CALL  @REGS
-;  MOV BX,2
-;  CALL  @REGS
-;  MOV CX,3
-;  CALL  @REGS
-;  MOV DX,4
-;  CALL  @REGS
-;  MOV SI,5
-;  CALL  @REGS
-;  MOV DI,6
-;  CALL  @REGS
-;  XOR   AX,AX
-;  CALL  @REGSTR
-;  MAKESTR 'jmp SHORT @aborT'
-;        jmp SHORT @aborT
-
+        PRIM ',',_comma,0,@COMMA
         vaLUe 'DP',_dp,0,ENDADR
 
         vaLUe 'DP+',_dpOFFS,0,0
@@ -129,25 +120,33 @@ _BYE  = $-2
 
         constant 'FIB',_Fib,0,@Fib
 
-        VECTOR 'TEXT>',_TEXT_IN,0,_INI
+        constant 'TBUF',_TBUF,0,@TBUF
 
-        vaLUe 'BASE',_base,0,10
+        constant 'BL',_BL,0,' '
 
 ; -------------------
 ; Stack
 ; -------------------
 
-;primitive 'ROT',_ROT,0
-;  pop  dx ax
-;  push dx
+prim 'DUP',_DUP,0,DODUP
 
-;prim 'PUSH',_pUSH,0,@NIPCALL
-
-prim 'POP',_POP,0,@RPOPW
-
-prim 'SWAP',_swap,0,doSWAP
+prim 'POP',_POP,0,DOPOP
 
 prim 'PUSH',_PUSH,0,DOPUSH
+
+prim 'DROP',_DROP,0,DODROP
+
+prim 'NIP',_NIP,0,DONIP
+
+prim 'OVER',_OVER,0,DOOVER
+
+prim 'SWAP',_swap,0,@CALL
+  XCHG TOP,NXT
+  RET
+
+PRIM 'LIT',_LIT,0,@CALLPH
+  LODSW
+  RET
 
 ; -------------------
 ; Maths / Logic
@@ -235,7 +234,8 @@ _@RETPARZ:
     jmp next
 
 COLON 'NUM',_NUMBER,0
-  DW _?STRSKIP,_NOP,_TONUM,_ZEQ,_IF,_@ONERR
+  DW _?STRSKIP,_NOP,_TONUM,_IF,@EXIT2
+_@ONERR   dw _aborT
 @EXIT2: DW _DROP
 @EXIT1: DW _DROP,_RET 
   
@@ -270,11 +270,11 @@ outchar:
   RET
 
   prim 'EMIT',_emit,0,@DRCALL
-  CALL  @REGS
-  ;j outchar
-  CALL  outchar
-  CALL  @REGS
-  RET
+  ;CALL  @REGS
+  j outchar
+  ;CALL  outchar
+  ;CALL  @REGS
+  ;RET
 
 acc2:	
   cmp  al,13
@@ -291,14 +291,15 @@ acc3:
   inc  Cx
   jmp outchar
 
-prim 'WORD',_word,0,@PARS
+  PRIM '(DK',_DKEY,0,@CALLZPH
+GETCHAR:
+  mov ah,7
+  int 021h
+  RET
 
-prim 'BLWORD',_BLword,0,@JPDUP
-  MOV   BL,32
-@PARS:
-  MOV   DI,PW [val_+_ETIB]
-  MOV   cx,PW [val_+_LTIB]
-  XCHG  AX,BX
+prim '(PARS',_PARSPRIM,0,@PAR
+  PUSH  TOP
+  POP   CX DI AX  
   SUB   DI,CX
   CMP   AL,' '
   JNE   @@SKIPX
@@ -314,78 +315,101 @@ prim 'BLWORD',_BLword,0,@JPDUP
   JNE   @@WEX
   DEC   DI      ; END OF THE SOURCE
 @@WEX:          ; CX REST LEN OF BUF
-  MOV   PW [val_+_LTIB],cx
-  POP   CX
-  SUB   DI,CX
-  mov   BX,PW [val_+_TBUF]
-  MOV   PB [BX+DI+1],'`'
-  XCHG  AX,DI
-_@MAKESTRZ:
-  MOV   DI,BX
-  STOSB
-  XCHG  AX,CX  
-  XOR   CH,CH
-_@TOMOVE:  
-  XCHG  SI,AX  ; SAVE IP  ;PUSH  DX      ; START OF THE SOURCE
-  REP   MOVSB
-  XCHG  SI,AX
-  JMP NEXT
+  MOV   BX,CX
+  POP   AX
+  SUB   DI,AX
+  PUSH  AX DI 
+  JMP   _@RETPARZ
   
-GETCHAR:
-  mov ah,7
-  int 021h
-  mov ah,0
-  RET
+COLON 'PARS',_PARS,0
+  DW  _ETIB,_LTIB,_PARSPRIM,TO_+_LTIB,_RET
+  
+COLON 'WORD',_word,0
+  DW  _PARS
+COLON 'S>T!',_SM,0
+  DW  _TBUF,_MAKESTR,_RET
 
+COLON 'BLWORD',_BLword,0
+  DW _BL,_WORD
+COLON '?C@',_?C@,0
+  DW _DUP,_C@,_RET
+    
 ; -----------------------
 ; MEMORY FUNCTIONS
 ; -----------------------
+
+prim 'MPUSH',_MPUSH,0,@PAR
+  POP   CX SI
+  SUB   TOP,CX
+  ADD   SI,CX   ; AFTER NAME ADDRESS
+  STD           ; BACKWARDS
+  CMPSB         ; PREPARE FOR DIRECTION
+  REP   MOVSB   ; NAME  MOVE
+  CLD
+  JMP   _@RETPARZ
+  
+prim 'MOVTO',_TOADR,0,@PAR
+  ;POP   DI  = BX
+  POP   CX SI
+    REP   MOVSB
+  JMP   _@RETPARZ
+
+prim 'S!',_MAKESTR,0,@PAR
+  POP   AX SI
+  MOV   CL,AL   ; CH = 0
+  STOSB
+    REP   MOVSB
+  MOV   PB [DI],'`'
+  JMP   _@RETPARZ
+
+PRIM 'AL>EL',_ALEL,0,@CALL
+  ADD  NXT,TOP
+  RET
 
 PRIM '1+',_1P,0,@1P
 
 PRIM '2+',_2P,0,@2P
 
-PRIM '>UNPAK',_UNP,0,@PAR
-  XCHG  AX,Cx
-  MOV   DI,BX
-  POP   CX SI
-  INC   DI
-  SKIPB
-@@UN1:
-  STOSB
-  JCXZ  @@EX10
-  LODSB
-  DEC   CX
-  CMP   AL,'_'
-  JNE   @@UN2
-  MOV   AL,' '
-  JJ    @@UN1
-@@UN2:
-  CMP   AL,'"'
-  JNE   @@UN3
-  JCXZ  @@EX10
-  LODSB
-  DEC   CX
-  JJ    @@UN1
-@@UN3:
-  CMP   AL,'^'
-  JNE   @@UN4
-  JCXZ  @@EX10
-  LODSB
-  DEC   CX
-  AND   AL,31
-  JJ    @@UN1
-@@UN4:
-  CMP   AL,'~'
-  JNE   @@UN1
-  MOV   AL,128
-  XOR   PB [DI-1],AL
-  JJ    @@UN1
-@@EX10:
-  LEA   AX,[DI-1]
-  SUB   AX,BX
-  MOV   [BX],AL
-  JMP   _@RETPARZ
+;PRIM '>UNPAK',_UNP,0,@PAR
+;  XCHG  AX,Cx
+;  POP   CX SI
+;  INC   DI
+;  SKIPB
+;@@UN1:
+;  STOSB
+;  JCXZ  @@EX10
+;  LODSB
+;  DEC   CX
+;  CMP   AL,'_'
+;  JNE   @@UN2
+;  MOV   AL,' '
+;  JJ    @@UN1
+;@@UN2:
+;  CMP   AL,'"'
+;  JNE   @@UN3
+;  JCXZ  @@EX10
+;  LODSB
+;  DEC   CX
+;  JJ    @@UN1
+;@@UN3:
+;  CMP   AL,'^'
+;  JNE   @@UN4
+;  JCXZ  @@EX10
+;  LODSB
+;  DEC   CX
+;  AND   AL,31
+;  JJ    @@UN1
+;@@UN4:
+;  CMP   AL,'~'
+;  JNE   @@UN1
+;  MOV   AL,128
+;  XOR   PB [DI-1],AL
+;  JJ    @@UN1
+;@@EX10:
+;  LEA   AX,[DI-1]
+;  SUB   AX,BX
+;  MOV   [BX],AL
+;  JMP   _@RETPARZ
 
 ; -----------------------
 ; Dictionary Search
@@ -394,42 +418,50 @@ PRIM '>UNPAK',_UNP,0,@PAR
 prim 'CFND',_CFND,0,@CALL
   MOV   DI,NXT
   INC   PB [DI]
-  PUSH  DI
+  PUSH  BX DI
   CALL  @FND
-  POP   DI
+  POP   DI AX
   DEC   PB [DI]
+  JCXZ  @AFND
   RET
 
+@AFND:
+  XCHG  AX,BX
+  CALL  @FND
+  INC   BX
+  INC   BX
+  RET
+  
 prim 'FND',_FND,0,@CALL
 @FND:
   CALL  @METHOD
-  PUSH  SI
+  SCASW
   MOV   SI,AX
   repe  cmpsb
-  POP   SI
   RET
 
-;prim 'WFND',_WFND,0,@CALL
-;  PUSH  DX
-;  CALL  @METHOD
-;  CMP   SI,[DI-4]
-;  RET
+prim 'WFND',_WFND,0,@CALL
+  CALL  @METHOD
+  RET
 
 
 @METHOD:
-  POP   DX
+  POP   AX
+  PUSH  DX
+  XCHG  AX,DX
   XOR   CX,Cx
   MOV   AX,NXT    ;KAKWO
   MOV   DI,BX     ;KADE
-  CALL  @REGS
+  PUSH  SI
+  ;CALL  @REGS
   
 @Nfnd:
   add   di,cx
   mov   Bx,di
-  LEA   di,[DI+4]
-  mov   cl,[di]
+  mov   cl,[di+4]
     jcxz  xfnd?
   INC   CX
+  SCASW
     CALL  DX
   jNZ   @NFnD
   MOV   CL,1
@@ -437,7 +469,8 @@ prim 'FND',_FND,0,@CALL
   ADC   [BX+2],CX
   XCHG  BX,AX
 xFND?:
-  CALL  @REGS
+  POP   SI DX
+  ;CALL  @REGS
   MOV   NXT,AX 
   MOV   BX,CX 
   RET
@@ -446,24 +479,20 @@ xFND?:
 ; Colon Definition
 ; -----------------------
 
-COLON 'LIT',_LIT,0
-  DW _RLDP,_RET
-
 COLON 'COMPILE',_COMPILE,0
-  DW _RLDP,_JUMP,@COMMA
-COLON '@COMMA',_@COMMA,0
-  DW _FETCH
-COLON ',',_comma,0
-@COMMA:
-  DW _DP,_STOREP,TO_+_DP,_RET
+  DW _RLDP,_comma,_RET
+
+COLON '(@,',_@COMMA,0
+  DW _FETCH,_comma,_RET
 
 
 COLON ':',_COLON,0  
   DW _HEADER,_COMPILE,DOCOLON  
 COLON '>,',_RPAR,0  
-  DW TO_+_LOCATE,_DICT,_CFND,_DUP,_IF,@NOTFOUND,_RET
-@NOTFOUND:  
-  DW _DROP,_TBUF,_FND,_2P,_RET
+  DW TO_+_LOCATE,_DICT,_CFND,_RET
+;  _DUP,_IF,@NOTFOUND,_RET
+;@NOTFOUND:  
+;  DW _DROP,_DICT,_FND,_2P,_RET
   
 COLON ';`',_semicolon,0
   DW _COMPILE,_RET
@@ -475,18 +504,18 @@ COLON ',<`',_LPAR,0
 ; Headers
 ; -----------------------
 
-COLON 'HERE',_HERE,0
-  DW _DP,_DPOFFS,_PLUS,_RET
+;COLON 'HERE',_HERE,0
+;  DW _DP,_DPOFFS,_PLUS,_RET
 
 COLON 'HEADER',_HEADER,0
-  DW _HERE
+  DW _DP
 colon '=:',_ENTRY,0
-    dw _0SWAP,_Blword,_DUPC@,_IF,_@ONERR
-    DW _DUPC@,_1P,_DICT,_MPUSH
+    dw _0,_SWAP,_Blword,_IF,_@ONERR
+    DW _?C@,_1P,_DICT,_MPUSH
     DW _STOREM,_STOREM,TO_+_DICT,_RET
 
 COLON '''',_TICK,0
-  DW _Blword,_DUPC@,_IF,_@ONERR,_FND,_IF,_@ONERR,_RET
+  DW _Blword,_IF,_@ONERR,_FND,_IF,_@ONERR,_RET
 
 ;COLON ';CODE`',_SMCOD,0
 ;  DW _POP,_DICT,_FETCH,_STORE,_RET
@@ -503,20 +532,27 @@ COLON '''',_TICK,0
 ; Outer Interpreter
 ; -----------------------
 
-_@ONERR   dw _aborDOT
-
 COLON 'VIN',_VIN,0
   DW _TIB,_LIT,64,_ACCEPT,_RET
   
-_interpret:
-  DW _TEXT_IN,_EVAL,_JUMP,_interpreT  
-
 prim '(;',_RET,0,doRET
 
 ; -----------------------
 ; PRIMITIVES
 ; -----------------------
 
+@COMMA:
+  SCASW
+  SCASW
+  PUSH  WA
+  MOV   WA,[WA]
+  XCHG  AX,TOP
+  STOSW
+  POP   AX
+  XCHG  AX,WA
+  STOSW
+  jJ DODROP
+  
 prim 'PERFORM',_PERFORM,0,@JPldPC
   SKIPA
 prim 'EXEC',_exec,0,@JPDROP
@@ -531,54 +567,53 @@ doDEFER:
 ; Flow Control
 ; -------------------
 
-primITIVE '(?"',_?STRSKIP,0
-  MOV   DI,255
-  AND   DI,[BX]
-  CMP   PB [BX+DI],'"'
-  JNE   @SKIP
+primITIVE '(?"',_?STRSKIP,0,@CLRC
+  MOV   CL,[DI]   ; DI = BX
+  ADD   DI,CX
+  CMP   PB [DI],'"'
+  JNE   DOSKIP
   jJ next
 
-prim '(?BR',_IF,0,@JPDROP
-  TEST  W,W
-  je @JUMP
-@SKIP:  
-  lodsw
-  jJ next
+prim '(BR',_JUMP,0,DOJUMP
 
-primitive '(BR',_JUMP,0
-@JUMP:        
+primITIVE '(NEXT',_NEXT,0
+  POP   W 
+  DEC   W 
+  PUSH  W 
+  INC   W
+  JE    DOSKIP
+DOJUMP:        
   mov IP,PW [IP]
   jJ next
 
-;prim 'S!',_MAKESTR,0,@JP2NIP
-;  XCHG   AX,CX
-;  CALL  @MAKESTRZ
-;  JJ   next  
-;
-;prim 'MOVTO',_TOADR,0,@JP2NIP
-;  MOV   DI,BX
-;  CALL  @TOADR
-;  JJ   next  
+prim '0;',_0RET,0,@JPDROP
+  JE  DORET
+  jJ next  
 
-_@DOFOR:
+prim '(?BR',_IF,0,@JPDROP
+  je DOJUMP
+DOSKIP:  
+  lodsw
+  jJ next
+
+DOFOR:
   MOV   IP,[IP]
 DOPUSH:
   PUSH  BX
   jJ DODROP
 
-PRIMITIVE 'R!+',_RSTP,0
+PRIM 'R!+',_RSTP,0,@JPDROP
   POP   WA
-  XCHG  W,TOP
   STOSW
   PUSH  WA
-  JJ DODROP
+  JJ NEXT
   
-PRIMITIVE 'R@+',_RLDP,0
+PRIMITIVE 'R@+',_RLDP,0,@JPDUP
   POP   WA
-  MOV   W,[WA]
+  MOV   TOP,[WA]
   SCASW
   PUSH  WA
-  JJ @PUSHW
+  JJ NEXT
   
 DOSETV:
   SCASW
@@ -601,7 +636,7 @@ _@DOES:
   POP   W
   PUSH  IP
   MOV   IP,W
-  SKIPR  CNR
+  SKIPA
   
   SCASW
   SCASW
@@ -613,12 +648,23 @@ DOvar:
   SCASW
 doconst: 
   mov W,[WA]
-  SKIPB
-@RPOPW:
+  jJ @PUSHW
+DODUP:
+  PUSH  TOP
+DOPOP:
   POP   W
+  jJ @PUSHW
+
+@CALLDPH:
+  MOV   WL,[TOP]
+@CALLZPH:
+  XOR   WH,WH
+@CALLPH:
+  CALL  WA
 @PUSHW:
   XCHG  W,TOP
   X 
+@RPUSHW:
   PUSH  W
 @SWAPSTK:  
   X
@@ -651,13 +697,7 @@ doRET:
   POP   IP
   J   NEXT
   
-doGETP:
-  PUSH IP
-doGETADR:
-  MOV  IP,[WA]
-  J NEXT
-
-_@EX:
+PRIMITIVE 'EX',_EX,0
   POP   WA
 prim 'NOP',_NOP,0,13CH 
 docolon = _NOP
@@ -666,17 +706,13 @@ doLbl:
   MOV   IP,WA
   j   NEXT
   
-doSWAP:
-  XCHG TOP,NXT
-    j next
-
 prim '!+',_STOREP,0,@CLRCX
   POP   [TOP]
-  JJ    @XINC
+;  JJ    @XINC
 
-prim '@+',_FETCHP,0,@CLRCX
-  PUSH   [TOP]
-@XINC:  
+;prim '@+',_FETCHP,0,@CLRCX
+;  PUSH   [TOP]
+;@XINC:  
   X
 @2P:  
   INC   TOP
@@ -707,18 +743,11 @@ primitive '!',_store ,0,@CLRCX
   X
   j doDROP
 
-PRIM '0SWAP',_0SWAP,0,@CLRCX
-  PUSH  CX
-  J @SWAPSTK
+;PRIM '0SWAP',_0SWAP,0,@CLRCX
+;  PUSH  CX
+;  J @SWAPSTK
   
-prim 'COUNT',_count,0,@CLRCX
-  MOV   CL,[BX]
-  INC   BX
-  PUSH  BX
-  MOV   BX,CX
-  J @SWAPSTK
-
-prim 'DUPC@',_DUPC@,0,@JPDUP
+;prim 'DUPC@',_DUPC@,0,@JPDUP
 @C@:  
   mov   bl, PB[bx]
 @WtoB:  
@@ -732,6 +761,7 @@ prim 'DUPC@',_DUPC@,0,@JPDUP
 @ADROP:
   DPOP  W
   XCHG  W,TOP
+  TEST  W,W
   RET
   
 @DRCALL:
@@ -740,37 +770,32 @@ prim 'DUPC@',_DUPC@,0,@JPDUP
   CALL  DI
     j next
 
-prim 'MPUSH',_MPUSH,0,@PAR
-  MOV   DI,TOP
-  POP   CX SI
-  SUB   TOP,CX
-  ADD   SI,CX   ; AFTER NAME ADDRESS
-  STD           ; BACKWARDS
-  CMPSB         ; PREPARE FOR DIRECTION
-  REP   MOVSB   ; NAME  MOVE
-  CLD
-  J   _@RETPARZ
-  
 prim 'U<',_ULESS,0,@DRCALL
   SUB BX,AX
   JJ @ZEQ 
 
 prim '0=',_Zeq,0,@CALL
-  sub bx,1
+  ;sub bx,1
+  NEG BX
+  CMC
 @Zeq:
   sbb bx,bx
   RET
 
+prim 'COUNT',_count,0,@CALLDPH
+  INC   BX
+  RET
+  
+prim 'STR',_STR,0,@CALLPH
+  MOV   AX,[BX]
+  INC   BX
+  INC   BX
+  RET
+  
 ; -------------------
 ; Compilation
 ; -------------------
 
-prim 'DROP',_drop,0,doDROP
-
-PRIM 'DUP',_DUP,0,@CALL
-  SKIPA
-@JP1PDUP:
-  INC TOP
 @JPDUP:
   PUSH  WA
 @DUP:
@@ -783,8 +808,11 @@ PRIM 'DUP',_DUP,0,@CALL
   PUSH  IP
 @CLRCX:
   X
+@CLRC:
+  PUSH  WA
+  MOV   WA,TOP
   XOR   CX,CX
-  JMP   WA
+  RET
   
 priM 'ACCEPT',_ACCEPT,0,@CALL
   MOV   DI,NXT
@@ -798,14 +826,14 @@ acceptl:
 COLON '(I',_INI,0
   DW _LIT,_VIN,TO_+_TEXT_IN,_LIT
 DICTPTR:  
-  DW ENDADR,_FETCHP,_SWAP,_DICT,_MPUSH,TO_+_DICT
+  DW ENDADR,_STR,_DICT,_MPUSH,TO_+_DICT
   DW _LIT,80H,_COUNT,_RET
 
 final:
 COLON 'EVAL',_EVAL,0    ; ADR LEN -> INTERPRET
-  DW _DUP,TO_+_LTIB,_PLUS,TO_+_ETIB
+  DW _ALEL,TO_+_LTIB,TO_+_ETIB
 @EVAL:        
-  DW _BLWORD,_DUPC@,_IF,@EXIT1
+  DW _BLWORD,_IF,@EXIT1
   DW _LOCATE,_OPER,_PERFORM,_JUMP,@EVAL
   
 ;freemem = $ - START + 100H    ; ITSY.COM

@@ -71,8 +71,11 @@
   
   MOV   AX,PW[VAL_+_DP]
   CALL  @HDOT
-  MOV   Di,[@DI]
-  LEA   ax,[Di-2]
+  
+  MOV   AX,[@SI]
+  CALL  @LBLID
+  
+  MOV   ax,[@DI]
   CALL  @STRID
   JMP   @WAITLOAD
 
@@ -161,9 +164,25 @@ PRIM 'TR',_TR,0,@CALL
   OR    CX,CX
   RET
   
-@TO   DB 2,'TO'  
+@TO   DB 3,'TO '  
+@CLN  DB 2,': '  
 
+@LBLID:
+  DEC   AX
+  DEC   AX
+  CALL  @SEARCH
+  JE    @NOLBL
+  PUSH  AX
+  MOV   AX, OFFSET @CLN
+  CALL  @STROUT
+  POP   AX
+  CALL  @STROUT
+@NOLBL:
+  RET
+  
 @STRID:
+  DEC   AX
+  DEC   AX
   CALL  @SEARCH
   JNE   @STROUT
   JMP   @HDOT
