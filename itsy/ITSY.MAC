@@ -1,28 +1,144 @@
-        %define link 0
-        %define immediate 080h
 
-        %macro head 4
-        %%link dw link
-        %define link %%link
-        %strlen %%count %1
-        db %3 + %%count,%1
-        xt_ %+ %2 dw %4
-        %endmacro
+locals  @@
+VAL_ = 2
+TO_  = -2
+AT_  = -4
 
-        %macro primitive 2-3 0
-        head %1,%2,%3,$+2
-        %endmacro
+pd  equ dword ptr
+pw  equ word  ptr
+pb  equ byte  ptr
 
-        %macro colon 2-3 0
-        head %1,%2,%3,docolon
-        %endmacro
+SKIPA   MACRO
+  DB    03DH
+ENDM
 
-        %macro constant 3
-        head %1,%2,0,doconst
-        val_ %+ %2 dw %3
-        %endmacro
+SKIPB   MACRO
+  DB    03CH
+ENDM
 
-        %macro variable 3
-        head %1,%2,0,dovar
-        val_ %+ %2 dw %3
-        %endmacro
+JJ MACRO ADR
+  JMP SHORT ADR
+ENDM
+
+J MACRO ADR
+LOCAL DIFF
+  DIFF = $+2-(ADR)
+  IF (DIFF LT 129) AND (DIFF GT -128)
+    JMP SHORT ADR
+  ELSE 
+    JMP ADR
+  ENDIF
+ENDM
+
+SKIPR   MACRO reg
+MADR = $
+  mov   reg,0
+  IF $-MADR-2
+  org   $-1
+  ENDIF
+  org   $-1
+ENDM
+
+X MACRO 
+  XCHG DSP,RSP      
+ENDM
+
+JMPS MACRO LBL
+  JMP   SHORT LBL
+ENDM
+
+DPOP    MACRO REG
+  X
+  POP REG
+  X
+ENDM
+
+DPUSH   MACRO REG
+  X
+  PUSH REG
+  X
+ENDM
+
+RPOP    MACRO REG
+  POP REG
+ENDM
+
+RPUSH   MACRO REG
+  PUSH REG
+ENDM
+
+
+MakeStr    macro   msg,FLAG
+LOCAL ENDMSG,STARTMSG
+  db    ENDMSG-$-1+FLAG
+  db    msg
+ENDMSG:  
+endm
+
+ENTRY MACRO  NAM,LBL
+  DW LBL,0
+  MakeStr NAM,0
+ENDM
+
+duck MACRO  NAM,LBL
+LBL:
+ENDM  
+
+HEAD MACRO  NAM,LBL,FLAG
+  MakeStr NAM,FLAG
+LBL:
+ENDM  
+
+primitive MACRO NAM,LBL,FLAG
+  DIVE NAM,LBL,FLAG
+  DW $+2
+  ENDM
+
+prim MACRO NAM,LBL,FLAG,ADR
+  DIVE NAM,LBL,FLAG
+  DW ADR
+  ENDM
+
+colon MACRO NAM,LBL,FLAG
+  DIVE NAM,LBL,FLAG
+  DW docolon
+  ENDM
+
+constant MACRO NAM,LBL,FLAG,DATA
+  DIVE NAM,LBL,FLAG
+  DW doconst,DATA
+  ENDM
+
+variable MACRO NAM,LBL,FLAG
+  DIVE NAM,LBL,FLAG
+  DW dovar,0
+  ENDM
+
+DEFER MACRO NAM,LBL,FLAG,DATA
+  DIVE NAM,LBL,FLAG
+  DW doDEFER,DATA
+  ENDM
+
+VALUE MACRO NAM,LBL,FLAG,DATA
+  DW DOSETV
+  DIVE NAM,LBL,FLAG
+  DW doconst,DATA
+  ENDM
+
+VECTOR MACRO NAM,LBL,FLAG,DATA
+  DW DOSETV
+  DIVE NAM,LBL,FLAG
+  DW doDEFER,DATA
+  ENDM
+
+POINT MACRO NAM,LBL,FLAG,DATA
+  DW DOSETP
+  DIVE NAM,LBL,FLAG
+  DW doGETP,DATA
+  ENDM
+
+BUF_ MACRO ADR,LEN
+  MADR = MADR - (LEN)
+  ADR  = MADR
+ENDM
+ 
