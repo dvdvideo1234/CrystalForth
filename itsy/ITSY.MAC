@@ -1,5 +1,6 @@
 
 locals  @@
+
 VAL_ = 2
 TO_  = -2
 AT_  = -4
@@ -54,9 +55,10 @@ LOCAL DIFF
 ENDM
 
 SKIPR   MACRO reg
-MADR = $
+LOCAL DIFF
+DIFF = $
   mov   reg,0
-  IF $-MADR-2
+  IF $-DIFF-2
   org   $-1
   ENDIF
   org   $-1
@@ -91,9 +93,9 @@ RPUSH   MACRO REG
 ENDM
 
 
-MakeStr    macro   msg,FLAG
-LOCAL ENDMSG,STARTMSG
-  db    ENDMSG-$-1+FLAG
+MakeStr    macro   msg
+LOCAL ENDMSG
+  db    ENDMSG-$-1
   db    msg
 ENDMSG:  
 endm

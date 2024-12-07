@@ -1,10 +1,11 @@
 
 INCLUDE ITSY.IMC
 
-DTOP = 10000  ;-2035H
+DTOP = 10000  ;-1EA7H
 DPTR = DTOP
 
-LISTGEN = 0
+LISTGEN = 01
+DBG_FLAG= 01
 
 IF LISTGEN
    DIVE EQU ENTRYB
@@ -62,6 +63,7 @@ ENDIF
   mov   ah,4ah
   int   21h
         jmp SHORT @aborT
+;       jmp SHORT @aborT2
 
 ; -------------------
 ; Variables &  constantS
@@ -98,6 +100,27 @@ _BYE  = $-2
   mov si,OFFSET _interpret
   jmp next
 
+@aborT2:
+;  MOV BP,-256
+;  CALL  @REGSTR
+;  MAKESTR 'MOV BP,-256'
+;  MOV AX,1
+;  CALL  @REGS
+;  MOV BX,2
+;  CALL  @REGS
+;  MOV CX,3
+;  CALL  @REGS
+;  MOV DX,4
+;  CALL  @REGS
+;  MOV SI,5
+;  CALL  @REGS
+;  MOV DI,6
+;  CALL  @REGS
+;  XOR   AX,AX
+;  CALL  @REGSTR
+;  MAKESTR 'jmp SHORT @aborT'
+;        jmp SHORT @aborT
+
         vaLUe 'DP',_dp,0,ENDADR
 
         vaLUe 'DP+',_dpOFFS,0,0
@@ -119,12 +142,7 @@ _BYE  = $-2
 ;  push dx
 
 ;prim 'PUSH',_pUSH,0,@NIPCALL
-;@PUSH:
-;  XCHG  SP,BP
-;  push  Ax
-;  XCHG  SP,BP
-;  RET
-  
+
 prim 'POP',_POP,0,@RPOPW
 
 prim 'SWAP',_swap,0,doSWAP
@@ -137,6 +155,9 @@ prim 'PUSH',_PUSH,0,DOPUSH
 
 prim 'XOR',_XOR,0,@DRCALL
   XOR BX,AX
+      IF DBG_FLAG EQ 0 
+@DBG:  
+      ENDIF
   RET
   
 prim 'AND',_AND,0,@DRCALL
@@ -151,143 +172,14 @@ prim '+',_plus,0,@DRCALL
   ADD BX,AX
   RET
   
-
-; -------------------
-; DEBUGER
-; -------------------
-
-;PRIM 'TR-',_TRM,0,@CALL
-;  MOV PB [NEXT],0B8H
-;  RET
-;
-;PRIM 'TR',_TR,0,@CALL
-;  MOV PB [NEXT],0E8H
-;  RET
-;
-;PRIM 'H.',_HDOT,0,@NIPCALL
-;@HDOT:
-;  CALL  @WORDOUT
-;@SPDOT:  
-;  MOV   AL,' '
-;  JMP   @COUT
-;  
-;@WORDOUT:
-;  CALL  @BYTEOUT
-;@BYTEOUT:
-;  CALL  @HDOT1
-;@HDOT1:
-;  ROL   AX,1
-;  ROL   AX,1
-;  ROL   AX,1
-;  ROL   AX,1
-;  PUSH  AX
-;  CALL  @DIGOUT
-;  POP   AX
-;  RET
-;  
-;@DIGOUT:
-;  AND   AL,15
-;  CMP   AL,10
-;  JC    @DIG1
-;  ADD   AL,7
-;@DIG1:
-;  ADD   AL,'0'
-;  JMP   @COUT
-;
-;@STRID:
-;  PUSH  CX DX DI
-;  MOV   DX,-1
-;  MOV   CX,32
-;  XCHG  AX,DI
-;@@IDLP:  
-;  INC   DX
-;  DEC   DI
-;  MOV   AL,[DI]
-;  AND   AL,127
-;  CMP   AL,DL
-;  JE    @@IDLPX
-;  LOOP  @@IDLP
-;@@IDLPX:
-;  XCHG  AX,DI
-;  POP   DI DX CX 
-;  RET
-;  
-;@STROUT:
-;  PUSH  CX DI
-;  XCHG  AX,DI
-;  MOV   AX,[DI]
-;  AND   AX,127
-;  MOV   CX,AX
-;@LPSTR:
-;  INC   DI
-;  MOV   AL,[DI]
-;  CALL  @COUT
-;  LOOP  @LPSTR
-;  POP   DI CX 
-;  JMP   @SPDOT
-;  
-;@CRDOT:  
-;  MOV   AL,13
-;  CALL  @COUT
-;  MOV   AL,10
-;  JMP   @COUT
-;  
-;@DBG:
-;  CALL  @PUSH   ; AX      1
-;  CALL  @CRDOT  ; AX .
-;  POP   AX
-;  CALL  @PUSH   ; RETADR  2
-;  ;CALL  @HDOT
-;  MOV   AX,SI   ; IP
-;  CALL  @HDOT
-;  MOV   AX,SP   ; DSP
-;  CALL  @HDOT
-;  LEA   AX,[BP+4]
-;  CALL  @HDOT   ; RSP
-;  CALL  @SPDOT
-;
-;  ;ROT H.
-;  POP   AX
-;  CALL  @PUSH   ; DSP[2]  3
-;  POP   AX
-;  PUSH  AX
-;  CALL  @HDOT   ; DSP[3] .
-;
-;  CALL  @POP    ; DSP[2] . 3
-;  PUSH  AX
-;  CALL  @HDOT
-;  MOV   AX,BX   ; DSP[1] .
-;  CALL  @HDOT
-;  
-;  CALL  @POP    ; RETADR BACK  2
-;  PUSH  AX
-;  MOV   AX,[BP]
-;  CALL  @HDOT  
-;  MOV   AX,CX
-;  CALL  @HDOT
-;  MOV   AX,DX
-;  CALL  @HDOT
-;  CALL  @SPDOT
-;  MOV   AX,PW[VAL_+_DP]
-;  CALL  @HDOT
-;
-;  MOV   AX,[SI]
-;  CALL  @STRID
-;  CALL  @STROUT
-;  CALL  @READBIOS
-;@POP:
-;  XCHG  SP,BP
-;  POP   AX
-;  XCHG  SP,BP
-;  RET
   
 ; -------------------
 ; String & ARRAY
 ; -------------------
 
 PRIM 'OPER',_OPER,0,@WARY
-  DW _NUMBER,  _EXEC  ; INTERP
-  DW _COMPNUM, _COMMA ; COMPILE
+  DW _NUMBER,  _PERFORM  ; INTERP
+  DW _COMPNUM, _@COMMA ; COMPILE
   
 prim 'C@',_c@,0,@C@
 
@@ -378,7 +270,11 @@ outchar:
   RET
 
   prim 'EMIT',_emit,0,@DRCALL
-  j outchar
+  CALL  @REGS
+  ;j outchar
+  CALL  outchar
+  CALL  @REGS
+  RET
 
 acc2:	
   cmp  al,13
@@ -441,11 +337,6 @@ GETCHAR:
   mov ah,0
   RET
 
-_@BIOSK:
-  XOR   AX,AX
-  INT   16H
-  RET
-  
 ; -----------------------
 ; MEMORY FUNCTIONS
 ; -----------------------
@@ -512,23 +403,26 @@ prim 'CFND',_CFND,0,@CALL
 prim 'FND',_FND,0,@CALL
 @FND:
   CALL  @METHOD
+  PUSH  SI
+  MOV   SI,AX
   repe  cmpsb
+  POP   SI
   RET
 
-prim 'WFND',_WFND,0,@CALL
-  CALL  @METHOD
-  CMP   SI,[DI-4]
-  RET
+;prim 'WFND',_WFND,0,@CALL
+;  PUSH  DX
+;  CALL  @METHOD
+;  CMP   SI,[DI-4]
+;  RET
 
 
 @METHOD:
-  POP   AX
-  PUSH  DX 
-  XCHG  AX,DX
+  POP   DX
   XOR   CX,Cx
   MOV   AX,NXT    ;KAKWO
   MOV   DI,BX     ;KADE
-  PUSH  SI
+  CALL  @REGS
+  
 @Nfnd:
   add   di,cx
   mov   Bx,di
@@ -536,15 +430,14 @@ prim 'WFND',_WFND,0,@CALL
   mov   cl,[di]
     jcxz  xfnd?
   INC   CX
-  MOV   SI,AX
     CALL  DX
   jNZ   @NFnD
-  INC   CX
+  MOV   CL,1
   STC
   ADC   [BX+2],CX
   XCHG  BX,AX
 xFND?:
-  POP   SI DX
+  CALL  @REGS
   MOV   NXT,AX 
   MOV   BX,CX 
   RET
@@ -557,15 +450,18 @@ COLON 'LIT',_LIT,0
   DW _RLDP,_RET
 
 COLON 'COMPILE',_COMPILE,0
-  DW _RLDP
+  DW _RLDP,_JUMP,@COMMA
+COLON '@COMMA',_@COMMA,0
+  DW _FETCH
 COLON ',',_comma,0
+@COMMA:
   DW _DP,_STOREP,TO_+_DP,_RET
 
 
 COLON ':',_COLON,0  
   DW _HEADER,_COMPILE,DOCOLON  
 COLON '>,',_RPAR,0  
-  DW TO_+_LOCATE,_TBUF,_CFND,_DUP,_IF,@NOTFOUND,_RET
+  DW TO_+_LOCATE,_DICT,_CFND,_DUP,_IF,@NOTFOUND,_RET
 @NOTFOUND:  
   DW _DROP,_TBUF,_FND,_2P,_RET
   
@@ -573,7 +469,7 @@ COLON ';`',_semicolon,0
   DW _COMPILE,_RET
 COLON ',<`',_LPAR,0
   DW TO_+_LOCATE
-@LOCINI: DW _TBUF,_FND,_RET 
+@LOCINI: DW _DICT,_FND,_RET 
   
 ; -----------------------
 ; Headers
@@ -624,11 +520,12 @@ prim '(;',_RET,0,doRET
 prim 'PERFORM',_PERFORM,0,@JPldPC
   SKIPA
 prim 'EXEC',_exec,0,@JPDROP
+  XCHG    W,WA
   SKIPA
 doDEFER:
-  mov WA,[WA]
+  mov     WA,[WA]
   SCASW
-  jmp PW [WA-2]
+  JJ    @INDIR
 
 ; -------------------
 ; Flow Control
@@ -636,12 +533,13 @@ doDEFER:
 
 primITIVE '(?"',_?STRSKIP,0
   MOV   DI,255
-  AND   DI,BX
+  AND   DI,[BX]
   CMP   PB [BX+DI],'"'
   JNE   @SKIP
   jJ next
 
 prim '(?BR',_IF,0,@JPDROP
+  TEST  W,W
   je @JUMP
 @SKIP:  
   lodsw
@@ -730,9 +628,12 @@ doconst:
 ; -------------------
 
 next:   
-  ;CALL  @DBG
+
+;  CALL  @REGS
   MOV    WA,[IP]
   CMPSW
+@INDIR:
+  CALL  @DBG
   jmp PW [WA-2]
 
 @LARY:
@@ -830,7 +731,6 @@ prim 'DUPC@',_DUPC@,0,@JPDUP
   PUSH  WA
 @ADROP:
   DPOP  W
-  TEST  TOP,TOP
   XCHG  W,TOP
   RET
   
@@ -913,21 +813,25 @@ COLON 'EVAL',_EVAL,0    ; ADR LEN -> INTERPRET
 ; 941
 ; 939 940 942  958 965 954 949 932 938
 
+IF DBG_FLAG
+INCLUDE ITSY.IDB
+ENDIF
 
 ENDADR = $ - START + 0100H
-  ENTRY '=:',_ENTRY 
-  ENTRY '',0 
 
 IF LISTGEN
-
   ORG DTOP
-  
 DTOP = DTOP - DPTR
 DPTR = DPTR - 2  
-
     DOKE DICTPTR,DPTR
     DOKE  DPTR,DTOP
+    
 Zfreemem = DPTR - ENDADR - 2  
+ELSE
+DW FREEMEM-ENDADR-2
+  ENTRY '=:',_ENTRY 
+  ENTRY '',0 
+FREEMEM:
 ENDIF
 
     

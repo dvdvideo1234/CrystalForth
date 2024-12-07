@@ -1,0 +1,202 @@
+
+;-------------------
+;DEBUGER
+;-------------------
+
+
+@BP   EQU PW [DSP+00]
+@SP   EQU @BP  + 2
+@DI   EQU @SP  + 2
+@SI   EQU @DI  + 2
+@DX   EQU @SI  + 2
+@CX   EQU @DX  + 2
+@BX   EQU @CX  + 2
+@AX   EQU @BX  + 2
+@FL   EQU @AX  + 2
+@RA   EQU @FL  + 2
+@TOP  EQU @RA  + 2
+
+@SAVEREGS:
+       ;14 12 10  8  6  4  2  0
+  PUSH  AX BX CX DX SI DI SP BP
+  MOV   BP,SP
+  PUSHF
+  POP   AX
+  XCHG  AX,[@FL]
+  PUSH  AX
+  LEA   AX,[@TOP]   ; TOP OF RETURN STACK
+  MOV   [@SP],AX
+  RET
+
+@REGS:  
+  CALL  @SAVEREGS
+@REGSZ:  
+  CALL  @CRDOT  
+  MOV   SI,SP
+  CALL  @DOTR
+  CALL  @DOTR
+  CALL  @DOTR4
+  CALL  @DOTR4
+@WAITLOAD:
+  CALL  _@BIOSK
+@POPREGS:
+  MOV   SP,BP ; SKIP SP
+  POP   BP DI DI SI DX CX BX AX
+  POPF
+  RET
+  
+@REGSTR:
+  CALL  @SAVEREGS
+  CALL  @CRDOT  
+  XOR   AX,AX
+  MOV   SI,@RA
+  LODSB
+  CALL  @STRTYPE
+  MOV   @RA,SI
+  JMP   @REGSZ
+  
+@DBG:
+  CALL  @SAVEREGS
+  CALL  @CRDOT  
+  MOV   AX,SI       ; IP - CURRENT ADDRESS OF VIRTUALMASHINE FORTH
+  CALL  @CALD3      ; IP. [IP]. [IP+2].
+
+  MOV   AX,BX       ; TOP. [NXT]. [NXT+2].
+  MOV   SI,[@BP]
+  CALL  @CALD3
+  
+  MOV   SI,[@SP]
+  LODSW
+  CALL  @CALD3
+  
+  MOV   AX,PW[VAL_+_DP]
+  CALL  @HDOT
+  MOV   Di,[@DI]
+  LEA   ax,[Di-2]
+  CALL  @STRID
+  JMP   @WAITLOAD
+
+
+;-----------------------------
+@CALDOT:
+  LODSW
+@CALDOTZ:
+  CALL  @WORDOUT
+  MOV   AL,'|'
+  JMP   @COUT
+  
+@CALD3:
+  CALL  @CALDOTZ
+  JMP   @DOTR2
+@DOTR4:
+  CALL  @CALDOT
+  CALL  @CALDOT
+@DOTR2:
+  CALL  @CALDOT
+@dotR:
+  LODSW
+  SKIPA
+PRIM 'H.',_HDOT,0,@DRCALL
+@HDOT:
+  CALL  @WORDOUT
+@SPDOT:  
+  MOV   AL,' '
+  JMP   @COUT
+  
+@WORDOUT:
+  CALL  @BYTEOUT
+@BYTEOUT:
+  CALL  @HDOT1
+@HDOT1:
+  ROL   AX,1
+  ROL   AX,1
+  ROL   AX,1
+  ROL   AX,1
+  PUSH  AX
+  CALL  @DIGOUT
+  POP   AX
+  RET
+
+@PUSH:
+  XCHG  SP,BP
+  push  Ax
+  XCHG  SP,BP
+  RET
+ 
+PRIM 'TR-',_TRM,0,@CALL
+  MOV PB [@INDIR],0B8H
+  RET
+
+PRIM 'TR',_TR,0,@CALL
+  MOV PB [@INDIR],0E8H
+  RET
+
+@DIGOUT:
+  AND   AL,15
+  CMP   AL,10
+  JC    @DIG1
+  ADD   AL,7
+@DIG1:
+  ADD   AL,'0'
+  JMP   @COUT
+  
+@SEARCH:
+  MOV   DI,PW [VAL_+_DICT]
+  XOR   CX,CX
+  SKIPB
+@@IDLP:  
+  SCASW
+  ADD   DI,CX
+  MOV   CL,[DI+4]
+  JCXZ  @IDLPX
+  INC   CX
+  SCASW
+  JNE    @@IDLP
+@@ID:
+  SCASW
+;  CALL  @REGSTR
+;  MAKESTR 'IN SEARCH'
+  XCHG  AX,DI
+@IDLPX:
+  OR    CX,CX
+  RET
+  
+@TO   DB 2,'TO'  
+
+@STRID:
+  CALL  @SEARCH
+  JNE   @STROUT
+  JMP   @HDOT
+  
+@STROUT:
+  XCHG  AX,SI
+  LODSB
+  AND   AX,127
+@STRTYPE:
+  XCHG  CX,AX
+  JCXZ  @@OUT
+@@LPSTR:
+  LODSB
+  CALL  @COUT
+  LOOP  @@LPSTR
+@@OUT:  
+  JMP   @SPDOT
+  
+@CRDOT:  
+  MOV   AL,13
+  CALL  @COUT
+  MOV   AL,10
+  JMP   @COUT
+  
+  
+@POP:
+  XCHG  SP,BP
+  POP   AX
+  XCHG  SP,BP
+  RET
+
+_@BIOSK:
+  XOR   AX,AX
+  INT   16H
+  RET
+  
