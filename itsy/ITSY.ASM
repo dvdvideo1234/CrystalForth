@@ -65,9 +65,9 @@ Start   Label byte
 
         variable 'STATE',_state,0
 
-        variable '>IN',_to_in,0
+        variable '>IN',_ETIB,0
 
-        variable '#tib',_number_tib,0
+        variable '#tib',_LTIB,0
 
         variable 'DP',_dp,freemem
 
@@ -86,10 +86,9 @@ Start   Label byte
 ; -------------------
 
         primitive 'ABORT',_abort,0
-        mov ax,PW [val_+_number_tib]
-        mov PW [VAL_+_to_in],ax
         xor bp,bp
         mov PW [VAL_+_state],bp
+        mov PW [val_+_LTIB],BX
         mov sp,-256
         mov si,OFFSET _interpret+2
         jmp next
@@ -439,7 +438,8 @@ to_numh:
   MOV   AL,'>'
   CALL @COUT
   
-  POP  DI
+  POP   DI
+  PUSH  DI
   xor  cx,cx
 acceptl:
   call acc 
@@ -497,39 +497,93 @@ acc3:
   INT   16H
   RET
   
-primitive 'WORD',_word,0
-        mov di,PW [val_+_dp]
-        push di
-        mov dx,bx
-        mov bx,PW [val_+_tib]
-        mov cx,bx
-        add bx,PW [val_+_to_in]
-        add cx,PW [val_+_number_tib]
-wordf:  cmp cx,bx
-        je wordz
-        mov al,PB [bx]
-        inc bx
-        cmp al,dl
-        je wordf
-wordc:  inc di
-        mov PB [di],al
-        cmp cx,bx
-        je wordz
-        mov al,PB [bx]
-        inc bx
-        cmp al,dl
-        jne wordc
-wordz:  mov PB [di+1],32
-        mov ax,PW [val_+_dp]
-        xchg ax,di
-        sub ax,di
-        mov PB [di],al
-        sub bx,PW [val_+_tib]
-        mov PW [val_+_to_in],bx
-        pop bx
+@BLPARS:
+  PUSH  BX
+  MOV   BL,32
+@PARS:
+  PUSH  DI
+;        add bx,PW [val_+_ETIB]      ENDBUF
+;        add cx,PW [val_+_LTIB] LENBUF
+        MOV DI,PW [val_+_ETIB]
+        MOV cx,PW [val_+_LTIB]
+        XCHG  AX,BX
+
+  ;POP   CX DI AX
+  SUB   DI,CX
+  CMP   AL,' '
+  JNE   @@SKIPX
+  JCXZ  @@SKIPX
+  REPE  SCASB
+  JE    @@SKIPX
+  DEC   DI
+  INC   CX
+@@SKIPX:
+  MOV   DX,DI    ;  START OF THE SOURCE
+  JCXZ  @@WEX
+  REPNE SCASB
+  JNE   @@WEX
+  DEC   DI      ; END OF THE SOURCE
+@@WEX:          ; CX REST LEN OF BUF
+  XCHG  AX,DI
+  SUB   AX,DX
+  MOV   PW [val_+_LTIB],cx
+  RET
+  
+;        mov di,PW [val_+_dp]
+;        push di
+;        mov dx,bx
+;        mov bx,PW [val_+_tib]
+;        mov cx,bx
+;        add bx,PW [val_+_ETIB]
+;        add cx,PW [val_+_LTIB]
+;wordf:  cmp cx,bx
+;        je wordz
+;        mov al,PB [bx]
+;        inc bx
+;        cmp al,dl
+;        je wordf
+;wordc:  inc di
+;        mov PB [di],al
+;        cmp cx,bx
+;        je wordz
+;        mov al,PB [bx]
+;        inc bx
+;        cmp al,dl
+;        jne wordc
+;wordz:  mov PB [di+1],32
+;        mov ax,PW [val_+_dp]
+;        xchg ax,di
+;        sub ax,di
+;        mov PB [di],al
+;        sub bx,PW [val_+_tib]
+;        mov PW [val_+_ETIB],bx
+;        pop bx
 
 ;  MOV AX,BX
 ;  CALL  @STROUT
+
+@MAKESTRZ:
+  mov   BX,PW [val_+_dp]
+  XCHG  SI,DX  ; SAVE IP  ;PUSH  DX      ; START OF THE SOURCE
+  MOV   DI,BX
+  MOV   CX,AX
+  STOSB
+  XOR   CH,CH
+  REP   MOVSB
+  XCHG  SI,DX
+  MOV   CL,[BX]
+  RET
+  
+prim 'WORD',_word,0,@PARS
+  CALL  @MAKESTRZ
+  jmp next
+
+prim 'BLWORD',_BLword,0,@BLPARS
+  CALL  @MAKESTRZ
+  JCXZ  @@?DUP
+  PUSH  BX
+@@?DUP:
+  MOV   BX,CX
   jmp next
 
   primitive 'EMIT',_emit,0
@@ -554,7 +608,7 @@ findL:
   POP   SI
   MOV   DX,SI
   MOV   CX,DX
-  jCXz  findnf
+    jCXz  findnf
   LODSW
   PUSH  AX    ; LINK TO NEXT
   
@@ -562,32 +616,32 @@ findL:
   LODSB
 	AND  AX,31
   SCASB       ; LENGTH = ?
-  JNE   findL
+    JNE   findL
   
   XCHG  CX,AX
   rep  cmpsb
-  jNe   findL
+    jNe   findL
   
   POP   AX      ; DISCARD LINK
   INC   CX      ; FLAG FOUND
   mov   BX,si
   MOV   SI,DX
   TEST  PB [SI+2],080H  ; IMMEDIATE ?
-  JZ    FINDNF
+    JZ    FINDNF
   NEG   CX
   
 findnf:
   POP  sI
 	push bx
 	mov  Bx,cx
-        jmp next
+    jmp next
 
 ; -----------------------
 ; Colon Definition
 ; -----------------------
 
   colon ':',_colon,0
-  dw _Bl,_state,_store,_create
+  dw _lIT,-1,_state,_store,_create
   dw _do_semi_code
 docolon:
   dec bp
@@ -637,10 +691,15 @@ doconst:
 
 final:
         colon 'INTERPRET',_interpret,0
-interpt dw _number_tib,_fetch,_to_in,_fetch,_equals,_zero_branch,intpar ; NOT EMPTY ?
+;interpt dw _LTIB,_fetch,_ETIB,_fetch,_equals,_zero_branch,intpar ; NOT EMPTY ?
+interpt dw _LTIB,_fetch,_ZEQ,_zero_branch,intpar ; NOT EMPTY ?
         
         ;DW  _LIT,'>',_EMIT
-        DW _tib,_lit,50,_accept,_number_tib,_store,_0,_to_in,_store
+        DW _tib
+        
+@ACCE:        
+        DW _lit,50,_accept,_DUP,_LTIB,_store,_zero_branch,@ACCE
+        DW _LTIB,_fetch,_PLUS,_ETIB,_store
         
 intpar  dw _Bl,_word,_find,_dup,_zero_branch,intnf    ; WORD NOT FOUND ?
         
