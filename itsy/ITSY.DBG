@@ -13,21 +13,36 @@
 @BX   EQU @CX  + 2
 @AX   EQU @BX  + 2
 @FL   EQU @AX  + 2
-@RA   EQU @FL  + 2
+@LRA  EQU @FL  + 2  ; LOCAL RETURN ADDRESS
+@RA   EQU @LRA + 2
 @TOP  EQU @RA  + 2
 
 @SAVEREGS:
+  PUSHF;16
        ;14 12 10  8  6  4  2  0
   PUSH  AX BX CX DX SI DI SP BP
   MOV   BP,SP
-  PUSHF
-  POP   AX
-  XCHG  AX,[@FL]
   PUSH  AX
   LEA   AX,[@TOP]   ; TOP OF RETURN STACK
   MOV   [@SP],AX
+  POP   AX
+  JMP   @LRA
+
+@LOADREGS:
+  POP   AX
+  MOV   @LRA,AX
+  POP   BP DI DI SI DX CX BX AX
+  POPF
   RET
 
+@REGSTR:
+  CALL  @SAVEREGS
+  CALL  @CR  
+  MOV   AX,@RA
+  CALL  @SHOWSTR
+  MOV   @RA,AX
+  JJ   @REGSZ
+  
 @REGS:  
   CALL  @SAVEREGS
 @REGSZ:  
@@ -37,68 +52,83 @@
   CALL  @DOTR
   CALL  @DOTR4
   CALL  @DOTR4
+  CALL  @DOTR2
 @WAITLOAD:
   CALL  _@BIOSK
-@POPREGS:
-  MOV   SP,BP ; SKIP SP
-  POP   BP DI DI SI DX CX BX AX
-  POPF
+@POPREGSZ:
+  CALL  @LOADREGS
   RET
   
-@REGSTR:
-  CALL  @SAVEREGS
-  CALL  @CR  
-  MOV   AX,@RA
-  CALL  @SHOWSTR
-  MOV   @RA,AX
-  JMP   @REGSZ
+@EMIT:
+  CALL @SAVEREGS
+  POP   BP
+  PUSH  BP AX
+  CALL  DORET
+  DW _POP,_EMIT,_4TH
+  J @POPREGSZ
+  
+@KEY:   CALL @SAVEREGS
+  POP   BP
+  PUSH  BP
+  CALL  DORET
+  DW _KEY,_PUSH,_4TH
+  POP   AX
+  MOV   BP,SP
+  MOV   @AX,AX
+  J @POPREGSZ
   
 @DBG:
   CALL  @SAVEREGS
   CALL  @CR  
   MOV   AX,SI       ; IP - CURRENT ADDRESS OF VIRTUALMASHINE FORTH
-  CALL  @CALD3      ; IP. [IP]. [IP+2].
+  CALL  @CALDOTZ    ; IP. 
+  XCHG  AX,SI     
+  CALL  @CALDOT     ; [IP]. NEXTWORD 
+  XCHG  AX,SI     
+  CALL  @dotR       ; [[IP]].  NEXTWORD TYPE
 
   MOV   AX,BX       ; TOP. [NXT]. [NXT+2].
   MOV   SI,[@BP]
-  CALL  @CALD3
+  CALL  @CALD3      ; TOP. [DSP]. [DSP+2]. 
   
   MOV   SI,[@SP]
   LODSW
-  CALL  @CALD3
+  CALL  @CALD3      ; [RSP]. [RSP+2]. [RSP+4]. 
   
   MOV   AX,PW[VAL_+_DP]
   MOV   SI,BP
-  CALL  @CALD3
+  CALL  @CALD3      ; DP. DSP. RSP. 
   
-  MOV   BX,[@SI]
+  MOV   BX,@SI
   MOV   AX,BX
-  MOV   CX,[BX-2]
-  MOV   DI,[@DI]
-  LEA   DI,[DI-2]   
-  CMP   CX,DI
+  MOV   CX,[BX]
+  CMP   CX,@DI
   JNE   @NOTALBL
   CALL  @LBLID
 @NOTALBL:  
   
   MOV   ax,[@DI]
-  CALL  @STRID
-  JMP   @WAITLOAD
+  CALL  @STRID      ; ? NAME OF THE WORD
+  J   @WAITLOAD
 
 
 ;-----------------------------
 @CALDOT:
   LODSW
 @CALDOTZ:
+  PUSH  AX
   CALL  @WORDOUT
   MOV   AL,'|'
-  JMP   @COUT
+  CALL  @COUT
+  POP   AX
+  RET
   
 @CALD3:
   CALL  @CALDOTZ
   JMP   @DOTR2
 @DOTR4:
   CALL  @CALDOT
+@DOTR3:
   CALL  @CALDOT
 @DOTR2:
   CALL  @CALDOT
@@ -107,16 +137,12 @@
   JMP   @HDOT
  
 @SEARCH2:
-; INPUT: AX:=[ADDRESS_TO_SEARCH+2]
+; INPUT: AX:=[ADDRESS_TO_SEARCH]
 ; OUTPUT: 
 ;    ON ZF=0 FOUND      AX:=NAME
-;    ON ZF=1 NOT_FOUND  DI:=AX+2  AX:=AX-2
+;    ON ZF=1 NOT_FOUND  DI:=AX+2
 ; USED REGS: AX CX DI
 
-  DEC   AX
-  DEC   AX
-
-;@SEARCH2:
   MOV   DI,PW [VAL_+_DICT]
   XOR   CX,CX
   SKIPB
@@ -138,24 +164,41 @@
   OR    CX,CX
   RET
   
-@TO   DB 3,'TO '  
-@AT   DB 3,'AT '  
-@CLN  DB 2,': '  ; COLON DEFINITION
+@PREFIXTO:
+  CALL  @PREFIX
+  MAKESTR 'TO'
+@PREFIXAT:
+  CALL  @PREFIX
+  MAKESTR 'AT'  
+@PREFIXCLN:
+  CALL  @PREFIX
+  MAKESTR ':'  ; COLON DEFINITION
 
 @LBLID:
   CALL  @SEARCH2
-  JE    @NOLBL
-  PUSH  AX
-  MOV   AX, OFFSET @CLN
-  CALL  @?STR
-  POP   AX
-  CALL  @?STR
+  JNZ    @PREFIXCLN
 @NOLBL:
   RET
+@PREFIX:
+  POP   DI
+  PUSH  AX
+  XCHG  AX,DI
+  CALL  @NOPREFIX
+  POP   AX
+@NOPREFIX:  
+  CALL  @SHOWSTR
+  J @SPDOT
   
 @STRID:
   CALL  @SEARCH2
-  JE    @HDOT2
-  JMP   @?STR
-@HDOT2:  JMP    @HDOT
+    JNZ    @NOPREFIX
+  XCHG  AX,DI   ;AX+=2
+  CALL  @SEARCH2
+    JNZ    @PREFIXTO
+  XCHG  AX,DI   ;AX+=2
+  CALL  @SEARCH2
+    JNZ    @PREFIXAT
+  ADD   AX,-4
+@HDOT2:  
+  JMP    @HDOT
   
