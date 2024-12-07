@@ -3,6 +3,7 @@
 immediate  = 080h
 locals  @@
 VAL_ = 2
+fl_name = 0
 
 pd  equ dword ptr
 pw  equ word  ptr
@@ -17,10 +18,12 @@ endstr  label   byte
         endm
 
 HEAD MACRO  NAM,LBL,FLAG
+  if fl_name EQ 1
 TEMP = $
   DW LINK
 LINK = TEMP
   NAM_ NAM,FLAG
+  endif
 LBL:
 ENDM  
 
@@ -57,8 +60,10 @@ MyCseg  segment para  use16
 
 Start   Label byte
 
-        jmp @aborT
+        jmp SHORT @aborT
 
+_BYE  DW 0
+  
 ; -------------------
 ; Variables
 ; -------------------
@@ -73,37 +78,36 @@ Start   Label byte
 
         variable 'ACCEPT',_accept,_INI
 
-@P2:
-  INC   BX
-  INC   BX
-  JMP   NEXT
-        
         variable 'BASE',_base,10
 
         variable 'LAST',_last,final
         
-        constant '0',_0,0
+        ;constant '0',_0,0
 
-        constant 'BL',_BL,32
+        ;constant 'BL',_BL,32
 
         constant 'TIB',_tib,128
+
+        constant 'FTIB',_Ftib,128
 
 ; -------------------
 ; Initialisation
 ; -------------------
 
 primitive 'ABORT',_aborDOt,0
-  MOV AX,PW [VAL_+_DP]
-  CALL @STROUT
-  MOV AL,'?'
-  CALL @COUT
+;  MOV AX,PW [VAL_+_DP]
+;  CALL @STROUT
+;  MOV AL,'?'
+;  CALL @COUT
 @ABORT:
-  xor bp,bp
-  mov PW [VAL_+_state],bp
-  mov PW [val_+_LTIB],BP
+  MOV ax,0
+  mov PW [VAL_+_state],ax
+  mov PW [val_+_LTIB],ax
+  
   mov sp,-256
+  mov bp,-512
   mov si,OFFSET _interpret
-  jmp next
+  jmp SHORT next
 
 ; -------------------
 ; Compilation
@@ -131,9 +135,9 @@ primitive 'LIT',_lit,0
 ; Stack
 ; -------------------
 
-primitive 'ROT',_ROT,0
-  pop  dx ax
-  push dx
+;primitive 'ROT',_ROT,0
+;  pop  dx ax
+;  push dx
 @PUSHW:
   push bx
   xchg ax,bx
@@ -148,32 +152,32 @@ primitive 'DUP',_dup,0
   push bx
   jmp next
 
-prim 'PUSH',_pUSH,0,@DRCALL
-@PUSH:
-  XCHG  SP,BP
-  push  Ax
-  XCHG  SP,BP
-  RET
+;prim 'PUSH',_pUSH,0,@DRCALL
+;@PUSH:
+;  XCHG  SP,BP
+;  push  Ax
+;  XCHG  SP,BP
+;  RET
   
-primitive 'POP',_POP,0
-  push  BX
-  XCHG  SP,BP
-  POP   bx
-  XCHG  SP,BP
-  jmp next
+;primitive 'POP',_POP,0
+;  push  BX
+;  XCHG  SP,BP
+;  POP   bx
+;  XCHG  SP,BP
+;  jmp next
 
-primitive 'SWAP',_swap,0
-  pop ax
-  jmp @PUSHW
+;primitive 'SWAP',_swap,0
+;  pop ax
+;  jmp @PUSHW
 
 ; -------------------
 ; Maths / Logic
 ; -------------------
 
-@XOR:
-  pop ax
-  XOR bx,ax
-  JMP DI
+;@XOR:
+;  pop ax
+;  XOR bx,ax
+;  JMP DI
 
 primitive '-',_MINUS,0
   NEG BX
@@ -190,137 +194,137 @@ primitive '0=',_Zeq,0
   sbb bx,bx
   jmp next
 
-PRIM '=',_equals,0,@XOR
-  JMP SHORT @ZEQ
+;PRIM '=',_equals,0,@XOR
+;  JMP SHORT @ZEQ
 
 ; -------------------
 ; DEBUGER
 ; -------------------
 
-PRIM 'TR-',_TRM,0,@CALL
-  MOV PB [NEXT],0B8H
-  RET
-
-PRIM 'TR',_TR,0,@CALL
-  MOV PB [NEXT],0E8H
-  RET
-
-PRIM 'H.',_HDOT,0,@DRCALL
-@HDOT:
-  CALL  @WORDOUT
-@SPDOT:  
-  MOV   AL,' '
-  JMP   @COUT
-  
-@WORDOUT:
-  CALL  @BYTEOUT
-@BYTEOUT:
-  CALL  @HDOT1
-@HDOT1:
-  ROL   AX,1
-  ROL   AX,1
-  ROL   AX,1
-  ROL   AX,1
-  PUSH  AX
-  CALL  @DIGOUT
-  POP   AX
-  RET
-  
-@DIGOUT:
-  AND   AL,15
-  CMP   AL,10
-  JC    @DIG1
-  ADD   AL,7
-@DIG1:
-  ADD   AL,'0'
-  JMP   @COUT
-
-@STRID:
-  PUSH  CX DX DI
-  MOV   DX,-1
-  MOV   CX,32
-  XCHG  AX,DI
-@@IDLP:  
-  INC   DX
-  DEC   DI
-  MOV   AL,[DI]
-  AND   AL,127
-  CMP   AL,DL
-  JE    @@IDLPX
-  LOOP  @@IDLP
-@@IDLPX:
-  XCHG  AX,DI
-  POP   DI DX CX 
-  RET
-  
-@STROUT:
-  PUSH  CX DI
-  XCHG  AX,DI
-  MOV   AX,[DI]
-  AND   AX,127
-  MOV   CX,AX
-@LPSTR:
-  INC   DI
-  MOV   AL,[DI]
-  CALL  @COUT
-  LOOP  @LPSTR
-  POP   DI CX 
-  JMP   @SPDOT
-  
-@CRDOT:  
-  MOV   AL,13
-  CALL  @COUT
-  MOV   AL,10
-  JMP   @COUT
-  
-@DBG:
-  CALL  @PUSH   ; AX      1
-  CALL  @CRDOT  ; AX .
-  POP   AX
-  CALL  @PUSH   ; RETADR  2
-  ;CALL  @HDOT
-  MOV   AX,SI   ; IP
-  CALL  @HDOT
-  MOV   AX,SP   ; DSP
-  CALL  @HDOT
-  LEA   AX,[BP+4]
-  CALL  @HDOT   ; RSP
-  CALL  @SPDOT
-
-  ;ROT H.
-  POP   AX
-  CALL  @PUSH   ; DSP[2]  3
-  POP   AX
-  PUSH  AX
-  CALL  @HDOT   ; DSP[3] .
-
-  CALL  @POP    ; DSP[2] . 3
-  PUSH  AX
-  CALL  @HDOT
-  MOV   AX,BX   ; DSP[1] .
-  CALL  @HDOT
-  
-  CALL  @POP    ; RETADR BACK  2
-  PUSH  AX
-  MOV   AX,[BP]
-  CALL  @HDOT  
-  MOV   AX,CX
-  CALL  @HDOT
-  MOV   AX,DX
-  CALL  @HDOT
-  CALL  @SPDOT
-  MOV   AX,PW[VAL_+_DP]
-  CALL  @HDOT
-
-  MOV   AX,[SI]
-  CALL  @STRID
-  CALL  @STROUT
-  CALL  @READBIOS
-@POP:
-  XCHG  SP,BP
-  POP   AX
-  XCHG  SP,BP
-  RET
+;PRIM 'TR-',_TRM,0,@CALL
+;  MOV PB [NEXT],0B8H
+;  RET
+;
+;PRIM 'TR',_TR,0,@CALL
+;  MOV PB [NEXT],0E8H
+;  RET
+;
+;PRIM 'H.',_HDOT,0,@DRCALL
+;@HDOT:
+;  CALL  @WORDOUT
+;@SPDOT:  
+;  MOV   AL,' '
+;  JMP   @COUT
+;  
+;@WORDOUT:
+;  CALL  @BYTEOUT
+;@BYTEOUT:
+;  CALL  @HDOT1
+;@HDOT1:
+;  ROL   AX,1
+;  ROL   AX,1
+;  ROL   AX,1
+;  ROL   AX,1
+;  PUSH  AX
+;  CALL  @DIGOUT
+;  POP   AX
+;  RET
+;  
+;@DIGOUT:
+;  AND   AL,15
+;  CMP   AL,10
+;  JC    @DIG1
+;  ADD   AL,7
+;@DIG1:
+;  ADD   AL,'0'
+;  JMP   @COUT
+;
+;@STRID:
+;  PUSH  CX DX DI
+;  MOV   DX,-1
+;  MOV   CX,32
+;  XCHG  AX,DI
+;@@IDLP:  
+;  INC   DX
+;  DEC   DI
+;  MOV   AL,[DI]
+;  AND   AL,127
+;  CMP   AL,DL
+;  JE    @@IDLPX
+;  LOOP  @@IDLP
+;@@IDLPX:
+;  XCHG  AX,DI
+;  POP   DI DX CX 
+;  RET
+;  
+;@STROUT:
+;  PUSH  CX DI
+;  XCHG  AX,DI
+;  MOV   AX,[DI]
+;  AND   AX,127
+;  MOV   CX,AX
+;@LPSTR:
+;  INC   DI
+;  MOV   AL,[DI]
+;  CALL  @COUT
+;  LOOP  @LPSTR
+;  POP   DI CX 
+;  JMP   @SPDOT
+;  
+;@CRDOT:  
+;  MOV   AL,13
+;  CALL  @COUT
+;  MOV   AL,10
+;  JMP   @COUT
+;  
+;@DBG:
+;  CALL  @PUSH   ; AX      1
+;  CALL  @CRDOT  ; AX .
+;  POP   AX
+;  CALL  @PUSH   ; RETADR  2
+;  ;CALL  @HDOT
+;  MOV   AX,SI   ; IP
+;  CALL  @HDOT
+;  MOV   AX,SP   ; DSP
+;  CALL  @HDOT
+;  LEA   AX,[BP+4]
+;  CALL  @HDOT   ; RSP
+;  CALL  @SPDOT
+;
+;  ;ROT H.
+;  POP   AX
+;  CALL  @PUSH   ; DSP[2]  3
+;  POP   AX
+;  PUSH  AX
+;  CALL  @HDOT   ; DSP[3] .
+;
+;  CALL  @POP    ; DSP[2] . 3
+;  PUSH  AX
+;  CALL  @HDOT
+;  MOV   AX,BX   ; DSP[1] .
+;  CALL  @HDOT
+;  
+;  CALL  @POP    ; RETADR BACK  2
+;  PUSH  AX
+;  MOV   AX,[BP]
+;  CALL  @HDOT  
+;  MOV   AX,CX
+;  CALL  @HDOT
+;  MOV   AX,DX
+;  CALL  @HDOT
+;  CALL  @SPDOT
+;  MOV   AX,PW[VAL_+_DP]
+;  CALL  @HDOT
+;
+;  MOV   AX,[SI]
+;  CALL  @STRID
+;  CALL  @STROUT
+;  CALL  @READBIOS
+;@POP:
+;  XCHG  SP,BP
+;  POP   AX
+;  XCHG  SP,BP
+;  RET
   
 ; -------------------
 ; Peek and Poke
@@ -354,7 +358,7 @@ primitive '!',_store ,0
   XCHG  SP,BP
   
 next:   
-        CALL  @DBG
+        ;CALL  @DBG
         MOV    DI,[SI]
         CMPSW
         jmp PW [di-2]
@@ -362,8 +366,6 @@ next:
 ; -------------------
 ; Flow Control
 ; -------------------
-
-PRIM 'BYE',_BYE,0,0
 
 primitive '(?BR',_IF,0
   test bx,bx
@@ -481,7 +483,7 @@ COLON 'NUM',_COMPNUM,0
 ; -----------------------
 ; Terminal Input / Output
 ; -----------------------
-prim '>AXP',_aXP,0,@ACCEP
+;prim '>AXP',_aXP,0,@ACCEP
 
 priMITIVE 'ACPT',_ACPT,0
 ;  DW _tib,_lit,50,_aXP,_RET
@@ -491,27 +493,28 @@ priMITIVE 'ACPT',_ACPT,0
   DEC   BX
   ;CALL @DBG
 @ACCEP:  
-  CALL @CRDOT
-  MOV   AL,'>'
-  CALL @COUT
+  ;CALL @CRDOT
+  ;MOV   AL,'>'
+  ;CALL @COUT
   
   POP   DI
   PUSH  DI
   xor  cx,cx
 acceptl:
   call acc 
-  jnC  acceptl
+  cmp  Bx,Cx
+  jne  acceptl
   jmp next
  
 acc1:	
-  MOV   AL,7
-  call outchar
+  ;MOV   AL,7
+  ;call outchar
 acc:
   call getchar   
 	cmp  al,8
         jne  acc2
         jCXz   acc1
-  CLC
+  ;CLC
   dec  Cx
   dec  DI
 	push ax
@@ -530,8 +533,9 @@ acc2:
   cmp  al,13
         jne  acc3
   mov  Bx,Cx
-  STC
-  JMP @SPDOT
+  ;STC
+  ret
+  ;JMP @SPDOT
 
 acc3:	
   cmp  al,' '
@@ -689,19 +693,11 @@ PRIM ';',_semicolon,IMMEDIATE,@COMPS
 PRIM '[LIT]',_LITC,IMMEDIATE,@COMPS  
   DW _LIT,_COMMA
   
-  
-PRIM 'NOP',_NOP,0,13CH
-
+prim 'NOP',_NOP,0,13CH 
 docolon = _NOP
   XCHG AX,di
   jmp @PUSHIP
   
-;colon ';',_semicolon,immediate
-;  dw _lit,_RET,_comma,_0,_state
-;  dw _store
-;@EXIT1:  
-;  DW _RET
-
 ; -----------------------
 ; Headers
 ; -----------------------
@@ -718,16 +714,16 @@ dovar:
   XCHG  AX,DI
   jmp @PUSHW
 
-COLON '''',_TICK,0
-  DW _Blword,_IF,@ONERR,_FIND,_IF,@ONERR,_RET
+;COLON '''',_TICK,0
+;  DW _Blword,_IF,@ONERR,_FIND,_IF,@ONERR,_RET
   
-  primitive '(;CODE)',_do_semi_code,0
-  mov di,PW [val_+_last]
-  mov al,PB [di+2]
-  and ax,31
-  add di,ax
-  mov PW [di+3],si
-  jmp @RET
+;  primitive '(;CODE)',_do_semi_code,0
+;  mov di,PW [val_+_last]
+;  mov al,PB [di+2]
+;  and ax,31
+;  add di,ax
+;  mov PW [di+3],si
+;  jmp @RET
 
 ; -----------------------
 ; Constants
@@ -754,18 +750,18 @@ COLON '(I',_INI,0
 _interpret:
   DW _ACCEPT,_PERFORM,_EVAL,_JUMP,_interpreT  
 
-PRIMITIVE '>EVAL',_TOEVAL,0    ; ADR LEN -> INTERPRET
-  ;DW _DUP,_LTIB,_store,_PLUS,_ETIB,_store
-  POP   AX
-  MOV   PW[_LTIB+VAL_],BX
-  ADD   AX,BX
-  MOV   PW[_ETIB+VAL_],AX
-  POP   BX
-  JMP   NEXT
+;PRIMITIVE '>EVAL',_TOEVAL,0    ; ADR LEN -> INTERPRET
+;  ;DW _DUP,_LTIB,_store,_PLUS,_ETIB,_store
+;  POP   AX
+;  MOV   PW[_LTIB+VAL_],BX
+;  ADD   AX,BX
+;  MOV   PW[_ETIB+VAL_],AX
+;  POP   BX
+;  JMP   NEXT
 
 final:
 COLON 'EVAL',_EVAL,0    ; ADR LEN -> INTERPRET
-  DW _TOEVAL  ;_DUP,_LTIB,_store,_PLUS,_ETIB,_store
+  DW _DUP,_LTIB,_store,_PLUS,_ETIB,_store
 @EVAL:        
   DW _BLWORD,_IF,@EXIT1
   DW _FIND,_OPER,_PERFORM,_JUMP,@EVAL
