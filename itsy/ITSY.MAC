@@ -5,9 +5,6 @@ VAL_ = 2
 TO_  = -2
 AT_  = -4
 
-DTOP = 0
-DPTR = 0 
-
 pd  equ dword ptr
 pw  equ word  ptr
 pb  equ byte  ptr
@@ -92,7 +89,19 @@ RPUSH   MACRO REG
   PUSH REG
 ENDM
 
+REG   MACRO 
+  CALL @REGS
+ENDM
 
+DBG   MACRO 
+  CALL @DBG
+ENDM
+
+REGSTR MACRO MSG
+  CALL @REGSTR
+  MAKESTR MSG
+ENDM
+  
 MakeStr    macro   msg
 LOCAL ENDMSG
   db    ENDMSG-$-1

@@ -68,7 +68,8 @@
   CALL  @CALD3
   
   MOV   AX,PW[VAL_+_DP]
-  CALL  @HDOT
+  MOV   SI,BP
+  CALL  @CALD3
   
   MOV   BX,[@SI]
   MOV   AX,BX
@@ -103,40 +104,19 @@
   CALL  @CALDOT
 @dotR:
   LODSW
-  SKIPA
-PRIM 'H.',_HDOT,0,@DRCALL
-@HDOT:
-  CALL  @WORDOUT
-@SPDOT:  
-  MOV   AL,' '
-  JMP   @COUT
-  
-@WORDOUT:
-  CALL  @BYTEOUT
-@BYTEOUT:
-  CALL  @HDOT1
-@HDOT1:
-  ROL   AX,1
-  ROL   AX,1
-  ROL   AX,1
-  ROL   AX,1
-  PUSH  AX
-  CALL  @DIGOUT
-  POP   AX
-  RET
+  JMP   @HDOT
+ 
+@SEARCH2:
+; INPUT: AX:=[ADDRESS_TO_SEARCH+2]
+; OUTPUT: 
+;    ON ZF=0 FOUND      AX:=NAME
+;    ON ZF=1 NOT_FOUND  DI:=AX+2  AX:=AX-2
+; USED REGS: AX CX DI
 
-PRIM 'TR-',_TRM,0,@CALL
-@TRM:
-  MOV AL,0FFH
-@TRZ:  
-  XCHG AL, PB [@INDIR]
-  RET
+  DEC   AX
+  DEC   AX
 
-PRIM 'TR',_TR,0,@CALL
-  MOV AL,0B8H
-  J @TRZ
-
-@SEARCH:
+;@SEARCH2:
   MOV   DI,PW [VAL_+_DICT]
   XOR   CX,CX
   SKIPB
@@ -150,20 +130,20 @@ PRIM 'TR',_TR,0,@CALL
   JNE    @@IDLP
 @@ID:
   SCASW
-;  CALL  @REGSTR
-;  MAKESTR 'IN SEARCH'
   XCHG  AX,DI
+  SKIPA
 @IDLPX:
+  MOV   DI,AX
+  SCASW
   OR    CX,CX
   RET
   
 @TO   DB 3,'TO '  
-@CLN  DB 2,': '  
+@AT   DB 3,'AT '  
+@CLN  DB 2,': '  ; COLON DEFINITION
 
 @LBLID:
-  DEC   AX
-  DEC   AX
-  CALL  @SEARCH
+  CALL  @SEARCH2
   JE    @NOLBL
   PUSH  AX
   MOV   AX, OFFSET @CLN
@@ -174,43 +154,8 @@ PRIM 'TR',_TR,0,@CALL
   RET
   
 @STRID:
-  DEC   AX
-  DEC   AX
-  CALL  @SEARCH
-  JE    @HDOT
+  CALL  @SEARCH2
+  JE    @HDOT2
   JMP   @?STR
+@HDOT2:  JMP    @HDOT
   
-;@?STR:
-;  XCHG  AX,SI
-;  LODSB
-;  AND   AX,127
-;@STRTYPE:
-;  XCHG  CX,AX
-;  JCXZ  @@OUT
-;@@LPSTR:
-;  LODSB
-;  CALL  @COUT
-;  LOOP  @@LPSTR
-;@@OUT:  
-;  JMP   @SPDOT
-  
-;@CRDOT:  
-;  MOV   AL,13
-;  CALL  @COUT
-;  MOV   AL,10
-;  JMP   @COUT
-  
-  
-;@POP:
-;  XCHG  SP,BP
-;  POP   AX
-;  XCHG  SP,BP
-;  RET
-;
-;@PUSH:
-;  XCHG  SP,BP
-;  push  Ax
-;  XCHG  SP,BP
-;  RET
-; 
-;
