@@ -2,6 +2,10 @@ FORGET MARKER!
 : MARKER! ;
 INCLUDE MACRO.CF
 ' =:    =: ALIAS
+' (PUSH =: >R
+' (POP  =: R>
+' I     =: R@
+
 : !CSP CSP! ;
 : <> - 0= 0= ;
 : INVERT NOT ;

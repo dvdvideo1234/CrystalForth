@@ -22,7 +22,7 @@ TO (LVL (# `T TO vTARG  AT LOCATE TFND 2/ (WARY `">PAD @EXEC
 \ 2 4 6 8 
 09876 ) CR PAD @+ HLD OVER- TYPE . CSP .
 
----------?
+\ ---------?
 
 ' PARSTK  4 + CONST PARPTR^   : `@PAR @ PARPTR^ @ + ;   
 -$600 $100 + -64 + CONST >EACH
